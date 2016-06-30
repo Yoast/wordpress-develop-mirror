@@ -85,6 +85,9 @@ foreach ( array( 'pre_post_type', 'pre_post_status', 'pre_post_comment_status', 
 add_filter( 'pre_post_mime_type', 'sanitize_mime_type' );
 add_filter( 'post_mime_type', 'sanitize_mime_type' );
 
+// Meta
+add_filter( 'register_meta_args', '_wp_register_meta_args_whitelist', 10, 2 );
+
 // Places to balance tags on input
 foreach ( array( 'content_save_pre', 'excerpt_save_pre', 'comment_save_pre', 'pre_comment_content' ) as $filter ) {
 	add_filter( $filter, 'convert_invalid_entities' );
@@ -239,6 +242,7 @@ add_action( 'wp_head',             'wp_print_styles',                  8    );
 add_action( 'wp_head',             'wp_print_head_scripts',            9    );
 add_action( 'wp_head',             'wp_generator'                           );
 add_action( 'wp_head',             'rel_canonical'                          );
+add_action( 'wp_head',             'wp_resource_hints'                      );
 add_action( 'wp_head',             'wp_shortlink_wp_head',            10, 0 );
 add_action( 'wp_head',             'wp_site_icon',                    99    );
 add_action( 'wp_footer',           'wp_print_footer_scripts',         20    );
