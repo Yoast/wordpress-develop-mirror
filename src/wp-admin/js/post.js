@@ -649,7 +649,7 @@ jQuery(document).ready( function($) {
 		/**
 		 * Make sure all labels represent the current settings.
 		 *
-		 * @returns {boolean}
+		 * @returns {boolean} False when an invalid timestamp has been selected, otherwise True.
 		 */
 		updateText = function() {
 
@@ -753,6 +753,7 @@ jQuery(document).ready( function($) {
 			}
 		});
 
+		// Cancel visibility selection area and hide it from view.
 		$postVisibilitySelect.find('.cancel-post-visibility').click( function( event ) {
 			$postVisibilitySelect.slideUp('fast');
 			$('#visibility-radio-' + $('#hidden-post-visibility').val()).prop('checked', true);
@@ -764,6 +765,7 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		});
 
+		// Set the selected visibility as current.
 		$postVisibilitySelect.find('.save-post-visibility').click( function( event ) { // crazyhorse - multiple ok cancels
 			$postVisibilitySelect.slideUp('fast');
 			$('#visibility .edit-visibility').show().focus();
@@ -783,10 +785,12 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		});
 
+		// When the selection changes, update labels.
 		$postVisibilitySelect.find('input:radio').change( function() {
 			updateVisibility();
 		});
 
+		// Edit publish time click.
 		$timestampdiv.siblings('a.edit-timestamp').click( function( event ) {
 			if ( $timestampdiv.is( ':hidden' ) ) {
 				$timestampdiv.slideDown( 'fast', function() {
@@ -797,6 +801,7 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		});
 
+		// Cancel editing the publish time and hide the settings.
 		$timestampdiv.find('.cancel-timestamp').click( function( event ) {
 			$timestampdiv.slideUp('fast').siblings('a.edit-timestamp').show().focus();
 			$('#mm').val($('#hidden_mm').val());
@@ -808,6 +813,7 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		});
 
+		// Save the changed timestamp.
 		$timestampdiv.find('.save-timestamp').click( function( event ) { // crazyhorse - multiple ok cancels
 			if ( updateText() ) {
 				$timestampdiv.slideUp('fast');
@@ -816,6 +822,7 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		});
 
+		// Cancel submit when an invalid timestamp has been selected.
 		$('#post').on( 'submit', function( event ) {
 			if ( ! updateText() ) {
 				event.preventDefault();
@@ -829,6 +836,7 @@ jQuery(document).ready( function($) {
 			}
 		});
 
+		// Post Status edit click.
 		$postStatusSelect.siblings('a.edit-post-status').click( function( event ) {
 			if ( $postStatusSelect.is( ':hidden' ) ) {
 				$postStatusSelect.slideDown( 'fast', function() {
@@ -839,12 +847,14 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		});
 
+		// Save the Post Status changes and hide the options.
 		$postStatusSelect.find('.save-post-status').click( function( event ) {
 			$postStatusSelect.slideUp( 'fast' ).siblings( 'a.edit-post-status' ).show().focus();
 			updateText();
 			event.preventDefault();
 		});
 
+		// Cancel Post Status editing and hide the options.
 		$postStatusSelect.find('.cancel-post-status').click( function( event ) {
 			$postStatusSelect.slideUp( 'fast' ).siblings( 'a.edit-post-status' ).show().focus();
 			$('#post_status').val( $('#hidden_post_status').val() );
@@ -853,7 +863,9 @@ jQuery(document).ready( function($) {
 		});
 	} // end submitdiv
 
-	// permalink
+	/**
+	 * Permalink aka slug aka post_name editing
+	 */
 	function editPermalink() {
 		var i, slug_value,
 			$el, revert_e,
@@ -876,6 +888,8 @@ jQuery(document).ready( function($) {
 		revert_e = $el.html();
 
 		buttons.html( '<button type="button" class="save button button-small">' + postL10n.ok + '</button> <button type="button" class="cancel button-link">' + postL10n.cancel + '</button>' );
+
+		// Save permalink changes.
 		buttons.children( '.save' ).click( function() {
 			var new_slug = $el.children( 'input' ).val();
 
@@ -883,29 +897,34 @@ jQuery(document).ready( function($) {
 				buttons.children('.cancel').click();
 				return;
 			}
-			$.post(ajaxurl, {
-				action: 'sample-permalink',
-				post_id: postId,
-				new_slug: new_slug,
-				new_title: $('#title').val(),
-				samplepermalinknonce: $('#samplepermalinknonce').val()
-			}, function(data) {
-				var box = $('#edit-slug-box');
-				box.html(data);
-				if (box.hasClass('hidden')) {
-					box.fadeIn('fast', function () {
-						box.removeClass('hidden');
-					});
-				}
+			$.post(
+				ajaxurl,
+				{
+					action: 'sample-permalink',
+					post_id: postId,
+					new_slug: new_slug,
+					new_title: $('#title').val(),
+					samplepermalinknonce: $('#samplepermalinknonce').val()
+				},
+				function(data) {
+					var box = $('#edit-slug-box');
+					box.html(data);
+					if (box.hasClass('hidden')) {
+						box.fadeIn('fast', function () {
+							box.removeClass('hidden');
+						});
+					}
 
-				buttons.html(buttonsOrig);
-				permalink.html(permalinkOrig);
-				real_slug.val(new_slug);
-				$( '.edit-slug' ).focus();
-				wp.a11y.speak( postL10n.permalinkSaved );
-			});
+					buttons.html(buttonsOrig);
+					permalink.html(permalinkOrig);
+					real_slug.val(new_slug);
+					$( '.edit-slug' ).focus();
+					wp.a11y.speak( postL10n.permalinkSaved );
+				}
+			);
 		});
 
+		// Cancel editing of permalink.
 		buttons.children( '.cancel' ).click( function() {
 			$('#view-post-btn').show();
 			$el.html(revert_e);
@@ -915,19 +934,21 @@ jQuery(document).ready( function($) {
 			$( '.edit-slug' ).focus();
 		});
 
+		// If more than 1/4th of 'full' is '%', make it empty?!
 		for ( i = 0; i < full.length; ++i ) {
 			if ( '%' == full.charAt(i) )
 				c++;
 		}
-
 		slug_value = ( c > full.length / 4 ) ? '' : full;
+
 		$el.html( '<input type="text" id="new-post-slug" value="' + slug_value + '" autocomplete="off" />' ).children( 'input' ).keydown( function( e ) {
 			var key = e.which;
-			// On enter, just save the new slug, don't save the post.
+			// On [enter], just save the new slug, don't save the post.
 			if ( 13 === key ) {
 				e.preventDefault();
 				buttons.children( '.save' ).click();
 			}
+			// On [esc] cancel the editing.
 			if ( 27 === key ) {
 				buttons.children( '.cancel' ).click();
 			}
@@ -940,6 +961,11 @@ jQuery(document).ready( function($) {
 		editPermalink();
 	});
 
+	/**
+	 * Title screenreader text handler.
+	 *
+	 * @param {string} id Optional. HTML ID to add the screenreader helper text to.
+	 */
 	wptitlehint = function(id) {
 		id = id || 'title';
 
@@ -972,13 +998,18 @@ jQuery(document).ready( function($) {
 			$handle = $('#post-status-info'),
 			$postdivrich = $('#postdivrich');
 
-		// No point for touch devices
+		// If there are no textareas or we are on a touch device, we can't do anything.
 		if ( ! $textarea.length || 'ontouchstart' in window ) {
 			// Hide the resize handle
 			$('#content-resize-handle').hide();
 			return;
 		}
 
+		/**
+		 * Handle drag event.
+		 *
+		 * @param {object} event Event containing details about the drag.
+		 */
 		function dragging( event ) {
 			if ( $postdivrich.hasClass( 'wp-editor-expand' ) ) {
 				return;
@@ -993,6 +1024,9 @@ jQuery(document).ready( function($) {
 			event.preventDefault();
 		}
 
+		/**
+		 * When the dragging stopped make sure we return focus and do a sanity check on the height.
+		 */
 		function endDrag() {
 			var height, toolbarHeight;
 
@@ -1043,6 +1077,7 @@ jQuery(document).ready( function($) {
 		}).on( 'mouseup.wp-editor-resize', endDrag );
 	})();
 
+	// TinyMCE specific handling of Post Format changes to reflect in the editor.
 	if ( typeof tinymce !== 'undefined' ) {
 		// When changing post formats, change the editor body class
 		$( '#post-formats-select input.post-format' ).on( 'change.set-editor-class', function() {
@@ -1059,6 +1094,7 @@ jQuery(document).ready( function($) {
 
 	// Save on pressing Ctrl/Command + S in the Text editor
 	$textarea.on( 'keydown.wp-autosave', function( event ) {
+		// Key [s] has code 83.
 		if ( event.which === 83 ) {
 			if ( event.shiftKey || event.altKey || ( isMac && ( ! event.metaKey || event.ctrlKey ) ) || ( ! isMac && ! event.ctrlKey ) ) {
 				return;
@@ -1069,6 +1105,9 @@ jQuery(document).ready( function($) {
 		}
 	});
 
+	/*
+	 * If the last status was auto-draft and the save is triggered, edit the current URL.
+	 */
 	if ( $( '#original_post_status' ).val() === 'auto-draft' && window.history.replaceState ) {
 		var location;
 
