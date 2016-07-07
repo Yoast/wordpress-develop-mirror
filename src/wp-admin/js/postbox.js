@@ -352,8 +352,17 @@ var postboxes;
 		},
 
 		/* Callbacks */
+
+		/**
+		 * @property {Function|boolean} pbshow A callback that is called when a postbox is opened.
+		 * @memberof postboxes
+		 */
 		pbshow : false,
 
+		/**
+		 * @property {Function|boolean} pbhide A callback that is called when a postbox is closed.
+		 * @memberof postboxes
+		 */
 		pbhide : false
 	};
 
