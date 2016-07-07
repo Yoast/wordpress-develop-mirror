@@ -182,14 +182,19 @@ function wp_maybe_decline_date( $date ) {
 	 */
 	if ( 'on' === _x( 'off', 'decline months names: on or off' ) ) {
 		// Match a format like 'j F Y' or 'j. F'
-		if ( @preg_match( '#^\d{1,2}\.? \w+#u', $date ) ) {
-			$months = $wp_locale->month;
+		if ( @preg_match( '#^\d{1,2}\.? [^\d ]+#u', $date ) ) {
+			$months          = $wp_locale->month;
+			$months_genitive = $wp_locale->month_genitive;
 
 			foreach ( $months as $key => $month ) {
-				$months[ $key ] = '#\b' . $month . '\b#u';
+				$months[ $key ] = '# ' . $month . '( |$)#u';
 			}
 
-			$date = preg_replace( $months, $wp_locale->month_genitive, $date );
+			foreach ( $months_genitive as $key => $month ) {
+				$months_genitive[ $key ] = ' ' . $month . '$1';
+			}
+
+			$date = preg_replace( $months, $months_genitive, $date );
 		}
 	}
 
@@ -262,6 +267,10 @@ function size_format( $bytes, $decimals = 0 ) {
 		'KB' => KB_IN_BYTES,
 		'B'  => 1,
 	);
+
+	if ( 0 === $bytes ) {
+		return number_format_i18n( 0, $decimals ) . ' B';
+	}
 
 	foreach ( $quant as $unit => $mag ) {
 		if ( doubleval( $bytes ) >= $mag ) {
@@ -637,7 +646,7 @@ function do_enclose( $content, $post_ID ) {
  */
 function wp_get_http_headers( $url, $deprecated = false ) {
 	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '2.7' );
+		_deprecated_argument( __FUNCTION__, '2.7.0' );
 
 	$response = wp_safe_remote_head( $url );
 
@@ -1099,7 +1108,6 @@ function wp_get_nocache_headers() {
 	$headers = array(
 		'Expires' => 'Wed, 11 Jan 1984 05:00:00 GMT',
 		'Cache-Control' => 'no-cache, must-revalidate, max-age=0',
-		'Pragma' => 'no-cache',
 	);
 
 	if ( function_exists('apply_filters') ) {
@@ -1115,7 +1123,6 @@ function wp_get_nocache_headers() {
 		 *
 		 *     @type string $Expires       Expires header.
 		 *     @type string $Cache-Control Cache-Control header.
-		 *     @type string $Pragma        Pragma header.
 		 * }
 		 */
 		$headers = (array) apply_filters( 'nocache_headers', $headers );
@@ -2108,7 +2115,7 @@ function wp_unique_filename( $dir, $filename, $unique_filename_callback = null )
  */
 function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '2.0' );
+		_deprecated_argument( __FUNCTION__, '2.0.0' );
 
 	if ( empty( $name ) )
 		return array( 'error' => __( 'Empty filename' ) );
@@ -3840,7 +3847,7 @@ function _deprecated_file( $file, $version, $replacement = null, $message = '' )
  * For example:
  *
  *     if ( ! empty( $deprecated ) ) {
- *         _deprecated_argument( __FUNCTION__, '3.0' );
+ *         _deprecated_argument( __FUNCTION__, '3.0.0' );
  *     }
  *
  *
@@ -4233,7 +4240,6 @@ function wp_suspend_cache_invalidation( $suspend = true ) {
  * @global object $current_site
  *
  * @param int $site_id Optional. Site ID to test. Defaults to current site.
- *                     Defaults to current site.
  * @return bool True if $site_id is the main site of the network, or if not
  *              running Multisite.
  */
@@ -5349,4 +5355,27 @@ function mysql_to_rfc3339( $date_string ) {
 
 	// Strip timezone information
 	return preg_replace( '/(?:Z|[+-]\d{2}(?::\d{2})?)$/', '', $formatted );
+}
+
+/**
+ * Check if an object type exists. By default, these are `post`, `comment`, `user`, and `term`.
+ *
+ * @param  string $object_type Object type to check.
+ * @return bool                True if the object type exists, false if not.
+ */
+function wp_object_type_exists( $object_type ) {
+	/**
+	 * Filters WordPress object types.
+	 *
+	 * @since 4.6.0
+	 *
+	 * @param array  $types Array of object types.
+	 */
+	$types = apply_filters( 'wp_object_types', array( 'post', 'comment', 'user', 'term' ) );
+
+	if ( in_array( $object_type, $types ) ) {
+		return true;
+	}
+
+	return false;
 }

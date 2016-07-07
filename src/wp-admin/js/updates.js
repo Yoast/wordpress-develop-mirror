@@ -295,20 +295,12 @@
 		$dashboardNavMenuUpdateCount.removeAttr( 'title' );
 		$dashboardNavMenuUpdateCount.find( '.update-count' ).text( count );
 
-		switch ( type ) {
-			case 'plugin':
-				$menuItem  = $( '#menu-plugins' );
-				$itemCount = $menuItem.find( '.plugin-count' );
-				break;
-
-			case 'theme':
-				$menuItem  = $( '#menu-appearance' );
-				$itemCount = $menuItem.find( '.theme-count' );
-				break;
-
-			default:
-				window.console.error( '"%s" is not white-listed to have its count decremented.', type );
-				return;
+		if ( 'plugin' === type ) {
+			$menuItem  = $( '#menu-plugins' );
+			$itemCount = $menuItem.find( '.plugin-count' );
+		} else if ( 'theme' === type ) {
+			$menuItem  = $( '#menu-appearance' );
+			$itemCount = $menuItem.find( '.theme-count' );
 		}
 
 		// Decrement the counter of the other menu items.
@@ -637,7 +629,7 @@
 
 		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
-		$document.trigger( 'wp-installer-install-success', response );
+		$document.trigger( 'wp-importer-install-success', response );
 	};
 
 	/**
@@ -885,6 +877,8 @@
 
 		wp.a11y.speak( wp.updates.l10n.updatingMsg, 'polite' );
 		$notice.text( wp.updates.l10n.updating );
+
+		$document.trigger( 'wp-theme-updating' );
 
 		return wp.updates.ajax( 'update-theme', args );
 	};
@@ -2087,7 +2081,7 @@
 
 			$.support.postMessage = !! window.postMessage;
 
-			if ( false === $.support.postMessage || null === target ) {
+			if ( false === $.support.postMessage || null === target || -1 !== window.parent.location.pathname.indexOf( 'update-core.php' ) ) {
 				return;
 			}
 
@@ -2117,7 +2111,7 @@
 
 			$.support.postMessage = !! window.postMessage;
 
-			if ( false === $.support.postMessage || null === target ) {
+			if ( false === $.support.postMessage || null === target || -1 !== window.parent.location.pathname.indexOf( 'index.php' ) ) {
 				return;
 			}
 
@@ -2150,7 +2144,11 @@
 				return;
 			}
 
-			message = $.parseJSON( originalEvent.data );
+			try {
+				message = $.parseJSON( originalEvent.data );
+			} catch ( e ) {
+				return;
+			}
 
 			if ( 'undefined' === typeof message.action ) {
 				return;

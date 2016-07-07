@@ -183,10 +183,6 @@ function get_blog_details( $fields = null, $get_all = true ) {
 				wp_cache_delete( $blog_id . $all, 'blog-details' );
 				unset($details);
 			}
-		} elseif ( ! $details->blog_id || ! $details->site_id ) {
-			// Clear objects missing critical properties.
-			wp_cache_delete( $blog_id . $all, 'blog-details' );
-			unset($details);
 		} else {
 			return $details;
 		}
@@ -207,17 +203,13 @@ function get_blog_details( $fields = null, $get_all = true ) {
 					wp_cache_delete( $blog_id, 'blog-details' );
 					unset($details);
 				}
-			} elseif ( ! $details->blog_id || ! $details->site_id ) {
-				// Clear objects missing critical properties.
-				wp_cache_delete( $blog_id, 'blog-details' );
-				unset($details);
 			} else {
 				return $details;
 			}
 		}
 	}
 
-	if ( empty( $details ) || ! $details->blog_id || ! $details->site_id ) {
+	if ( empty($details) ) {
 		$details = WP_Site::get_instance( $blog_id );
 		if ( ! $details ) {
 			// Set the full cache.
@@ -737,7 +729,7 @@ function update_blog_option( $id, $option, $value, $deprecated = null ) {
 	$id = (int) $id;
 
 	if ( null !== $deprecated  )
-		_deprecated_argument( __FUNCTION__, '3.1' );
+		_deprecated_argument( __FUNCTION__, '3.1.0' );
 
 	if ( get_current_blog_id() == $id )
 		return update_option( $option, $value );
@@ -971,7 +963,7 @@ function update_blog_status( $blog_id, $pref, $value, $deprecated = null ) {
 	global $wpdb;
 
 	if ( null !== $deprecated  )
-		_deprecated_argument( __FUNCTION__, '3.1' );
+		_deprecated_argument( __FUNCTION__, '3.1.0' );
 
 	if ( ! in_array( $pref, array( 'site_id', 'domain', 'path', 'registered', 'last_updated', 'public', 'archived', 'mature', 'spam', 'deleted', 'lang_id') ) )
 		return $value;

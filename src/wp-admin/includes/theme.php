@@ -236,6 +236,7 @@ function get_theme_feature_list( $api = true ) {
 			'custom-background'     => __( 'Custom Background' ),
 			'custom-colors'         => __( 'Custom Colors' ),
 			'custom-header'         => __( 'Custom Header' ),
+			'custom-logo'           => __( 'Custom Logo' ),
 			'custom-menu'           => __( 'Custom Menu' ),
 			'editor-style'          => __( 'Editor Style' ),
 			'featured-image-header' => __( 'Featured Image Header' ),
@@ -284,10 +285,9 @@ function get_theme_feature_list( $api = true ) {
 	set_site_transient( 'wporg_theme_feature_list', $feature_list, 3 * HOUR_IN_SECONDS );
 
 	$category_translations = array(
-		'Colors'   => __( 'Colors' ),
 		'Layout'   => __( 'Layout' ),
 		'Features' => __( 'Features' ),
-		'Subject'  => __( 'Subject' )
+		'Subject'  => __( 'Subject' ),
 	);
 
 	// Loop over the wporg canonical list and apply translations
@@ -312,7 +312,7 @@ function get_theme_feature_list( $api = true ) {
  * Retrieves theme installer pages from the WordPress.org Themes API.
  *
  * It is possible for a theme to override the Themes API result with three
- * Filterss. Assume this is for themes, which can extend on the Theme Info to
+ * filters. Assume this is for themes, which can extend on the Theme Info to
  * offer more choices. This is very powerful and must be used with care, when
  * overriding the filters.
  *
