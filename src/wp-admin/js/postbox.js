@@ -1,11 +1,30 @@
 /* global ajaxurl, postBoxL10n */
 
+/**
+ * This object contains all function to handle the behaviour of the post boxes. The post boxes are the boxes you see
+ * around the content on the edit page.
+ *
+ * @namespace postboxes
+ *
+ * @type {Object}
+ */
 var postboxes;
 
 (function($) {
 	var $document = $( document );
 
 	postboxes = {
+
+		/**
+		 * Handles a click on either the postbox heading or the postbox open/close icon. Opens or closes the postbox.
+		 * Expects this to equal the clicked element.
+		 *
+		 * Triggers postboxes.pbshow if the postbox has just been opened, triggers postboxes.pbhide if the postbox has
+		 * just been closed.
+		 *
+		 * @memberof postboxes
+		 * @fires postboxes#postbox-toggled
+		 */
 		handle_click : function () {
 			var $el = $( this ),
 				p = $el.parent( '.postbox' ),
@@ -41,9 +60,26 @@ var postboxes;
 				}
 			}
 
+			/**
+			 * Fires when the postbox has been opened or closed. Contains a jQuery object with the postbox element in
+			 * it.
+			 *
+			 * @event postboxes#postbox-toggled
+			 * @type {Object}
+			 */
 			$document.trigger( 'postbox-toggled', p );
 		},
 
+		/**
+		 * Adds event handlers to all postboxes and screen option on the current page.
+		 *
+		 * @memberof postboxes
+		 *
+		 * @param {string} page The page we are currently on.
+		 * @param {Object} [args]
+		 * @param {Function} args.pbshow A callback that is called when a postbox opens.
+		 * @param {Function} args.pbhide A callback that is called when a postbox closes.
+		 */
 		add_postbox_toggles : function (page, args) {
 			var $handles = $( '.postbox .hndle, .postbox .handlediv' );
 
@@ -56,12 +92,21 @@ var postboxes;
 				e.stopPropagation();
 			});
 
+			/**
+			 * Adds an event handler to the dismissal of a postbox. Event handler completely hides the postbox element
+			 * and it cannot be closed or opened afterwards.
+			 */
 			$( '.postbox a.dismiss' ).on( 'click.postboxes', function( e ) {
 				var hide_id = $(this).parents('.postbox').attr('id') + '-hide';
 				e.preventDefault();
 				$( '#' + hide_id ).prop('checked', false).triggerHandler('click');
 			});
 
+			/**
+			 * Adds an event handler to the screen option checkboxes. Event handler completely hides the postbox element
+			 *
+			 * @fires postboxes#postbox-toggled
+			 */
 			$('.hide-postbox-tog').bind('click.postboxes', function() {
 				var $el = $(this),
 					boxId = $el.val(),
@@ -78,11 +123,15 @@ var postboxes;
 						postboxes.pbhide( boxId );
 					}
 				}
+
 				postboxes.save_state( page );
 				postboxes._mark_area();
 				$document.trigger( 'postbox-toggled', $postbox );
 			});
 
+			/**
+			 * Adds an event handler to the screen options layout preferences.
+			 */
 			$('.columns-prefs input[type="radio"]').bind('click.postboxes', function(){
 				var n = parseInt($(this).val(), 10);
 
@@ -93,6 +142,16 @@ var postboxes;
 			});
 		},
 
+		/**
+		 * Initializes all the postboxes, mainly their sortable behaviour.
+		 *
+		 * @memberof postboxes
+		 *
+		 * @param {string} page The page we are currently on.
+		 * @param {Object} [args]
+		 * @param {Function} args.pbshow A callback that is called when a postbox opens.
+		 * @param {Function} args.pbhide A callback that is called when a postbox closes.
+		 */
 		init : function(page, args) {
 			var isMobile = $( document.body ).hasClass( 'mobile' ),
 				$handleButtons = $( '.postbox .handlediv' );
@@ -157,6 +216,14 @@ var postboxes;
 			});
 		},
 
+		/**
+		 * Saves the state of the postboxes to the server. It sends two lists, one with all the closed postboxes, one
+		 * with all the hidden postboxes.
+		 *
+		 * @memberof postboxes
+		 *
+		 * @param {string} page The page we are currently on.
+		 */
 		save_state : function(page) {
 			var closed, hidden;
 
@@ -177,6 +244,14 @@ var postboxes;
 			});
 		},
 
+		/**
+		 * Saves the order of the postboxes to the server. Sends a list of all postboxes inside a sortable area to the
+		 * server.
+		 *
+		 * @memberof postboxes
+		 *
+		 * @param {string} page The page we are currently on.
+		 */
 		save_order : function(page) {
 			var postVars, page_columns = $('.columns-prefs input:checked').val() || 0;
 
@@ -186,12 +261,21 @@ var postboxes;
 				page_columns: page_columns,
 				page: page
 			};
+
 			$('.meta-box-sortables').each( function() {
 				postVars[ 'order[' + this.id.split( '-' )[0] + ']' ] = $( this ).sortable( 'toArray' ).join( ',' );
 			} );
+
 			$.post( ajaxurl, postVars );
 		},
 
+		/**
+		 * Adds a message to empty sortable areas on the dashboard page. Also adds a border around the side area on the
+		 * post edit screen if there are no postboxes present.
+		 *
+		 * @memberof postboxes
+		 * @private
+		 */
 		_mark_area : function() {
 			var visible = $('div.postbox:visible').length, side = $('#post-body #side-sortables');
 
@@ -215,6 +299,15 @@ var postboxes;
 			}
 		},
 
+		/**
+		 * Changes the amount of columns on the post edit page.
+		 *
+		 * @memberof postboxes
+		 * @fires postboxes#postboxes-columnchange
+		 * @private
+		 *
+		 * @param {number} n The amount of columns to divide the post edit page in.
+		 */
 		_pb_edit : function(n) {
 			var el = $('.metabox-holder').get(0);
 
@@ -222,9 +315,21 @@ var postboxes;
 				el.className = el.className.replace(/columns-\d+/, 'columns-' + n);
 			}
 
+			/**
+			 * Fires when the amount of columns on the post edit page has been changed.
+			 *
+			 * @event postboxes#postboxes-columnchange
+			 */
 			$( document ).trigger( 'postboxes-columnchange' );
 		},
 
+		/**
+		 * Changes the postboxes based on the current orientation of the browser. Meant to be called when the
+		 * orientation of the browser changes.
+		 *
+		 * @memberof postboxes
+		 * @private
+		 */
 		_pb_change : function() {
 			var check = $( 'label.columns-prefs-1 input[type="radio"]' );
 
