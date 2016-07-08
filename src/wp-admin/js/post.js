@@ -861,7 +861,7 @@ jQuery(document).ready( function($) {
 			updateText();
 			event.preventDefault();
 		});
-	} // end submitdiv
+	}
 
 	/**
 	 * Permalink aka slug aka post_name editing
@@ -879,11 +879,13 @@ jQuery(document).ready( function($) {
 			buttonsOrig = buttons.html(),
 			full = $('#editable-post-name-full');
 
-		// Deal with Twemoji in the post-name
+		// Deal with Twemoji in the post-name.
 		full.find( 'img' ).replaceWith( function() { return this.alt; } );
 		full = full.html();
 
 		permalink.html( permalinkInner );
+
+		// Save current content to revert to when cancelling.
 		$el = $( '#editable-post-name' );
 		revert_e = $el.html();
 
@@ -897,6 +899,7 @@ jQuery(document).ready( function($) {
 				buttons.children('.cancel').click();
 				return;
 			}
+
 			$.post(
 				ajaxurl,
 				{
@@ -934,7 +937,7 @@ jQuery(document).ready( function($) {
 			$( '.edit-slug' ).focus();
 		});
 
-		// If more than 1/4th of 'full' is '%', make it empty?!
+		// If more than 1/4th of 'full' is '%', make it empty.
 		for ( i = 0; i < full.length; ++i ) {
 			if ( '%' == full.charAt(i) )
 				c++;
@@ -962,9 +965,9 @@ jQuery(document).ready( function($) {
 	});
 
 	/**
-	 * Title screenreader text handler.
+	 * Title screen reader text handler.
 	 *
-	 * @param {string} id Optional. HTML ID to add the screenreader helper text to.
+	 * @param {string} id Optional. HTML ID to add the screen reader helper text to.
 	 */
 	wptitlehint = function(id) {
 		id = id || 'title';
@@ -992,7 +995,7 @@ jQuery(document).ready( function($) {
 
 	wptitlehint();
 
-	// Resize the visual and text editors
+	// Resize the wysiwyg and plain text editors.
 	( function() {
 		var editor, offset, mce,
 			$handle = $('#post-status-info'),
@@ -1000,7 +1003,7 @@ jQuery(document).ready( function($) {
 
 		// If there are no textareas or we are on a touch device, we can't do anything.
 		if ( ! $textarea.length || 'ontouchstart' in window ) {
-			// Hide the resize handle
+			// Hide the resize handle.
 			$('#content-resize-handle').hide();
 			return;
 		}
@@ -1050,7 +1053,7 @@ jQuery(document).ready( function($) {
 
 			$document.off( '.wp-editor-resize' );
 
-			// sanity check
+			// Normalize height to stay within acceptable ranges.
 			if ( height && height > 50 && height < 5000 ) {
 				setUserSetting( 'ed_size', height );
 			}
@@ -1079,7 +1082,7 @@ jQuery(document).ready( function($) {
 
 	// TinyMCE specific handling of Post Format changes to reflect in the editor.
 	if ( typeof tinymce !== 'undefined' ) {
-		// When changing post formats, change the editor body class
+		// When changing post formats, change the editor body class.
 		$( '#post-formats-select input.post-format' ).on( 'change.set-editor-class', function() {
 			var editor, body, format = this.id;
 
@@ -1092,7 +1095,7 @@ jQuery(document).ready( function($) {
 		});
 	}
 
-	// Save on pressing Ctrl/Command + S in the Text editor
+	// Save on pressing Ctrl/Command + S in the Text editor.
 	$textarea.on( 'keydown.wp-autosave', function( event ) {
 		// Key [s] has code 83.
 		if ( event.which === 83 ) {
@@ -1105,9 +1108,7 @@ jQuery(document).ready( function($) {
 		}
 	});
 
-	/*
-	 * If the last status was auto-draft and the save is triggered, edit the current URL.
-	 */
+	// If the last status was auto-draft and the save is triggered, edit the current URL.
 	if ( $( '#original_post_status' ).val() === 'auto-draft' && window.history.replaceState ) {
 		var location;
 
@@ -1122,7 +1123,7 @@ jQuery(document).ready( function($) {
 });
 
 /**
- * TinyMCE wordcount display
+ * TinyMCE word count display
  */
 ( function( $, counter ) {
 	// Anonymous function inside anonymous function without added value.
