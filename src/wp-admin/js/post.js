@@ -170,19 +170,19 @@ window.wp = window.wp || {};
 		data['wp-refresh-post-lock'] = send;
 
 	}).on( 'heartbeat-tick.refresh-lock', function( e, data ) {
-		// Post locks: update the lock string or show the dialog if somebody has taken over editing
+		// Post locks: update the lock string or show the dialog if somebody has taken over editing.
 		var received, wrap, avatar;
 
 		if ( data['wp-refresh-post-lock'] ) {
 			received = data['wp-refresh-post-lock'];
 
 			if ( received.lock_error ) {
-				// show "editing taken over" message
+				// Show "editing taken over" message.
 				wrap = $('#post-lock-dialog');
 
 				if ( wrap.length && ! wrap.is(':visible') ) {
 					if ( wp.autosave ) {
-						// Save the latest changes and disable
+						// Save the latest changes and disable.
 						$(document).one( 'heartbeat-tick', function() {
 							wp.autosave.server.suspend();
 							wrap.removeClass('saving').addClass('saved');
@@ -208,8 +208,11 @@ window.wp = window.wp || {};
 	}).on( 'before-autosave.update-post-slug', function() {
 		titleHasFocus = document.activeElement && document.activeElement.id === 'title';
 	}).on( 'after-autosave.update-post-slug', function() {
-		// Create slug area only if not already there
-		// and the title field was not focused (user was not typing a title) when autosave ran
+
+		/*
+		 * Create slug area only if not already there
+		 * and the title field was not focused (user was not typing a title) when autosave ran.
+		 */
 		if ( ! $('#edit-slug-box > *').length && ! titleHasFocus ) {
 			$.post( ajaxurl, {
 					action: 'sample-permalink',
@@ -317,12 +320,12 @@ jQuery(document).ready( function($) {
 		}
 	}).filter(':visible').find('.wp-tab-first').focus();
 
-	// Set the heartbeat interval to 15 sec. if post lock dialogs are enabled
+	// Set the heartbeat interval to 15 sec. if post lock dialogs are enabled.
 	if ( wp.heartbeat && $('#post-lock-dialog').length ) {
 		wp.heartbeat.interval( 15 );
 	}
 
-	// The form is being submitted by the user
+	// The form is being submitted by the user.
 	$submitButtons = $submitpost.find( ':submit, a.submitdelete, #post-preview' ).on( 'click.edit-post', function( event ) {
 		var $button = $(this);
 
@@ -342,7 +345,7 @@ jQuery(document).ready( function($) {
 				return;
 			}
 
-			// Stop autosave.
+			// Stop auto save.
 			if ( wp.autosave ) {
 				wp.autosave.server.suspend();
 			}
@@ -427,7 +430,7 @@ jQuery(document).ready( function($) {
 		}
 	});
 
-	// Autosave new posts after a title is typed.
+	// Auto save new posts after a title is typed.
 	if ( $( '#auto_draft' ).val() ) {
 		$( '#title' ).blur( function() {
 			var cancel;
@@ -436,7 +439,7 @@ jQuery(document).ready( function($) {
 				return;
 			}
 
-			// Cancel the autosave when the blur was triggered by the user submitting the form.
+			// Cancel the auto save when the blur was triggered by the user submitting the form.
 			$('form#post').one( 'submit', function() {
 				cancel = true;
 			});
@@ -622,7 +625,7 @@ jQuery(document).ready( function($) {
 
 	}); // end cats
 
-	// Custom Fields postbox
+	// Custom Fields postbox.
 	if ( $('#postcustom').length ) {
 		$( '#the-list' ).wpList( {
 			/**
@@ -800,7 +803,7 @@ jQuery(document).ready( function($) {
 
 			if ( $postVisibilitySelect.find('input:radio:checked').val() != 'public' ) {
 				$('#sticky').prop('checked', false);
-			} // WEAPON LOCKED
+			}
 
 			if ( $('#sticky').prop('checked') ) {
 				sticky = 'Sticky';
