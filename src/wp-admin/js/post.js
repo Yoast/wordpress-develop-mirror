@@ -9,6 +9,8 @@ makeSlugeditClickable = editPermalink = function(){};
 window.wp = window.wp || {};
 
 ( function( $ ) {
+	var titleHasFocus = false;
+
 	/**
 	 * Control loading of comments on the post and term edit pages
 	 *
@@ -92,9 +94,7 @@ window.wp = window.wp || {};
 			this.get(total);
 		}
 	};
-}(jQuery));
 
-(function($) {
 	/**
 	 * Overwrite the content of the Featured Image postbox
 	 *
@@ -145,11 +145,6 @@ window.wp = window.wp || {};
 		}
 		);
 	};
-}(jQuery));
-
-(function($) {
-
-	var titleHasFocus = false;
 
 	/**
 	 * Heartbeat locks.
