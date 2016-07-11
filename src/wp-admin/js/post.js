@@ -2,18 +2,19 @@
 /* global theList:true, theExtraList:true, getUserSetting, setUserSetting, commentReply */
 
 var commentsBox, WPSetThumbnailHTML, WPSetThumbnailID, WPRemoveThumbnail, wptitlehint, makeSlugeditClickable, editPermalink;
-// Back-compat: prevent fatal errors
+// Backwards compatibility: prevent fatal errors.
 makeSlugeditClickable = editPermalink = function(){};
 
+// Make sure the wp object exists.
 window.wp = window.wp || {};
 
 ( function( $ ) {
-	var titleHasFocus = false;
-
 	/**
 	 * Control loading of comments on the post and term edit pages
 	 *
 	 * @type {{st: number, get: commentsBox.get, load: commentsBox.load}}
+	 *
+	 * @namespace commentsbox
 	 */
 	commentsBox = {
 		// Comment offset to use when fetching new comments.
@@ -25,6 +26,8 @@ window.wp = window.wp || {};
 		 * @param {int} total Total number of comments for this post.
 		 * @param {int} num   Optional. Number of comments to fetch, defaults to 20.
 		 * @returns {boolean} Always returns false.
+		 *
+		 * @memberof commentsbox
 		 */
 		get : function(total, num) {
 			var st = this.st, data;
@@ -44,12 +47,9 @@ window.wp = window.wp || {};
 				'number' : num
 			};
 
-			$.post(ajaxurl, data,
-				/**
-				 * Response handler for the AJAX request
-				 *
-				 * @param {object} r Response from the get-comments AJAX request.
-				 */
+			$.post(
+				ajaxurl,
+				data,
 				function(r) {
 					r = wpAjax.parseAjaxResponse(r);
 					$('#commentsdiv .widefat').show();
@@ -84,17 +84,23 @@ window.wp = window.wp || {};
 		 * Load the next batch of comments.
 		 *
 		 * @param {int} total Total number of comments to load.
+		 *
+		 * @memberof commentsbox
 		 */
 		load: function(total){
 			this.st = jQuery('#the-comment-list tr.comment:visible').length;
 			this.get(total);
 		}
 	};
+}(jQuery));
 
+(function($) {
 	/**
 	 * Overwrite the content of the Featured Image postbox
 	 *
 	 * @param {string} html New HTML to be displayed in the content area of the postbox.
+	 * 
+	 * @global
 	 */
 	WPSetThumbnailHTML = function(html){
 		$('.inside', '#postimagediv').html(html);
@@ -104,6 +110,8 @@ window.wp = window.wp || {};
 	 * Set the Image ID of the Featured Image
 	 *
 	 * @param {int} id The post_id of the image to use as Featured Image.
+	 *
+	 * @global
 	 */
 	WPSetThumbnailID = function(id){
 		var field = $('input[value="_thumbnail_id"]', '#list-table');
@@ -116,6 +124,8 @@ window.wp = window.wp || {};
 	 * Remove the Featured Image
 	 *
 	 * @param {string} nonce Nonce to use in the request.
+	 *
+	 * @global
 	 */
 	WPRemoveThumbnail = function(nonce){
 		$.post(ajaxurl, {
@@ -135,6 +145,11 @@ window.wp = window.wp || {};
 		}
 		);
 	};
+}(jQuery));
+
+(function($) {
+
+	var titleHasFocus = false;
 
 	/**
 	 * Heartbeat locks.
@@ -282,8 +297,10 @@ jQuery(document).ready( function($) {
 
 	postboxes.add_postbox_toggles(pagenow);
 
-	// Clear the window name. Otherwise if this is a former preview window where the user navigated to edit another post,
-	// and the first post is still being edited, clicking Preview there will use this window to show the preview.
+	/*
+	 * Clear the window name. Otherwise if this is a former preview window where the user navigated to edit another post,
+	 * and the first post is still being edited, clicking Preview there will use this window to show the preview.
+	 */
 	window.name = '';
 
 	// Post locks: contain focus inside the dialog. If the dialog is shown, focus the first item.
@@ -294,9 +311,11 @@ jQuery(document).ready( function($) {
 
 		var target = $(e.target);
 
+		// [shift] + [tab] on first tab cycles back to last tab.
 		if ( target.hasClass('wp-tab-first') && e.shiftKey ) {
 			$(this).find('.wp-tab-last').focus();
 			e.preventDefault();
+		// [tab] on last tab cycles back to first tab.
 		} else if ( target.hasClass('wp-tab-last') && ! e.shiftKey ) {
 			$(this).find('.wp-tab-first').focus();
 			e.preventDefault();
@@ -328,7 +347,7 @@ jQuery(document).ready( function($) {
 				return;
 			}
 
-			// Stop autosave
+			// Stop autosave.
 			if ( wp.autosave ) {
 				wp.autosave.server.suspend();
 			}
@@ -413,7 +432,7 @@ jQuery(document).ready( function($) {
 		}
 	});
 
-	// Autosave new posts after a title is typed
+	// Autosave new posts after a title is typed.
 	if ( $( '#auto_draft' ).val() ) {
 		$( '#title' ).blur( function() {
 			var cancel;
@@ -422,7 +441,7 @@ jQuery(document).ready( function($) {
 				return;
 			}
 
-			// Cancel the autosave when the blur was triggered by the user submitting the form
+			// Cancel the autosave when the blur was triggered by the user submitting the form.
 			$('form#post').one( 'submit', function() {
 				cancel = true;
 			});
@@ -451,10 +470,9 @@ jQuery(document).ready( function($) {
 		}
 	});
 
-	/**
+	/*
 	 * When the user is trying to load another page, or reloads current page
-	 *
-	 * Show a confirmation dialog when there are unsaved changes.
+	 * show a confirmation dialog when there are unsaved changes.
 	 */
 	$(window).on( 'beforeunload.edit-post', function() {
 		var editor = typeof tinymce !== 'undefined' && tinymce.get('content');
@@ -469,8 +487,10 @@ jQuery(document).ready( function($) {
 			return;
 		}
 
-		// Unload is triggered (by hand) on removing the Thickbox iframe.
-		// Make sure we process only the main document unload.
+		/*
+		 * Unload is triggered (by hand) on removing the Thickbox iframe.
+		 * Make sure we process only the main document unload.
+		 */
 		if ( event.target && event.target.nodeName != '#document' ) {
 			return;
 		}
@@ -488,7 +508,7 @@ jQuery(document).ready( function($) {
 		});
 	});
 
-	// multi-taxonomies
+	// Multiple Taxonomies.
 	if ( $('#tagsdiv-post_tag').length ) {
 		window.tagBox && window.tagBox.init();
 	} else {
@@ -500,7 +520,7 @@ jQuery(document).ready( function($) {
 		});
 	}
 
-	// categories
+	// Handle categories.
 	$('.categorydiv').each( function(){
 		var this_id = $(this).attr('id'), catAddBefore, catAddAfter, taxonomyParts, taxonomy, settingName;
 
@@ -508,8 +528,10 @@ jQuery(document).ready( function($) {
 		taxonomyParts.shift();
 		taxonomy = taxonomyParts.join('-');
 		settingName = taxonomy + '_tab';
-		if ( taxonomy == 'category' )
+
+		if ( taxonomy == 'category' ) {
 			settingName = 'cats';
+		}
 
 		// TODO: move to jQuery 1.3+, support for multiple hierarchical taxonomies, see wp-lists.js
 		$('a', '#' + taxonomy + '-tabs').click( function( e ) {
@@ -518,17 +540,20 @@ jQuery(document).ready( function($) {
 			$(this).parent().addClass('tabs').siblings('li').removeClass('tabs');
 			$('#' + taxonomy + '-tabs').siblings('.tabs-panel').hide();
 			$(t).show();
-			if ( '#' + taxonomy + '-all' == t )
+			if ( '#' + taxonomy + '-all' == t ) {
 				deleteUserSetting( settingName );
-			else
+			} else {
 				setUserSetting( settingName, 'pop' );
+			}
 		});
 
 		if ( getUserSetting( settingName ) )
 			$('a[href="#' + taxonomy + '-pop"]', '#' + taxonomy + '-tabs').click();
 
-		// Ajax Cat
-		$('#new' + taxonomy).one( 'focus', function() { $( this ).val( '' ).removeClass( 'form-input-tip' ); } );
+		// Add category button controls.
+		$('#new' + taxonomy).one( 'focus', function() {
+			$( this ).val( '' ).removeClass( 'form-input-tip' );
+		});
 
 		// On [enter] submit the taxonomy.
 		$('#new' + taxonomy).keypress( function(event){
@@ -537,8 +562,11 @@ jQuery(document).ready( function($) {
 				$('#' + taxonomy + '-add-submit').click();
 			}
 		});
+
 		// After submitting a new taxonomy, re-focus the input field.
-		$('#' + taxonomy + '-add-submit').click( function(){ $('#new' + taxonomy).focus(); });
+		$('#' + taxonomy + '-add-submit').click( function() {
+			$('#new' + taxonomy).focus();
+		});
 
 		/**
 		 * Before adding a new taxonomy, disable submit button.
@@ -547,8 +575,10 @@ jQuery(document).ready( function($) {
 		 * @returns {*}
 		 */
 		catAddBefore = function( s ) {
-			if ( !$('#new'+taxonomy).val() )
+			if ( !$('#new'+taxonomy).val() ) {
 				return false;
+			}
+
 			s.data += '&' + $( ':checked', '#'+taxonomy+'checklist' ).serialize();
 			$( '#' + taxonomy + '-add-submit' ).prop( 'disabled', true );
 			return s;
@@ -619,7 +649,7 @@ jQuery(document).ready( function($) {
 		});
 	}
 
-	/**
+	/*
 	 * Publish Post box (#submitdiv)
 	 */
 	if ( $('#submitdiv').length ) {
@@ -628,6 +658,8 @@ jQuery(document).ready( function($) {
 
 		/**
 		 * When the visibility of a post changes sub-options should be shown or hidden.
+		 *
+		 * @returns void
 		 */
 		updateVisibility = function() {
 			// Show sticky for public posts.
@@ -865,6 +897,10 @@ jQuery(document).ready( function($) {
 
 	/**
 	 * Permalink aka slug aka post_name editing
+	 *
+	 * @global
+	 *
+	 * @returns void
 	 */
 	function editPermalink() {
 		var i, slug_value,
@@ -968,6 +1004,10 @@ jQuery(document).ready( function($) {
 	 * Title screen reader text handler.
 	 *
 	 * @param {string} id Optional. HTML ID to add the screen reader helper text to.
+	 *
+	 * @global
+	 *
+	 * @returns void
 	 */
 	wptitlehint = function(id) {
 		id = id || 'title';
@@ -1095,7 +1135,7 @@ jQuery(document).ready( function($) {
 		});
 	}
 
-	// Save on pressing Ctrl/Command + S in the Text editor.
+	// Save on pressing [ctrl]/[command] + [s] in the Text editor.
 	$textarea.on( 'keydown.wp-autosave', function( event ) {
 		// Key [s] has code 83.
 		if ( event.which === 83 ) {
@@ -1126,7 +1166,6 @@ jQuery(document).ready( function($) {
  * TinyMCE word count display
  */
 ( function( $, counter ) {
-	// Anonymous function inside anonymous function without added value.
 	$( function() {
 		var $content = $( '#content' ),
 			$count = $( '#wp-word-count' ).find( '.word-count' ),
