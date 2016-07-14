@@ -1,10 +1,40 @@
+/**
+ * @namespace wp.utils
+ */
 ( function() {
+	/**
+	 * Word counting object
+	 * 
+	 * @namespace wp.utils.wordcounter
+	 * @memberof wp.utils
+	 *
+	 * @static
+	 *
+	 * @constructs
+	 * 
+	 * @param {object} [settings] - Key-value object containing overrides for settings.
+	 * @param {RegExp} [settings.HTMLRegExp] - Find HTML elements.
+	 * @param {RegExp} [settings.HTMLcommentRegExp] - Find HTML comments.
+	 * @param {RegExp} [settings.spaceRegExp] - Find non-breaking space.
+	 * @param {RegExp} [settings.HTMLEntityRegExp] - Find ampersant HTML code.
+	 * @param {RegExp} [settings.connectorRegExp] - Double dash or 'em-dash'
+	 * @param {RegExp} [settings.removeRegExp] - Remove unwanted characters to reduce false-positives.
+	 * @param {RegExp} [settings.astralRegExp] - Remove astral planes.
+	 * @param {RegExp} [settings.wordsRegExp] - Find words by spaces.
+	 * @param {RegExp} [settings.characters_excluding_spacesRegExp] - Find non-spaces.
+	 * @param {RegExp} [settings.characters_including_spacesRegExp] - Find characters including spaces.
+	 * @param {object} [settings.l10n] - Localization object containing specific configuration for the current localization.
+	 * @param {string} [settings.l10n.type] - Method of finding words to count.
+	 * @param {array}  [settings.l10n.shortcodes] - Array of shortcodes that contain text to be counted.
+	 */
 	function WordCounter( settings ) {
 		var key,
 			shortcodes;
 
+		// Apply provided settings to object settings.
 		if ( settings ) {
 			for ( key in settings ) {
+				// Only apply valid settings.
 				if ( settings.hasOwnProperty( key ) ) {
 					this.settings[ key ] = settings[ key ];
 				}
@@ -13,17 +43,22 @@
 
 		shortcodes = this.settings.l10n.shortcodes;
 
+		// If there are any localization shortcodes add this as type in the settings.
 		if ( shortcodes && shortcodes.length ) {
 			this.settings.shortcodesRegExp = new RegExp( '\\[\\/?(?:' + shortcodes.join( '|' ) + ')[^\\]]*?\\]', 'g' );
 		}
 	}
 
+	/**
+	 * @memberof wp.utils.wordcounter
+	 * @type {{HTMLRegExp: RegExp, HTMLcommentRegExp: RegExp, spaceRegExp: RegExp, HTMLEntityRegExp: RegExp, connectorRegExp: RegExp, removeRegExp: RegExp, astralRegExp: RegExp, wordsRegExp: RegExp, characters_excluding_spacesRegExp: RegExp, characters_including_spacesRegExp: RegExp, l10n: (*|{})}}
+	 */
 	WordCounter.prototype.settings = {
 		HTMLRegExp: /<\/?[a-z][^>]*?>/gi,
 		HTMLcommentRegExp: /<!--[\s\S]*?-->/g,
 		spaceRegExp: /&nbsp;|&#160;/gi,
 		HTMLEntityRegExp: /&\S+?;/g,
-		connectorRegExp: /--|\u2014/g,
+		connectorRegExp: /--|\u2014/g, // \u2014 = em-dash.
 		removeRegExp: new RegExp( [
 			'[',
 				// Basic Latin (extract)
@@ -66,6 +101,15 @@
 		l10n: window.wordCountL10n || {}
 	};
 
+	/**
+	 * Count words
+	 *
+	 * @param {string} text - Text to count words in.
+	 * @param {string} [type] - Override type to use.
+	 * @returns {number}
+	 *
+	 * @memberof wp.utils.wordcounter
+	 */
 	WordCounter.prototype.count = function( text, type ) {
 		var count = 0;
 
