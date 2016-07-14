@@ -8,8 +8,6 @@
 	 * @namespace wp.utils.wordcounter
 	 * @memberof wp.utils
 	 *
-	 * @static
-	 *
 	 * @constructs
 	 * 
 	 * @param {object} [settings] - Key-value object containing overrides for settings.
@@ -49,10 +47,7 @@
 		}
 	}
 
-	/**
-	 * @memberof wp.utils.wordcounter
-	 * @type {{HTMLRegExp: RegExp, HTMLcommentRegExp: RegExp, spaceRegExp: RegExp, HTMLEntityRegExp: RegExp, connectorRegExp: RegExp, removeRegExp: RegExp, astralRegExp: RegExp, wordsRegExp: RegExp, characters_excluding_spacesRegExp: RegExp, characters_including_spacesRegExp: RegExp, l10n: (*|{})}}
-	 */
+	// Default settings.
 	WordCounter.prototype.settings = {
 		HTMLRegExp: /<\/?[a-z][^>]*?>/gi,
 		HTMLcommentRegExp: /<!--[\s\S]*?-->/g,
@@ -104,11 +99,11 @@
 	/**
 	 * Count words
 	 *
+	 * @memberof wp.utils.wordcounter
+	 *
 	 * @param {string} text - Text to count words in.
 	 * @param {string} [type] - Override type to use.
 	 * @returns {number}
-	 *
-	 * @memberof wp.utils.wordcounter
 	 */
 	WordCounter.prototype.count = function( text, type ) {
 		var count = 0;
