@@ -1,3 +1,13 @@
+/**
+ * Contains the postboxes logic, opening and closing postboxes, reordering and saving
+ * the state and ordering to the database.
+ *
+ * @summary Contains postboxes logic
+ *
+ * @since 2.4.0
+ * @requires jQuery
+ */
+
 /* global ajaxurl, postBoxL10n */
 
 /**
@@ -18,11 +28,11 @@ var postboxes;
 	postboxes = {
 
 		/**
-		 * Handles a click on either the postbox heading or the postbox open/close icon. Opens or closes the postbox.
-		 * Expects this to equal the clicked element.
+		 * @summary Handles a click on either the postbox heading or the postbox open/close icon.
 		 *
-		 * Triggers postboxes.pbshow if the postbox has just been opened, triggers postboxes.pbhide if the postbox has
-		 * just been closed.
+		 * Opens or closes the postbox. Expects `this` to equal the clicked element.
+		 * Calls postboxes.pbshow if the postbox has been opened, calls postboxes.pbhide
+		 * if the postbox has been closed.
 		 *
 		 * @since 4.4.0
 		 * @memberof postboxes
@@ -64,8 +74,9 @@ var postboxes;
 			}
 
 			/**
-			 * Fires when the postbox has been opened or closed. Contains a jQuery object with the postbox element in
-			 * it.
+			 * @summary Fires when a postbox has been opened or closed.
+			 *
+			 * Contains a jQuery object with the relevant postbox element.
 			 *
 			 * @since 4.0.0
 			 * @event postboxes#postbox-toggled
@@ -93,13 +104,20 @@ var postboxes;
 
 			$handles.on( 'click.postboxes', this.handle_click );
 
+			/**
+			 * @since 2.7.0
+			 */
 			$('.postbox .hndle a').click( function(e) {
 				e.stopPropagation();
 			});
 
 			/**
-			 * Adds an event handler to the dismissal of a postbox. Event handler completely hides the postbox element
-			 * and it cannot be closed or opened afterwards.
+			 * @summary Hides a postbox.
+			 *
+			 * Event handler for the postbox dismiss button. After clicking the button
+			 * the postbox will be hidden.
+			 *
+			 * @since 3.2.0
 			 */
 			$( '.postbox a.dismiss' ).on( 'click.postboxes', function( e ) {
 				var hide_id = $(this).parents('.postbox').attr('id') + '-hide';
@@ -108,8 +126,12 @@ var postboxes;
 			});
 
 			/**
-			 * Adds an event handler to the screen option checkboxes. Event handler completely hides the postbox element
+			 * @summary Hides the postbox element
 			 *
+			 * Event handler for the screen options checkboxes. When a checkbox is
+			 * clicked this function will hide or show the relevant postboxes.
+			 *
+			 * @since 2.7.0
 			 * @fires postboxes#postbox-toggled
 			 */
 			$('.hide-postbox-tog').bind('click.postboxes', function() {
@@ -140,7 +162,9 @@ var postboxes;
 			});
 
 			/**
-			 * Adds an event handler to the screen options layout preferences.
+			 * @summary Changes the amount of columns based on the layout preferences.
+			 *
+			 * @since 2.8.0
 			 */
 			$('.columns-prefs input[type="radio"]').bind('click.postboxes', function(){
 				var n = parseInt($(this).val(), 10);
@@ -153,15 +177,16 @@ var postboxes;
 		},
 
 		/**
-		 * Initializes all the postboxes, mainly their sortable behaviour.
+		 * @summary Initializes all the postboxes, mainly their sortable behaviour.
 		 *
 		 * @since 2.7.0
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
-		 * @param {Object} [args]
+		 * @param {Object} [args={}] The arguments for the postbox initializer.
 		 * @param {Function} args.pbshow A callback that is called when a postbox opens.
-		 * @param {Function} args.pbhide A callback that is called when a postbox closes.
+		 * @param {Function} args.pbhide A callback that is called when a postbox
+		 *                               closes.
 		 */
 		init : function(page, args) {
 			var isMobile = $( document.body ).hasClass( 'mobile' ),
@@ -180,12 +205,13 @@ var postboxes;
 				tolerance: 'pointer',
 				forcePlaceholderSize: true,
 				helper: function( event, element ) {
-					// `helper: 'clone'` is equivalent to `return element.clone();`
-					// Cloning a checked radio and then inserting that clone next to the original
-					// radio unchecks the original radio (since only one of the two can be checked).
-					// We get around this by renaming the helper's inputs' name attributes so that,
-					// when the helper is inserted into the DOM for the sortable, no radios are
-					// duplicated, and no original radio gets unchecked.
+					/* `helper: 'clone'` is equivalent to `return element.clone();`
+					 * Cloning a checked radio and then inserting that clone next to the original
+					 * radio unchecks the original radio (since only one of the two can be checked).
+					 * We get around this by renaming the helper's inputs' name attributes so that,
+					 * when the helper is inserted into the DOM for the sortable, no radios are
+					 * duplicated, and no original radio gets unchecked.
+					 */
 					return element.clone()
 						.find( ':input' )
 							.attr( 'name', function( i, currentName ) {
@@ -228,8 +254,10 @@ var postboxes;
 		},
 
 		/**
-		 * Saves the state of the postboxes to the server. It sends two lists, one with all the closed postboxes, one
-		 * with all the hidden postboxes.
+		 * @summary Saves the state of the postboxes to the server.
+		 *
+		 * Saves the state of the postboxes to the server. It sends two lists, one with
+		 * all the closed postboxes, one with all the hidden postboxes.
 		 *
 		 * @since 2.7.0
 		 * @memberof postboxes
@@ -257,8 +285,10 @@ var postboxes;
 		},
 
 		/**
-		 * Saves the order of the postboxes to the server. Sends a list of all postboxes inside a sortable area to the
-		 * server.
+		 * @summary Saves the order of the postboxes to the server.
+		 *
+		 * Saves the order of the postboxes to the server. Sends a list of all postboxes
+		 * inside a sortable area to the server.
 		 *
 		 * @since 2.8.0
 		 * @memberof postboxes
@@ -283,12 +313,15 @@ var postboxes;
 		},
 
 		/**
-		 * Adds a message to empty sortable areas on the dashboard page. Also adds a border around the side area on the
-		 * post edit screen if there are no postboxes present.
+		 * @summary Marks empty postbox areas.
+		 *
+		 * Adds a message to empty sortable areas on the dashboard page. Also adds a
+		 * border around the side area on the post edit screen if there are no postboxes
+		 * present.
 		 *
 		 * @since 3.3.0
 		 * @memberof postboxes
-		 * @private
+		 * @access private
 		 */
 		_mark_area : function() {
 			var visible = $('div.postbox:visible').length, side = $('#post-body #side-sortables');
@@ -314,12 +347,12 @@ var postboxes;
 		},
 
 		/**
-		 * Changes the amount of columns on the post edit page.
+		 * @summary Changes the amount of columns on the post edit page.
 		 *
 		 * @since 3.3.0
 		 * @memberof postboxes
 		 * @fires postboxes#postboxes-columnchange
-		 * @private
+		 * @access private
 		 *
 		 * @param {number} n The amount of columns to divide the post edit page in.
 		 */
@@ -333,18 +366,19 @@ var postboxes;
 			/**
 			 * Fires when the amount of columns on the post edit page has been changed.
 			 *
+			 * @since 4.0.0
 			 * @event postboxes#postboxes-columnchange
 			 */
 			$( document ).trigger( 'postboxes-columnchange' );
 		},
 
 		/**
-		 * Changes the postboxes based on the current orientation of the browser. Meant to be called when the
-		 * orientation of the browser changes.
+		 * @summary Changes the amount of columns the postboxes are in based on the
+		 *          current orientation of the browser.
 		 *
 		 * @since 3.3.0
 		 * @memberof postboxes
-		 * @private
+		 * @access private
 		 */
 		_pb_change : function() {
 			var check = $( 'label.columns-prefs-1 input[type="radio"]' );
@@ -371,15 +405,19 @@ var postboxes;
 
 		/**
 		 * @since 2.7.0
-		 * @property {Function|boolean} pbshow A callback that is called when a postbox is opened.
 		 * @memberof postboxes
+		 * @access public
+		 * @property {Function|boolean} pbshow A callback that is called when a postbox
+		 *                                     is opened.
 		 */
 		pbshow : false,
 
 		/**
 		 * @since 2.7.0
-		 * @property {Function|boolean} pbhide A callback that is called when a postbox is closed.
 		 * @memberof postboxes
+		 * @access public
+		 * @property {Function|boolean} pbhide A callback that is called when a postbox
+		 *                                     is closed.
 		 */
 		pbhide : false
 	};
