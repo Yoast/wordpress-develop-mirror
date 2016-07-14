@@ -2769,7 +2769,7 @@ function edit_form_image_editor( $post ) {
 	else :
 
 		/**
-		 * Fires when attachment type can't be rendered in the edit form.
+		 * Fires when an attachment type can't be rendered in the edit form.
 		 *
 		 * @since 4.6.0
 		 *
@@ -2818,7 +2818,7 @@ function edit_form_image_editor( $post ) {
 }
 
 /**
- * Displays non-editable attachment metadata in the publish metabox
+ * Displays non-editable attachment metadata in the publish meta box.
  *
  * @since 3.5.0
  */

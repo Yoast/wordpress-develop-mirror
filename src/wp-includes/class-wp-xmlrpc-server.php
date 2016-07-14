@@ -881,6 +881,8 @@ class wp_xmlrpc_server extends IXR_Server {
 	/**
 	 * Prepares post data for return in an XML-RPC object.
 	 *
+	 * @since 3.4.0
+	 * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
 	 * @access protected
 	 *
 	 * @param WP_Post_Type $post_type Post type object.
@@ -921,6 +923,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		 * Filters XML-RPC-prepared date for the given post type.
 		 *
 		 * @since 3.4.0
+		 * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
 		 *
 		 * @param array        $_post_type An array of post type data.
 		 * @param WP_Post_Type $post_type  Post type object.
@@ -4409,7 +4412,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			return $this->error;
 
 		if ( !current_user_can( 'edit_posts' ) )
-			return new IXR_Error( 401, __( 'Sorry, you do not have access to user data on this site.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to access user data on this site.' ) );
 
 		/** This action is documented in wp-includes/class-wp-xmlrpc-server.php */
 		do_action( 'xmlrpc_call', 'blogger.getUserInfo' );
