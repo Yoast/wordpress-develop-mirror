@@ -4,6 +4,8 @@
  * This object contains all function to handle the behaviour of the post boxes. The post boxes are the boxes you see
  * around the content on the edit page.
  *
+ * @since 2.7.0
+ *
  * @namespace postboxes
  *
  * @type {Object}
@@ -22,6 +24,7 @@ var postboxes;
 		 * Triggers postboxes.pbshow if the postbox has just been opened, triggers postboxes.pbhide if the postbox has
 		 * just been closed.
 		 *
+		 * @since 4.4.0
 		 * @memberof postboxes
 		 * @fires postboxes#postbox-toggled
 		 */
@@ -64,6 +67,7 @@ var postboxes;
 			 * Fires when the postbox has been opened or closed. Contains a jQuery object with the postbox element in
 			 * it.
 			 *
+			 * @since 4.0.0
 			 * @event postboxes#postbox-toggled
 			 * @type {Object}
 			 */
@@ -73,6 +77,7 @@ var postboxes;
 		/**
 		 * Adds event handlers to all postboxes and screen option on the current page.
 		 *
+		 * @since 2.7.0
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
@@ -128,6 +133,7 @@ var postboxes;
 				postboxes._mark_area();
 
 				/**
+				 * @since 4.0.0
 				 * @see postboxes.handle_click
 				 */
 				$document.trigger( 'postbox-toggled', $postbox );
@@ -149,6 +155,7 @@ var postboxes;
 		/**
 		 * Initializes all the postboxes, mainly their sortable behaviour.
 		 *
+		 * @since 2.7.0
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
@@ -224,6 +231,7 @@ var postboxes;
 		 * Saves the state of the postboxes to the server. It sends two lists, one with all the closed postboxes, one
 		 * with all the hidden postboxes.
 		 *
+		 * @since 2.7.0
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
@@ -252,6 +260,7 @@ var postboxes;
 		 * Saves the order of the postboxes to the server. Sends a list of all postboxes inside a sortable area to the
 		 * server.
 		 *
+		 * @since 2.8.0
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
@@ -277,6 +286,7 @@ var postboxes;
 		 * Adds a message to empty sortable areas on the dashboard page. Also adds a border around the side area on the
 		 * post edit screen if there are no postboxes present.
 		 *
+		 * @since 3.3.0
 		 * @memberof postboxes
 		 * @private
 		 */
@@ -306,6 +316,7 @@ var postboxes;
 		/**
 		 * Changes the amount of columns on the post edit page.
 		 *
+		 * @since 3.3.0
 		 * @memberof postboxes
 		 * @fires postboxes#postboxes-columnchange
 		 * @private
@@ -331,6 +342,7 @@ var postboxes;
 		 * Changes the postboxes based on the current orientation of the browser. Meant to be called when the
 		 * orientation of the browser changes.
 		 *
+		 * @since 3.3.0
 		 * @memberof postboxes
 		 * @private
 		 */
@@ -358,12 +370,14 @@ var postboxes;
 		/* Callbacks */
 
 		/**
+		 * @since 2.7.0
 		 * @property {Function|boolean} pbshow A callback that is called when a postbox is opened.
 		 * @memberof postboxes
 		 */
 		pbshow : false,
 
 		/**
+		 * @since 2.7.0
 		 * @property {Function|boolean} pbhide A callback that is called when a postbox is closed.
 		 * @memberof postboxes
 		 */
