@@ -508,7 +508,9 @@
 			$message.text( wp.updates.l10n.installing );
 		}
 
-		$message.addClass( 'updating-message' );
+		$message
+			.addClass( 'updating-message' )
+			.attr( 'aria-label', wp.updates.l10n.pluginInstallingLabel.replace( '%s', $message.data( 'name' ) ) );
 
 		wp.a11y.speak( wp.updates.l10n.installingMsg, 'polite' );
 
@@ -535,6 +537,7 @@
 		$message
 			.removeClass( 'updating-message' )
 			.addClass( 'updated-message installed button-disabled' )
+			.attr( 'aria-label', wp.updates.l10n.pluginInstalledLabel.replace( '%s', response.pluginName ) )
 			.text( wp.updates.l10n.installed );
 
 		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
@@ -547,6 +550,7 @@
 				// Transform the 'Install' button into an 'Activate' button.
 				$message.removeClass( 'install-now installed button-disabled updated-message' ).addClass( 'activate-now button-primary' )
 					.attr( 'href', response.activateUrl )
+					.attr( 'aria-label', wp.updates.l10n.activatePluginLabel.replace( '%s', response.pluginName ) )
 					.text( wp.updates.l10n.activatePlugin );
 			}, 1000 );
 		}
@@ -595,7 +599,7 @@
 
 		$button
 			.removeClass( 'updating-message' ).addClass( 'button-disabled' )
-			.attr( 'aria-label', wp.updates.l10n.installFailedLabel.replace( '%s', response.pluginName ) )
+			.attr( 'aria-label', wp.updates.l10n.pluginInstallFailedLabel.replace( '%s', $button.data( 'name' ) ) )
 			.text( wp.updates.l10n.installFailedShort );
 
 		wp.a11y.speak( errorMessage, 'assertive' );
@@ -1003,7 +1007,9 @@
 			$message.data( 'originaltext', $message.html() );
 		}
 
-		$message.text( wp.updates.l10n.installing );
+		$message
+			.text( wp.updates.l10n.installing )
+			.attr( 'aria-label', wp.updates.l10n.themeInstallingLabel.replace( '%s', $message.data( 'name' ) ) );
 		wp.a11y.speak( wp.updates.l10n.installingMsg, 'polite' );
 
 		// Remove previous error messages, if any.
@@ -1032,6 +1038,7 @@
 		$message = $card.find( '.button-primary' )
 			.removeClass( 'updating-message' )
 			.addClass( 'updated-message disabled' )
+			.attr( 'aria-label', wp.updates.l10n.themeInstalledLabel.replace( '%s', response.themeName ) )
 			.text( wp.updates.l10n.installed );
 
 		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
@@ -1045,6 +1052,7 @@
 					.attr( 'href', response.activateUrl )
 					.removeClass( 'theme-install updated-message disabled' )
 					.addClass( 'activate' )
+					.attr( 'aria-label', wp.updates.l10n.activateThemeLabel.replace( '%s', response.themeName ) )
 					.text( wp.updates.l10n.activateTheme );
 			}
 
@@ -1098,7 +1106,7 @@
 
 		$button
 			.removeClass( 'updating-message' )
-			.attr( 'aria-label', wp.updates.l10n.installFailedLabel.replace( '%s', $card.find( '.theme-name' ).text() ) )
+			.attr( 'aria-label', wp.updates.l10n.themeInstallFailedLabel.replace( '%s', $button.data( 'name' ) ) )
 			.text( wp.updates.l10n.installFailedShort );
 
 		wp.a11y.speak( errorMessage, 'assertive' );
@@ -1584,7 +1592,8 @@
 	$( function() {
 		var $pluginFilter    = $( '#plugin-filter' ),
 			$bulkActionForm  = $( '#bulk-action-form' ),
-			$filesystemModal = $( '#request-filesystem-credentials-dialog' );
+			$filesystemModal = $( '#request-filesystem-credentials-dialog' ),
+			$pluginSearch    = $( '.plugins-php .wp-filter-search' );
 
 		/*
 		 * Whether a user needs to submit filesystem credentials.
@@ -1972,7 +1981,7 @@
 		 *
 		 * @since 4.6.0
 		 */
-		$( 'input.wp-filter-search, .wp-filter input[name="s"]' ).on( 'keyup search', _.debounce( function() {
+		$( '.plugin-install-php .wp-filter-search' ).on( 'keyup search', _.debounce( function() {
 			var $form = $( '#plugin-filter' ).empty(),
 				data  = _.extend( {
 					_ajax_nonce: wp.updates.ajaxNonce,
@@ -1987,7 +1996,9 @@
 				wp.updates.searchTerm = data.s;
 			}
 
-			history.pushState( null, '', location.href.split( '?' )[0] + '?' + $.param( _.omit( data, '_ajax_nonce' ) ) );
+			if ( history.pushState ) {
+				history.pushState( null, '', location.href.split( '?' )[ 0 ] + '?' + $.param( _.omit( data, '_ajax_nonce' ) ) );
+			}
 
 			if ( 'undefined' !== typeof wp.updates.searchRequest ) {
 				wp.updates.searchRequest.abort();
@@ -2001,17 +2012,26 @@
 			} );
 		}, 500 ) );
 
+		if ( $pluginSearch.length > 0 ) {
+			$pluginSearch.attr( 'aria-describedby', 'live-search-desc' );
+		}
+
 		/**
 		 * Handles changes to the plugin search box on the Installed Plugins screen,
 		 * searching the plugin list dynamically.
 		 *
 		 * @since 4.6.0
 		 */
-		$( '#plugin-search-input' ).on( 'keyup search', _.debounce( function() {
+		$pluginSearch.on( 'keyup input', _.debounce( function( event ) {
 			var data = {
 				_ajax_nonce: wp.updates.ajaxNonce,
-				s:           $( '<p />' ).html( $( this ).val() ).text()
+				s:           event.target.value
 			};
+
+			// Clear on escape.
+			if ( 'keyup' === event.type && 27 === event.which ) {
+				event.target.value = '';
+			}
 
 			if ( wp.updates.searchTerm === data.s ) {
 				return;
@@ -2019,7 +2039,9 @@
 				wp.updates.searchTerm = data.s;
 			}
 
-			history.pushState( null, '', location.href.split( '?' )[0] + '?s=' + data.s );
+			if ( history.pushState ) {
+				history.pushState( null, '', location.href.split( '?' )[ 0 ] + '?s=' + data.s );
+			}
 
 			if ( 'undefined' !== typeof wp.updates.searchRequest ) {
 				wp.updates.searchRequest.abort();
@@ -2045,6 +2067,12 @@
 				$( 'body' ).removeClass( 'loading-content' );
 				$bulkActionForm.append( response.items );
 				delete wp.updates.searchRequest;
+
+				if ( 0 === response.count ) {
+					wp.a11y.speak( wp.updates.l10n.noPluginsFound );
+				} else {
+					wp.a11y.speak( wp.updates.l10n.pluginsFound.replace( '%d', response.count ) );
+				}
 			} );
 		}, 500 ) );
 

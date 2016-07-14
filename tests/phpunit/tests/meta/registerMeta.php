@@ -32,6 +32,42 @@ class Tests_Meta_Register_Meta extends WP_UnitTestCase {
 		return $meta_key . ' new sanitized';
 	}
 
+	public function _old_auth_meta_cb( $allowed, $meta_key, $post_id, $user_id, $cap, $caps ) {
+		return $allowed;
+	}
+
+	public function _new_auth_meta_cb( $allowed, $meta_key, $post_id, $user_id, $cap, $caps ) {
+		return $allowed;
+	}
+
+	public function test_register_meta_back_compat_with_auth_callback_and_no_sanitize_callback_has_old_style_auth_filter() {
+		register_meta( 'post', 'flight_number', null, array( $this, '_old_auth_meta_cb' ) );
+		$has_filter = has_filter( 'auth_post_meta_flight_number', array( $this, '_old_auth_meta_cb' ) );
+		remove_filter( 'auth_post_meta_flight_number', array( $this, '_old_auth_meta_cb' ) );
+
+		// The filter should have been added with a priority of 10.
+		$this->assertEquals( 10, $has_filter );
+	}
+
+	public function test_register_meta_back_compat_with_sanitize_callback_and_no_auth_callback_has_old_style_sanitize_filter() {
+		register_meta( 'post', 'flight_number', array( $this, '_old_sanitize_meta_cb' ) );
+		$has_filter = has_filter( 'sanitize_post_meta_flight_number', array( $this, '_old_sanitize_meta_cb' ) );
+		remove_filter( 'sanitize_post_meta_flight_number', array( $this, '_old_sanitize_meta_cb' ) );
+
+		$this->assertEquals( 10, $has_filter );
+	}
+
+	public function test_register_meta_back_compat_with_auth_and_sanitize_callback_has_old_style_filters() {
+		register_meta( 'post', 'flight_number', array( $this, '_old_sanitize_meta_cb' ), array( $this, '_old_auth_meta_cb' ) );
+		$has_filters = array();
+		$has_filters['auth'] = has_filter( 'auth_post_meta_flight_number', array( $this, '_old_auth_meta_cb' ) );
+		$has_filters['sanitize'] = has_filter( 'sanitize_post_meta_flight_number', array( $this, '_old_sanitize_meta_cb' ) );
+		remove_filter( 'auth_post_meta_flight_number', array( $this, '_old_auth_meta_cb' ) );
+		remove_filter( 'sanitize_post_meta_flight_number', array( $this, '_old_sanitize_meta_cb' ) );
+
+		$this->assertEquals( array( 'auth' => 10, 'sanitize' => 10 ), $has_filters );
+	}
+
 	public function test_register_meta_with_valid_object_type_and_object_subtype_returns_true() {
 		$result = register_meta( 'post', 'flight_number', array( 'object_subtype' => 'post' ) );
 		unregister_meta_key( 'post', 'post', 'flight_number' );
@@ -200,9 +236,6 @@ class Tests_Meta_Register_Meta extends WP_UnitTestCase {
 		$result = register_meta( 'post', 'flight_number', array( 'object_subtype' => 'post', 'sanitize_callback' => array( $this, '_new_sanitize_meta_cb' ) ) );
 		unregister_meta_key( 'post', 'post', 'flight_number' );
 
-		remove_filter( 'sanitize_post_post_meta_flight_number', array( $this, '_new_sanitize_meta_cb') );
-		remove_filter( 'auth_post_post_meta_flight_number', '__return_true');
-
 		$this->assertTrue( $result );
 	}
 
@@ -212,10 +245,25 @@ class Tests_Meta_Register_Meta extends WP_UnitTestCase {
 
 		unregister_meta_key( 'post', 'post', 'new_sanitized_key' );
 
-		remove_filter( 'sanitize_post_post_meta_new_sanitized_key', array( $this, '_new_sanitize_meta_cb') );
-		remove_filter( 'auth_post_post_meta_new_sanitized_key', '__return_true');
-
 		$this->assertEquals( 'new_sanitized_key new sanitized', $meta );
+	}
+
+	public function test_register_meta_unregistered_meta_key_removes_sanitize_filter() {
+		register_meta( 'post', 'new_sanitized_key', array( 'object_subtype' => 'post', 'sanitize_callback' => array( $this, '_new_sanitize_meta_cb' ) ) );
+		unregister_meta_key( 'post', 'post', 'new_sanitized_key' );
+
+		$has_filter = has_filter( 'sanitize_post_post_meta_new_sanitized_key', array( $this, '_new_sanitize_meta_cb' ) );
+
+		$this->assertFalse( $has_filter );
+	}
+
+	public function test_register_meta_unregistered_meta_key_removes_auth_filter() {
+		register_meta( 'post', 'new_auth_key', array( 'object_subtype' => 'post', 'auth_callback' => array( $this, '_new_auth_meta_cb' ) ) );
+		unregister_meta_key( 'post', 'post', 'new_auth_key' );
+
+		$has_filter = has_filter( 'auth_post_post_meta_new_auth_key', array( $this, '_new_auth_meta_cb' ) );
+
+		$this->assertFalse( $has_filter );
 	}
 
 	public function test_unregister_meta_key_clears_key_from_wp_meta_keys() {

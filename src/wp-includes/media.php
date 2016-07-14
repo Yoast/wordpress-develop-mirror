@@ -1142,7 +1142,7 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	 * @param array  $size_array    Array of width and height values in pixels (in that order).
 	 * @param string $image_src     The 'src' of the image.
 	 * @param array  $image_meta    The image meta data as returned by 'wp_get_attachment_metadata()'.
- 	 * @param int    $attachment_id Image attachment ID or 0.
+	 * @param int    $attachment_id Image attachment ID or 0.
 	 */
 	$sources = apply_filters( 'wp_calculate_image_srcset', $sources, $size_array, $image_src, $image_meta, $attachment_id );
 
@@ -1154,7 +1154,7 @@ function wp_calculate_image_srcset( $size_array, $image_src, $image_meta, $attac
 	$srcset = '';
 
 	foreach ( $sources as $source ) {
-		$srcset .= $source['url'] . ' ' . $source['value'] . $source['descriptor'] . ', ';
+		$srcset .= str_replace( ' ', '%20', $source['url'] ) . ' ' . $source['value'] . $source['descriptor'] . ', ';
 	}
 
 	return rtrim( $srcset, ', ' );
@@ -2774,26 +2774,6 @@ function wp_expand_dimensions( $example_width, $example_height, $max_width, $max
 	$max_height     = (int) $max_height;
 
 	return wp_constrain_dimensions( $example_width * 1000000, $example_height * 1000000, $max_width, $max_height );
-}
-
-/**
- * Converts a shorthand byte value to an integer byte value.
- *
- * @since 2.3.0
- *
- * @param string $size A shorthand byte value.
- * @return int An integer byte value.
- */
-function wp_convert_hr_to_bytes( $size ) {
-	$size  = strtolower( $size );
-	$bytes = (int) $size;
-	if ( strpos( $size, 'k' ) !== false )
-		$bytes = intval( $size ) * KB_IN_BYTES;
-	elseif ( strpos( $size, 'm' ) !== false )
-		$bytes = intval($size) * MB_IN_BYTES;
-	elseif ( strpos( $size, 'g' ) !== false )
-		$bytes = intval( $size ) * GB_IN_BYTES;
-	return $bytes;
 }
 
 /**

@@ -32,7 +32,7 @@ function wp_ajax_nopriv_heartbeat() {
 		$data = wp_unslash( (array) $_POST['data'] );
 
 		/**
-		 * Filters Heartbeat AJAX response in no-privilege environments.
+		 * Filters Heartbeat Ajax response in no-privilege environments.
 		 *
 		 * @since 3.6.0
 		 *
@@ -44,7 +44,7 @@ function wp_ajax_nopriv_heartbeat() {
 	}
 
 	/**
-	 * Filters Heartbeat AJAX response when no data is passed.
+	 * Filters Heartbeat Ajax response when no data is passed.
 	 *
 	 * @since 3.6.0
 	 *
@@ -132,7 +132,7 @@ function wp_ajax_ajax_tag_search() {
 	$s = trim( $s );
 
 	/**
-	 * Filters the minimum number of characters required to fire a tag search via AJAX.
+	 * Filters the minimum number of characters required to fire a tag search via Ajax.
 	 *
 	 * @since 4.0.0
 	 *
@@ -335,7 +335,7 @@ function wp_ajax_logged_in() {
 /**
  * Sends back current comment total and new page links if they need to be updated.
  *
- * Contrary to normal success AJAX response ("1"), die with time() on success.
+ * Contrary to normal success Ajax response ("1"), die with time() on success.
  *
  * @access private
  * @since 2.7.0
@@ -2164,7 +2164,7 @@ function wp_ajax_set_post_thumbnail() {
 }
 
 /**
- * AJAX handler for setting the featured image for an attachment.
+ * Ajax handler for setting the featured image for an attachment.
  *
  * @since 4.0.0
  *
@@ -2391,7 +2391,7 @@ function wp_ajax_query_attachments() {
 		$query['post_status'] .= ',private';
 
 	/**
-	 * Filters the arguments passed to WP_Query during an AJAX
+	 * Filters the arguments passed to WP_Query during an Ajax
 	 * call for querying attachments.
 	 *
 	 * @since 3.7.0
@@ -2908,7 +2908,7 @@ function wp_ajax_query_themes() {
 }
 
 /**
- * Apply [embed] AJAX handlers to a string.
+ * Apply [embed] Ajax handlers to a string.
  *
  * @since 4.0.0
  *
@@ -3069,7 +3069,7 @@ function wp_ajax_parse_media_shortcode() {
 }
 
 /**
- * AJAX handler for destroying multiple open sessions for a user.
+ * Ajax handler for destroying multiple open sessions for a user.
  *
  * @since 4.1.0
  */
@@ -3104,7 +3104,7 @@ function wp_ajax_destroy_sessions() {
 }
 
 /**
- * AJAX handler for saving a post from Press This.
+ * Ajax handler for saving a post from Press This.
  *
  * @since 4.2.0
  *
@@ -3119,7 +3119,7 @@ function wp_ajax_press_this_save_post() {
 }
 
 /**
- * AJAX handler for creating new category from Press This.
+ * Ajax handler for creating new category from Press This.
  *
  * @since 4.2.0
  *
@@ -3134,7 +3134,7 @@ function wp_ajax_press_this_add_category() {
 }
 
 /**
- * AJAX handler for cropping an image.
+ * Ajax handler for cropping an image.
  *
  * @since 4.3.0
  *
@@ -3278,9 +3278,11 @@ function wp_ajax_save_wporg_username() {
 }
 
 /**
- * AJAX handler for installing a theme.
+ * Ajax handler for installing a theme.
  *
  * @since 4.6.0
+ *
+ * @see Theme_Upgrader
  */
 function wp_ajax_install_theme() {
 	check_ajax_referer( 'updates' );
@@ -3342,6 +3344,8 @@ function wp_ajax_install_theme() {
 		wp_send_json_error( $status );
 	}
 
+	$status['themeName'] = wp_get_theme( $slug )->get( 'Name' );
+
 	if ( current_user_can( 'switch_themes' ) ) {
 		if ( is_multisite() ) {
 			$status['activateUrl'] = add_query_arg( array(
@@ -3372,7 +3376,7 @@ function wp_ajax_install_theme() {
 }
 
 /**
- * AJAX handler for updating a theme.
+ * Ajax handler for updating a theme.
  *
  * @since 4.6.0
  *
@@ -3453,9 +3457,11 @@ function wp_ajax_update_theme() {
 }
 
 /**
- * AJAX handler for deleting a theme.
+ * Ajax handler for deleting a theme.
  *
  * @since 4.6.0
+ *
+ * @see delete_theme()
  */
 function wp_ajax_delete_theme() {
 	check_ajax_referer( 'updates' );
@@ -3518,9 +3524,11 @@ function wp_ajax_delete_theme() {
 }
 
 /**
- * AJAX handler for installing a plugin.
+ * Ajax handler for installing a plugin.
  *
  * @since 4.6.0
+ *
+ * @see Plugin_Upgrader
  */
 function wp_ajax_install_plugin() {
 	check_ajax_referer( 'updates' );
@@ -3602,7 +3610,7 @@ function wp_ajax_install_plugin() {
 }
 
 /**
- * AJAX handler for updating a plugin.
+ * Ajax handler for updating a plugin.
  *
  * @since 4.2.0
  *
@@ -3704,9 +3712,11 @@ function wp_ajax_update_plugin() {
 }
 
 /**
- * AJAX handler for deleting a plugin.
+ * Ajax handler for deleting a plugin.
  *
  * @since 4.6.0
+ *
+ * @see delete_plugins()
  */
 function wp_ajax_delete_plugin() {
 	check_ajax_referer( 'updates' );
@@ -3767,7 +3777,7 @@ function wp_ajax_delete_plugin() {
 }
 
 /**
- * AJAX handler for searching plugins.
+ * Ajax handler for searching plugins.
  *
  * @since 4.6.0
  *
@@ -3802,13 +3812,14 @@ function wp_ajax_search_plugins() {
 
 	ob_start();
 	$wp_list_table->display();
+	$status['count'] = count( $wp_list_table->items );
 	$status['items'] = ob_get_clean();
 
 	wp_send_json_success( $status );
 }
 
 /**
- * AJAX handler for searching plugins to install.
+ * Ajax handler for searching plugins to install.
  *
  * @since 4.6.0
  *
@@ -3846,7 +3857,9 @@ function wp_ajax_search_install_plugins() {
 }
 
 /**
- * Ajax handler for testing if an URL exists. Used in the editor.
+ * Ajax handler for testing if a URL exists.
+ *
+ * Used in the editor.
  *
  * @since 4.6.0
  */

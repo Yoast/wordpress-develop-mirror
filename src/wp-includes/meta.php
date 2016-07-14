@@ -986,7 +986,8 @@ function sanitize_meta( $meta_key, $meta_value, $object_type, $object_subtype = 
  * Registers a meta key.
  *
  * @since 3.3.0
- * @since 4.6.0 Modified to support an array of data to attach to registered meta keys. Previous arguments for
+ * @since 4.6.0 {@link https://make.wordpress.org/core/2016/07/08/enhancing-register_meta-in-4-6/ Modified
+ *              to support an array of data to attach to registered meta keys}. Previous arguments for
  *              `$sanitize_callback` and `$auth_callback` have been folded into this array.
  *
  * @param string $object_type    Type of object this meta is registered to.
@@ -1031,6 +1032,7 @@ function register_meta( $object_type, $meta_key, $args, $deprecated = null ) {
 
 	// There used to be individual args for sanitize and auth callbacks
 	$has_old_sanitize_cb = false;
+	$has_old_auth_cb = false;
 
 	if ( is_callable( $args ) ) {
 		$args = array(
@@ -1044,6 +1046,7 @@ function register_meta( $object_type, $meta_key, $args, $deprecated = null ) {
 
 	if ( is_callable( $deprecated ) ) {
 		$args['auth_callback'] = $deprecated;
+		$has_old_auth_cb = true;
 	}
 
 	$args = wp_parse_args( $args, $defaults );
@@ -1061,7 +1064,7 @@ function register_meta( $object_type, $meta_key, $args, $deprecated = null ) {
 	$args = apply_filters( 'register_meta_args', $args, $defaults, $object_type, $meta_key );
 
 	// Object subtype is required if using the args style of registration
-	if ( ! $has_old_sanitize_cb && empty( $args['object_subtype'] ) ) {
+	if ( ! $has_old_sanitize_cb && ! $has_old_auth_cb && empty( $args['object_subtype'] ) ) {
 		return new WP_Error( 'register_meta_failed', __( 'Meta must be registered against an object subtype.' ) );
 	}
 
@@ -1080,11 +1083,16 @@ function register_meta( $object_type, $meta_key, $args, $deprecated = null ) {
 		$object_subtype = $args['object_subtype'];
 	}
 
-	// Back-compat: old sanitize and auth callbacks applied to all of an object type
-	if ( $has_old_sanitize_cb ) {
+	// Back-compat: old sanitize and auth callbacks are applied to all of an object type.
+	if ( $has_old_sanitize_cb && is_callable( $args['sanitize_callback'] ) ) {
 		add_filter( "sanitize_{$object_type}_meta_{$meta_key}", $args['sanitize_callback'], 10, 4 );
+	}
+
+	if ( $has_old_auth_cb && is_callable( $args['auth_callback'] ) ) {
 		add_filter( "auth_{$object_type}_meta_{$meta_key}", $args['auth_callback'], 10, 6 );
-	} else {
+	}
+
+	if ( ! $has_old_auth_cb && ! $has_old_sanitize_cb) {
 		if ( is_callable( $args['sanitize_callback'] ) ) {
 			add_filter( "sanitize_{$object_type}_{$object_subtype}_meta_{$meta_key}", $args['sanitize_callback'], 10, 4 );
 		}
@@ -1159,6 +1167,16 @@ function unregister_meta_key( $object_type, $object_subtype, $meta_key ) {
 
 	if ( ! registered_meta_key_exists( $object_type, $object_subtype, $meta_key ) ) {
 		return new WP_Error( 'invalid_meta_key', __( 'Invalid meta key' ) );
+	}
+
+	$args = $wp_meta_keys[ $object_type ][ $object_subtype ][ $meta_key ];
+
+	if ( isset( $args['sanitize_callback'] ) && is_callable( $args['sanitize_callback'] ) ) {
+		remove_filter( "sanitize_{$object_type}_{$object_subtype}_meta_{$meta_key}", $args['sanitize_callback'] );
+	}
+
+	if ( isset( $args['auth_callback'] ) && is_callable( $args['auth_callback'] ) ) {
+		remove_filter( "auth_{$object_type}_{$object_subtype}_meta_{$meta_key}", $args['auth_callback'] );
 	}
 
 	unset( $wp_meta_keys[ $object_type ][ $object_subtype ][ $meta_key ] );
