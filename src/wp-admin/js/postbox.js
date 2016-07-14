@@ -126,6 +126,10 @@ var postboxes;
 
 				postboxes.save_state( page );
 				postboxes._mark_area();
+
+				/**
+				 * @see postboxes.handle_click
+				 */
 				$document.trigger( 'postbox-toggled', $postbox );
 			});
 
