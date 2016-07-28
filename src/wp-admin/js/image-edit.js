@@ -1,12 +1,45 @@
 /* global imageEditL10n, ajaxurl, confirm */
+/**
+ * The long description of the file's purpose goes here and
+ * describes in detail the complete functionality of the file.
+ * This description can span several lines and ends with a period.
+ *
+ * @summary   A short description of the file.
+ *
+ * @since     Unknown
+ * @requires  jQuery.js
+ * @class     imageEdit
+ * @classdesc This is a description of the MyClass class.
+ */
 
+/**
+ *
+ *
+ * @namespace imageEdit
+ *
+ *
+ *
+ */
 (function($) {
-var imageEdit = window.imageEdit = {
+
+	/**
+	 *
+	 *
+	 *
+	 */
+	var imageEdit = window.imageEdit = {
 	iasapi : {},
 	hold : {},
 	postid : '',
 	_view : false,
 
+
+	/**
+	 * Converts a value to an integer.
+	 * @param {float} f The float value should be converted.
+	 * @return {number} The integer representation from the float value.
+	 * @memberOf imageEdit
+	 */
 	intval : function(f) {
 		/*
 		 * Bitwise OR operator: one of the obscure ways to truncate floating point figures,
@@ -14,7 +47,14 @@ var imageEdit = window.imageEdit = {
 		 */
 		return f | 0;
 	},
-
+	/**
+	 * Adds the disabled attribute and class to a single form element or a fieldset.
+	 *
+	 * @param {HTMLElement} el The element that should be modified.
+	 * @param {bool|int} s The state for the element. If set to true the element is disabled,
+	 * else the element is enabled.
+	 * @memberOf imageEdit
+	 */
 	setDisabled : function( el, s ) {
 		/*
 		 * `el` can be a single form element or a fieldset. Before #28864, the disabled state on
@@ -29,6 +69,12 @@ var imageEdit = window.imageEdit = {
 		}
 	},
 
+	/**
+	 * Initializes the image editor.
+	 *
+	 * @param {int} postid The post id.
+	 * @memberOf imageEdit
+	 */
 	init : function(postid) {
 		var t = this, old = $('#image-editor-' + t.postid),
 			x = t.intval( $('#imgedit-x-' + postid).val() ),
@@ -48,10 +94,12 @@ var imageEdit = window.imageEdit = {
 		$('input[type="text"]', '#imgedit-panel-' + postid).keypress(function(e) {
 			var k = e.keyCode;
 
+			// The keys 37 till 40 are the arrow keys.
 			if ( 36 < k && k < 41 ) {
 				$(this).blur();
 			}
 
+			// The key 13 is the enter key.
 			if ( 13 === k ) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -60,6 +108,13 @@ var imageEdit = window.imageEdit = {
 		});
 	},
 
+	/**
+	 * Toggles the wait/load icon in the editor.
+	 *
+	 * @param {int} postid The post id.
+	 * @param {int} toggle Is 0 or 1, fades the icon in then 1 and out when 0.
+	 * @memberOf imageEdit
+	 */
 	toggleEditor : function(postid, toggle) {
 		var wait = $('#imgedit-wait-' + postid);
 
@@ -70,6 +125,13 @@ var imageEdit = window.imageEdit = {
 		}
 	},
 
+	/**
+	 * Shows or hides the image edit help box.
+	 *
+	 * @param {HTMLElement} el The element to create the help window in.
+	 * @return {boolean} Always returns false.
+	 * @memberOf imageEdit
+	 */
 	toggleHelp : function(el) {
 		var $el = $( el );
 		$el
@@ -79,10 +141,25 @@ var imageEdit = window.imageEdit = {
 		return false;
 	},
 
+	/**
+	 * Gets the value from the image edit target, this contains the image sizes where the (possible) changes have to be applied to.
+	 *
+	 * @param {int} postid The post id.
+	 * @return {null|string} The value from the imagedit-save-target input field when available, or 'full' when not available.
+	 */
 	getTarget : function(postid) {
 		return $('input[name="imgedit-target-' + postid + '"]:checked', '#imgedit-save-target-' + postid).val() || 'full';
 	},
 
+	/**
+	 * Recalculates the height or width for the image and keeps the original aspect ratio.
+	 * If the original image size is exceeded a red exclamation mark is shown.
+	 *
+	 * @param {int} postid The current post id.
+	 * @param {int} x  Is 0 when it applies the y-axis and 1 when applicable for the x-axis.
+	 * @param {HTMLElement} el Element.
+	 * @memberOf imageEdit
+	 */
 	scaleChanged : function( postid, x, el ) {
 		var w = $('#imgedit-scale-width-' + postid), h = $('#imgedit-scale-height-' + postid),
 		warn = $('#imgedit-scale-warn-' + postid), w1 = '', h1 = '';
@@ -105,7 +182,13 @@ var imageEdit = window.imageEdit = {
 			warn.css('visibility', 'hidden');
 		}
 	},
-
+	/**
+	 * Get the configured aspect ratio.
+	 *
+	 * @param {int} postid The post id.
+	 * @return {string} The aspect ratio.
+	 * @memberOf imageEdit
+	 */
 	getSelRatio : function(postid) {
 		var x = this.hold.w, y = this.hold.h,
 			X = this.intval( $('#imgedit-crop-width-' + postid).val() ),
@@ -122,6 +205,14 @@ var imageEdit = window.imageEdit = {
 		return '1:1';
 	},
 
+	/**
+	 * Gets the stored history and loops through it to remove the unneeded history steps.
+	 * The history consist of (edit)actions performed on the image.
+	 *
+	 * @param {int} postid The post id.
+	 * @param {int} setSize 0 or 1, todo check what this does.
+	 * @return {string} JSON string containing the history.
+	 */
 	filterHistory : function(postid, setSize) {
 		// apply undo state to history
 		var history = $('#imgedit-history-' + postid).val(), pop, n, o, i, op = [];
