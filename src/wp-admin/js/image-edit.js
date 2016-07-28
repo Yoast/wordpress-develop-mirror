@@ -212,6 +212,7 @@
 	 * @param {int} postid The post id.
 	 * @param {int} setSize 0 or 1, todo check what this does.
 	 * @return {string} JSON string containing the history.
+	 * @memberOf imageEdit
 	 */
 	filterHistory : function(postid, setSize) {
 		// apply undo state to history
@@ -259,7 +260,13 @@
 		}
 		return '';
 	},
-
+	/**
+	 *
+	 * @param postid
+	 * @param nonce
+	 * @param callback
+	 * @memberOf imageEdit
+	 */
 	refreshEditor : function(postid, nonce, callback) {
 		var t = this, data, img;
 
@@ -321,7 +328,15 @@
 			})
 			.attr('src', ajaxurl + '?' + $.param(data));
 	},
-
+	/**
+	 *
+	 *
+	 * @param postid
+	 * @param nonce
+	 * @param action
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	action : function(postid, nonce, action) {
 		var t = this, data, w, h, fw, fh;
 
@@ -373,6 +388,14 @@
 		});
 	},
 
+	/**
+	 *
+	 *
+	 * @param postid
+	 * @param nonce
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	save : function(postid, nonce) {
 		var data,
 			target = this.getTarget(postid),
@@ -423,6 +446,14 @@
 		});
 	},
 
+	/**
+	 *
+	 * @param postid
+	 * @param nonce
+	 * @param view
+	 * @return {*}
+	 * @memberOf imageEdit
+	 */
 	open : function( postid, nonce, view ) {
 		this._view = view;
 
@@ -467,6 +498,11 @@
 		return dfd;
 	},
 
+	/**
+	 *
+	 * @param postid
+	 * @memberOf imageEdit
+	 */
 	imgLoaded : function(postid) {
 		var img = $('#image-preview-' + postid), parent = $('#imgedit-crop-' + postid);
 
@@ -477,6 +513,14 @@
 		$( '.imgedit-wrap .imgedit-help-toggle' ).eq( 0 ).focus();
 	},
 
+	/**
+	 *
+	 *
+	 * @param postid
+	 * @param image
+	 * @param parent
+	 * @memberOf imageEdit
+	 */
 	initCrop : function(postid, image, parent) {
 		var t = this,
 			selW = $('#imgedit-sel-width-' + postid),
@@ -529,6 +573,14 @@
 		});
 	},
 
+	/**
+	 *
+	 *
+	 * @param postid
+	 * @param c
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	setCropSelection : function(postid, c) {
 		var sel;
 
@@ -548,6 +600,15 @@
 		$('#imgedit-selection-' + postid).val( JSON.stringify(sel) );
 	},
 
+
+	/**
+	 *
+	 *
+	 * @param postid
+	 * @param warn
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	close : function(postid, warn) {
 		warn = warn || false;
 
@@ -578,6 +639,12 @@
 
 	},
 
+	/**
+	 *
+	 * @param postid
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	notsaved : function(postid) {
 		var h = $('#imgedit-history-' + postid).val(),
 			history = ( h !== '' ) ? JSON.parse(h) : [],
@@ -592,6 +659,13 @@
 		return false;
 	},
 
+	/**
+	 *
+	 * @param op
+	 * @param postid
+	 * @param nonce
+	 * @memberOf imageEdit
+	 */
 	addStep : function(op, postid, nonce) {
 		var t = this, elem = $('#imgedit-history-' + postid),
 			history = ( elem.val() !== '' ) ? JSON.parse( elem.val() ) : [],
@@ -613,6 +687,15 @@
 		});
 	},
 
+	/**
+	 *
+	 * @param angle
+	 * @param postid
+	 * @param nonce
+	 * @param t
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	rotate : function(angle, postid, nonce, t) {
 		if ( $(t).hasClass('disabled') ) {
 			return false;
@@ -621,6 +704,15 @@
 		this.addStep({ 'r': { 'r': angle, 'fw': this.hold.h, 'fh': this.hold.w }}, postid, nonce);
 	},
 
+	/**
+	 *
+	 * @param axis
+	 * @param postid
+	 * @param nonce
+	 * @param t
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	flip : function (axis, postid, nonce, t) {
 		if ( $(t).hasClass('disabled') ) {
 			return false;
@@ -628,7 +720,14 @@
 
 		this.addStep({ 'f': { 'f': axis, 'fw': this.hold.w, 'fh': this.hold.h }}, postid, nonce);
 	},
-
+	/**
+	 *
+	 * @param postid
+	 * @param nonce
+	 * @param t
+	 * @return {boolean}
+	 * @memberOf imageEdit
+	 */
 	crop : function (postid, nonce, t) {
 		var sel = $('#imgedit-selection-' + postid).val(),
 			w = this.intval( $('#imgedit-sel-width-' + postid).val() ),
@@ -645,7 +744,12 @@
 			this.addStep({ 'c': sel }, postid, nonce);
 		}
 	},
-
+	/**
+	 *
+	 * @param postid
+	 * @param nonce
+	 * @memberOf imageEdit
+	 */
 	undo : function (postid, nonce) {
 		var t = this, button = $('#image-undo-' + postid), elem = $('#imgedit-undone-' + postid),
 			pop = t.intval( elem.val() ) + 1;
