@@ -1,13 +1,36 @@
-/* global tinymce, QTags */
-// send html to the post editor
+/* global wpActiveEditor, tinymce, QTags */
+
+/**
+ * Updates the ThickBox anchor href and the ThickBox's own properties in order to set the size and position on every resize event.
+ * Also adds a function to send HTML or text to the currently active editor.
+ *
+ * @summary Makes sure the ThickBox dimensions are properly set and adds functionality to pass HTML to the editor.
+ *
+ * @since 2.3.3
+ *
+ * @requires jQuery
+ */
+
 
 var wpActiveEditor, send_to_editor;
 
+/**
+ * @summary Sends the HTML passed in the parameters to TinyMCE.
+ *
+ * @since 2.3.3
+ *
+ * @global {tinymce} tinymce An instance of the TinyMCE editor.
+ * @global {QTags} QTags An instance of QTags.
+ *
+ * @param {string} html The HTML/text to be sent to the editor.
+ * @return {boolean} Returns false when both TinyMCE and QTags instances are unavailable. This means that the HTML was not sent to the editor.
+ */
 send_to_editor = function( html ) {
 	var editor,
 		hasTinymce = typeof tinymce !== 'undefined',
 		hasQuicktags = typeof QTags !== 'undefined';
 
+	// If no active editor is set, try to set it.
 	if ( ! wpActiveEditor ) {
 		if ( hasTinymce && tinymce.activeEditor ) {
 			editor = tinymce.activeEditor;
@@ -19,6 +42,7 @@ send_to_editor = function( html ) {
 		editor = tinymce.get( wpActiveEditor );
 	}
 
+	// If the editor is set and not hidden, insert the HTML into the content of the editor.
 	if ( editor && ! editor.isHidden() ) {
 		editor.execCommand( 'mceInsertContent', false, html );
 	} else if ( hasQuicktags ) {
@@ -27,15 +51,22 @@ send_to_editor = function( html ) {
 		document.getElementById( wpActiveEditor ).value += html;
 	}
 
-	// If the old thickbox remove function exists, call it
+	// If the old thickbox remove function exists, call it.
 	if ( window.tb_remove ) {
 		try { window.tb_remove(); } catch( e ) {}
 	}
 };
 
-// thickbox settings
+// ThickBox positioning.
 var tb_position;
 (function($) {
+	/**
+	 * @summary Recalculates and applies the new ThickBox position based on the current window size.
+	 *
+	 * @since 2.6.0
+	 *
+	 * @return {HTMLElements[]} Array containing all the found ThickBox anchors.
+	 */
 	tb_position = function() {
 		var tbWindow = $('#TB_window'),
 			width = $(window).width(),
@@ -55,6 +86,11 @@ var tb_position;
 				tbWindow.css({'top': 20 + adminbar_height + 'px', 'margin-top': '0'});
 		}
 
+		/**
+		 * @summary Removes any width and height parameters from the href of any anchor with the ThickBox class and recalculates the new height and width values.
+		 *
+		 * @since 2.6.0
+		 */
 		return $('a.thickbox').each( function() {
 			var href = $(this).attr('href');
 			if ( ! href ) return;
@@ -64,6 +100,9 @@ var tb_position;
 		});
 	};
 
+	/**
+	 * Recalculates the ThickBox position on every window resize.
+	 */
 	$(window).resize(function(){ tb_position(); });
 
 })(jQuery);
