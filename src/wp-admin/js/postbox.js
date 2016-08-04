@@ -37,6 +37,8 @@ var postboxes;
 		 * @since 4.4.0
 		 * @memberof postboxes
 		 * @fires postboxes#postbox-toggled
+		 *
+		 * @returns {void}
 		 */
 		handle_click : function () {
 			var $el = $( this ),
@@ -95,6 +97,7 @@ var postboxes;
 		 * @param {Object} [args]
 		 * @param {Function} args.pbshow A callback that is called when a postbox opens.
 		 * @param {Function} args.pbhide A callback that is called when a postbox closes.
+		 * @returns {void}
 		 */
 		add_postbox_toggles : function (page, args) {
 			var $handles = $( '.postbox .hndle, .postbox .handlediv' );
@@ -118,6 +121,8 @@ var postboxes;
 			 * the postbox will be hidden.
 			 *
 			 * @since 3.2.0
+			 *
+			 * @returns {void}
 			 */
 			$( '.postbox a.dismiss' ).on( 'click.postboxes', function( e ) {
 				var hide_id = $(this).parents('.postbox').attr('id') + '-hide';
@@ -133,6 +138,8 @@ var postboxes;
 			 *
 			 * @since 2.7.0
 			 * @fires postboxes#postbox-toggled
+			 *
+			 * @returns {void}
 			 */
 			$('.hide-postbox-tog').bind('click.postboxes', function() {
 				var $el = $(this),
@@ -165,6 +172,8 @@ var postboxes;
 			 * @summary Changes the amount of columns based on the layout preferences.
 			 *
 			 * @since 2.8.0
+			 *
+			 * @returns {void}
 			 */
 			$('.columns-prefs input[type="radio"]').bind('click.postboxes', function(){
 				var n = parseInt($(this).val(), 10);
@@ -187,6 +196,8 @@ var postboxes;
 		 * @param {Function} args.pbshow A callback that is called when a postbox opens.
 		 * @param {Function} args.pbhide A callback that is called when a postbox
 		 *                               closes.
+		 *
+		 * @returns {void}
 		 */
 		init : function(page, args) {
 			var isMobile = $( document.body ).hasClass( 'mobile' ),
@@ -263,6 +274,7 @@ var postboxes;
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
+		 * @returns {void}
 		 */
 		save_state : function(page) {
 			var closed, hidden;
@@ -294,6 +306,7 @@ var postboxes;
 		 * @memberof postboxes
 		 *
 		 * @param {string} page The page we are currently on.
+		 * @returns {void}
 		 */
 		save_order : function(page) {
 			var postVars, page_columns = $('.columns-prefs input:checked').val() || 0;
@@ -322,6 +335,8 @@ var postboxes;
 		 * @since 3.3.0
 		 * @memberof postboxes
 		 * @access private
+		 *
+		 * @returns {void}
 		 */
 		_mark_area : function() {
 			var visible = $('div.postbox:visible').length, side = $('#post-body #side-sortables');
@@ -355,6 +370,7 @@ var postboxes;
 		 * @access private
 		 *
 		 * @param {number} n The amount of columns to divide the post edit page in.
+		 * @returns {void}
 		 */
 		_pb_edit : function(n) {
 			var el = $('.metabox-holder').get(0);
@@ -379,6 +395,8 @@ var postboxes;
 		 * @since 3.3.0
 		 * @memberof postboxes
 		 * @access private
+		 *
+		 * @returns {void}
 		 */
 		_pb_change : function() {
 			var check = $( 'label.columns-prefs-1 input[type="radio"]' );
