@@ -7,7 +7,7 @@
 	 *
 	 * @global
 	 * @returns {object} the switchEditor, wpautop, pre_wpautop, autop, removep functions.
-	 * @constructor
+	 * @class
 	 */
 	function SwitchEditors() {
 		var tinymce, $$,
