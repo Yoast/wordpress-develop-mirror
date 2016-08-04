@@ -1,4 +1,8 @@
 /* global inlineEditL10n, ajaxurl */
+/**
+ * This file is used on the term overview page to power quick-editing terms.
+ */
+
 window.wp = window.wp || {};
 
 /**
@@ -7,7 +11,8 @@ window.wp = window.wp || {};
  * @namespace inlineEditTax
  *
  * @property {string} type The type of inline edit we are currently on.
- * @property {string} what The type property with a hash prefixed and a dash suffixed.
+ * @property {string} what The type property with a hash prefixed and a dash
+ *                         suffixed.
  */
 var inlineEditTax;
 
@@ -16,10 +21,15 @@ var inlineEditTax;
 inlineEditTax = {
 
 	/**
-	 * Initializes the inline taxonomy editor, adds event handlers to be able to quick edit.
+	 * @summary Initializes the inline taxonomy editor.
+	 *
+	 * Adds event handlers to be able to quick edit.
+	 *
+	 * @since 2.7.0
 	 *
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
+	 * @returns {void}
 	 */
 	init : function() {
 		var t = this, row = $('#inline-edit');
@@ -33,7 +43,7 @@ inlineEditTax = {
 		});
 
 		/*
-		 * Prepare the edit row.
+		 * @summary Cancels inline editing when pressing escape inside the inline editor.
 		 *
 		 * @param {Object} e The keyup event that has been triggered.
 		 */
@@ -44,14 +54,23 @@ inlineEditTax = {
 			}
 		});
 
+		/**
+		 * @summary Cancels inline editing when clicking the cancel button.
+		 */
 		$( '.cancel', row ).click( function() {
 			return inlineEditTax.revert();
 		});
 
+		/**
+		 * @summary Saves the inline edits when clicking the save button.
+		 */
 		$( '.save', row ).click( function() {
 			return inlineEditTax.save(this);
 		});
 
+		/**
+		 * @summary Saves the inline edits when pressing enter inside the inline editor.
+		 */
 		$( 'input, select', row ).keydown( function( e ) {
 			// 13 = [enter]
 			if ( e.which === 13 ) {
@@ -59,6 +78,9 @@ inlineEditTax = {
 			}
 		});
 
+		/**
+		 * @summary Saves the inline edits on submitting the inline edit form.
+		 */
 		$( '#posts-filter input[type="submit"]' ).mousedown( function() {
 			t.revert();
 		});
@@ -67,10 +89,13 @@ inlineEditTax = {
 	/**
 	 * Toggles the quick edit based on if it is currently shown or hidden.
 	 *
+	 * @since 2.7.0
+	 *
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
 	 *
 	 * @param {HTMLElement} el An element within the table row or the table row itself that we want to quick edit.
+	 * @returns {void}
 	 */
 	toggle : function(el) {
 		var t = this;
@@ -80,6 +105,8 @@ inlineEditTax = {
 
 	/**
 	 * Shows the quick editor
+	 *
+	 * @since 2.7.0
 	 *
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
@@ -121,6 +148,8 @@ inlineEditTax = {
 
 	/**
 	 * Saves the quick edit data to the server and replaces the table row with the HTML retrieved from the server.
+	 *
+	 * @since 2.7.0
 	 *
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
@@ -205,8 +234,11 @@ inlineEditTax = {
 	/**
 	 * Closes the quick edit form.
 	 *
+	 * @since 2.7.0
+	 *
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
+	 * @returns {void}
 	 */
 	revert : function() {
 		var id = $('table.widefat tr.inline-editor').attr('id');
@@ -224,6 +256,8 @@ inlineEditTax = {
 	/**
 	 * Retrieves the ID of the term of the element inside the table row.
 	 *
+	 * @since 2.7.0
+	 *
 	 * @memberof inlineEditTax
 	 *
 	 * @param {HTMLElement} o An element within the table row or the table row itself.
@@ -236,8 +270,6 @@ inlineEditTax = {
 	}
 };
 
-$(document).ready(function(){
-	inlineEditTax.init();
-});
+$(document).ready(function(){inlineEditTax.init();});
 
 })( jQuery, window.wp );
