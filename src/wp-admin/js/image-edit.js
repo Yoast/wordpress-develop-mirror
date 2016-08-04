@@ -13,13 +13,8 @@
  */
 
 /**
- *
- *
- * @namespace imageEdit
- *
- *
- *
- */
+  * @namespace imageEdit
+  */
 (function($) {
 
 	/**
@@ -36,9 +31,13 @@
 
 	/**
 	 * Converts a value to an integer.
-	 * @param {float} f The float value should be converted.
-	 * @return {number} The integer representation from the float value.
+	 *
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {float} f The float value should be converted.
+	 *
+	 * @return {number} The integer representation from the float value.
 	 */
 	intval : function(f) {
 		/*
@@ -50,10 +49,14 @@
 	/**
 	 * Adds the disabled attribute and class to a single form element or a fieldset.
 	 *
-	 * @param {HTMLElement} el The element that should be modified.
-	 * @param {bool|int} s The state for the element. If set to true the element is disabled,
-	 * else the element is enabled.
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {HTMLElement} el The element that should be modified.
+	 * @param {bool|int}    s  The state for the element. If set to true the element is disabled,
+	 * else the element is enabled.
+	 *
+	 * @returns void
 	 */
 	setDisabled : function( el, s ) {
 		/*
@@ -72,8 +75,11 @@
 	/**
 	 * Initializes the image editor.
 	 *
-	 * @param {int} postid The post id.
 	 * @memberOf imageEdit
+	 *
+	 * @param {int} postid The post id.
+	 *
+	 * @returns void
 	 */
 	init : function(postid) {
 		var t = this, old = $('#image-editor-' + t.postid),
@@ -111,9 +117,13 @@
 	/**
 	 * Toggles the wait/load icon in the editor.
 	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
 	 * @param {int} postid The post id.
 	 * @param {int} toggle Is 0 or 1, fades the icon in then 1 and out when 0.
-	 * @memberOf imageEdit
+	 *
+	 * @returns void
 	 */
 	toggleEditor : function(postid, toggle) {
 		var wait = $('#imgedit-wait-' + postid);
@@ -128,9 +138,12 @@
 	/**
 	 * Shows or hides the image edit help box.
 	 *
-	 * @param {HTMLElement} el The element to create the help window in.
-	 * @return {boolean} Always returns false.
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {HTMLElement} el The element to create the help window in.
+	 *
+	 * @returns {boolean} Always returns false.
 	 */
 	toggleHelp : function(el) {
 		var $el = $( el );
@@ -144,8 +157,12 @@
 	/**
 	 * Gets the value from the image edit target, this contains the image sizes where the (possible) changes have to be applied to.
 	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
 	 * @param {int} postid The post id.
-	 * @return {null|string} The value from the imagedit-save-target input field when available, or 'full' when not available.
+	 *
+	 * @returns {null|string} The value from the imagedit-save-target input field when available, or 'full' when not available.
 	 */
 	getTarget : function(postid) {
 		return $('input[name="imgedit-target-' + postid + '"]:checked', '#imgedit-save-target-' + postid).val() || 'full';
@@ -155,10 +172,14 @@
 	 * Recalculates the height or width for the image and keeps the original aspect ratio.
 	 * If the original image size is exceeded a red exclamation mark is shown.
 	 *
-	 * @param {int} postid The current post id.
-	 * @param {int} x  Is 0 when it applies the y-axis and 1 when applicable for the x-axis.
-	 * @param {HTMLElement} el Element.
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int}         postid The current post id.
+	 * @param {int}         x      Is 0 when it applies the y-axis and 1 when applicable for the x-axis.
+	 * @param {HTMLElement} el     Element.
+	 *
+	 * @returns void
 	 */
 	scaleChanged : function( postid, x, el ) {
 		var w = $('#imgedit-scale-width-' + postid), h = $('#imgedit-scale-height-' + postid),
@@ -183,11 +204,13 @@
 		}
 	},
 	/**
-	 * Get the configured aspect ratio.
+	 * Gets the selected aspect ratio.
+	 *
+	 * @memberOf imageEdit
 	 *
 	 * @param {int} postid The post id.
-	 * @return {string} The aspect ratio.
-	 * @memberOf imageEdit
+	 *
+	 * @returns {string} The aspect ratio.
 	 */
 	getSelRatio : function(postid) {
 		var x = this.hold.w, y = this.hold.h,
@@ -206,19 +229,23 @@
 	},
 
 	/**
-	 * Gets the stored history and loops through it to remove the unneeded history steps.
+	 * Removes the last action from the image edit history
 	 * The history consist of (edit)actions performed on the image.
 	 *
-	 * @param {int} postid The post id.
-	 * @param {int} setSize 0 or 1, todo check what this does.
-	 * @return {string} JSON string containing the history.
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid  The post id.
+	 * @param {int} setSize 0 or 1, when 1 the image resets to its original size.
+	 *
+	 * @returns {string} JSON string containing the history or an empty string if no history exists.
 	 */
 	filterHistory : function(postid, setSize) {
-		// apply undo state to history
+		// Apply undo state to history.
 		var history = $('#imgedit-history-' + postid).val(), pop, n, o, i, op = [];
 
 		if ( history !== '' ) {
+			// Read the JSON string with the image edit history.
 			history = JSON.parse(history);
 			pop = this.intval( $('#imgedit-undone-' + postid).val() );
 			if ( pop > 0 ) {
@@ -228,6 +255,7 @@
 				}
 			}
 
+			// Reset size to it's original state.
 			if ( setSize ) {
 				if ( !history.length ) {
 					this.hold.w = this.hold.ow;
@@ -235,17 +263,21 @@
 					return '';
 				}
 
-				// restore
+				// Restore original 'o'.
 				o = history[history.length - 1];
+
+				// c = 'crop', r = 'rotate', f = 'flip'
 				o = o.c || o.r || o.f || false;
 
 				if ( o ) {
+					// fw = Full image width
 					this.hold.w = o.fw;
+					// fh = Full image height
 					this.hold.h = o.fh;
 				}
 			}
 
-			// filter the values
+			// Filter the last step/action from the history.
 			for ( n in history ) {
 				i = history[n];
 				if ( i.hasOwnProperty('c') ) {
@@ -261,11 +293,16 @@
 		return '';
 	},
 	/**
+	 * Binds the necessary events to the image. When the image source is reloaded the image will be reloaded.
 	 *
-	 * @param postid
-	 * @param nonce
-	 * @param callback
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int}      postid   The post id.
+	 * @param {string}   nonce    The nonce to verify the request.
+	 * @param {function} callback Function executed when the image is loaded.
+	 *
+	 * @returns void
 	 */
 	refreshEditor : function(postid, nonce, callback) {
 		var t = this, data, img;
@@ -286,6 +323,7 @@
 					t = imageEdit,
 					historyObj;
 
+				// Checks if there already is some image-edit history.
 				if ( '' !== event.data.history ) {
 					historyObj = JSON.parse( event.data.history );
 					// If last executed action in history is a crop action.
@@ -329,13 +367,15 @@
 			.attr('src', ajaxurl + '?' + $.param(data));
 	},
 	/**
+	 * Performs an image edit action.
 	 *
-	 *
-	 * @param postid
-	 * @param nonce
-	 * @param action
-	 * @return {boolean}
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param  {int}     postid The post id.
+	 * @param  {string}  nonce  The nonce to verify the request.
+	 * @param  {string}  action
+	 * @returns {boolean}
 	 */
 	action : function(postid, nonce, action) {
 		var t = this, data, w, h, fw, fh;
@@ -393,7 +433,7 @@
 	 *
 	 * @param postid
 	 * @param nonce
-	 * @return {boolean}
+	 * @returns {boolean}
 	 * @memberOf imageEdit
 	 */
 	save : function(postid, nonce) {
@@ -448,11 +488,15 @@
 
 	/**
 	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
 	 * @param postid
 	 * @param nonce
 	 * @param view
-	 * @return {*}
-	 * @memberOf imageEdit
+	 *
+	 * @returns {*}
 	 */
 	open : function( postid, nonce, view ) {
 		this._view = view;
@@ -500,8 +544,12 @@
 
 	/**
 	 *
-	 * @param postid
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 *
+	 * @returns void
 	 */
 	imgLoaded : function(postid) {
 		var img = $('#image-preview-' + postid), parent = $('#imgedit-crop-' + postid);
@@ -516,10 +564,14 @@
 	/**
 	 *
 	 *
-	 * @param postid
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
 	 * @param image
 	 * @param parent
-	 * @memberOf imageEdit
+	 *
+	 * @returns void
 	 */
 	initCrop : function(postid, image, parent) {
 		var t = this,
@@ -536,7 +588,7 @@
 			minHeight: 3,
 
 			onInit: function( img ) {
-				// Ensure that the imgareaselect wrapper elements are position:absolute
+				// Ensure that the imgAreaSelect wrapper elements are position:absolute
 				// (even if we're in a position:fixed modal)
 				$img = $( img );
 				$img.next().css( 'position', 'absolute' )
@@ -576,10 +628,13 @@
 	/**
 	 *
 	 *
-	 * @param postid
-	 * @param c
-	 * @return {boolean}
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 * @param c
+	 *
+	 * @returns {boolean}
 	 */
 	setCropSelection : function(postid, c) {
 		var sel;
@@ -604,10 +659,13 @@
 	/**
 	 *
 	 *
-	 * @param postid
-	 * @param warn
-	 * @return {boolean}
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 * @param warn
+	 *
+	 * @returns {boolean}
 	 */
 	close : function(postid, warn) {
 		warn = warn || false;
@@ -641,9 +699,13 @@
 
 	/**
 	 *
-	 * @param postid
-	 * @return {boolean}
+	 *
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 *
+	 * @returns {boolean}
 	 */
 	notsaved : function(postid) {
 		var h = $('#imgedit-history-' + postid).val(),
@@ -661,10 +723,15 @@
 
 	/**
 	 *
-	 * @param op
-	 * @param postid
-	 * @param nonce
+	 *
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param op
+	 * @param {int} postid The post id.
+	 * @param nonce
+	 *
+	 * @returns void
 	 */
 	addStep : function(op, postid, nonce) {
 		var t = this, elem = $('#imgedit-history-' + postid),
@@ -689,12 +756,16 @@
 
 	/**
 	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
 	 * @param angle
-	 * @param postid
+	 * @param {int} postid The post id.
 	 * @param nonce
 	 * @param t
-	 * @return {boolean}
-	 * @memberOf imageEdit
+	 *
+	 * @returns {boolean}
 	 */
 	rotate : function(angle, postid, nonce, t) {
 		if ( $(t).hasClass('disabled') ) {
@@ -706,12 +777,16 @@
 
 	/**
 	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
 	 * @param axis
-	 * @param postid
+	 * @param {int} postid The post id.
 	 * @param nonce
 	 * @param t
-	 * @return {boolean}
-	 * @memberOf imageEdit
+	 *
+	 * @returns {boolean}
 	 */
 	flip : function (axis, postid, nonce, t) {
 		if ( $(t).hasClass('disabled') ) {
@@ -722,11 +797,14 @@
 	},
 	/**
 	 *
-	 * @param postid
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
 	 * @param nonce
 	 * @param t
-	 * @return {boolean}
-	 * @memberOf imageEdit
+	 *
+	 * @returns {boolean}
 	 */
 	crop : function (postid, nonce, t) {
 		var sel = $('#imgedit-selection-' + postid).val(),
@@ -746,9 +824,13 @@
 	},
 	/**
 	 *
-	 * @param postid
-	 * @param nonce
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 * @param nonce
+	 *
+	 * @returns void
 	 */
 	undo : function (postid, nonce) {
 		var t = this, button = $('#image-undo-' + postid), elem = $('#imgedit-undone-' + postid),
@@ -771,7 +853,17 @@
 			}
 		});
 	},
-
+	/**
+	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 * @param nonce
+	 *
+	 * @returns void
+	 */
 	redo : function(postid, nonce) {
 		var t = this, button = $('#image-redo-' + postid), elem = $('#imgedit-undone-' + postid),
 			pop = t.intval( elem.val() ) - 1;
@@ -790,7 +882,17 @@
 			}
 		});
 	},
-
+	/**
+	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 * @param el
+	 *
+	 * @returns {boolean}
+	 */
 	setNumSelection : function( postid, el ) {
 		var sel, elX = $('#imgedit-sel-width-' + postid), elY = $('#imgedit-sel-height-' + postid),
 			x = this.intval( elX.val() ), y = this.intval( elY.val() ),
@@ -834,7 +936,16 @@
 			this.setCropSelection(postid, ias.getSelection());
 		}
 	},
-
+	/**
+	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param num
+	 *
+	 * @returns {*}
+	 */
 	round : function(num) {
 		var s;
 		num = Math.round(num);
@@ -853,7 +964,18 @@
 
 		return num;
 	},
-
+	/**
+	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int} postid The post id.
+	 * @param n
+	 * @param el
+	 *
+	 * @returns void
+	 */
 	setRatioSelection : function(postid, n, el) {
 		var sel, r, x = this.intval( $('#imgedit-crop-width-' + postid).val() ),
 			y = this.intval( $('#imgedit-crop-height-' + postid).val() ),
@@ -885,7 +1007,15 @@
 			}
 		}
 	},
-
+	/**
+	 *
+	 *
+	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param el
+	 * @returns {boolean}
+	 */
 	validateNumeric: function( el ) {
 		if ( ! this.intval( $( el ).val() ) ) {
 			$( el ).val( '' );
