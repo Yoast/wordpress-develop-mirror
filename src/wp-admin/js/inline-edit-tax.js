@@ -94,7 +94,8 @@ inlineEditTax = {
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
 	 *
-	 * @param {HTMLElement} el An element within the table row or the table row itself that we want to quick edit.
+	 * @param {HTMLElement} el An element within the table row or the table row
+	 *                         itself that we want to quick edit.
 	 * @returns {void}
 	 */
 	toggle : function(el) {
@@ -111,7 +112,8 @@ inlineEditTax = {
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
 	 *
-	 * @param {string|HTMLElement} id The ID of the term we want to quick edit or an element within the table row or the
+	 * @param {string|HTMLElement} id The ID of the term we want to quick edit or an
+	 *                                element within the table row or the
 	 * table row itself.
 	 * @returns {boolean} Always returns false.
 	 */
@@ -147,14 +149,18 @@ inlineEditTax = {
 	},
 
 	/**
-	 * Saves the quick edit data to the server and replaces the table row with the HTML retrieved from the server.
+	 * @summary Saves the quick edit data.
+	 *
+	 * Saves the quick edit data to the server and replaces the table row with the
+	 * HTML retrieved from the server.
 	 *
 	 * @since 2.7.0
 	 *
 	 * @this inlineEditTax
 	 * @memberof inlineEditTax
 	 *
-	 * @param {string|HTMLElement} id The ID of the term we want to quick edit or an element within the table row or the
+	 * @param {string|HTMLElement} id The ID of the term we want to quick edit or an
+	 *                                element within the table row or the
 	 * table row itself.
 	 * @returns {boolean} Always returns false.
 	 */
@@ -181,7 +187,10 @@ inlineEditTax = {
 		// Do the ajax request to save the data to the server.
 		$.post( ajaxurl, params,
 			/**
-			 * Handles the response from the server, replaces the table row with the response from the server.
+			 * @summary Handles the response from the server.
+			 *
+			 * Handles the response from the server, replaces the table row with the response
+			 * from the server.
 			 *
 			 * @param {string} r The string with which to replace the table row.
 			 */
@@ -217,7 +226,10 @@ inlineEditTax = {
 
 					} else {
 						$errorSpan.html( r ).show();
-						// Some error strings may contain HTML entities (e.g. `&#8220`), let's use the HTML element's text.
+						/*
+						 * Some error strings may contain HTML entities (e.g. `&#8220`), let's use
+						 * the HTML element's text.
+						 */
 						wp.a11y.speak( $errorSpan.text() );
 					}
 				} else {
