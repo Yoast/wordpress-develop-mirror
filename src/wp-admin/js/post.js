@@ -1,6 +1,12 @@
 /* global postL10n, ajaxurl, wpAjax, setPostThumbnailL10n, postboxes, pagenow, tinymce, alert, deleteUserSetting */
 /* global theList:true, theExtraList:true, getUserSetting, setUserSetting, commentReply */
 
+/**
+ * Contains all dynamic functionality needed on post and term pages.
+ *
+ * @summary Control page and term functionality.
+ */
+
 var commentsBox, WPSetThumbnailHTML, WPSetThumbnailID, WPRemoveThumbnail, wptitlehint, makeSlugeditClickable, editPermalink;
 // Backwards compatibility: prevent fatal errors.
 makeSlugeditClickable = editPermalink = function(){};
@@ -16,7 +22,7 @@ window.wp = window.wp || {};
 	 *
 	 * @type {{st: number, get: commentsBox.get, load: commentsBox.load}}
 	 *
-	 * @namespace commentsbox
+	 * @namespace commentsBox
 	 */
 	commentsBox = {
 		// Comment offset to use when fetching new comments.
@@ -27,9 +33,9 @@ window.wp = window.wp || {};
 		 *
 		 * @param {int} total Total number of comments for this post.
 		 * @param {int} num   Optional. Number of comments to fetch, defaults to 20.
-		 * @returns {boolean} Always returns false.
+		 * @return {boolean} Always returns false.
 		 *
-		 * @memberof commentsbox
+		 * @memberof commentsBox
 		 */
 		get : function(total, num) {
 			var st = this.st, data;
@@ -87,7 +93,7 @@ window.wp = window.wp || {};
 		 *
 		 * @param {int} total Total number of comments to load.
 		 *
-		 * @memberof commentsbox
+		 * @memberof commentsBox
 		 */
 		load: function(total){
 			this.st = jQuery('#the-comment-list tr.comment:visible').length;
@@ -569,8 +575,9 @@ jQuery(document).ready( function($) {
 		/**
 		 * Before adding a new taxonomy, disable submit button.
 		 *
-		 * @param {object} s Taxonomy object which will be added.
-		 * @returns {*}
+		 * @param {Object} s Taxonomy object which will be added.
+		 *
+		 * @return {Object}
 		 */
 		catAddBefore = function( s ) {
 			if ( !$('#new'+taxonomy).val() ) {
@@ -583,13 +590,15 @@ jQuery(document).ready( function($) {
 		};
 
 		/**
-		 * After a taxonomy has been added.
+		 * Re-enable submit button after a taxonomy has been added.
 		 *
 		 * Re-enable submit button.
 		 * If the taxonomy has a parent place the taxonomy underneath the parent.
 		 *
-		 * @param {object} r Response.
-		 * @param {object} s Taxonomy data.
+		 * @param {Object} r Response.
+		 * @param {Object} s Taxonomy data.
+		 *
+		 * @return void
 		 */
 		catAddAfter = function( r, s ) {
 			var sup, drop = $('#new'+taxonomy+'_parent');
@@ -631,8 +640,9 @@ jQuery(document).ready( function($) {
 			/**
 			 * Add current post_ID to request to fetch custom fields
 			 *
-			 * @param {object} s Request object.
-			 * @returns {object} Data modified with post_ID attached.
+			 * @param {Object} s Request object.
+			 *
+			 * @return {Object} Data modified with post_ID attached.
 			 */
 			addBefore: function( s ) {
 				s.data += '&post_id=' + $('#post_ID').val();
@@ -657,7 +667,7 @@ jQuery(document).ready( function($) {
 		/**
 		 * When the visibility of a post changes sub-options should be shown or hidden.
 		 *
-		 * @returns void
+		 * @return void
 		 */
 		updateVisibility = function() {
 			// Show sticky for public posts.
@@ -679,7 +689,7 @@ jQuery(document).ready( function($) {
 		/**
 		 * Make sure all labels represent the current settings.
 		 *
-		 * @returns {boolean} False when an invalid timestamp has been selected, otherwise True.
+		 * @return {boolean} False when an invalid timestamp has been selected, otherwise True.
 		 */
 		updateText = function() {
 
@@ -714,9 +724,9 @@ jQuery(document).ready( function($) {
 				$('#publish').val( postL10n.update );
 			}
 
-			// If the date is the same, just force it to itself for update triggers.
+			// If the date is the same, set it to trigger update events.
 			if ( originalDate.toUTCString() == attemptedDate.toUTCString() ) {
-				// Set to what it is already.
+				// Re-set to the current value.
 				$('#timestamp').html(stamp);
 			} else {
 				$('#timestamp').html(
@@ -894,11 +904,13 @@ jQuery(document).ready( function($) {
 	}
 
 	/**
-	 * Permalink aka slug aka post_name editing
+	 * Handle the editing of the post_name. Create the required HTML elements and update the changes via AJAX.
+	 *
+	 * @summary Permalink aka slug aka post_name editing
 	 *
 	 * @global
 	 *
-	 * @returns void
+	 * @return void
 	 */
 	function editPermalink() {
 		var i, slug_value,
@@ -999,13 +1011,15 @@ jQuery(document).ready( function($) {
 	});
 
 	/**
-	 * Title screen reader text handler.
+	 * Add screen reader text to the title prompt when needed.
+	 *
+	 * @summary Title screen reader text handler.
 	 *
 	 * @param {string} id Optional. HTML ID to add the screen reader helper text to.
 	 *
 	 * @global
 	 *
-	 * @returns void
+	 * @return void
 	 */
 	wptitlehint = function(id) {
 		id = id || 'title';
@@ -1033,7 +1047,7 @@ jQuery(document).ready( function($) {
 
 	wptitlehint();
 
-	// Resize the wysiwyg and plain text editors.
+	// Resize the WYSIWYG and plain text editors.
 	( function() {
 		var editor, offset, mce,
 			$handle = $('#post-status-info'),
@@ -1049,7 +1063,7 @@ jQuery(document).ready( function($) {
 		/**
 		 * Handle drag event.
 		 *
-		 * @param {object} event Event containing details about the drag.
+		 * @param {Object} event Event containing details about the drag.
 		 */
 		function dragging( event ) {
 			if ( $postdivrich.hasClass( 'wp-editor-expand' ) ) {
@@ -1091,7 +1105,7 @@ jQuery(document).ready( function($) {
 
 			$document.off( '.wp-editor-resize' );
 
-			// Normalize height to stay within acceptable ranges.
+			// Sanity check: normalize height to stay within acceptable ranges.
 			if ( height && height > 50 && height < 5000 ) {
 				setUserSetting( 'ed_size', height );
 			}
