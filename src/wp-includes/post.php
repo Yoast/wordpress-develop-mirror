@@ -837,7 +837,7 @@ function get_post_type( $post = null ) {
  * Retrieves a post type object by name.
  *
  * @since 3.0.0
- * @since 4.6.0 Converted to use WP_Post_Type.
+ * @since 4.6.0 Object returned is now an instance of WP_Post_Type.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -900,7 +900,7 @@ function get_post_types( $args = array(), $output = 'names', $operator = 'and' )
  * @since 3.0.0 The `show_ui` argument is now enforced on the new post screen.
  * @since 4.4.0 The `show_ui` argument is now enforced on the post type listing
  *              screen and post editing screen.
- * @since 4.6.0 Converted to use WP_Post_Type.
+ * @since 4.6.0 Post type object returned is now an instance of WP_Post_Type.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -1058,7 +1058,6 @@ function register_post_type( $post_type, $args = array() ) {
  * Can not be used to unregister built-in post types.
  *
  * @since 4.5.0
- * @since 4.6.0 Converted to use WP_Post_Type.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -1069,7 +1068,7 @@ function unregister_post_type( $post_type ) {
 	global $wp_post_types;
 
 	if ( ! post_type_exists( $post_type ) ) {
-		return new WP_Error( 'invalid_post_type', __( 'Invalid post type' ) );
+		return new WP_Error( 'invalid_post_type', __( 'Invalid post type.' ) );
 	}
 
 	$post_type_object = get_post_type_object( $post_type );
@@ -3283,6 +3282,27 @@ function wp_insert_post( $postarr, $wp_error = false ) {
 		}
 	}
 
+	// Set or remove featured image.
+	if ( isset( $postarr['_thumbnail_id'] ) ) {
+		$thumbnail_support = current_theme_supports( 'post-thumbnails', $post_type ) && post_type_supports( $post_type, 'thumbnail' ) || 'revision' === $post_type;
+		if ( ! $thumbnail_support && 'attachment' === $post_type && $post_mime_type ) {
+			if ( wp_attachment_is( 'audio', $post_ID ) ) {
+				$thumbnail_support = post_type_supports( 'attachment:audio', 'thumbnail' ) || current_theme_supports( 'post-thumbnails', 'attachment:audio' );
+			} elseif ( wp_attachment_is( 'video', $post_ID ) ) {
+				$thumbnail_support = post_type_supports( 'attachment:video', 'thumbnail' ) || current_theme_supports( 'post-thumbnails', 'attachment:video' );
+			}
+		}
+
+		if ( $thumbnail_support ) {
+			$thumbnail_id = intval( $postarr['_thumbnail_id'] );
+			if ( -1 === $thumbnail_id ) {
+				delete_post_thumbnail( $post_ID );
+			} else {
+				set_post_thumbnail( $post_ID, $thumbnail_id );
+			}
+		}
+	}
+
 	clean_post_cache( $post_ID );
 
 	$post = get_post( $post_ID );
@@ -4306,7 +4326,7 @@ function _page_traverse_name( $page_id, &$children, &$result ){
  * Sub pages will be in the "directory" under the parent page post name.
  *
  * @since 1.5.0
- * @since 4.6.0 The $page parameter is optional.
+ * @since 4.6.0 Converted the `$page` parameter to optional.
  *
  * @param WP_Post|object|int $page Optional. Page ID or WP_Post object. Default is global $post.
  * @return string|false Page URI, false on error.
@@ -4323,7 +4343,7 @@ function get_page_uri( $page = 0 ) {
 
 	foreach ( $page->ancestors as $parent ) {
 		$parent = get_post( $parent );
-		if ( $parent ) {
+		if ( $parent && $parent->post_name ) {
 			$uri = $parent->post_name . '/' . $uri;
 		}
 	}
@@ -4945,7 +4965,7 @@ function wp_get_attachment_url( $post_id = 0 ) {
  *
  * @since 4.6.0
  *
- * @param int $post_id Optional. Attachment ID. Default 0.
+ * @param int $post_id Optional. Attachment ID. Default is the ID of the global `$post`.
  * @return string|false False on failure. Attachment caption on success.
  */
 function wp_get_attachment_caption( $post_id = 0 ) {
@@ -5042,12 +5062,12 @@ function wp_get_attachment_thumb_url( $post_id = 0 ) {
  *
  * @since 4.2.0
  *
- * @param string      $type    Attachment type. Accepts 'image', 'audio', or 'video'.
- * @param int|WP_Post $post_id Optional. Attachment ID. Default 0.
+ * @param string      $type Attachment type. Accepts 'image', 'audio', or 'video'.
+ * @param int|WP_Post $post Optional. Attachment ID or object. Default is global $post.
  * @return bool True if one of the accepted types, false otherwise.
  */
-function wp_attachment_is( $type, $post_id = 0 ) {
-	if ( ! $post = get_post( $post_id ) ) {
+function wp_attachment_is( $type, $post = null ) {
+	if ( ! $post = get_post( $post ) ) {
 		return false;
 	}
 
@@ -5093,10 +5113,10 @@ function wp_attachment_is( $type, $post_id = 0 ) {
  * @since 4.2.0 Modified into wrapper for wp_attachment_is() and
  *              allowed WP_Post object to be passed.
  *
- * @param int|WP_Post $post Optional. Attachment ID. Default 0.
+ * @param int|WP_Post $post Optional. Attachment ID or object. Default is global $post.
  * @return bool Whether the attachment is an image.
  */
-function wp_attachment_is_image( $post = 0 ) {
+function wp_attachment_is_image( $post = null ) {
 	return wp_attachment_is( 'image', $post );
 }
 
