@@ -250,7 +250,7 @@ function wp_default_scripts( &$scripts ) {
 	// It sets jQuery as a dependency, as the theme may have been implicitly loading it this way.
 	$scripts->add( 'imagesloaded', "/wp-includes/js/imagesloaded.min.js", array(), '3.2.0', 1 );
 	$scripts->add( 'masonry', "/wp-includes/js/masonry.min.js", array( 'imagesloaded' ), '3.3.2', 1 );
-	$scripts->add( 'jquery-masonry', "/wp-includes/js/jquery/jquery.masonry$dev_suffix.js", array( 'jquery', 'masonry' ), '3.1.2', 1 );
+	$scripts->add( 'jquery-masonry', "/wp-includes/js/jquery/jquery.masonry$dev_suffix.js", array( 'jquery', 'masonry' ), '3.1.2a', 1 );
 
 	$scripts->add( 'thickbox', "/wp-includes/js/thickbox/thickbox.js", array('jquery'), '3.1-20121105', 1 );
 	did_action( 'init' ) && $scripts->localize( 'thickbox', 'thickboxL10n', array(
@@ -335,22 +335,31 @@ function wp_default_scripts( &$scripts ) {
 
 	$scripts->add( 'imgareaselect', "/wp-includes/js/imgareaselect/jquery.imgareaselect$suffix.js", array('jquery'), false, 1 );
 
-	$scripts->add( 'mediaelement', "/wp-includes/js/mediaelement/mediaelement-and-player.min.js", array('jquery'), '2.21.2', 1 );
+	$scripts->add( 'mediaelement', "/wp-includes/js/mediaelement/mediaelement-and-player.min.js", array('jquery'), '2.22.0', 1 );
 	did_action( 'init' ) && $scripts->localize( 'mediaelement', 'mejsL10n', array(
 		'language' => get_bloginfo( 'language' ),
 		'strings'  => array(
-			'Close'               => __( 'Close' ),
-			'Fullscreen'          => __( 'Fullscreen' ),
-			'Download File'       => __( 'Download File' ),
-			'Download Video'      => __( 'Download Video' ),
-			'Play/Pause'          => __( 'Play/Pause' ),
-			'Mute Toggle'         => __( 'Mute Toggle' ),
-			'None'                => __( 'None' ),
-			'Turn off Fullscreen' => __( 'Turn off Fullscreen' ),
-			'Go Fullscreen'       => __( 'Go Fullscreen' ),
-			'Unmute'              => __( 'Unmute' ),
-			'Mute'                => __( 'Mute' ),
-			'Captions/Subtitles'  => __( 'Captions/Subtitles' )
+			'Close'                   => __( 'Close' ),
+			'Fullscreen'              => __( 'Fullscreen' ),
+			'Turn off Fullscreen'     => __( 'Turn off Fullscreen' ),
+			'Go Fullscreen'           => __( 'Go Fullscreen' ),
+			'Download File'           => __( 'Download File' ),
+			'Download Video'          => __( 'Download Video' ),
+			'Play'                    => __( 'Play' ),
+			'Pause'                   => __( 'Pause' ),
+			'Captions/Subtitles'      => __( 'Captions/Subtitles' ),
+			'None'                    => __( 'None', 'no captions/subtitles' ),
+			'Time Slider'             => __( 'Time Slider' ),
+			/* translators: %1: number of seconds (30 by default) */
+			'Skip back %1 seconds'    => __( 'Skip back %1 seconds' ),
+			'Video Player'            => __( 'Video Player' ),
+			'Audio Player'            => __( 'Audio Player' ),
+			'Volume Slider'           => __( 'Volume Slider' ),
+			'Mute Toggle'             => __( 'Mute Toggle' ),
+			'Unmute'                  => __( 'Unmute' ),
+			'Mute'                    => __( 'Mute' ),
+			'Use Up/Down Arrow keys to increase or decrease volume.' => __( 'Use Up/Down Arrow keys to increase or decrease volume.' ),
+			'Use Left/Right Arrow keys to advance one second, Up/Down arrows to advance ten seconds.' => __( 'Use Left/Right Arrow keys to advance one second, Up/Down arrows to advance ten seconds.' ),
 		),
 	) );
 
@@ -391,7 +400,7 @@ function wp_default_scripts( &$scripts ) {
 	$scripts->add( 'user-profile', "/wp-admin/js/user-profile$suffix.js", array( 'jquery', 'password-strength-meter', 'wp-util' ), false, 1 );
 	did_action( 'init' ) && $scripts->localize( 'user-profile', 'userProfileL10n', array(
 		'warn'     => __( 'Your new password has not been saved.' ),
-		'warnWeak' => __( 'Confirm use of weak password.' ),
+		'warnWeak' => __( 'Confirm use of weak password' ),
 		'show'     => __( 'Show' ),
 		'hide'     => __( 'Hide' ),
 		'cancel'   => __( 'Cancel' ),
@@ -600,20 +609,23 @@ function wp_default_scripts( &$scripts ) {
 			'l10n'       => array(
 				/* translators: %s: Search string */
 				'searchResults'              => __( 'Search results for &#8220;%s&#8221;' ),
+				'searchResultsLabel'         => __( 'Search Results' ),
 				'noPlugins'                  => __( 'You do not appear to have any plugins available at this time.' ),
 				'noItemsSelected'            => __( 'Please select at least one item to perform this action on.' ),
 				'updating'                   => __( 'Updating...' ), // No ellipsis.
 				'updated'                    => __( 'Updated!' ),
 				'update'                     => __( 'Update' ),
 				'updateNow'                  => __( 'Update Now' ),
+				/* translators: %s: Plugin name and version */
+				'updateNowLabel'             => __( 'Update %s now' ),
 				'updateFailedShort'          => __( 'Update Failed!' ),
-				/* translators: Error string for a failed update */
+				/* translators: %s: Error string for a failed update */
 				'updateFailed'               => __( 'Update Failed: %s' ),
-				/* translators: Plugin name and version */
+				/* translators: %s: Plugin name and version */
 				'updatingLabel'              => __( 'Updating %s...' ), // No ellipsis.
-				/* translators: Plugin name and version */
+				/* translators: %s: Plugin name and version */
 				'updatedLabel'               => __( '%s updated!' ),
-				/* translators: Plugin name and version */
+				/* translators: %s: Plugin name and version */
 				'updateFailedLabel'          => __( '%s update failed' ),
 				/* translators: JavaScript accessible string */
 				'updatingMsg'                => __( 'Updating... please wait.' ), // No ellipsis.
@@ -623,27 +635,29 @@ function wp_default_scripts( &$scripts ) {
 				'updateCancel'               => __( 'Update canceled.' ),
 				'beforeunload'               => __( 'Updates may not complete if you navigate away from this page.' ),
 				'installNow'                 => __( 'Install Now' ),
+				/* translators: %s: Plugin name */
+				'installNowLabel'            => __( 'Install %s now' ),
 				'installing'                 => __( 'Installing...' ),
 				'installed'                  => __( 'Installed!' ),
 				'installFailedShort'         => __( 'Install Failed!' ),
-				/* translators: Error string for a failed installation */
+				/* translators: %s: Error string for a failed installation */
 				'installFailed'              => __( 'Installation failed: %s' ),
-				/* translators: Plugin name and version */
+				/* translators: %s: Plugin name and version */
 				'pluginInstallingLabel'      => _x( 'Installing %s...', 'plugin' ), // no ellipsis
-				/* translators: Theme name and version */
+				/* translators: %s: Theme name and version */
 				'themeInstallingLabel'       => _x( 'Installing %s...', 'theme' ), // no ellipsis
-				/* translators: Plugin name and version */
+				/* translators: %s: Plugin name and version */
 				'pluginInstalledLabel'       => _x( '%s installed!', 'plugin' ),
-				/* translators: Theme name and version */
+				/* translators: %s: Theme name and version */
 				'themeInstalledLabel'        => _x( '%s installed!', 'theme' ),
-				/* translators: Plugin name and version */
+				/* translators: %s: Plugin name and version */
 				'pluginInstallFailedLabel'   => _x( '%s installation failed', 'plugin' ),
-				/* translators: Theme name and version */
+				/* translators: %s: Theme name and version */
 				'themeInstallFailedLabel'    => _x( '%s installation failed', 'theme' ),
 				'installingMsg'              => __( 'Installing... please wait.' ),
 				'installedMsg'               => __( 'Installation completed successfully.' ),
-				/* translators: Activation URL */
-				'importerInstalledMsg'       => __( 'Importer installed successfully. <a href="%s">Activate plugin &#38; run importer</a>' ),
+				/* translators: %s: Activation URL */
+				'importerInstalledMsg'       => __( 'Importer installed successfully. <a href="%s">Run importer</a>' ),
 				/* translators: %s: Theme name */
 				'aysDelete'                  => __( 'Are you sure you want to delete %s?' ),
 				/* translators: %s: Plugin name */
@@ -655,15 +669,18 @@ function wp_default_scripts( &$scripts ) {
 				'deleteFailed'               => __( 'Deletion failed: %s' ),
 				'deleted'                    => __( 'Deleted!' ),
 				'livePreview'                => __( 'Live Preview' ),
-				/* translators: %s: Theme name */
 				'activatePlugin'             => is_network_admin() ? __( 'Network Activate' ) : __( 'Activate' ),
 				'activateTheme'              => is_network_admin() ? __( 'Network Enable' ) : __( 'Activate' ),
 				/* translators: %s: Plugin name */
 				'activatePluginLabel'        => is_network_admin() ? _x( 'Network Activate %s', 'plugin' ) : _x( 'Activate %s', 'plugin' ),
 				/* translators: %s: Theme name */
 				'activateThemeLabel'         => is_network_admin() ? _x( 'Network Activate %s', 'theme' ) : _x( 'Activate %s', 'theme' ),
-				'activateImporter'           => __( 'Activate importer' ),
+				'activateImporter'           => __( 'Run Importer' ),
+				/* translators: %s: Importer name */
+				'activateImporterLabel'      => __( 'Run %s' ),
 				'unknownError'               => __( 'An unknown error occurred' ),
+				'connectionError'            => __( 'Connection lost or the server is busy. Please try again later.' ),
+				'nonceError'                 => __( 'An error has occurred. Please reload the page and try again.' ),
 				'pluginsFound'               => __( 'Number of plugins found: %d' ),
 				'noPluginsFound'             => __( 'No plugins found. Try a different search.' ),
 			),
@@ -827,7 +844,7 @@ function wp_default_styles( &$styles ) {
 	// External libraries and friends
 	$styles->add( 'imgareaselect',       '/wp-includes/js/imgareaselect/imgareaselect.css', array(), '0.9.8' );
 	$styles->add( 'wp-jquery-ui-dialog', "/wp-includes/css/jquery-ui-dialog$suffix.css", array( 'dashicons' ) );
-	$styles->add( 'mediaelement',        "/wp-includes/js/mediaelement/mediaelementplayer.min.css", array(), '2.21.2' );
+	$styles->add( 'mediaelement',        "/wp-includes/js/mediaelement/mediaelementplayer.min.css", array(), '2.22.0' );
 	$styles->add( 'wp-mediaelement',     "/wp-includes/js/mediaelement/wp-mediaelement$suffix.css", array( 'mediaelement' ) );
 	$styles->add( 'thickbox',            '/wp-includes/js/thickbox/thickbox.css', array( 'dashicons' ) );
 
@@ -905,6 +922,7 @@ function wp_just_in_time_script_localization() {
  * @since 4.6.0
  *
  * @link http://api.jqueryui.com/datepicker/#options
+ *
  * @global WP_Locale $wp_locale The WordPress date and time locale object.
  */
 function wp_localize_jquery_ui_datepicker() {

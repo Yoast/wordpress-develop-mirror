@@ -461,8 +461,8 @@ function clean_blog_cache( $blog ) {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param int     $id Blog ID.
-	 * @param WP_Site $blog
+	 * @param int     $id              Blog ID.
+	 * @param WP_Site $blog            Site object.
 	 * @param string  $domain_path_key md5 hash of domain and path.
 	 */
 	do_action( 'clean_site_cache', $blog_id, $blog, $domain_path_key );
@@ -478,15 +478,12 @@ function clean_blog_cache( $blog ) {
  *
  * @since 4.6.0
  *
- * @global WP_Site $current_blog The current site.
- *
  * @param WP_Site|int|null $site Optional. Site to retrieve. Default is the current site.
  * @return WP_Site|null The site object or null if not found.
  */
-function get_site( &$site = null ) {
-	global $current_blog;
-	if ( empty( $site ) && isset( $current_blog ) ) {
-		$site = $current_blog;
+function get_site( $site = null ) {
+	if ( empty( $site ) ) {
+		$site = get_current_blog_id();
 	}
 
 	if ( $site instanceof WP_Site ) {
@@ -520,7 +517,6 @@ function get_site( &$site = null ) {
  * @access private
  *
  * @see update_site_cache()
- *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @param array $ids ID list.
@@ -541,9 +537,9 @@ function _prime_site_caches( $ids ) {
  *
  * @since 4.6.0
  *
- * @param array $sites Array of site objects, passed by reference.
+ * @param array $sites Array of site objects.
  */
-function update_site_cache( &$sites ) {
+function update_site_cache( $sites ) {
 	if ( ! $sites ) {
 		return;
 	}
@@ -1089,10 +1085,10 @@ function get_networks( $args = array() ) {
  *
  * @global WP_Network $current_site
  *
- * @param WP_Network|int|null $network Network to retrieve.
+ * @param WP_Network|int|null $network Optional. Network to retrieve. Default is the current network.
  * @return WP_Network|null The network object or null if not found.
  */
-function get_network( &$network = null ) {
+function get_network( $network = null ) {
 	global $current_site;
 	if ( empty( $network ) && isset( $current_site ) ) {
 		$network = $current_site;

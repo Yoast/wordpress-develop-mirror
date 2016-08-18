@@ -101,15 +101,15 @@ class WP_Network_Query {
 	 *     @type array        $network__not_in      Array of network IDs to exclude. Default empty.
  	 *     @type bool         $count                Whether to return a network count (true) or array of network objects.
  	 *                                              Default false.
- 	 *     @type string       $fields               Network fields to return. Accepts 'ids' for network IDs only or empty
- 	 *                                              for all fields. Default empty.
+ 	 *     @type string       $fields               Network fields to return. Accepts 'ids' (returns an array of network IDs)
+ 	 *                                              or empty (returns an array of complete network objects). Default empty.
  	 *     @type int          $number               Maximum number of networks to retrieve. Default null (no limit).
  	 *     @type int          $offset               Number of networks to offset the query. Used to build LIMIT clause.
  	 *                                              Default 0.
  	 *     @type bool         $no_found_rows        Whether to disable the `SQL_CALC_FOUND_ROWS` query. Default true.
  	 *     @type string|array $orderby              Network status or array of statuses. Accepts 'id', 'domain', 'path',
- 	 *                                              'domain_length', 'path_length' and 'network__in'. Also accepts false, an empty array, or 'none' to disable
- 	 *                                              `ORDER BY` clause. Default 'id'.
+ 	 *                                              'domain_length', 'path_length' and 'network__in'. Also accepts false,
+ 	 *                                              an empty array, or 'none' to disable `ORDER BY` clause. Default 'id'.
  	 *     @type string       $order                How to order retrieved networks. Accepts 'ASC', 'DESC'. Default 'ASC'.
  	 *     @type string       $domain               Limit results to those affiliated with a given network ID.
  	 *                                              Default current network ID.
@@ -132,7 +132,7 @@ class WP_Network_Query {
 			'number'               => '',
 			'offset'               => '',
 			'no_found_rows'        => true,
-			'orderby'              => '',
+			'orderby'              => 'id',
 			'order'                => 'ASC',
 			'domain'               => '',
 			'domain__in'           => '',

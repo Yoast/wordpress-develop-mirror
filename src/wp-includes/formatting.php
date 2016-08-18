@@ -1279,9 +1279,9 @@ function utf8_uri_encode( $utf8_string, $length = 0 ) {
  * | U+0146  | ņ     | n           | Latin small letter n with cedilla                 |
  * | U+0147  | Ň     | N           | Latin capital letter N with caron                 |
  * | U+0148  | ň     | n           | Latin small letter n with caron                   |
- * | U+0149  | ŉ     | N           | Latin small letter n preceded by apostrophe       |
- * | U+014A  | Ŋ     | n           | Latin capital letter Eng                          |
- * | U+014B  | ŋ     | N           | Latin small letter Eng                            |
+ * | U+0149  | ŉ     | n           | Latin small letter n preceded by apostrophe       |
+ * | U+014A  | Ŋ     | N           | Latin capital letter Eng                          |
+ * | U+014B  | ŋ     | n           | Latin small letter Eng                            |
  * | U+014C  | Ō     | O           | Latin capital letter O with macron                |
  * | U+014D  | ō     | o           | Latin small letter o with macron                  |
  * | U+014E  | Ŏ     | O           | Latin capital letter O with breve                 |
@@ -1491,7 +1491,7 @@ function utf8_uri_encode( $utf8_string, $length = 0 ) {
  * | U+00B7   | l·l   | ll          | Flown dot (between two Ls)              |
  *
  * @since 1.2.1
- * @since 4.6.0 Locale support was added for `de_CH`, `de_CH_informal`, and `ca`.
+ * @since 4.6.0 Added locale support for `de_CH`, `de_CH_informal`, and `ca`.
  *
  * @param string $string Text that might have accent characters
  * @return string Filtered string with replaced "nice" characters.
@@ -1572,8 +1572,8 @@ function remove_accents( $string ) {
 		chr(197).chr(130) => 'l', chr(197).chr(131) => 'N',
 		chr(197).chr(132) => 'n', chr(197).chr(133) => 'N',
 		chr(197).chr(134) => 'n', chr(197).chr(135) => 'N',
-		chr(197).chr(136) => 'n', chr(197).chr(137) => 'N',
-		chr(197).chr(138) => 'n', chr(197).chr(139) => 'N',
+		chr(197).chr(136) => 'n', chr(197).chr(137) => 'n',
+		chr(197).chr(138) => 'N', chr(197).chr(139) => 'n',
 		chr(197).chr(140) => 'O', chr(197).chr(141) => 'o',
 		chr(197).chr(142) => 'O', chr(197).chr(143) => 'o',
 		chr(197).chr(144) => 'O', chr(197).chr(145) => 'o',
@@ -4922,13 +4922,13 @@ function print_emoji_detection_script() {
 }
 
 /**
- * Print inline Emoji dection script
+ * Prints inline Emoji dection script
  *
  * @ignore
  * @since 4.6.0
  * @access private
  *
- * @global string $wp_version
+ * @global string $wp_version WordPress version string.
  */
 function _print_emoji_detection_script() {
 	global $wp_version;
@@ -4941,7 +4941,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @param string The emoji base URL for png images.
 		 */
-		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/72x72/' ),
+		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2/72x72/' ),
 
 		/**
 		 * Filters the extension of the emoji png files.
@@ -4959,7 +4959,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @param string The emoji base URL for svg images.
 		 */
-		'svgUrl' => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/svg/' ),
+		'svgUrl' => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2/svg/' ),
 
 		/**
 		 * Filters the extension of the emoji SVG files.
@@ -5071,7 +5071,7 @@ function wp_staticize_emoji( $text ) {
 	$text = wp_encode_emoji( $text );
 
 	/** This filter is documented in wp-includes/formatting.php */
-	$cdn_url = apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/72x72/' );
+	$cdn_url = apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2/72x72/' );
 
 	/** This filter is documented in wp-includes/formatting.php */
 	$ext = apply_filters( 'emoji_ext', '.png' );

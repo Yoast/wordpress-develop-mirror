@@ -61,12 +61,12 @@ function twentythirteen_setup() {
 	/*
 	 * Makes Twenty Thirteen available for translation.
 	 *
-	 * Translations can be added to the /languages/ directory.
+	 * Translations can be filed at WordPress.org. See: https://translate.wordpress.org/projects/wp-themes/twentythirteen
 	 * If you're building a theme based on Twenty Thirteen, use a find and
 	 * replace to change 'twentythirteen' to the name of your theme in all
 	 * template files.
 	 */
-	load_theme_textdomain( 'twentythirteen', get_template_directory() . '/languages' );
+	load_theme_textdomain( 'twentythirteen' );
 
 	/*
 	 * This theme styles the visual editor to resemble the theme style,
@@ -173,7 +173,7 @@ function twentythirteen_scripts_styles() {
 		wp_enqueue_script( 'jquery-masonry' );
 
 	// Loads JavaScript file with functionality specific to Twenty Thirteen.
-	wp_enqueue_script( 'twentythirteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20150330', true );
+	wp_enqueue_script( 'twentythirteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20160717', true );
 
 	// Add Source Sans Pro and Bitter fonts, used in the main stylesheet.
 	wp_enqueue_style( 'twentythirteen-fonts', twentythirteen_fonts_url(), array(), null );

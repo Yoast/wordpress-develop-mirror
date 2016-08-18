@@ -782,11 +782,13 @@ function delete_plugins( $plugins, $deprecated = '' ) {
 	foreach ( $plugins as $plugin )
 		$checked[] = 'checked[]=' . $plugin;
 
-	ob_start();
 	$url = wp_nonce_url('plugins.php?action=delete-selected&verify-delete=1&' . implode('&', $checked), 'bulk-plugins');
-	if ( false === ($credentials = request_filesystem_credentials($url)) ) {
-		$data = ob_get_clean();
 
+	ob_start();
+	$credentials = request_filesystem_credentials( $url );
+	$data = ob_get_clean();
+
+	if ( false === $credentials ) {
 		if ( ! empty($data) ){
 			include_once( ABSPATH . 'wp-admin/admin-header.php');
 			echo $data;
@@ -796,8 +798,9 @@ function delete_plugins( $plugins, $deprecated = '' ) {
 		return;
 	}
 
-	if ( ! WP_Filesystem($credentials) ) {
-		request_filesystem_credentials($url, '', true); //Failed to connect, Error and request again
+	if ( ! WP_Filesystem( $credentials ) ) {
+		ob_start();
+		request_filesystem_credentials( $url, '', true ); // Failed to connect, Error and request again.
 		$data = ob_get_clean();
 
 		if ( ! empty($data) ){
@@ -818,7 +821,7 @@ function delete_plugins( $plugins, $deprecated = '' ) {
 	// Get the base plugin folder.
 	$plugins_dir = $wp_filesystem->wp_plugins_dir();
 	if ( empty( $plugins_dir ) ) {
-		return new WP_Error( 'fs_no_plugins_dir', __( 'Unable to locate WordPress Plugin directory.' ) );
+		return new WP_Error( 'fs_no_plugins_dir', __( 'Unable to locate WordPress plugin directory.' ) );
 	}
 
 	$plugins_dir = trailingslashit( $plugins_dir );

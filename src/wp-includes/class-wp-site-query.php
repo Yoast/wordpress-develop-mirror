@@ -110,8 +110,8 @@ class WP_Site_Query {
 	 *                                           Default false.
 	 *     @type array        $date_query        Date query clauses to limit sites by. See WP_Date_Query.
 	 *                                           Default null.
-	 *     @type string       $fields            Site fields to return. Accepts 'ids' for site IDs only or empty
-	 *                                           for all fields. Default empty.
+	 *     @type string       $fields            Site fields to return. Accepts 'ids' (returns an array of site IDs)
+	 *                                           or empty (returns an array of complete site objects). Default empty.
 	 *     @type int          $ID                A site ID to only return that site. Default empty.
 	 *     @type int          $number            Maximum number of sites to retrieve. Default null (no limit).
 	 *     @type int          $offset            Number of sites to offset the query. Used to build LIMIT clause.
@@ -155,8 +155,8 @@ class WP_Site_Query {
 			'number'            => 100,
 			'offset'            => '',
 			'no_found_rows'     => true,
-			'orderby'           => 'ids',
-			'order'             => 'DESC',
+			'orderby'           => 'id',
+			'order'             => 'ASC',
 			'network_id'        => 0,
 			'network__in'       => '',
 			'network__not_in'   => '',
