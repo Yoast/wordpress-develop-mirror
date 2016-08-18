@@ -6,7 +6,7 @@
  *
  * @summary   A short description of the file.
  *
- * @since     Unknown
+ * @since     2.8.5
  * @requires  jQuery.js
  * @class     imageEdit
  * @classdesc This is a description of the MyClass class.
@@ -18,9 +18,7 @@
 (function($) {
 
 	/**
-	 *
-	 *
-	 *
+	 * Bind the imageEdit object to the window to make it globally accessible.
 	 */
 	var imageEdit = window.imageEdit = {
 	iasapi : {},
@@ -28,12 +26,11 @@
 	postid : '',
 	_view : false,
 
-
 	/**
 	 * Converts a value to an integer.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.8.5
 	 *
 	 * @param {float} f The float value should be converted.
 	 *
@@ -207,6 +204,7 @@
 	 * Gets the selected aspect ratio.
 	 *
 	 * @memberOf imageEdit
+	 * @since    Unknown
 	 *
 	 * @param {int} postid The post id.
 	 *
@@ -374,8 +372,10 @@
 	 *
 	 * @param  {int}     postid The post id.
 	 * @param  {string}  nonce  The nonce to verify the request.
-	 * @param  {string}  action
-	 * @returns {boolean}
+	 * @param  {string}  action The action to perform on the image. The possible actions are: "scale" and "restore".
+	 *
+	 * @returns {boolean||void} Executes a post request that refreshes the page when the action is performed.
+	 *                          Returns false if a invalid action is given, or when the action cannot be performed.
 	 */
 	action : function(postid, nonce, action) {
 		var t = this, data, w, h, fw, fh;
@@ -429,12 +429,17 @@
 	},
 
 	/**
+	 * Stores the changes that are made to the image.
 	 *
-	 *
-	 * @param postid
-	 * @param nonce
-	 * @returns {boolean}
 	 * @memberOf imageEdit
+	 * @since    Unknown
+	 *
+	 * @param {int}     postid   The post id to get the image from the database.
+	 * @param {string}  nonce    The nonce to verify the request.
+	 *
+	 * @returns {boolean||void} If the actions are successfully saved a response message is shown.
+	 *                          Returns false if there is no image editing history,
+	 *                          thus there are not edit-actions performed on the image.
 	 */
 	save : function(postid, nonce) {
 		var data,
@@ -456,10 +461,12 @@
 			'context': $('#image-edit-context').length ? $('#image-edit-context').val() : null,
 			'do': 'save'
 		};
-
+		// Post the image edit data to the backend.
 		$.post(ajaxurl, data, function(r) {
+			// Read the response.
 			var ret = JSON.parse(r);
 
+			// If a response is returned, close the editor and show an error.
 			if ( ret.error ) {
 				$('#imgedit-response-' + postid).html('<div class="error"><p>' + ret.error + '</p></div>');
 				imageEdit.close(postid);
@@ -487,16 +494,17 @@
 	},
 
 	/**
-	 *
+	 * Creates the image edit window.
 	 *
 	 * @memberOf imageEdit
 	 * @since    Unknown
 	 *
-	 * @param postid
-	 * @param nonce
-	 * @param view
+	 * @param {int}    postid   The post id for the image.
+	 * @param {string} nonce    The nonce to verify the request.
+	 * @param {object} view     The image editor view to be used for the editing.
 	 *
-	 * @returns {*}
+	 * @returns {void||promise} Either returns void if the button was already activated
+	 *                          or returns an instance of the image editor, wrapped in a promise.
 	 */
 	open : function( postid, nonce, view ) {
 		this._view = view;
@@ -543,13 +551,14 @@
 	},
 
 	/**
+	 * Initializes the cropping tool and sets a default cropping selection. Also set the focus to the help button.
 	 *
 	 * @memberOf imageEdit
 	 * @since    Unknown
 	 *
 	 * @param {int} postid The post id.
 	 *
-	 * @returns void
+	 * @returns {void}
 	 */
 	imgLoaded : function(postid) {
 		var img = $('#image-preview-' + postid), parent = $('#imgedit-crop-' + postid);
@@ -562,16 +571,16 @@
 	},
 
 	/**
-	 *
+	 * Initializes the cropping tool.
 	 *
 	 * @memberOf imageEdit
 	 * @since    Unknown
 	 *
-	 * @param {int} postid The post id.
-	 * @param image
-	 * @param parent
+	 * @param {int}         postid The post id.
+	 * @param {HTMLElement} image  The preview image.
+	 * @param {HTMLElement} parent The preview image container.
 	 *
-	 * @returns void
+	 * @returns {void}
 	 */
 	initCrop : function(postid, image, parent) {
 		var t = this,
@@ -587,13 +596,20 @@
 			minWidth: 3,
 			minHeight: 3,
 
+			/**
+			 * Sets the CSS styles and binds events for locking the aspect ratio.
+			 *
+			 * @param {HTMLElement} img The preview image.
+			 */
 			onInit: function( img ) {
 				// Ensure that the imgAreaSelect wrapper elements are position:absolute
 				// (even if we're in a position:fixed modal)
 				$img = $( img );
 				$img.next().css( 'position', 'absolute' )
 					.nextAll( '.imgareaselect-outer' ).css( 'position', 'absolute' );
-
+				/**
+				 * Binds mouse down event to the cropping container.
+				 */
 				parent.children().mousedown(function(e){
 					var ratio = false, sel, defRatio;
 
@@ -608,7 +624,9 @@
 					});
 				});
 			},
-
+			/**
+			 *
+			 */
 			onSelectStart: function() {
 				imageEdit.setDisabled($('#imgedit-crop-sel-' + postid), 1);
 			},
