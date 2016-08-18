@@ -1,29 +1,47 @@
 /**
+ * Word or character counting functionality. Count words or characters in a provided text string.
+ *
+ * @summary   Count words or characters in a text.
+ *
  * @namespace wp.utils
+ * @since     2.6
  */
+
 ( function() {
 	/**
-	 * Word counting object
+	 * Word counting utility
 	 * 
 	 * @namespace wp.utils.wordcounter
-	 * @memberof wp.utils
+	 * @memberof  wp.utils
 	 *
-	 * @constructs
-	 * 
-	 * @param {object} [settings] - Key-value object containing overrides for settings.
-	 * @param {RegExp} [settings.HTMLRegExp] - Find HTML elements.
-	 * @param {RegExp} [settings.HTMLcommentRegExp] - Find HTML comments.
-	 * @param {RegExp} [settings.spaceRegExp] - Find non-breaking space.
-	 * @param {RegExp} [settings.HTMLEntityRegExp] - Find ampersant HTML code.
-	 * @param {RegExp} [settings.connectorRegExp] - Double dash or 'em-dash'
-	 * @param {RegExp} [settings.removeRegExp] - Remove unwanted characters to reduce false-positives.
-	 * @param {RegExp} [settings.astralRegExp] - Remove astral planes.
-	 * @param {RegExp} [settings.wordsRegExp] - Find words by spaces.
-	 * @param {RegExp} [settings.characters_excluding_spacesRegExp] - Find non-spaces.
-	 * @param {RegExp} [settings.characters_including_spacesRegExp] - Find characters including spaces.
-	 * @param {object} [settings.l10n] - Localization object containing specific configuration for the current localization.
-	 * @param {string} [settings.l10n.type] - Method of finding words to count.
-	 * @param {array}  [settings.l10n.shortcodes] - Array of shortcodes that contain text to be counted.
+	 * @class
+	 *
+	 * @param {Object} settings                                   Optional. Key-value object containing overrides for
+	 *                                                            settings.
+	 * @param {RegExp} settings.HTMLRegExp                        Optional. Regular expression to find HTML elements.
+	 * @param {RegExp} settings.HTMLcommentRegExp                 Optional. Regular expression to find HTML comments.
+	 * @param {RegExp} settings.spaceRegExp                       Optional. Regular expression to find irregular space
+	 *                                                            characters.
+	 * @param {RegExp} settings.HTMLEntityRegExp                  Optional. Regular expression to find HTML entities.
+	 * @param {RegExp} settings.connectorRegExp                   Optional. Regular expression to find connectors that
+	 *                                                            split words.
+	 * @param {RegExp} settings.removeRegExp                      Optional. Regular expression to find remove unwanted
+	 *                                                            characters to reduce false-positives.
+	 * @param {RegExp} settings.astralRegExp                      Optional. Regular expression to find unwanted
+	 *                                                            characters when searching for non-words.
+	 * @param {RegExp} settings.wordsRegExp                       Optional. Regular expression to find words by spaces.
+	 * @param {RegExp} settings.characters_excluding_spacesRegExp Optional. Regular expression to find characters which
+	 *                                                            are non-spaces.
+	 * @param {RegExp} settings.characters_including_spacesRegExp Optional. Regular expression to find characters
+	 *                                                            including spaces.
+	 * @param {RegExp} settings.shortcodesRegExp                  Optional. Regular expression to find shortcodes.
+	 * @param {Object} settings.l10n                              Optional. Localization object containing specific
+	 *                                                            configuration for the current localization.
+	 * @param {String} settings.l10n.type                         Optional. Method of finding words to count.
+	 * @param {Array}  settings.l10n.shortcodes                   Optional. Array of shortcodes that should be removed
+	 *                                                            from the text.
+	 *
+	 * @return void
 	 */
 	function WordCounter( settings ) {
 		var key,
@@ -41,7 +59,7 @@
 
 		shortcodes = this.settings.l10n.shortcodes;
 
-		// If there are any localization shortcodes add this as type in the settings.
+		// If there are any localization shortcodes, add this as type in the settings.
 		if ( shortcodes && shortcodes.length ) {
 			this.settings.shortcodesRegExp = new RegExp( '\\[\\/?(?:' + shortcodes.join( '|' ) + ')[^\\]]*?\\]', 'g' );
 		}
@@ -53,7 +71,8 @@
 		HTMLcommentRegExp: /<!--[\s\S]*?-->/g,
 		spaceRegExp: /&nbsp;|&#160;/gi,
 		HTMLEntityRegExp: /&\S+?;/g,
-		connectorRegExp: /--|\u2014/g, // \u2014 = em-dash.
+		// \u2014 = em-dash
+		connectorRegExp: /--|\u2014/g,
 		removeRegExp: new RegExp( [
 			'[',
 				// Basic Latin (extract)
@@ -89,54 +108,84 @@
 				'\u2E00-\u2E7F',
 			']'
 		].join( '' ), 'g' ),
+		// Remove UTF-16 surrogate points, see https://en.wikipedia.org/wiki/UTF-16#U.2BD800_to_U.2BDFFF
 		astralRegExp: /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
 		wordsRegExp: /\S\s+/g,
 		characters_excluding_spacesRegExp: /\S/g,
+		/*
+		 * Match anything that is not a formatting character, excluding:
+		 * \f = form feed
+		 * \n = new line
+		 * \r = carriage return
+		 * \t = tab
+		 * \v = vertical tab
+		 * \u00AD = soft hyphen
+		 * \u2028 = line separator
+		 * \u2029 = paragraph separator
+		 */
 		characters_including_spacesRegExp: /[^\f\n\r\t\v\u00AD\u2028\u2029]/g,
 		l10n: window.wordCountL10n || {}
 	};
 
 	/**
-	 * Count words
+	 * Counts the number of words (or other specified type) in the specified text.
 	 *
+	 * @summary  Count the number of elements in a text.
+	 *
+	 * @since    2.6
 	 * @memberof wp.utils.wordcounter
 	 *
-	 * @param {string} text - Text to count words in.
-	 * @param {string} [type] - Override type to use.
-	 * @returns {number}
+	 * @param {String}  text Text to count elements in.
+	 * @param {String}  type Optional. Specify type to use.
+	 *
+	 * @return {Number} The number of items counted.
 	 */
 	WordCounter.prototype.count = function( text, type ) {
 		var count = 0;
 
+		// Use default type if none was provided.
 		type = type || this.settings.l10n.type;
 
+		// Sanitize type to one of three possibilities: 'words', 'characters_excluding_spaces' or 'characters_including_spaces'.
 		if ( type !== 'characters_excluding_spaces' && type !== 'characters_including_spaces' ) {
 			type = 'words';
 		}
 
+		// If we have any text at all.
 		if ( text ) {
 			text = text + '\n';
 
+			// Replace all HTML with a new-line.
 			text = text.replace( this.settings.HTMLRegExp, '\n' );
+			// Remove all HTML comments.
 			text = text.replace( this.settings.HTMLcommentRegExp, '' );
 
+			// If a shortcode regular expression has been provided use it to remove shortcodes.
 			if ( this.settings.shortcodesRegExp ) {
 				text = text.replace( this.settings.shortcodesRegExp, '\n' );
 			}
 
+			// Normalize non-breaking space to a normal space.
 			text = text.replace( this.settings.spaceRegExp, ' ' );
 
 			if ( type === 'words' ) {
+				// Remove HTML Entities.
 				text = text.replace( this.settings.HTMLEntityRegExp, '' );
+				// Convert connectors to spaces to count attached text as words.
 				text = text.replace( this.settings.connectorRegExp, ' ' );
+				// Remove unwanted characters.
 				text = text.replace( this.settings.removeRegExp, '' );
 			} else {
+				// Convert HTML Entities to "a".
 				text = text.replace( this.settings.HTMLEntityRegExp, 'a' );
+				// Remove surrogate points.
 				text = text.replace( this.settings.astralRegExp, 'a' );
 			}
 
+			// Match with the selected type regular expression to count the items.
 			text = text.match( this.settings[ type + 'RegExp' ] );
 
+			// If we have any matches, set the count to the number of items found.
 			if ( text ) {
 				count = text.length;
 			}
