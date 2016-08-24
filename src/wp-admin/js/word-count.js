@@ -10,7 +10,7 @@
 ( function() {
 	/**
 	 * Word counting utility
-	 * 
+	 *
 	 * @namespace wp.utils.wordcounter
 	 * @memberof  wp.utils
 	 *
@@ -50,6 +50,7 @@
 		// Apply provided settings to object settings.
 		if ( settings ) {
 			for ( key in settings ) {
+
 				// Only apply valid settings.
 				if ( settings.hasOwnProperty( key ) ) {
 					this.settings[ key ] = settings[ key ];
@@ -71,47 +72,59 @@
 		HTMLcommentRegExp: /<!--[\s\S]*?-->/g,
 		spaceRegExp: /&nbsp;|&#160;/gi,
 		HTMLEntityRegExp: /&\S+?;/g,
+
 		// \u2014 = em-dash
 		connectorRegExp: /--|\u2014/g,
+
+		// Characters to be removed from input text.
 		removeRegExp: new RegExp( [
 			'[',
+
 				// Basic Latin (extract)
 				'\u0021-\u0040\u005B-\u0060\u007B-\u007E',
+
 				// Latin-1 Supplement (extract)
 				'\u0080-\u00BF\u00D7\u00F7',
-				// General Punctuation
-				// Superscripts and Subscripts
-				// Currency Symbols
-				// Combining Diacritical Marks for Symbols
-				// Letterlike Symbols
-				// Number Forms
-				// Arrows
-				// Mathematical Operators
-				// Miscellaneous Technical
-				// Control Pictures
-				// Optical Character Recognition
-				// Enclosed Alphanumerics
-				// Box Drawing
-				// Block Elements
-				// Geometric Shapes
-				// Miscellaneous Symbols
-				// Dingbats
-				// Miscellaneous Mathematical Symbols-A
-				// Supplemental Arrows-A
-				// Braille Patterns
-				// Supplemental Arrows-B
-				// Miscellaneous Mathematical Symbols-B
-				// Supplemental Mathematical Operators
-				// Miscellaneous Symbols and Arrows
+
+				/*
+				 * The following range consists of:
+				 * General Punctuation
+				 * Superscripts and Subscripts
+				 * Currency Symbols
+				 * Combining Diacritical Marks for Symbols
+				 * Letterlike Symbols
+				 * Number Forms
+				 * Arrows
+				 * Mathematical Operators
+				 * Miscellaneous Technical
+				 * Control Pictures
+				 * Optical Character Recognition
+				 * Enclosed Alphanumerics
+				 * Box Drawing
+				 * Block Elements
+				 * Geometric Shapes
+				 * Miscellaneous Symbols
+				 * Dingbats
+				 * Miscellaneous Mathematical Symbols-A
+				 * Supplemental Arrows-A
+				 * Braille Patterns
+				 * Supplemental Arrows-B
+				 * Miscellaneous Mathematical Symbols-B
+				 * Supplemental Mathematical Operators
+				 * Miscellaneous Symbols and Arrows
+				 */
 				'\u2000-\u2BFF',
+
 				// Supplemental Punctuation
 				'\u2E00-\u2E7F',
 			']'
 		].join( '' ), 'g' ),
+
 		// Remove UTF-16 surrogate points, see https://en.wikipedia.org/wiki/UTF-16#U.2BD800_to_U.2BDFFF
 		astralRegExp: /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
 		wordsRegExp: /\S\s+/g,
 		characters_excluding_spacesRegExp: /\S/g,
+
 		/*
 		 * Match anything that is not a formatting character, excluding:
 		 * \f = form feed
@@ -157,6 +170,7 @@
 
 			// Replace all HTML with a new-line.
 			text = text.replace( this.settings.HTMLRegExp, '\n' );
+
 			// Remove all HTML comments.
 			text = text.replace( this.settings.HTMLcommentRegExp, '' );
 
@@ -169,15 +183,20 @@
 			text = text.replace( this.settings.spaceRegExp, ' ' );
 
 			if ( type === 'words' ) {
+
 				// Remove HTML Entities.
 				text = text.replace( this.settings.HTMLEntityRegExp, '' );
+
 				// Convert connectors to spaces to count attached text as words.
 				text = text.replace( this.settings.connectorRegExp, ' ' );
+
 				// Remove unwanted characters.
 				text = text.replace( this.settings.removeRegExp, '' );
 			} else {
+
 				// Convert HTML Entities to "a".
 				text = text.replace( this.settings.HTMLEntityRegExp, 'a' );
+
 				// Remove surrogate points.
 				text = text.replace( this.settings.astralRegExp, 'a' );
 			}
@@ -194,6 +213,7 @@
 		return count;
 	};
 
+	// Add the WordCounter to the WP Utils.
 	window.wp = window.wp || {};
 	window.wp.utils = window.wp.utils || {};
 	window.wp.utils.WordCounter = WordCounter;
