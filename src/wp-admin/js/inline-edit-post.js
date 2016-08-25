@@ -1,11 +1,25 @@
-/* global inlineEditL10n, ajaxurl, typenow */
-window.wp = window.wp || {};
 /**
- * An object that manages the quick edit and bulk edit windows for editing posts or pages.
+ *  This file contains the functions needed for the inline editing of posts.
  *
- * @namespace inlineEditPost
+ *  @since 2.7.0
+ */
+
+/* global inlineEditL10n, ajaxurl, typenow */
+
+window.wp = window.wp || {};
+
+/**
+ * Manages the quick edit and bulk edit windows for editing posts or pages.
+ *
+ * @namespace
+ *
+ * @since 2.7.0
+ * @access public
  *
  * @type {Object}
+ *
+ * @property {string} type The type of inline editor.
+ * @property {string} what The prefix before the post id.
  *
  */
 var inlineEditPost;
@@ -14,23 +28,29 @@ var inlineEditPost;
 	inlineEditPost = {
 
 	/**
-	 * Initialises the inline and bulk post editor.
-	 * @memberof    inlineEditPost
-	 * @fires       inlineEditPost#init
-	 * @returns     void
+	 * @summary Initializes the inline and bulk post editor.
+	 *
+	 * Binds event handlers to the escape key to close the inline editor
+	 * and to the save and close buttons. Changes DOM to be ready for inline
+	 * editing. Adds event handler to bulk edit.
+	 *
+	 * @memberof inlineEditPost
+	 * @since 2.7.0
+	 *
+	 * @returns {void}
 	 */
 	init : function(){
 		var t = this, qeRow = $('#inline-edit'), bulkRow = $('#bulk-edit');
 
-		/**
-		 * Set if the editor is created on the posts or page edit-page.
-		 * @type {string}
-		 */
 		t.type = $('table.widefat').hasClass('pages') ? 'page' : 'post';
 		// Post id prefix.
 		t.what = '#post-';
 
-		// Bind escape key to revert the changes and close the quick editor.
+		/**
+		 * @summary Bind escape key to revert the changes and close the quick editor.
+		 *
+		 * @returns {boolean} Returns the result of revert.
+		 */
 		qeRow.keyup(function(e){
 			// Revert changes if escape key is pressed.
 			if ( e.which === 27 ) {
@@ -38,7 +58,11 @@ var inlineEditPost;
 			}
 		});
 
-		// Bind escape key to revert the changes and close the bulk editor.
+		/**
+		 * @summary Bind escape key to revert the changes and close the bulk editor.
+		 *
+		 * @returns {boolean} Returns the result of revert.
+		 */
 		bulkRow.keyup(function(e){
 			// Revert changes if escape key is pressed.
 			if ( e.which === 27 ) {
@@ -46,29 +70,49 @@ var inlineEditPost;
 			}
 		});
 
-		// Revert changes and close the quick editor if the cancel button is clicked.
+		/**
+		 * @summary Revert changes and close the quick editor if the cancel button is clicked.
+		 *
+		 * @returns {boolean} Returns the result of revert.
+		 */
 		$( '.cancel', qeRow ).click( function() {
 			return inlineEditPost.revert();
 		});
 
-		// Save changes in the quick editor if the save(named: update) button is clicked.
+		/**
+		 * @summary Save changes in the quick editor if the save(named: update) button is clicked.
+		 *
+		 * @returns {boolean} Returns the result of save.
+		 */
 		$( '.save', qeRow ).click( function() {
 			return inlineEditPost.save(this);
 		});
 
-		// If enter is pressed, and the target is not the cancel button, save the post.
+		/**
+		 * @summary If enter is pressed, and the target is not the cancel button, save the post.
+		 *
+		 * @returns {boolean} Returns the result of save.
+		 */
 		$('td', qeRow).keydown(function(e){
 			if ( e.which === 13 && ! $( e.target ).hasClass( 'cancel' ) ) {
 				return inlineEditPost.save(this);
 			}
 		});
 
-		// Revert changes and close the bulk editor if the cancel button is clicked.
+		/**
+		 * @summary Revert changes and close the bulk editor if the cancel button is clicked.
+		 *
+		 * @returns {boolean} Returns the result of revert.
+		 */
 		$( '.cancel', bulkRow ).click( function() {
 			return inlineEditPost.revert();
 		});
 
-		// Disables the password input field when the private post checkbox is checked.
+		/**
+		 * @summary Disables the password input field when the private post checkbox is checked.
+		 *
+		 * @returns {void}
+		 */
 		$('#inline-edit .inline-edit-private input[value="private"]').click( function(){
 			var pw = $('input.inline-edit-password-input');
 			if ( $(this).prop('checked') ) {
@@ -78,7 +122,11 @@ var inlineEditPost;
 			}
 		});
 
-		// Bind click event to the .editinline link which opens the quick editor.
+		/**
+		 * @summary Bind click event to the .editinline link which opens the quick editor.
+		 *
+		 * @returns {void}
+		 */
 		$('#the-list').on( 'click', 'a.editinline', function( e ) {
 			e.preventDefault();
 			inlineEditPost.edit(this);
@@ -92,6 +140,11 @@ var inlineEditPost;
 
 		$('select[name="_status"] option[value="future"]', bulkRow).remove();
 
+		/**
+		 * @summary Adds onclick events to the apply buttons.
+		 *
+		 * @returns {void}
+		 */
 		$('#doaction, #doaction2').click(function(e){
 			var n;
 
@@ -108,11 +161,16 @@ var inlineEditPost;
 	},
 
 	/**
-	 * Toggles the quick edit window. Hides the window when it's active and shows the window when inactive.
+	 * @summary Toggles the quick edit window.
+	 *
+	 * Hides the window when it's active and shows the window when inactive.
+	 *
 	 * @memberof inlineEditPost
-	 * @fires inlineEditPost#toggle
-	 * @param {int} el The id from the post to edit.
-	 * @returns void
+	 * @since 2.7.0
+	 *
+	 * @param {Object} el Element within a post table row.
+	 *
+	 * @returns {void}
 	 */
 	toggle : function(el){
 		var t = this;
@@ -120,26 +178,34 @@ var inlineEditPost;
 	},
 
 	/**
-	 * Creates the bulk editor row to edit multiple post at once.
+	 * @summary Creates the bulk editor row to edit multiple posts at once.
+	 *
 	 * @memberof inlineEditPost
-	 * @fires inlineEditPost#setBulk
-	 * @returns void
+	 * @since 2.7.0
+	 *
+	 * @returns {void}
 	 */
 	setBulk : function(){
 		var te = '', type = this.type, tax, c = true;
 		this.revert();
 
 		$( '#bulk-edit td' ).attr( 'colspan', $( 'th:visible, td:visible', '.widefat:first thead' ).length );
+
 		// Insert the editor at the top of the table with an empty row above to maintain zebra striping.
 		$('table.widefat tbody').prepend( $('#bulk-edit') ).prepend('<tr class="hidden"></tr>');
 		$('#bulk-edit').addClass('inline-editor').show();
 
-		// Get the selected posts based on the checked, checkboxes in the post table.
-		// Create a HTML div with the title and a link(delete-icon) for each selected post.
+		/**
+		 * @summary Create a HTML div with the title and a delete link(cross-icon) for each selected post.
+		 *
+		 * Get the selected posts based on the checked checkboxes in the post table.
+		 * Create a HTML div with the title and a link(delete-icon) for each selected post.
+		 *
+		 * @returns {void}
+		 */
 		$( 'tbody th.check-column input[type="checkbox"]' ).each( function() {
-			// If the checkbox in row for a post is selected,
-			// set c(selected posts not found) to false and create a title div for the post,
-			// with the id stored in the html attribute.
+
+			// If the checkbox for a post is selected, add the post to the edit list.
 			if ( $(this).prop('checked') ) {
 				c = false;
 				var id = $(this).val(), theTitle;
@@ -148,34 +214,46 @@ var inlineEditPost;
 			}
 		});
 
-		// If no boxes where checked, just hide the quick/bulk edit rows.
+		// If no checkboxes where checked, just hide the quick/bulk edit rows.
 		if ( c ) {
 			return this.revert();
 		}
 
-		// Add onclick events to the delete-icons for the post titles.
+		// Add onclick events to the delete-icons in the bulk editors the post title list.
 		$('#bulk-titles').html(te);
+
+		/**
+		 * @summary Binds on click events to the checkboxes before the posts in the table.
+		 *
+		 * @listens click
+		 *
+		 * @returns {void}
+		 */
 		$('#bulk-titles a').click(function(){
 			var id = $(this).attr('id').substr(1);
 			$('table.widefat input[value="' + id + '"]').prop('checked', false);
 			$('#ttle'+id).remove();
 		});
 
-		// Enable auto-complete for tags, when editing posts.
+		// Enable auto-complete for tags when editing posts.
 		if ( 'post' === type ) {
-			// Support multi taxonomies?
 			tax = 'post_tag';
 			$('tr.inline-editor textarea[name="tax_input['+tax+']"]').suggest( ajaxurl + '?action=ajax-tag-search&tax=' + tax, { delay: 500, minchars: 2, multiple: true, multipleSep: inlineEditL10n.comma } );
 		}
-		// Scrolls to the top of the table, where the editor is rendered.
+
+		// Scrolls to the top of the table where the editor is rendered.
 		$('html, body').animate( { scrollTop: 0 }, 'fast' );
 	},
 
 	/**
-	 * Creates a quick edit window for the post that has been clicked.
+	 * @summary Creates a quick edit window for the post that has been clicked.
+	 *
 	 * @memberof inlineEditPost
-	 * @fires inlineEditPost#edit
-	 * @param {int} id The id from the clicked post.
+	 * @since 2.7.0
+	 *
+	 * @param {number|Object} id The id of the clicked post or an element within a post
+	 *                           table row.
+	 *
 	 * @returns {boolean} Always returns false at the end of execution.
 	 */
 	edit : function(id) {
@@ -302,8 +380,12 @@ var inlineEditPost;
 	 * Saves the changes made in the quick edit window to the post.
 	 * Ajax saving is only for Quick Edit and not for bulk edit.
 	 *
+	 * @since 2.7.0
+	 *
 	 * @param   {int} id The id for the post that has been changed.
-	 * @returns {boolean} Returns false so the form does not submit when pressing Enter on a focused field.
+	 *
+	 * @returns {boolean} Returns false so the form does not submit
+	 *                    when pressing Enter on a focused field.
 	 */
 	save : function(id) {
 		var params, fields, page = $('.post_status_page').val() || '';
@@ -359,8 +441,10 @@ var inlineEditPost;
 
 	/**
 	 * Hide and empty the Quick Edit and/or Bulk Edit windows.
+	 *
 	 * @memberof    inlineEditPost
-	 * @fires       inlineEditPost#revert
+	 * @since 2.7.0
+	 *
 	 * @returns     {boolean} Always returns false.
 	 */
 	revert : function(){
@@ -392,10 +476,13 @@ var inlineEditPost;
 	},
 	/**
 	 * Gets the id for a the post that you want to quick edit from the row in the quick edit table.
+	 *
 	 * @memberof    inlineEditPost
-	 * @fires       inlineEditPost#getId
+	 * @since 2.7.0
+	 *
 	 * @param       {Object}    o DOM row object to get the id for.
-	 * @returns     {int}       The post id extracted from the table row in the object.
+	 *
+	 * @returns     {string}       The post id extracted from the table row in the object.
 	 */
 	getId : function(o) {
 		var id = $(o).closest('tr').attr('id'),
