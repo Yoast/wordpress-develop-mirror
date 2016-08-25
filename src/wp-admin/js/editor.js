@@ -1,20 +1,33 @@
 
 ( function( $ ) {
 	/**
-	 * Creates the tinyMCE editor and binds all events used for switching from visual to text mode.
+	 * @summary Creates the tinyMCE editors.
 	 *
-	 * Returns an object containing the switchEditor, wpautop, pre_wpautop, autop, removep functions.
+	 * Creates the tinyMCE editor and binds all events used for switching
+	 * from visual to text mode.
+	 *
+	 * Returns an object containing the switchEditor, wpautop, pre_wpautop,
+	 * autop, removep functions.
+	 *
+	 * @since 3.7.9
 	 *
 	 * @global
-	 * @returns {object} the switchEditor, wpautop, pre_wpautop, autop, removep functions.
-	 * @class
+	 * @returns {Object} The switchEditor, wpautop, pre_wpautop, autop,
+	 * 					 removep functions.
+	 * @constructor
 	 */
 	function SwitchEditors() {
 		var tinymce, $$,
 			exports = {};
 
 		/**
+		 * @summary Initilizes the event binding for switching editors.
+		 *
+		 * @since 3.7.10
+		 *
 		 * Initializes the event binding for switching editors.
+		 *
+		 * @returns {void}
 		 */
 		function init() {
 			if ( ! tinymce && window.tinymce ) {
@@ -22,16 +35,22 @@
 				$$ = tinymce.$;
 
 				/**
+				 * @summary Binds onclick events for the editor buttons.
+				 *
+				 * @since 3.7.10
+				 *
 				 * Binds an onclick event on the document.
 				 * Switches the editor if the clicked element has the 'wp-switch-editor' class.
-				 * If the class name is switch-html switches to the HTML editor, if the class name is switch-tmce0
-				 *
+				 * If the class name is switch-html switches to the HTML editor,
+				 * if the class name is switch-tmce
 				 * switches to the TMCE editor.
-				 */{
-				$$( document ).on( 'click', function( event )
+				 *
+				 * @returns {void}
+				 */
+				$$( document ).on( 'click', function( event ) {
 					var id, mode,
 						target = $$( event.target );
-php
+
 					if ( target.hasClass( 'wp-switch-editor' ) ) {
 						id = target.attr( 'data-wp-editor-id' );
 						mode = target.hasClass( 'switch-tmce' ) ? 'tmce' : 'html';
@@ -42,9 +61,15 @@ php
 		}
 
 		/**
-		 * Gets the height of the toolbar, returns the height if it is between 10 and 200, else it returns 30.
+		 * @summary Gets the height of the toolbar.
+		 *
+		 * @since 3.7.2
+		 *
+		 * Gets the height of the toolbar, returns the height if it is between
+		 * 10 and 200, else it returns 30.
 		 * @param {object} editor The tinyMCE editor.
-		 * @returns {number} If the height is between 10 and 200 return the height, else return 30.
+		 * @returns {number} If the height is between 10 and 200 return the height,
+		 * 					 else return 30.
 		 */
 		function getToolbarHeight( editor ) {
 			var node = $$( '.mce-toolbar-grp', editor.getContainer() )[0],
@@ -58,12 +83,18 @@ php
 		}
 
 		/**
+		 * @summary Switches the editor based on which button is pressed.
+		 *
+		 * @since 3.7.10
+		 *
 		 * Switches the editor based on which button is pressed.
 		 *
 		 * @param {string} id The id of the editor you want to change the editor mode for.
-		 * If an undefined id is given, it defaults to content.
+		 *					  If an undefined id is given, it defaults to content.
 		 * @param {string} mode The mode you want to switch to.
-		 * If an undefined mode is given, it defaults to toggle.
+		 * 						If an undefined mode is given, it defaults to toggle.
+		 *
+		 * @returns {void}
 		 */
 		function switchEditor( id, mode ) {
 			id = id || 'content';
@@ -75,7 +106,10 @@ php
 				$textarea = $$( '#' + id ),
 				textarea = $textarea[0];
 
-			// If the mode is toggle, checks the current state of the editor and switches to the other state.
+			/*
+			 * If the mode is toggle, checks the current state of the editor
+			 * and switches to the other state.
+			 */
 			if ( 'toggle' === mode ) {
 				if ( editor && ! editor.isHidden() ) {
 					mode = 'html';
@@ -84,11 +118,15 @@ php
 				}
 			}
 
-			// If the mode is tmce or tinymce, we are in the text mode and should show the editor.
+			/*
+			 * If the mode is tmce or tinymce, we are in text mode
+			 * and should show the editor.
+			 */
 			if ( 'tmce' === mode || 'tinymce' === mode ) {
 
 				/*
-				 * If the editor isn't hidden we are already in tmce mode and we don't need to switch.
+				 * If the editor isn't hidden we are already in tmce mode
+				 * and we don't need to switch.
 				 * Returns false to stop event bubbling.
 				 */
 				if ( editor && ! editor.isHidden() ) {
@@ -127,7 +165,8 @@ php
 			} else if ( 'html' === mode ) {
 
 				/*
-				 * If the editor is hidden we are already in html mode and we don't need to switch.
+				 * If the editor is hidden we are already in html mode and
+				 * we don't need to switch.
 				 * Returns false to stop event bubbling.
 				 */
 				if ( editor && editor.isHidden() ) {
@@ -164,8 +203,12 @@ php
 		}
 
 		/**
-		 * Replaces all paragraphs with double line breaks. Taking into account the elements where the <p> should be
-		 * preserved.
+		 * @summary Replaces all paragraphs with double linke breaks.
+		 *
+		 * @since 3.7.10
+		 *
+		 * Replaces all paragraphs with double line breaks. Taking into account
+		 * the elements where the <p> should be preserved.
 		 * Unifies all whitespaces.
 		 * Adds indenting with tabs to li, dt and dd elements.
 		 * Trims whitespaces from beginning and end of the html input.
@@ -184,7 +227,10 @@ php
 				return '';
 			}
 
-			// Protects pre|script tags by replacing all newlines and <br> tags with <wp-line-break>.
+			/*
+			 * Protects pre|script tags by replacing all newlines and
+			 * <br> tags with <wp-line-break>.
+			 */
 			if ( html.indexOf( '<pre' ) !== -1 || html.indexOf( '<script' ) !== -1 ) {
 				preserve_linebreaks = true;
 				html = html.replace( /<(pre|script)[^>]*>[\s\S]+?<\/\1>/g, function( a ) {
@@ -193,8 +239,10 @@ php
 					return a.replace( /\r?\n/g, '<wp-line-break>' );
 				});
 			}
-
-			// Keeps <br> tags inside captions and remove line breaks by replacing them with <wp-temp-br>.
+			/*
+			 * Keeps <br> tags inside captions and remove line breaks by replacing
+			 * them with <wp-temp-br>.
+			 */
 			if ( html.indexOf( '[caption' ) !== -1 ) {
 				preserve_br = true;
 				html = html.replace( /\[caption[\s\S]+?\[\/caption\]/g, function( a ) {
@@ -227,10 +275,16 @@ php
 			// Replaces white spaces with newlines in combination with [caption]'s.
 			html = html.replace( /\s*\[caption([^\[]+)\[\/caption\]\s*/gi, '\n\n[caption$1[/caption]\n\n' );
 
-			// Replaces more than 2 newlines with 2 newlines in combination with [caption]'s.
+			/*
+			 * Replaces more than 2 newlines with 2 newlines
+			 * in combination with [caption]'s.
+			 */
 			html = html.replace( /caption\]\n\n+\[caption/g, 'caption]\n\n[caption' );
 
-			// Replaces white spaces with newlines in combination with all elements listed in blocklist2.
+			/*
+			 * Replaces white spaces with newlines in combination with
+			 * all elements listed in blocklist2.
+			 */
 			html = html.replace( new RegExp('\\s*<((?:' + blocklist2 + ')(?: [^>]*)?)\\s*>', 'g' ), '\n<$1>' );
 			html = html.replace( new RegExp('\\s*</(' + blocklist2 + ')>\\s*', 'g' ), '</$1>\n' );
 
@@ -258,7 +312,10 @@ php
 			// Unmarks special paragraph closing tags.
 			html = html.replace( /<\/p#>/g, '</p>\n' );
 
-			// Replaces white spaces with newlines in combination with the special paragraph tags.
+			/*
+			 * Replaces white spaces with newlines in combination with
+			 * the special paragraph tags.
+			 */
 			html = html.replace( /\s*(<p [^>]+>[\s\S]*?<\/p>)/g, '\n$1' );
 
 			// Trims whitespace at the start or end of the string.
@@ -279,7 +336,11 @@ php
 		}
 
 		/**
-		 * Adds paragraph tags to the text taking into account the block level elements.
+		 * @summary Adds paragraph tags to the text.
+		 *
+		 * @since 3.7.10
+		 *
+		 * Adds paragraph tags to the text taking into account block level elements.
 		 * Normalizes the whitespaces and newlines.
 		 *
 		 * Similar to `wpautop()` in formatting.php.
@@ -343,19 +404,37 @@ php
 
 			// Adds 2 newlines at the end of the text.
 			text = text + '\n\n';
-			// Replaces a break tag followed by 1 or more spaces and another break tag with 2 newlines.
+			/*
+			 * Replaces a break tag followed by 1 or more spaces
+			 * and another break tag with 2 newlines.
+			 */
 			text = text.replace( /<br \/>\s*<br \/>/gi, '\n\n' );
-			// Replaces a block level element open tag with two newlines followed by the captured block level element.
+			/*
+			 * Replaces a block level element open tag with 2 newlines
+			 * followed by the captured block level element.
+			 */
 			text = text.replace( new RegExp( '(<(?:' + blocklist + ')(?: [^>]*)?>)', 'gi' ), '\n\n$1' );
-			// Replaces a block level element closing tag with the captured block level element followed by 2 newlines.
+			/*
+			 * Replaces a block level element closing tag with the captured
+			 * block level element followed by 2 newlines.
+			 */
 			text = text.replace( new RegExp( '(</(?:' + blocklist + ')>)', 'gi' ), '$1\n\n' );
 			// Adds 2 newlines to a HR tag.
 			text = text.replace( /<hr( [^>]*)?>/gi, '<hr$1>\n\n' );
-			// Replaces an option open tag preceded by spaces with an option tag without spaces.
+			/*
+			 * Replaces an option open tag preceded by spaces
+			 * with an option tag without spaces.
+			 */
 			text = text.replace( /\s*<option/gi, '<option' );
-			// Replaces an option end tag followed by spaces with an option tag without spaces.
+			/*
+			 * Replaces an option end tag followed by spaces
+			 * with an option tag without spaces.
+			 */
 			text = text.replace( /<\/option>\s*/gi, '</option>' );
-			// Replaces a newline followed by one or multiple spaces and another newline with 2 newlines.
+			/*
+			 * Replaces a newline followed by one or multiple spaces
+			 * and another newline with 2 newlines.
+			 */
 			text = text.replace( /\n\s*\n+/g, '\n\n' );
 			// Replaces 2 newlines with a paragraph and a single newline.
 			text = text.replace( /([\s\S]+?)\n\n/g, '<p>$1</p>\n' );
@@ -381,27 +460,39 @@ php
 
 			// Removes whitespaces and a single br tag after a block level element.
 			text = text.replace( new RegExp( '(</?(?:' + blocklist + ')[^>]*>)\\s*<br />', 'gi' ), '$1' );
-			// Removes a br tag preceding white spaces followed by p li div dl dd dt th pre td ul ol element..
+			/*
+			 * Removes a br tag preceding white spaces followed by
+			 * p li div dl dd dt th pre td ul ol element..
+			 */
 			text = text.replace( /<br \/>(\s*<\/?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)>)/gi, '$1' );
 			// Removes white spaces, p tags and br tags in captions.
 			text = text.replace( /(?:<p>|<br ?\/?>)*\s*\[caption([^\[]+)\[\/caption\]\s*(?:<\/p>|<br ?\/?>)*/gi, '[caption$1[/caption]' );
 
-			/*
-			 *  Makes sure there is a paragraph open tag when there is a paragraph close tag in
-			 * a div, th, td, form, fieldset or dd element.
+			/**
+			 * @summary Makes sure there is a paragraph open tag for a close tag.
+			 *
+			 * @since 3.5.2
+			 *
+			 * Makes sure there is a paragraph open tag when there is a paragraph close tag
+			 * in a div, th, td, form, fieldset or dd element.
 			 * @param a the complete match
 			 * @param b the first capture group
 			 * @param c the second capture group
 			 * @returns the string in paragraph tags.
 			 */
 			text = text.replace( /(<(?:div|th|td|form|fieldset|dd)[^>]*>)(.*?)<\/p>/g, function( a, b, c ) {
-				// Checks if the matched group has a p open tag in it, if so we don't need to add another one
-				// and the complete match can be returned.
+				/*
+				 * Checks if the matched group has a p open tag in it, if so we don't need to add
+				 * another one and the complete match can be returned.
+				 */
 				if ( c.match( /<p( [^>]*)?>/ ) ) {
 					return a;
 				}
 
-				// If there is no p open tag in the matched string, add it and return the string including p tags.
+				/*
+				 * If there is no p open tag in the matched string,
+				 * add it and return the string including p tags.
+				 */
 				return b + '<p>' + c + '</p>';
 			});
 
@@ -419,7 +510,12 @@ php
 		}
 
 		/**
-		 * Modifies the data when a switch is made. Runs removep to remove the p tags from text.
+		 * @summary Modifies the data when a switch is made from HTML to text.
+		 *
+		 * @since 3.5.2
+		 *
+		 * Modifies the data when a switch is made.
+		 * Runs removep to remove the p tags from text.
 		 * Returns the modified text.
 		 *
 		 * Adds a trigger on beforePreWpautop and afterPreWpautop.
@@ -444,7 +540,11 @@ php
 		}
 
 		/**
-		 * Modifies the data when a switch is made. Runs autop to add the p tags from text.
+		 * @summary Modifies the data when a switch is made from text to HTML.
+		 *
+		 * @since 3.5.2
+		 *
+		 * Modifies the data when a switch is made. Runs autop to add p tags from text.
 		 * Returns the modified text.
 		 *
 		 * Adds a trigger on beforeWpautop and afterWpautop.
@@ -487,7 +587,10 @@ php
 			} );
 		}
 
-		// Makes sure the window.wp object exists so autop and removep can be bound to it.
+		/*
+		 * Makes sure the window.wp object exists so autop and removep
+		 * can be bound to it.
+		 */
 		window.wp = window.wp || {};
 		window.wp.editor = window.wp.editor || {};
 		window.wp.editor.autop = wpautop;
