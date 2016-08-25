@@ -24,13 +24,14 @@
 				/**
 				 * Binds an onclick event on the document.
 				 * Switches the editor if the clicked element has the 'wp-switch-editor' class.
-				 * If the class name is switch-html switches to the HTML editor, if the class name is switch-tmce
+				 * If the class name is switch-html switches to the HTML editor, if the class name is switch-tmce0
+				 *
 				 * switches to the TMCE editor.
-				 */
-				$$( document ).on( 'click', function( event ) {
+				 */{
+				$$( document ).on( 'click', function( event )
 					var id, mode,
 						target = $$( event.target );
-
+php
 					if ( target.hasClass( 'wp-switch-editor' ) ) {
 						id = target.attr( 'data-wp-editor-id' );
 						mode = target.hasClass( 'switch-tmce' ) ? 'tmce' : 'html';
