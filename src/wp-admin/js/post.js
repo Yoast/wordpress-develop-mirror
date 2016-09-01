@@ -18,7 +18,7 @@ window.wp = window.wp || {};
 	var titleHasFocus = false;
 
 	/**
-	 * Control loading of comments on the post and term edit pages
+	 * Control loading of comments on the post and term edit pages.
 	 *
 	 * @type {{st: number, get: commentsBox.get, load: commentsBox.load}}
 	 *
@@ -29,11 +29,11 @@ window.wp = window.wp || {};
 		st : 0,
 
 		/**
-		 * Fetch comments using AJAX and display them in the box
+		 * Fetch comments using AJAX and display them in the box.
 		 *
 		 * @param {int} total Total number of comments for this post.
 		 * @param {int} num   Optional. Number of comments to fetch, defaults to 20.
-		 * @return {boolean} Always returns false.
+		 * @returns {boolean} Always returns false.
 		 *
 		 * @memberof commentsBox
 		 */
@@ -577,7 +577,7 @@ jQuery(document).ready( function($) {
 		 *
 		 * @param {Object} s Taxonomy object which will be added.
 		 *
-		 * @return {Object}
+		 * @returns {Object}
 		 */
 		catAddBefore = function( s ) {
 			if ( !$('#new'+taxonomy).val() ) {
@@ -598,7 +598,7 @@ jQuery(document).ready( function($) {
 		 * @param {Object} r Response.
 		 * @param {Object} s Taxonomy data.
 		 *
-		 * @return void
+		 * @returns void
 		 */
 		catAddAfter = function( r, s ) {
 			var sup, drop = $('#new'+taxonomy+'_parent');
@@ -642,7 +642,7 @@ jQuery(document).ready( function($) {
 			 *
 			 * @param {Object} s Request object.
 			 *
-			 * @return {Object} Data modified with post_ID attached.
+			 * @returns {Object} Data modified with post_ID attached.
 			 */
 			addBefore: function( s ) {
 				s.data += '&post_id=' + $('#post_ID').val();
@@ -667,7 +667,7 @@ jQuery(document).ready( function($) {
 		/**
 		 * When the visibility of a post changes sub-options should be shown or hidden.
 		 *
-		 * @return void
+		 * @returns void
 		 */
 		updateVisibility = function() {
 			// Show sticky for public posts.
@@ -689,7 +689,7 @@ jQuery(document).ready( function($) {
 		/**
 		 * Make sure all labels represent the current settings.
 		 *
-		 * @return {boolean} False when an invalid timestamp has been selected, otherwise True.
+		 * @returns {boolean} False when an invalid timestamp has been selected, otherwise True.
 		 */
 		updateText = function() {
 
@@ -910,7 +910,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @global
 	 *
-	 * @return void
+	 * @returns void
 	 */
 	function editPermalink() {
 		var i, slug_value,
@@ -1019,7 +1019,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @global
 	 *
-	 * @return void
+	 * @returns void
 	 */
 	wptitlehint = function(id) {
 		id = id || 'title';
