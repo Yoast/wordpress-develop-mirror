@@ -1,13 +1,25 @@
 /* global ajaxurl, attachMediaBoxL10n, _wpMediaGridSettings, showNotice */
 
+/**
+ * Creates a dialog and retrieves all the posts that a particular media item can be attached to.
+ *
+ * @summary Creates a dialog containing posts that can have a particular media attached to it.
+ *
+ * @since 3.4.2
+ *
+ * @requires jQuery
+ */
+
 var findPosts;
 ( function( $ ){
 	findPosts = {
 		/**
 		 * @summary Opens a dialog to attach media to a post.
 		 *
-		 * @param {string} af_name The name of the affected element. //todo
-		 * @param {string} af_val The value of the affected post element. //todo
+		 * Adds an overlay prior to retrieving a list of posts to attach the media to.
+		 *
+		 * @param {string} af_name The name of the affected element.
+		 * @param {string} af_val The value of the affected post element.
 		 * @returns {boolean} Always returns false.
 		 */
 		open: function( af_name, af_val ) {
@@ -106,7 +118,8 @@ var findPosts;
 
 	/**
 	 * Initializes the file once the DOM is fully loaded and attaches events to the various form elements.
-	 * 
+	 *
+	 * @returns {void}
 	 */
 	$( document ).ready( function() {
 		var settings, $mediaGridWrap = $( '#wp-media-grid' );

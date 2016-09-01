@@ -14,7 +14,7 @@ var imageEdit = window.imageEdit = {
 		 */
 		return f | 0;
 	},
-
+	//2.8.5
 	setDisabled : function( el, s ) {
 		/*
 		 * `el` can be a single form element or a fieldset. Before #28864, the disabled state on
