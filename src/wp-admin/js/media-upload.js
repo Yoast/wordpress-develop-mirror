@@ -22,8 +22,8 @@ var wpActiveEditor, send_to_editor;
  * @global {tinymce} tinymce An instance of the TinyMCE editor.
  * @global {QTags} QTags An instance of QTags.
  *
- * @param {string} html The HTML/text to be sent to the editor.
- * @return {boolean} Returns false when both TinyMCE and QTags instances are unavailable. This means that the HTML was not sent to the editor.
+ * @param {string} html The HTML to be sent to the editor.
+ * @returns {boolean} Returns false when both TinyMCE and QTags instances are unavailable. This means that the HTML was not sent to the editor.
  */
 send_to_editor = function( html ) {
 	var editor,
@@ -46,8 +46,10 @@ send_to_editor = function( html ) {
 	if ( editor && ! editor.isHidden() ) {
 		editor.execCommand( 'mceInsertContent', false, html );
 	} else if ( hasQuicktags ) {
+		// If quick tags are available, insert the HTML into its content.
 		QTags.insertContent( html );
 	} else {
+		// If neither the TinyMCE editor and the quick tags are available, add the HTML to the current active editor.
 		document.getElementById( wpActiveEditor ).value += html;
 	}
 
@@ -65,7 +67,7 @@ var tb_position;
 	 *
 	 * @since 2.6.0
 	 *
-	 * @return {HTMLElements[]} Array containing all the found ThickBox anchors.
+	 * @returns {HTMLElements[]} Array containing all the found ThickBox anchors.
 	 */
 	tb_position = function() {
 		var tbWindow = $('#TB_window'),
