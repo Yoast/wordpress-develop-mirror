@@ -1,5 +1,8 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/class-basic-object.php';
+require_once dirname( __FILE__ ) . '/class-basic-subclass.php';
+
 /**
  * Resets various `$_SERVER` variables that can get altered during tests.
  */
@@ -48,45 +51,49 @@ function _test_filter_build_unique_id($tag, $function, $priority) {
 	}
 }
 
+function _delete_all_data() {
+	global $wpdb;
+
+	foreach ( array(
+		$wpdb->posts,
+		$wpdb->postmeta,
+		$wpdb->comments,
+		$wpdb->commentmeta,
+		$wpdb->term_relationships,
+		$wpdb->termmeta
+	) as $table ) {
+		$wpdb->query( "DELETE FROM {$table}" );
+	}
+
+	foreach ( array(
+		$wpdb->terms,
+		$wpdb->term_taxonomy
+	) as $table ) {
+		$wpdb->query( "DELETE FROM {$table} WHERE term_id != 1" );
+	}
+
+	$wpdb->query( "UPDATE {$wpdb->term_taxonomy} SET count = 0" );
+
+	$wpdb->query( "DELETE FROM {$wpdb->users} WHERE ID != 1" );
+	$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE user_id != 1" );
+}
+
 function _delete_all_posts() {
 	global $wpdb;
 
-	$all_posts = $wpdb->get_col("SELECT ID from {$wpdb->posts}");
-	if ($all_posts) {
-		foreach ($all_posts as $id)
-			wp_delete_post( $id, true );
+	$all_posts = $wpdb->get_results( "SELECT ID, post_type from {$wpdb->posts}", ARRAY_A );
+	if ( ! $all_posts ) {
+		return;
+	}
+
+	foreach ( $all_posts as $data ) {
+		if ( 'attachment' === $data['post_type'] ) {
+			wp_delete_attachment( $data['ID'], true );
+		} else {
+			wp_delete_post( $data['ID'], true );
+		}
 	}
 }
-
-class Basic_Object {
-	private $foo = 'bar';
-
-	public function __get( $name ) {
-		return $this->$name;
-	}
-
-	public function __set( $name, $value ) {
-		return $this->$name = $value;
-	}
-
-	public function __isset( $name ) {
-		return isset( $this->$name );
-	}
-
-	public function __unset( $name ) {
-		unset( $this->$name );
-	}
-
-	public function __call( $name, $arguments ) {
-		return call_user_func_array( array( $this, $name ), $arguments );
-	}
-
-	private function callMe() {
-		return 'maybe';
-	}
-}
-
-class Basic_Subclass extends Basic_Object {}
 
 function _wp_die_handler( $message, $title = '', $args = array() ) {
 	if ( !$GLOBALS['_wp_die_disabled'] ) {
@@ -147,7 +154,7 @@ function _upload_dir_no_subdir( $uploads ) {
 
 /**
  * Helper used with the `upload_dir` filter to set https upload URL.
- */ 
+ */
 function _upload_dir_https( $uploads ) {
 	$uploads['url'] = str_replace( 'http://', 'https://', $uploads['url'] );
 	$uploads['baseurl'] = str_replace( 'http://', 'https://', $uploads['baseurl'] );

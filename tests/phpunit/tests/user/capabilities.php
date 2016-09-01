@@ -20,12 +20,6 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		);
 	}
 
-	public static function wpTearDownAfterClass() {
-		foreach ( self::$users as $role => $user ) {
-			self::delete_user( $user->ID );
-		}
-	}
-
 	function setUp() {
 		parent::setUp();
 		// keep track of users we create
@@ -90,6 +84,8 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			'import'                 => array( 'administrator' ),
 			'list_users'             => array( 'administrator' ),
 			'manage_options'         => array( 'administrator' ),
+			'delete_site'            => array( 'administrator' ),
+			'add_users'              => array( 'administrator' ),
 			'promote_users'          => array( 'administrator' ),
 			'remove_users'           => array( 'administrator' ),
 			'switch_themes'          => array( 'administrator' ),
@@ -181,6 +177,8 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			'import'                 => array( 'administrator' ),
 			'list_users'             => array( 'administrator' ),
 			'manage_options'         => array( 'administrator' ),
+			'delete_site'            => array( 'administrator' ),
+			'add_users'              => array( 'administrator' ),
 			'promote_users'          => array( 'administrator' ),
 			'remove_users'           => array( 'administrator' ),
 			'switch_themes'          => array( 'administrator' ),
@@ -1191,7 +1189,7 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 		foreach ( $caps as $cap => $roles ) {
 			$this->assertFalse( current_user_can( $cap ), "Non-logged-in user should not have the {$cap} capability" );
-		}		
+		}
 
 	}
 

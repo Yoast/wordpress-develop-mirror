@@ -6,14 +6,18 @@
  */
 class Tests_Media extends WP_UnitTestCase {
 	protected static $large_id;
+	protected static $_sizes;
 
 	public static function wpSetUpBeforeClass( $factory ) {
+		self::$_sizes = wp_get_additional_image_sizes();
+		$GLOBALS['_wp_additional_image_sizes'] = array();
+
 		$filename = DIR_TESTDATA . '/images/test-image-large.png';
 		self::$large_id = $factory->attachment->create_upload_object( $filename );
 	}
 
 	public static function wpTearDownAfterClass() {
-		wp_delete_attachment( self::$large_id );
+		$GLOBALS['_wp_additional_image_sizes'] = self::$_sizes;
 	}
 
 	function setUp() {
@@ -644,18 +648,14 @@ VIDEO;
 	 * @ticket 26768
 	 */
 	function test_add_image_size() {
-		global $_wp_additional_image_sizes;
-
-		if ( ! isset( $_wp_additional_image_sizes ) ) {
-			$_wp_additional_image_sizes = array();
-		}
+		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
 		remove_image_size( 'test-size' );
 
 		$this->assertArrayNotHasKey( 'test-size', $_wp_additional_image_sizes );
 		add_image_size( 'test-size', 200, 600 );
 
-		$sizes = $_wp_additional_image_sizes;
+		$sizes = wp_get_additional_image_sizes();
 
 		// Clean up
 		remove_image_size( 'test-size' );
@@ -971,7 +971,7 @@ EOF;
 	 * @ticket 33641
 	 */
 	function test_wp_calculate_image_srcset() {
-		global $_wp_additional_image_sizes;
+		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
 		$year_month = date('Y/m');
 		$image_meta = wp_get_attachment_metadata( self::$large_id );
@@ -1011,7 +1011,7 @@ EOF;
 	 * @ticket 33641
 	 */
 	function test_wp_calculate_image_srcset_no_date_uploads() {
-		global $_wp_additional_image_sizes;
+		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
 		// Disable date organized uploads
 		add_filter( 'upload_dir', '_upload_dir_no_subdir' );
@@ -1093,7 +1093,7 @@ EOF;
 	 * @ticket 35106
 	 */
 	function test_wp_calculate_image_srcset_with_absolute_path_in_meta() {
-		global $_wp_additional_image_sizes;
+		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
 		$year_month = date('Y/m');
 		$image_meta = wp_get_attachment_metadata( self::$large_id );
@@ -1369,7 +1369,7 @@ EOF;
 	 * @ticket 33641
 	 */
 	function test_wp_get_attachment_image_srcset() {
-		global $_wp_additional_image_sizes;
+		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
 		$image_meta = wp_get_attachment_metadata( self::$large_id );
 		$size_array = array( 1600, 1200 ); // full size
@@ -1754,6 +1754,66 @@ EOF;
 		$expected = sprintf( $html, $url, $attachment[0], $alt, $attachment[1], $attachment[2], $align, $size, $id );
 
 		$this->assertSame( $expected, get_image_send_to_editor( $id, $caption, $title, $align, $url, $rel, $size, $alt ) );
+	}
+
+	/**
+	 * Tests if wp_get_attachment_image() uses wp_get_attachment_metadata().
+	 *
+	 * In this way, the meta data can be filtered using the filter
+	 * `wp_get_attachment_metadata`.
+	 *
+	 * The test checks if the image size that is added in the filter is
+	 * used in the output of `wp_get_attachment_image()`.
+	 *
+	 * @ticket 36246
+	 */
+	function test_wp_get_attachment_image_should_use_wp_get_attachment_metadata() {
+		add_filter( 'wp_get_attachment_metadata', array( $this, '_filter_36246' ), 10, 2 );
+
+		remove_all_filters( 'wp_calculate_image_sizes' );
+
+		$actual = wp_get_attachment_image( self::$large_id, 'testsize' );
+		$year = date( 'Y' );
+		$month = date( 'm' );
+
+		$expected = '<img width="999" height="999" src="http://example.org/wp-content/uploads/' . $year . '/' . $month . '/test-image-testsize-999x999.png"' .
+			' class="attachment-testsize size-testsize" alt="test-image-large.png"' .
+			' srcset="http://example.org/wp-content/uploads/' . $year . '/' . $month . '/test-image-testsize-999x999.png 999w,' .
+				' http://example.org/wp-content/uploads/' . $year . '/' . $month . '/test-image-large-150x150.png 150w"' .
+				' sizes="(max-width: 999px) 100vw, 999px" />';
+
+		remove_filter( 'wp_get_attachment_metadata', array( $this, '_filter_36246' ) );
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	function _filter_36246( $data, $attachment_id ) {
+		$data['sizes']['testsize'] = array(
+			'file' => 'test-image-testsize-999x999.png',
+			'width' => 999,
+			'height' => 999,
+			'mime-type' => 'image/png',
+		);
+		return $data;
+	}
+
+	/**
+	 * @ticket 37813
+	 */
+	public function test_return_type_when_inserting_attachment_with_error_in_data() {
+		$data = array(
+			'post_status'  => 'public',
+			'post_content' => 'Attachment content',
+			'post_title'   => 'Attachment Title',
+			'post_date'    => '2012-02-30 00:00:00',
+		);
+
+		$attachment_id = wp_insert_attachment( $data, '', 0, true );
+		$this->assertWPError( $attachment_id );
+		$this->assertEquals( 'invalid_date', $attachment_id->get_error_code() );
+
+		$attachment_id = wp_insert_attachment( $data, '', 0 );
+		$this->assertSame( 0, $attachment_id );
 	}
 }
 

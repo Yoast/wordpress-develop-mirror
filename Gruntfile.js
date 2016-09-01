@@ -438,6 +438,11 @@ module.exports = function(grunt) {
 				cmd: 'phpunit',
 				args: ['-c', 'phpunit.xml.dist', '--group', 'external-http']
 			}
+			//,
+			//'external-oembed': {
+			//	cmd: 'phpunit',
+			//	args: ['-c', 'phpunit.xml.dist', '--group', 'external-oembed']
+			//}
 		},
 		uglify: {
 			options: {
@@ -514,8 +519,17 @@ module.exports = function(grunt) {
 				},
 				src: SOURCE_DIR + 'wp-admin/js/bookmarklet.js',
 				dest: SOURCE_DIR + 'wp-admin/js/bookmarklet.min.js'
+			},
+			masonry: {
+				options: {
+					// Preserve comments that start with a bang.
+					preserveComments: /^!/
+				},
+				src: SOURCE_DIR + 'wp-includes/js/jquery/jquery.masonry.js',
+				dest: SOURCE_DIR + 'wp-includes/js/jquery/jquery.masonry.min.js'
 			}
 		},
+
 		concat: {
 			tinymce: {
 				options: {
@@ -676,6 +690,7 @@ module.exports = function(grunt) {
 		'browserify',
 		'jshint:corejs',
 		'uglify:bookmarklet',
+		'uglify:masonry',
 		'qunit:compiled'
 	] );
 

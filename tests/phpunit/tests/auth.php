@@ -26,10 +26,6 @@ class Tests_Auth extends WP_UnitTestCase {
 		self::$wp_hasher = new PasswordHash( 8, true );
 	}
 
-	public static function wpTearDownAfterClass() {
-		self::delete_user( self::$user_id );
-	}
-
 	function setUp() {
 		parent::setUp();
 
@@ -151,6 +147,34 @@ class Tests_Auth extends WP_UnitTestCase {
 		wp_verify_nonce( $nonce, 'nonce_test_action' );
 
 		$this->assertEquals( $count, did_action( $this->nonce_failure_hook ) );
+	}
+
+	/**
+	 * @ticket 36361
+	 */
+	public function test_check_admin_referer_with_no_action_triggers_doing_it_wrong() {
+		$this->setExpectedIncorrectUsage( 'check_admin_referer' );
+
+		// A valid nonce needs to be set so the check doesn't die()
+		$_REQUEST['_wpnonce'] = wp_create_nonce( -1 );
+		$result = check_admin_referer();
+		$this->assertSame( 1, $result );
+
+		unset( $_REQUEST['_wpnonce'] );
+	}
+
+	/**
+	 * @ticket 36361
+	 */
+	public function test_check_ajax_referer_with_no_action_triggers_doing_it_wrong() {
+		$this->setExpectedIncorrectUsage( 'check_ajax_referer' );
+
+		// A valid nonce needs to be set so the check doesn't die()
+		$_REQUEST['_wpnonce'] = wp_create_nonce( -1 );
+		$result = check_ajax_referer();
+		$this->assertSame( 1, $result );
+
+		unset( $_REQUEST['_wpnonce'] );
 	}
 
 	function test_password_length_limit() {

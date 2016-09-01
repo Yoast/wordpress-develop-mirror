@@ -20,7 +20,7 @@
 function create_initial_post_types() {
 	register_post_type( 'post', array(
 		'labels' => array(
-			'name_admin_bar' => _x( 'Post', 'add new on admin bar' ),
+			'name_admin_bar' => _x( 'Post', 'add new from admin bar' ),
 		),
 		'public'  => true,
 		'_builtin' => true, /* internal use only. don't use this when registering your own post type. */
@@ -37,7 +37,7 @@ function create_initial_post_types() {
 
 	register_post_type( 'page', array(
 		'labels' => array(
-			'name_admin_bar' => _x( 'Page', 'add new on admin bar' ),
+			'name_admin_bar' => _x( 'Page', 'add new from admin bar' ),
 		),
 		'public' => true,
 		'publicly_queryable' => false,
@@ -837,7 +837,7 @@ function get_post_type( $post = null ) {
  * Retrieves a post type object by name.
  *
  * @since 3.0.0
- * @since 4.6.0 Converted to use WP_Post_Type.
+ * @since 4.6.0 Object returned is now an instance of WP_Post_Type.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -900,7 +900,7 @@ function get_post_types( $args = array(), $output = 'names', $operator = 'and' )
  * @since 3.0.0 The `show_ui` argument is now enforced on the new post screen.
  * @since 4.4.0 The `show_ui` argument is now enforced on the post type listing
  *              screen and post editing screen.
- * @since 4.6.0 Converted to use WP_Post_Type.
+ * @since 4.6.0 Post type object returned is now an instance of WP_Post_Type.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -1058,7 +1058,6 @@ function register_post_type( $post_type, $args = array() ) {
  * Can not be used to unregister built-in post types.
  *
  * @since 4.5.0
- * @since 4.6.0 Converted to use WP_Post_Type.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -2867,7 +2866,7 @@ function wp_get_recent_posts( $args = array(), $output = ARRAY_A ) {
  *     @type array  $tax_input             Array of taxonomy terms keyed by their taxonomy name. Default empty.
  *     @type array  $meta_input            Array of post meta values keyed by their post meta key. Default empty.
  * }
- * @param bool  $wp_error Optional. Whether to allow return of WP_Error on failure. Default false.
+ * @param bool  $wp_error Optional. Whether to return a WP_Error on failure. Default false.
  * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
  */
 function wp_insert_post( $postarr, $wp_error = false ) {
@@ -3260,16 +3259,6 @@ function wp_insert_post( $postarr, $wp_error = false ) {
 		}
 	}
 
-	// Set or remove featured image.
-	if ( isset( $postarr['_thumbnail_id'] ) && ( post_type_supports( $post_type, 'thumbnail' ) || 'revision' === $post_type ) ) {
-		$thumbnail_id = intval( $postarr['_thumbnail_id'] );
-		if ( -1 === $thumbnail_id ) {
-			delete_post_thumbnail( $post_ID );
-		} else {
-			set_post_thumbnail( $post_ID, $thumbnail_id );
-		}
-	}
-
 	if ( ! empty( $postarr['meta_input'] ) ) {
 		foreach ( $postarr['meta_input'] as $field => $value ) {
 			update_post_meta( $post_ID, $field, $value );
@@ -3290,6 +3279,27 @@ function wp_insert_post( $postarr, $wp_error = false ) {
 
 		if ( ! empty( $postarr['context'] ) ) {
 			add_post_meta( $post_ID, '_wp_attachment_context', $postarr['context'], true );
+		}
+	}
+
+	// Set or remove featured image.
+	if ( isset( $postarr['_thumbnail_id'] ) ) {
+		$thumbnail_support = current_theme_supports( 'post-thumbnails', $post_type ) && post_type_supports( $post_type, 'thumbnail' ) || 'revision' === $post_type;
+		if ( ! $thumbnail_support && 'attachment' === $post_type && $post_mime_type ) {
+			if ( wp_attachment_is( 'audio', $post_ID ) ) {
+				$thumbnail_support = post_type_supports( 'attachment:audio', 'thumbnail' ) || current_theme_supports( 'post-thumbnails', 'attachment:audio' );
+			} elseif ( wp_attachment_is( 'video', $post_ID ) ) {
+				$thumbnail_support = post_type_supports( 'attachment:video', 'thumbnail' ) || current_theme_supports( 'post-thumbnails', 'attachment:video' );
+			}
+		}
+
+		if ( $thumbnail_support ) {
+			$thumbnail_id = intval( $postarr['_thumbnail_id'] );
+			if ( -1 === $thumbnail_id ) {
+				delete_post_thumbnail( $post_ID );
+			} else {
+				set_post_thumbnail( $post_ID, $thumbnail_id );
+			}
 		}
 	}
 
@@ -4684,15 +4694,17 @@ function is_local_attachment($url) {
  * setting the value for the 'comment_status' key.
  *
  * @since 2.0.0
+ * @since 4.7.0 Added the `$wp_error` parameter to allow a WP_Error to be returned on failure.
  *
  * @see wp_insert_post()
  *
- * @param string|array $args   Arguments for inserting an attachment.
- * @param string       $file   Optional. Filename.
- * @param int          $parent Optional. Parent post ID.
- * @return int Attachment ID.
+ * @param string|array $args     Arguments for inserting an attachment.
+ * @param string       $file     Optional. Filename.
+ * @param int          $parent   Optional. Parent post ID.
+ * @param bool         $wp_error Optional. Whether to return a WP_Error on failure. Default false.
+ * @return int|WP_Error The attachment ID on success. The value 0 or WP_Error on failure.
  */
-function wp_insert_attachment( $args, $file = false, $parent = 0 ) {
+function wp_insert_attachment( $args, $file = false, $parent = 0, $wp_error = false ) {
 	$defaults = array(
 		'file'        => $file,
 		'post_parent' => 0
@@ -4706,7 +4718,7 @@ function wp_insert_attachment( $args, $file = false, $parent = 0 ) {
 
 	$data['post_type'] = 'attachment';
 
-	return wp_insert_post( $data );
+	return wp_insert_post( $data, $wp_error );
 }
 
 /**

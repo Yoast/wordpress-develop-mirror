@@ -45,7 +45,7 @@ abstract class WP_HTTP_UnitTestCase extends WP_UnitTestCase {
 			return;
 		}
 
-		$class = "WP_Http_" . $this->transport;
+		$class = "WP_Http_" . ucfirst( $this->transport );
 		if ( !call_user_func( array($class, 'test') ) ) {
 			$this->markTestSkipped( sprintf('The transport %s is not supported on this system', $this->transport) );
 		}
@@ -374,6 +374,19 @@ abstract class WP_HTTP_UnitTestCase extends WP_UnitTestCase {
 
 		$res = wp_remote_get( 'https://wordpress.org/' );
 		$this->assertTrue( ! is_wp_error( $res ), print_r( $res, true ) );
+	}
+
+	/**
+	 * @ticket 37733
+	 */
+	function test_url_with_double_slashes_path() {
+		$url = $this->redirection_script . '?rt=' . 0;
+
+		$path = parse_url( $url, PHP_URL_PATH );
+		$url = str_replace( $path, '/' . $path, $url );
+
+		$res = wp_remote_request( $url );
+		$this->assertNotWPError( $res );
 	}
 
 

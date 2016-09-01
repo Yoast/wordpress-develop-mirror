@@ -9,6 +9,7 @@ window._wpUpdatesSettings = {
 		'updated': 'Updated!',
 		'update': 'Update',
 		'updateNow': 'Update Now',
+		'updateNowLabel': 'Update %s now',
 		'updateFailedShort': 'Update Failed!',
 		'updateFailed': 'Update Failed: %s',
 		'updatingLabel': 'Updating %s...',
@@ -19,6 +20,7 @@ window._wpUpdatesSettings = {
 		'updateCancel': 'Update canceled.',
 		'beforeunload': 'Updates may not complete if you navigate away from this page.',
 		'installNow': 'Install Now',
+		'installNowLabel': 'Install %s now',
 		'installing': 'Installing...',
 		'installed': 'Installed!',
 		'installFailedShort': 'Install Failed!',
@@ -46,6 +48,8 @@ window._wpUpdatesSettings = {
 		'activateThemeLabel':  'Activate %s',
 		'activateImporter': 'Run Importer',
 		'unknownError': 'An unknown error occurred',
+		'connectionError': 'Connection lost or the server is busy. Please try again later.',
+		'nonceError': 'An error has occurred. Please reload the page and try again.',
 		'pluginsFound': 'Number of plugins found: %d',
 		'noPluginsFound': 'No plugins found. Try a different search.'
 	}

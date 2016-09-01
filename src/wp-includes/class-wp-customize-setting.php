@@ -468,7 +468,7 @@ class WP_Customize_Setting {
 	 * the value of the setting.
 	 *
 	 * @since 3.4.0
-	 * @since 4.6.0 Return the result of updating the value.
+	 *
 	 * @access public
 	 *
 	 * @return false|void False if cap check fails or value isn't set or is invalid.
@@ -497,6 +497,8 @@ class WP_Customize_Setting {
 
 	/**
 	 * Fetch and sanitize the $_POST value for the setting.
+	 *
+	 * During a save request prior to save, post_value() provides the new value while value() does not.
 	 *
 	 * @since 3.4.0
 	 *
