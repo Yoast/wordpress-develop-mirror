@@ -4,7 +4,18 @@
 var tagBox, array_unique_noempty;
 
 ( function( $ ) {
-	// Return an array with any duplicate, whitespace or empty values removed
+
+	/**
+	 * Filters all items from an array into a new array containing only the unique items.
+	 * This also excludes whitespace or empty values.
+	 *
+	 * @summary Filters all items from an array into a new array containing only the unique items.
+	 *
+	 * @since Unknown
+	 *
+	 * @param {Array} array The array to filter through.
+	 * @returns {Array} A new array containing only the unique items.
+	 */
 	array_unique_noempty = function( array ) {
 		var out = [];
 
@@ -20,6 +31,17 @@ var tagBox, array_unique_noempty;
 	};
 
 	tagBox = {
+
+		/**
+		 * Cleans up tags by converting the tag delimiter to comma's and by removing extra spaces and comma's.
+		 *
+		 * @summary Cleans up tags by removing redundant characters.
+		 *
+		 * @since Unknown
+		 *
+		 * @param {string} tags The tags that need to be cleaned up.
+		 * @returns {string} The cleaned up tags.
+		 */
 		clean : function(tags) {
 			var comma = window.tagsBoxL10n.tagDelimiter;
 			if ( ',' !== comma )
@@ -30,6 +52,12 @@ var tagBox, array_unique_noempty;
 			return tags;
 		},
 
+		/**
+		 * Parses the tags and binds events to them to make them editable.
+		 *
+		 * @param el
+		 * @returns {boolean}
+		 */
 		parseTags : function(el) {
 			var id = el.id,
 				num = id.split('-check-num-')[1],
@@ -54,6 +82,11 @@ var tagBox, array_unique_noempty;
 			return false;
 		},
 
+		/**
+		 * Creates all the links, buttons and fields for adding and editing tags.
+		 *
+		 * @param el
+		 */
 		quickClicks : function( el ) {
 			var thetags = $('.the-tags', el),
 				tagchecklist = $('.tagchecklist', el),
