@@ -275,10 +275,10 @@ var inlineEditPost;
 
 		$(t.what+id).removeClass('is-expanded').hide().after(editRow).after('<tr class="hidden"></tr>');
 
-		// Populate the data
+		// Populate fields in the quick edit window.
 		rowData = $('#inline_'+id);
 		if ( !$(':input[name="post_author"] option[value="' + $('.post_author', rowData).text() + '"]', editRow).val() ) {
-			// The post author no longer has edit caps, so we need to add them to the list of authors
+			// The post author no longer has edit capabilities, so we need to add them to the list of authors.
 			$(':input[name="post_author"]', editRow).prepend('<option value="' + $('.post_author', rowData).text() + '">' + $('#' + t.type + '-' + id + ' .author').text() + '</option>');
 		}
 		if ( $( ':input[name="post_author"] option', editRow ).length === 1 ) {
@@ -287,7 +287,11 @@ var inlineEditPost;
 
 		for ( f = 0; f < fields.length; f++ ) {
 			val = $('.'+fields[f], rowData);
-			// Deal with Twemoji
+			/**
+			 * @summary Replaces the image for a Twemoji(Twitter emoji) with it's alternate text.
+			 *
+			 * @returns Alternate text from the image.
+			 */
 			val.find( 'img' ).replaceWith( function() { return this.alt; } );
 			val = val.text();
 			$(':input[name="' + fields[f] + '"]', editRow).val( val );
@@ -303,7 +307,11 @@ var inlineEditPost;
 			$( 'input[name="sticky"]', editRow ).prop( 'checked', true );
 		}
 
-		// hierarchical taxonomies
+		/**
+		 * @summary Creates the select boxes for the categories.
+		 *
+		 * @returns {void}
+		 */
 		$('.post_category', rowData).each(function(){
 			var taxname,
 				term_ids = $(this).text();
@@ -314,7 +322,12 @@ var inlineEditPost;
 			}
 		});
 
-		//flat taxonomies
+		/**
+		 * @summary Gets all the taxonomies for live auto-fill suggestions.
+		 * When typing the name of a tag.
+		 *
+		 * @returns {void}
+		 */
 		$('.tags_input', rowData).each(function(){
 			var terms = $(this),
 				taxname = $(this).attr('id').replace('_' + id, ''),
@@ -377,8 +390,8 @@ var inlineEditPost;
 
 
 	/**
-	 * Saves the changes made in the quick edit window to the post.
-	 * Ajax saving is only for Quick Edit and not for bulk edit.
+	 * @summary Saves the changes made in the quick edit window to the post.
+	 * AJAX saving is only for Quick Edit and not for bulk edit.
 	 *
 	 * @since 2.7.0
 	 *
@@ -440,7 +453,7 @@ var inlineEditPost;
 	},
 
 	/**
-	 * Hide and empty the Quick Edit and/or Bulk Edit windows.
+	 * @summary Hides and empties the Quick Edit and/or Bulk Edit windows.
 	 *
 	 * @memberof    inlineEditPost
 	 * @since 2.7.0
@@ -459,7 +472,7 @@ var inlineEditPost;
 				// Hide the bulk editor.
 				$( '#bulk-edit', $tableWideFat ).removeClass( 'inline-editor' ).hide().siblings( '.hidden' ).remove();
 				$('#bulk-titles').empty();
-				// Stores the empty bulk editor in a hidden element.
+				// Store the empty bulk editor in a hidden element.
 				$('#inlineedit').append( $('#bulk-edit') );
 				// Move focus back to the Bulk Action button that was activated.
 				$( '#' + inlineEditPost.whichBulkButtonId ).focus();
@@ -474,15 +487,17 @@ var inlineEditPost;
 
 		return false;
 	},
+
 	/**
-	 * Gets the id for a the post that you want to quick edit from the row in the quick edit table.
+	 * @summary Gets the id for a the post that you want to quick edit from the row
+	 * in the quick edit table.
 	 *
 	 * @memberof    inlineEditPost
 	 * @since 2.7.0
 	 *
-	 * @param       {Object}    o DOM row object to get the id for.
+	 * @param   {Object} o DOM row object to get the id for.
 	 *
-	 * @returns     {string}       The post id extracted from the table row in the object.
+	 * @returns {string} The post id extracted from the table row in the object.
 	 */
 	getId : function(o) {
 		var id = $(o).closest('tr').attr('id'),
