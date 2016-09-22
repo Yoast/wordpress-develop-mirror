@@ -48,7 +48,7 @@
 	 *          or a field set.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {HTMLElement} el The element that should be modified.
 	 * @param {bool|int}    s  The state for the element. If set to true the element
@@ -74,6 +74,7 @@
 	 * @summary Initializes the image editor.
 	 *
 	 * @memberOf imageEdit
+	 * @since    2.9
 	 *
 	 * @param {int} postid The post id.
 	 *
@@ -116,7 +117,7 @@
 	 * @summary Toggles the wait/load icon in the editor.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid The post id.
 	 * @param {int} toggle Is 0 or 1, fades the icon in then 1 and out when 0.
@@ -137,7 +138,7 @@
 	 * @summary Shows or hides the image edit help box.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {HTMLElement} el The element to create the help window in.
 	 *
@@ -156,7 +157,7 @@
 	 * @summary Gets the value from the image edit target, this contains the image sizes where the (possible) changes have to be applied to.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid The post id.
 	 *
@@ -171,13 +172,13 @@
 	 * If the original image size is exceeded a red exclamation mark is shown.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}         postid The current post id.
 	 * @param {int}         x      Is 0 when it applies the y-axis and 1 when applicable for the x-axis.
 	 * @param {HTMLElement} el     Element.
 	 *
-	 * @returns void
+	 * @returns {void}
 	 */
 	scaleChanged : function( postid, x, el ) {
 		var w = $('#imgedit-scale-width-' + postid), h = $('#imgedit-scale-height-' + postid),
@@ -201,11 +202,12 @@
 			warn.css('visibility', 'hidden');
 		}
 	},
+
 	/**
 	 * @summary Gets the selected aspect ratio.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid The post id.
 	 *
@@ -232,7 +234,7 @@
 	 * The history consist of (edit)actions performed on the image.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid  The post id.
 	 * @param {int} setSize 0 or 1, when 1 the image resets to its original size.
@@ -295,13 +297,13 @@
 	 * @summary Binds the necessary events to the image. When the image source is reloaded the image will be reloaded.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}      postid   The post id.
 	 * @param {string}   nonce    The nonce to verify the request.
 	 * @param {function} callback Function executed when the image is loaded.
 	 *
-	 * @returns void
+	 * @returns {void}
 	 */
 	refreshEditor : function(postid, nonce, callback) {
 		var t = this, data, img;
@@ -369,7 +371,7 @@
 	 * @summary Performs an image edit action.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param  {int}     postid The post id.
 	 * @param  {string}  nonce  The nonce to verify the request.
@@ -433,7 +435,7 @@
 	 * @summary Stores the changes that are made to the image.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}     postid   The post id to get the image from the database.
 	 * @param {string}  nonce    The nonce to verify the request.
@@ -498,7 +500,7 @@
 	 * @summary Creates the image edit window.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}    postid   The post id for the image.
 	 * @param {string} nonce    The nonce to verify the request.
@@ -555,7 +557,7 @@
 	 * @summary Initializes the cropping tool and sets a default cropping selection. Also set the focus to the help button.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid The post id.
 	 *
@@ -575,7 +577,7 @@
 	 * @summary Initializes the cropping tool.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}         postid The post id.
 	 * @param {HTMLElement} image  The preview image.
@@ -668,7 +670,7 @@
 	 * @summary Stores the current crop selection.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}    postid The post id.
 	 * @param {object} c      The selection.
@@ -699,7 +701,7 @@
 	 * @summary Closes the image editor.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}  postid The post id.
 	 * @param {bool} warn   Warning message.
@@ -740,7 +742,7 @@
 	 * @summary Checks if the image edit history is saved.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid The post id.
 	 *
@@ -764,7 +766,7 @@
 	 * @summary Adds a image edit action to the history.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {object} op     The original position.
 	 * @param {int}    postid The post id.
@@ -797,7 +799,7 @@
 	 * @summary Rotates the image.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {string} angle  The angle the image is rotated with.
 	 * @param {int}    postid The post id.
@@ -818,7 +820,7 @@
 	 * @summary Flips the image.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}    axis   The axle the image is flipped on.
 	 * @param {int}    postid The post id.
@@ -839,7 +841,7 @@
 	 * @summary Crops the image.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}    postid The post id.
 	 * @param {string} nonce  The nonce.
@@ -868,7 +870,7 @@
 	 * @summary Undoes a image edit action.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid   The post id.
 	 * @param {string} nonce The nonce.
@@ -901,7 +903,7 @@
 	 * Reverts a undo action.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}    postid The post id.
 	 * @param {string} nonce  The nonce.
@@ -931,7 +933,7 @@
 	 * @summary Sets the selection for the height and width in pixels.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int}         postid The post id.
 	 * @param {HTMLElement} el     The element containing the values.
@@ -988,7 +990,7 @@
 	 * Rounds a number to a whole.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} num The number.
 	 *
@@ -1017,7 +1019,7 @@
 	 * Sets a locked aspect ratio for the selection.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    2.9
 	 *
 	 * @param {int} postid     The post id.
 	 * @param {int} n          The ratio to set.
@@ -1061,7 +1063,7 @@
 	 * Validates if a value in a HTMLElement is numeric.
 	 *
 	 * @memberOf imageEdit
-	 * @since    Unknown
+	 * @since    4.6
 	 *
 	 * @param {HTMLElement} el The html element.
 	 *
