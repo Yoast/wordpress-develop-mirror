@@ -1,6 +1,6 @@
 <?php
 /**
- * Send XML response back to AJAX request.
+ * Send XML response back to Ajax request.
  *
  * @package WordPress
  * @since 2.1.0
@@ -149,7 +149,7 @@ class WP_Ajax_Response {
 		foreach ( (array) $this->responses as $response )
 			echo $response;
 		echo '</wp_ajax>';
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX )
+		if ( wp_doing_ajax() )
 			wp_die();
 		else
 			die();

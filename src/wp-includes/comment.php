@@ -51,11 +51,11 @@ function check_comment($author, $email, $url, $comment, $user_ip, $user_agent, $
 		$num_links = preg_match_all( '/<a [^>]*href/i', $comment, $out );
 
 		/**
-		 * Filters the maximum number of links allowed in a comment.
+		 * Filters the number of links found in a comment.
 		 *
 		 * @since 3.0.0
 		 *
-		 * @param int    $num_links The number of links allowed.
+		 * @param int    $num_links The number of links found.
 		 * @param string $url       Comment author's URL. Included in allowed links total.
 		 */
 		$num_links = apply_filters( 'comment_max_links_url', $num_links, $url );
@@ -632,7 +632,7 @@ function wp_allow_comment( $commentdata ) {
 		 * @param array $commentdata Comment data.
 		 */
 		do_action( 'comment_duplicate_trigger', $commentdata );
-		if ( defined( 'DOING_AJAX' ) ) {
+		if ( wp_doing_ajax() ) {
 			die( __('Duplicate comment detected; it looks as though you&#8217;ve already said that!') );
 		}
 		wp_die( __( 'Duplicate comment detected; it looks as though you&#8217;ve already said that!' ), 409 );
@@ -768,7 +768,7 @@ function check_comment_flood_db( $ip, $email, $date ) {
 			 */
 			do_action( 'comment_flood_trigger', $time_lastcomment, $time_newcomment );
 
-			if ( defined('DOING_AJAX') )
+			if ( wp_doing_ajax() )
 				die( __('You are posting comments too quickly. Slow down.') );
 
 			wp_die( __( 'You are posting comments too quickly. Slow down.' ), 429 );
@@ -1055,6 +1055,10 @@ function wp_blacklist_check($author, $email, $url, $comment, $user_ip, $user_age
 	$mod_keys = trim( get_option('blacklist_keys') );
 	if ( '' == $mod_keys )
 		return false; // If moderation keys are empty
+
+	// Ensure HTML tags are not being used to bypass the blacklist.
+	$comment_without_html = wp_strip_all_tags( $comment );
+
 	$words = explode("\n", $mod_keys );
 
 	foreach ( (array) $words as $word ) {
@@ -1073,6 +1077,7 @@ function wp_blacklist_check($author, $email, $url, $comment, $user_ip, $user_age
 			|| preg_match($pattern, $email)
 			|| preg_match($pattern, $url)
 			|| preg_match($pattern, $comment)
+			|| preg_match($pattern, $comment_without_html)
 			|| preg_match($pattern, $user_ip)
 			|| preg_match($pattern, $user_agent)
 		 )
@@ -2030,7 +2035,7 @@ function wp_update_comment($commentarr) {
 	 * The hook also fires immediately before comment status transition hooks are fired.
 	 *
 	 * @since 1.2.0
-	 * @since 4.6.0 The `$data` parameter was added.
+	 * @since 4.6.0 Added the `$data` parameter.
 	 *
 	 * @param int   $comment_ID The comment ID.
 	 * @param array $data       Comment data.
@@ -2357,15 +2362,12 @@ function generic_ping( $post_id = 0 ) {
  *
  * @since 0.71
  *
- * @global string $wp_version
- *
  * @param string $content Post content to check for links.
  * @param int $post_ID Post ID.
  */
 function pingback($content, $post_ID) {
-	global $wp_version;
-	include_once(ABSPATH . WPINC . '/class-IXR.php');
-	include_once(ABSPATH . WPINC . '/class-wp-http-ixr-client.php');
+	include_once( ABSPATH . WPINC . '/class-IXR.php' );
+	include_once( ABSPATH . WPINC . '/class-wp-http-ixr-client.php' );
 
 	// original code by Mort (http://mort.mine.nu:8080)
 	$post_links = array();
@@ -2432,7 +2434,7 @@ function pingback($content, $post_ID) {
 			 * @param string $pagelinkedto        URL of page linked to.
 			 * @param string $pagelinkedfrom      URL of page linked from.
 			 */
-			$client->useragent = apply_filters( 'pingback_useragent', $client->useragent . ' -- WordPress/' . $wp_version, $client->useragent, $pingback_server_url, $pagelinkedto, $pagelinkedfrom );
+			$client->useragent = apply_filters( 'pingback_useragent', $client->useragent . ' -- WordPress/' . get_bloginfo( 'version' ), $client->useragent, $pingback_server_url, $pagelinkedto, $pagelinkedfrom );
 			// when set to true, this outputs debug messages by itself
 			$client->debug = false;
 
@@ -2501,20 +2503,17 @@ function trackback($trackback_url, $title, $excerpt, $ID) {
  *
  * @since 1.2.0
  *
- * @global string $wp_version
- *
  * @param string $server Host of blog to connect to.
  * @param string $path Path to send the ping.
  */
 function weblog_ping($server = '', $path = '') {
-	global $wp_version;
-	include_once(ABSPATH . WPINC . '/class-IXR.php');
-	include_once(ABSPATH . WPINC . '/class-wp-http-ixr-client.php');
+	include_once( ABSPATH . WPINC . '/class-IXR.php' );
+	include_once( ABSPATH . WPINC . '/class-wp-http-ixr-client.php' );
 
 	// using a timeout of 3 seconds should be enough to cover slow servers
 	$client = new WP_HTTP_IXR_Client($server, ((!strlen(trim($path)) || ('/' == $path)) ? false : $path));
 	$client->timeout = 3;
-	$client->useragent .= ' -- WordPress/'.$wp_version;
+	$client->useragent .= ' -- WordPress/' . get_bloginfo( 'version' );
 
 	// when set to true, this outputs debug messages by itself
 	$client->debug = false;
@@ -2736,7 +2735,7 @@ function _close_comments_for_old_post( $open, $post_id ) {
 function wp_handle_comment_submission( $comment_data ) {
 
 	$comment_post_ID = $comment_parent = 0;
-	$comment_author = $comment_author_email = $comment_author_url = $comment_content = $_wp_unfiltered_html_comment = null;
+	$comment_author = $comment_author_email = $comment_author_url = $comment_content = null;
 
 	if ( isset( $comment_data['comment_post_ID'] ) ) {
 		$comment_post_ID = (int) $comment_data['comment_post_ID'];
@@ -2755,9 +2754,6 @@ function wp_handle_comment_submission( $comment_data ) {
 	}
 	if ( isset( $comment_data['comment_parent'] ) ) {
 		$comment_parent = absint( $comment_data['comment_parent'] );
-	}
-	if ( isset( $comment_data['_wp_unfiltered_html_comment'] ) && is_string( $comment_data['_wp_unfiltered_html_comment'] ) ) {
-		$_wp_unfiltered_html_comment = trim( $comment_data['_wp_unfiltered_html_comment'] );
 	}
 
 	$post = get_post( $comment_post_ID );

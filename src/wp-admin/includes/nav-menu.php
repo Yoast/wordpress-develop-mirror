@@ -123,7 +123,7 @@ function _wp_ajax_menu_quick_search( $request = array() ) {
 }
 
 /**
- * Register nav menu metaboxes and advanced menu items
+ * Register nav menu meta boxes and advanced menu items.
  *
  * @since 3.0.0
  **/
@@ -178,7 +178,7 @@ function wp_initial_nav_menu_meta_boxes() {
 }
 
 /**
- * Creates metaboxes for any post type menu item.
+ * Creates meta boxes for any post type menu item..
  *
  * @since 3.0.0
  */
@@ -212,7 +212,7 @@ function wp_nav_menu_post_type_meta_boxes() {
 }
 
 /**
- * Creates metaboxes for any taxonomy menu item.
+ * Creates meta boxes for any taxonomy menu item.
  *
  * @since 3.0.0
  */
@@ -252,7 +252,7 @@ function wp_nav_menu_disabled_check( $nav_menu_selected_id ) {
 }
 
 /**
- * Displays a metabox for the custom links menu item.
+ * Displays a meta box for the custom links menu item.
  *
  * @since 3.0.0
  *
@@ -289,7 +289,7 @@ function wp_nav_menu_item_link_meta_box() {
 }
 
 /**
- * Displays a metabox for a post type menu item.
+ * Displays a meta box for a post type menu item.
  *
  * @since 3.0.0
  *
@@ -297,12 +297,19 @@ function wp_nav_menu_item_link_meta_box() {
  * @global int|string $nav_menu_selected_id
  *
  * @param string $object Not used.
- * @param string $post_type The post type object.
+ * @param array  $box {
+ *     Post type menu item meta box arguments.
+ *
+ *     @type string       $id       Meta box 'id' attribute.
+ *     @type string       $title    Meta box title.
+ *     @type string       $callback Meta box display callback.
+ *     @type WP_Post_Type $args     Extra meta box arguments (the post type object for this meta box).
+ * }
  */
-function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
+function wp_nav_menu_item_post_type_meta_box( $object, $box ) {
 	global $_nav_menu_placeholder, $nav_menu_selected_id;
 
-	$post_type_name = $post_type['args']->name;
+	$post_type_name = $box['args']->name;
 
 	// Paginate browsing for large numbers of post objects.
 	$per_page = 50;
@@ -320,8 +327,8 @@ function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
 		'update_post_meta_cache' => false
 	);
 
-	if ( isset( $post_type['args']->_default_query ) )
-		$args = array_merge($args, (array) $post_type['args']->_default_query );
+	if ( isset( $box['args']->_default_query ) )
+		$args = array_merge($args, (array) $box['args']->_default_query );
 
 	// @todo transient caching of these results with proper invalidation on updating of a post of this type
 	$get_posts = new WP_Query;
@@ -411,11 +418,11 @@ function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
 				 *
 				 * @since 4.3.0
 				 *
-				 * @param array  $most_recent An array of post objects being listed.
-				 * @param array  $args        An array of WP_Query arguments.
-				 * @param object $post_type   The current post type object for this menu item meta box.
+				 * @param array $most_recent An array of post objects being listed.
+				 * @param array $args        An array of WP_Query arguments.
+				 * @param array $box         Arguments passed to wp_nav_menu_item_post_type_meta_box().
 				 */
-				$most_recent = apply_filters( "nav_menu_items_{$post_type_name}_recent", $most_recent, $args, $post_type );
+				$most_recent = apply_filters( "nav_menu_items_{$post_type_name}_recent", $most_recent, $args, $box );
 
 				echo walk_nav_menu_tree( array_map('wp_setup_nav_menu_item', $most_recent), 0, (object) $args );
 				?>
@@ -495,7 +502,7 @@ function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
 				}
 
 				$post_type = get_post_type_object( $post_type_name );
-				$archive_link = get_post_type_archive_link( $post_type_name );
+
 				if ( $post_type->has_archive ) {
 					$_nav_menu_placeholder = ( 0 > $_nav_menu_placeholder ) ? intval($_nav_menu_placeholder) - 1 : -1;
 					array_unshift( $posts, (object) array(
@@ -519,6 +526,7 @@ function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
 				 * to the slug of the current post type.
 				 *
 				 * @since 3.2.0
+				 * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
 				 *
 				 * @see WP_Query::query()
 				 *
@@ -527,6 +535,7 @@ function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
 				 * @param WP_Post_Type $post_type The current post type object for this menu item meta box.
 				 */
 				$posts = apply_filters( "nav_menu_items_{$post_type_name}", $posts, $args, $post_type );
+
 				$checkbox_items = walk_nav_menu_tree( array_map('wp_setup_nav_menu_item', $posts), 0, (object) $args );
 
 				if ( 'all' == $current_tab && ! empty( $_REQUEST['selectall'] ) ) {
@@ -568,18 +577,25 @@ function wp_nav_menu_item_post_type_meta_box( $object, $post_type ) {
 }
 
 /**
- * Displays a metabox for a taxonomy menu item.
+ * Displays a meta box for a taxonomy menu item.
  *
  * @since 3.0.0
  *
  * @global int|string $nav_menu_selected_id
  *
  * @param string $object Not used.
- * @param string $taxonomy The taxonomy object.
+ * @param array  $box {
+ *     Taxonomy menu item meta box arguments.
+ *
+ *     @type string $id       Meta box 'id' attribute.
+ *     @type string $title    Meta box title.
+ *     @type string $callback Meta box display callback.
+ *     @type object $args     Extra meta box arguments (the taxonomy object for this meta box).
+ * }
  */
-function wp_nav_menu_item_taxonomy_meta_box( $object, $taxonomy ) {
+function wp_nav_menu_item_taxonomy_meta_box( $object, $box ) {
 	global $nav_menu_selected_id;
-	$taxonomy_name = $taxonomy['args']->name;
+	$taxonomy_name = $box['args']->name;
 
 	// Paginate browsing for large numbers of objects.
 	$per_page = 50;

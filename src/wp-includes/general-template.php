@@ -30,7 +30,7 @@ function get_header( $name = null ) {
 	 * @since 2.1.0
 	 * @since 2.8.0 $name parameter added.
 	 *
-	 * @param string $name Name of the specific header file to use.
+	 * @param string|null $name Name of the specific header file to use. null for the default header.
 	 */
 	do_action( 'get_header', $name );
 
@@ -69,7 +69,7 @@ function get_footer( $name = null ) {
 	 * @since 2.1.0
 	 * @since 2.8.0 $name parameter added.
 	 *
-	 * @param string $name Name of the specific footer file to use.
+	 * @param string|null $name Name of the specific footer file to use. null for the default footer.
 	 */
 	do_action( 'get_footer', $name );
 
@@ -108,7 +108,7 @@ function get_sidebar( $name = null ) {
 	 * @since 2.2.0
 	 * @since 2.8.0 $name parameter added.
 	 *
-	 * @param string $name Name of the specific sidebar file to use.
+	 * @param string|null $name Name of the specific sidebar file to use. null for the default sidebar.
 	 */
 	do_action( 'get_sidebar', $name );
 
@@ -152,8 +152,8 @@ function get_template_part( $slug, $name = null ) {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param string $slug The slug name for the generic template.
-	 * @param string $name The name of the specialized template.
+	 * @param string      $slug The slug name for the generic template.
+	 * @param string|null $name The name of the specialized template.
 	 */
 	do_action( "get_template_part_{$slug}", $slug, $name );
 
@@ -383,7 +383,7 @@ function wp_registration_url() {
  *     @type string $redirect       URL to redirect to. Must be absolute, as in "https://example.com/mypage/".
  *                                  Default is to redirect back to the request URI.
  *     @type string $form_id        ID attribute value for the form. Default 'loginform'.
- *     @type string $label_username Label for the username or email address field. Default 'Username or Email'.
+ *     @type string $label_username Label for the username or email address field. Default 'Username or Email Address'.
  *     @type string $label_password Label for the password field. Default 'Password'.
  *     @type string $label_remember Label for the remember field. Default 'Remember Me'.
  *     @type string $label_log_in   Label for the submit button. Default 'Log In'.
@@ -405,7 +405,7 @@ function wp_login_form( $args = array() ) {
 		// Default 'redirect' value takes the user back to the request URI.
 		'redirect' => ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
 		'form_id' => 'loginform',
-		'label_username' => __( 'Username or Email' ),
+		'label_username' => __( 'Username or Email Address' ),
 		'label_password' => __( 'Password' ),
 		'label_remember' => __( 'Remember Me' ),
 		'label_log_in' => __( 'Log In' ),
@@ -1074,7 +1074,7 @@ function _wp_render_title_tag() {
  * important, which is the page that the user is looking at.
  *
  * There are also SEO benefits to having the blog title after or to the 'right'
- * or the page title. However, it is mostly common sense to have the blog title
+ * of the page title. However, it is mostly common sense to have the blog title
  * to the right with most browsers supporting tabs. You can achieve this by
  * using the seplocation parameter and setting the value to 'right'. This change
  * was introduced around 2.5.0, in case backward compatibility of themes is
@@ -1505,7 +1505,7 @@ function get_the_archive_title() {
 }
 
 /**
- * Display category, tag, or term description.
+ * Display category, tag, term, or author description.
  *
  * @since 4.1.0
  *
@@ -1522,23 +1522,30 @@ function the_archive_description( $before = '', $after = '' ) {
 }
 
 /**
- * Retrieve category, tag, or term description.
+ * Retrieve category, tag, term, or author description.
  *
  * @since 4.1.0
+ * @since 4.7.0 Added support for author archives.
+ *
+ * @see term_description()
  *
  * @return string Archive description.
  */
 function get_the_archive_description() {
+	if ( is_author() ) {
+		$description = get_the_author_meta( 'description' );
+	} else {
+		$description = term_description();
+	}
+
 	/**
 	 * Filters the archive description.
 	 *
 	 * @since 4.1.0
 	 *
-	 * @see term_description()
-	 *
 	 * @param string $description Archive description to be displayed.
 	 */
-	return apply_filters( 'get_the_archive_description', term_description() );
+	return apply_filters( 'get_the_archive_description', $description );
 }
 
 /**
@@ -2255,7 +2262,7 @@ function the_modified_date( $d = '', $before = '', $after = '', $echo = true ) {
  * Retrieve the date on which the post was last modified.
  *
  * @since 2.1.0
- * @since 4.6.0 The `$post` parameter was added.
+ * @since 4.6.0 Added the `$post` parameter.
  *
  * @param string      $d    Optional. PHP date format defaults to the date_format option if not specified.
  * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default current post.
@@ -2277,7 +2284,7 @@ function get_the_modified_date( $d = '', $post = null ) {
 	 * Filters the date a post was last modified.
 	 *
 	 * @since 2.1.0
-	 * @since 4.6.0 The `$post` parameter was added.
+	 * @since 4.6.0 Added the `$post` parameter.
 	 *
 	 * @param string  $the_time The formatted date.
 	 * @param string  $d        PHP date format. Defaults to value specified in
@@ -2408,7 +2415,7 @@ function the_modified_time($d = '') {
  * Retrieve the time at which the post was last modified.
  *
  * @since 2.0.0
- * @since 4.6.0 The `$post` parameter was added.
+ * @since 4.6.0 Added the `$post` parameter.
  *
  * @param string      $d     Optional. Format to use for retrieving the time the post
  *                           was modified. Either 'G', 'U', or php date format defaults
@@ -2432,7 +2439,7 @@ function get_the_modified_time( $d = '', $post = null ) {
 	 * Filters the localized time a post was last modified.
 	 *
 	 * @since 2.0.0
-	 * @since 4.6.0 The `$post` parameter was added.
+	 * @since 4.6.0 Added the `$post` parameter.
 	 *
 	 * @param string $the_time The formatted time.
 	 * @param string $d        Format to use for retrieving the time the post was
@@ -2788,10 +2795,12 @@ function wp_site_icon() {
 }
 
 /**
- * Prints resource hints to browsers for pre-fetching, pre-rendering and pre-connecting to web sites.
+ * Prints resource hints to browsers for pre-fetching, pre-rendering
+ * and pre-connecting to web sites.
  *
- * Gives hints to browsers to prefetch specific pages or render them in the background,
- * to perform DNS lookups or to begin the connection handshake (DNS, TCP, TLS) in the background.
+ * Gives hints to browsers to prefetch specific pages or render them
+ * in the background, to perform DNS lookups or to begin the connection
+ * handshake (DNS, TCP, TLS) in the background.
  *
  * These performance improving indicators work by using `<link rel"…">`.
  *
@@ -2799,15 +2808,22 @@ function wp_site_icon() {
  */
 function wp_resource_hints() {
 	$hints = array(
-		'dns-prefetch' => wp_resource_hints_scripts_styles(),
-		'preconnect'   => array( 's.w.org' ),
+		'dns-prefetch' => wp_dependencies_unique_hosts(),
+		'preconnect'   => array(),
 		'prefetch'     => array(),
 		'prerender'    => array(),
 	);
 
+	/*
+	 * Add DNS prefetch for the Emoji CDN.
+	 * The path is removed in the foreach loop below.
+	 */
+	/** This filter is documented in wp-includes/formatting.php */
+	$hints['dns-prefetch'][] = apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2/svg/' );
+
 	foreach ( $hints as $relation_type => $urls ) {
 		/**
-		 * Filters domains and URLs for resource hints.
+		 * Filters domains and URLs for resource hints of relation type.
 		 *
 		 * @since 4.6.0
 		 *
@@ -2815,55 +2831,66 @@ function wp_resource_hints() {
 		 * @param string $relation_type The relation type the URLs are printed for, e.g. 'preconnect' or 'prerender'.
 		 */
 		$urls = apply_filters( 'wp_resource_hints', $urls, $relation_type );
-		$urls = array_unique( $urls );
 
-		foreach ( $urls as $url ) {
+		foreach ( $urls as $key => $url ) {
 			$url = esc_url( $url, array( 'http', 'https' ) );
+			if ( ! $url ) {
+				unset( $urls[ $key ] );
+				continue;
+			}
 
 			if ( in_array( $relation_type, array( 'preconnect', 'dns-prefetch' ) ) ) {
 				$parsed = wp_parse_url( $url );
 				if ( empty( $parsed['host'] ) ) {
+					unset( $urls[ $key ] );
 					continue;
 				}
 
-				if ( ! empty( $parsed['scheme'] ) ) {
+				if ( 'preconnect' === $relation_type && ! empty( $parsed['scheme'] ) ) {
 					$url = $parsed['scheme'] . '://' . $parsed['host'];
 				} else {
-					$url = $parsed['host'];
+					// Use protocol-relative URLs for dns-prefetch or if scheme is missing.
+					$url = '//' . $parsed['host'];
 				}
 			}
 
-			printf( "<link rel='%s' href='%s'>\r\n", $relation_type, $url );
+			$urls[ $key ] = $url;
+		}
+
+		$urls = array_unique( $urls );
+
+		foreach ( $urls as $url ) {
+			printf( "<link rel='%s' href='%s' />\n", $relation_type, $url );
 		}
 	}
 }
 
 /**
- * Adds dns-prefetch for all scripts and styles enqueued from external hosts.
+ * Retrieves a list of unique hosts of all enqueued scripts and styles.
  *
  * @since 4.6.0
+ *
+ * @return array A list of unique hosts of enqueued scripts and styles.
  */
-function wp_resource_hints_scripts_styles() {
+function wp_dependencies_unique_hosts() {
 	global $wp_scripts, $wp_styles;
 
 	$unique_hosts = array();
 
-	if ( is_object( $wp_scripts ) && ! empty( $wp_scripts->registered ) ) {
-		foreach ( $wp_scripts->registered as $registered_script ) {
-			$parsed = wp_parse_url( $registered_script->src );
+	foreach ( array( $wp_scripts, $wp_styles ) as $dependencies ) {
+		if ( $dependencies instanceof WP_Dependencies && ! empty( $dependencies->queue ) ) {
+			foreach ( $dependencies->queue as $handle ) {
+				if ( ! isset( $dependencies->registered[ $handle ] ) ) {
+					continue;
+				}
 
-			if ( ! empty( $parsed['host'] ) && ! in_array( $parsed['host'], $unique_hosts ) && $parsed['host'] !== $_SERVER['SERVER_NAME'] ) {
-				$unique_hosts[] = $parsed['host'];
-			}
-		}
-	}
+				/* @var _WP_Dependency $dependency */
+				$dependency = $dependencies->registered[ $handle ];
+				$parsed     = wp_parse_url( $dependency->src );
 
-	if ( is_object( $wp_styles ) && ! empty( $wp_styles->registered ) ) {
-		foreach ( $wp_styles->registered as $registered_style ) {
-			$parsed = wp_parse_url( $registered_style->src );
-
-			if ( ! empty( $parsed['host'] ) && ! in_array( $parsed['host'], $unique_hosts ) && $parsed['host'] !== $_SERVER['SERVER_NAME'] ) {
-				$unique_hosts[] = $parsed['host'];
+				if ( ! empty( $parsed['host'] ) && ! in_array( $parsed['host'], $unique_hosts ) && $parsed['host'] !== $_SERVER['SERVER_NAME'] ) {
+					$unique_hosts[] = $parsed['host'];
+				}
 			}
 		}
 	}
@@ -2947,7 +2974,7 @@ function wp_default_editor() {
  * _WP_Editors should not be used directly. See https://core.trac.wordpress.org/ticket/17144.
  *
  * NOTE: Once initialized the TinyMCE editor cannot be safely moved in the DOM. For that reason
- * running wp_editor() inside of a metabox is not a good idea unless only Quicktags is used.
+ * running wp_editor() inside of a meta box is not a good idea unless only Quicktags is used.
  * On the post edit screen several actions can be used to include additional editors
  * containing TinyMCE: 'edit_page_form', 'edit_form_advanced' and 'dbx_post_sidebar'.
  * See https://core.trac.wordpress.org/ticket/19173 for more information.
@@ -2962,7 +2989,6 @@ function wp_default_editor() {
 function wp_editor( $content, $editor_id, $settings = array() ) {
 	if ( ! class_exists( '_WP_Editors', false ) )
 		require( ABSPATH . WPINC . '/class-wp-editor.php' );
-
 	_WP_Editors::editor($content, $editor_id, $settings);
 }
 
@@ -3327,8 +3353,6 @@ function wp_admin_css_color( $key, $name, $url, $colors = array(), $icons = arra
  * Registers the default Admin color schemes
  *
  * @since 3.0.0
- *
- * @global string $wp_version
  */
 function register_admin_color_schemes() {
 	$suffix = is_rtl() ? '-rtl' : '';
@@ -3341,8 +3365,9 @@ function register_admin_color_schemes() {
 	);
 
 	// Other color schemes are not available when running out of src
-	if ( false !== strpos( $GLOBALS['wp_version'], '-src' ) )
+	if ( false !== strpos( get_bloginfo( 'version' ), '-src' ) ) {
 		return;
+	}
 
 	wp_admin_css_color( 'light', _x( 'Light', 'admin color scheme' ),
 		admin_url( "css/colors/light/colors$suffix.css" ),

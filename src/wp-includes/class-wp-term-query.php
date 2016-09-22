@@ -87,6 +87,13 @@ class WP_Term_Query {
 	public $terms;
 
 	/**
+	 * @since 4.7.0
+	 * @access protected
+	 * @var wpdb
+	 */
+	protected $db;
+
+	/**
 	 * Constructor.
 	 *
 	 * Sets up the term query, based on the query vars passed.
@@ -172,6 +179,8 @@ class WP_Term_Query {
 	 * }
 	 */
 	public function __construct( $query = '' ) {
+		$this->db = $GLOBALS['wpdb'];
+
 		$this->query_var_defaults = array(
 			'taxonomy'               => null,
 			'orderby'                => 'name',
@@ -199,6 +208,10 @@ class WP_Term_Query {
 			'cache_domain'           => 'core',
 			'update_term_meta_cache' => true,
 			'meta_query'             => '',
+			'meta_key'               => '',
+			'meta_value'             => '',
+			'meta_type'              => '',
+			'meta_compare'           => '',
 		);
 
 		if ( ! empty( $query ) ) {
@@ -219,7 +232,7 @@ class WP_Term_Query {
 			$query = $this->query_vars;
 		}
 
-		$taxonomies = isset( $query['taxonomy'] ) ? $query['taxonomy'] : null;
+		$taxonomies = isset( $query['taxonomy'] ) ? (array) $query['taxonomy'] : null;
 
 		/**
 		 * Filters the terms query default arguments.
@@ -293,13 +306,9 @@ class WP_Term_Query {
 	 * @param 4.6.0
 	 * @access public
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
 	 * @return array
 	 */
 	public function get_terms() {
-		global $wpdb;
-
 		$this->parse_query( $this->query_vars );
 		$args = $this->query_vars;
 
@@ -384,6 +393,10 @@ class WP_Term_Query {
 		}
 
 		$orderby = $this->parse_orderby( $this->query_vars['orderby'] );
+		if ( $orderby ) {
+			$orderby = "ORDER BY $orderby";
+		}
+
 		$order = $this->parse_order( $this->query_vars['order'] );
 
 		if ( $taxonomies ) {
@@ -482,16 +495,16 @@ class WP_Term_Query {
 				$tt_ids = implode( ',', array_map( 'intval', $args['term_taxonomy_id'] ) );
 				$this->sql_clauses['where']['term_taxonomy_id'] = "tt.term_taxonomy_id IN ({$tt_ids})";
 			} else {
-				$this->sql_clauses['where']['term_taxonomy_id'] = $wpdb->prepare( "tt.term_taxonomy_id = %d", $args['term_taxonomy_id'] );
+				$this->sql_clauses['where']['term_taxonomy_id'] = $this->db->prepare( "tt.term_taxonomy_id = %d", $args['term_taxonomy_id'] );
 			}
 		}
 
 		if ( ! empty( $args['name__like'] ) ) {
-			$this->sql_clauses['where']['name__like'] = $wpdb->prepare( "t.name LIKE %s", '%' . $wpdb->esc_like( $args['name__like'] ) . '%' );
+			$this->sql_clauses['where']['name__like'] = $this->db->prepare( "t.name LIKE %s", '%' . $this->db->esc_like( $args['name__like'] ) . '%' );
 		}
 
 		if ( ! empty( $args['description__like'] ) ) {
-			$this->sql_clauses['where']['description__like'] = $wpdb->prepare( "tt.description LIKE %s", '%' . $wpdb->esc_like( $args['description__like'] ) . '%' );
+			$this->sql_clauses['where']['description__like'] = $this->db->prepare( "tt.description LIKE %s", '%' . $this->db->esc_like( $args['description__like'] ) . '%' );
 		}
 
 		if ( '' !== $parent ) {
@@ -587,11 +600,9 @@ class WP_Term_Query {
 		 */
 		$fields = implode( ', ', apply_filters( 'get_terms_fields', $selects, $args, $taxonomies ) );
 
-		$join .= " INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id";
+		$join .= " INNER JOIN {$this->db->term_taxonomy} AS tt ON t.term_id = tt.term_id";
 
 		$where = implode( ' AND ', $this->sql_clauses['where'] );
-
-		$pieces = array( 'fields', 'join', 'where', 'distinct', 'orderby', 'order', 'limits' );
 
 		/**
 		 * Filters the terms query SQL clauses.
@@ -602,7 +613,7 @@ class WP_Term_Query {
 		 * @param array $taxonomies An array of taxonomies.
 		 * @param array $args       An array of terms query arguments.
 		 */
-		$clauses = apply_filters( 'terms_clauses', compact( $pieces ), $taxonomies, $args );
+		$clauses = apply_filters( 'terms_clauses', compact( 'fields', 'join', 'where', 'distinct', 'orderby', 'order', 'limits' ), $taxonomies, $args );
 
 		$fields = isset( $clauses[ 'fields' ] ) ? $clauses[ 'fields' ] : '';
 		$join = isset( $clauses[ 'join' ] ) ? $clauses[ 'join' ] : '';
@@ -617,11 +628,11 @@ class WP_Term_Query {
 		}
 
 		$this->sql_clauses['select']  = "SELECT $distinct $fields";
-		$this->sql_clauses['from']    = "FROM $wpdb->terms AS t $join";
-		$this->sql_clauses['orderby'] = $orderby ? "ORDER BY $orderby $order" : '';
+		$this->sql_clauses['from']    = "FROM {$this->db->terms} AS t $join";
+		$this->sql_clauses['orderby'] = $orderby ? "$orderby $order" : '';
 		$this->sql_clauses['limits']  = $limits;
 
-		$this->request = $this->request = "{$this->sql_clauses['select']} {$this->sql_clauses['from']} {$where} {$this->sql_clauses['orderby']} {$this->sql_clauses['limits']}";
+		$this->request = "{$this->sql_clauses['select']} {$this->sql_clauses['from']} {$where} {$this->sql_clauses['orderby']} {$this->sql_clauses['limits']}";
 
 		// $args can be anything. Only use the args defined in defaults to compute the key.
 		$key = md5( serialize( wp_array_slice_assoc( $args, array_keys( $this->query_var_defaults ) ) ) . serialize( $taxonomies ) . $this->request );
@@ -637,14 +648,15 @@ class WP_Term_Query {
 				$cache = array_map( 'get_term', $cache );
 			}
 
-			return $cache;
+			$this->terms = $cache;
+			return $this->terms;
 		}
 
 		if ( 'count' == $_fields ) {
-			return $wpdb->get_var( $this->request );
+			return $this->db->get_var( $this->request );
 		}
 
-		$terms = $wpdb->get_results( $this->request );
+		$terms = $this->db->get_results( $this->request );
 		if ( 'all' == $_fields ) {
 			update_term_cache( $terms );
 		}
@@ -747,8 +759,6 @@ class WP_Term_Query {
 	 *
 	 * @since 4.6.0
 	 * @access protected
-	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param string $orderby_raw Alias for the field to order by.
 	 * @return string|false Value to used in the ORDER clause. False otherwise.
@@ -889,16 +899,12 @@ class WP_Term_Query {
 	 * @since 4.6.0
 	 * @access protected
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
 	 * @param string $string
 	 * @return string
 	 */
 	protected function get_search_sql( $string ) {
-		global $wpdb;
+		$like = '%' . $this->db->esc_like( $string ) . '%';
 
-		$like = '%' . $wpdb->esc_like( $string ) . '%';
-
-		return $wpdb->prepare( '((t.name LIKE %s) OR (t.slug LIKE %s))', $like, $like );
+		return $this->db->prepare( '((t.name LIKE %s) OR (t.slug LIKE %s))', $like, $like );
 	}
 }

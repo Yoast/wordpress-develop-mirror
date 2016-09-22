@@ -22,14 +22,36 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		update_option( 'comments_per_page', 5 );
 		update_option( 'posts_per_page', 5 );
 
-		create_initial_taxonomies();
-
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+
+		create_initial_taxonomies();
 	}
 
 	function test_home() {
 		$this->go_to('/');
-		$this->assertQueryTrue('is_home');
+		$this->assertQueryTrue( 'is_home', 'is_front_page' );
+	}
+
+	function test_page_on_front() {
+		$page_on_front = self::factory()->post->create( array(
+			'post_type' => 'page',
+		) );
+		$page_for_posts = self::factory()->post->create( array(
+			'post_type' => 'page',
+		) );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $page_on_front );
+		update_option( 'page_for_posts', $page_for_posts );
+
+		$this->go_to( '/' );
+		$this->assertQueryTrue( 'is_front_page', 'is_page', 'is_singular' );
+
+		$this->go_to( get_permalink( $page_for_posts ) );
+		$this->assertQueryTrue( 'is_home', 'is_posts_page' );
+
+		update_option( 'show_on_front', 'posts' );
+		delete_option( 'page_on_front' );
+		delete_option( 'page_for_posts' );
 	}
 
 	function test_404() {
@@ -198,7 +220,6 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		$this->assertEquals( $page_id, $wp_query->get_queried_object()->ID );
 	}
 
-	// FIXME: what is this for?
 	// '(about)(/[0-9]+)?/?$' => 'index.php?pagename=$matches[1]&page=$matches[2]'
 	function test_pagination_of_posts_page() {
 		$page_id = self::factory()->post->create( array( 'post_type' => 'page', 'post_title' => 'about', 'post_content' => 'Page 1 <!--nextpage--> Page 2' ) );
@@ -212,6 +233,9 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		// make sure the correct page was fetched
 		global $wp_query;
 		$this->assertEquals( $page_id, $wp_query->get_queried_object()->ID );
+
+		update_option( 'show_on_front', 'posts' );
+		delete_option( 'page_for_posts' );
 	}
 
 	// FIXME: no tests for these yet
@@ -255,7 +279,7 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		self::factory()->post->create_many( 5 );
 		for ( $i = 2; $i <= 3; $i++ ) {
 			$this->go_to("/page/{$i}/");
-			$this->assertQueryTrue('is_home', 'is_paged');
+			$this->assertQueryTrue( 'is_home', 'is_front_page', 'is_paged' );
 		}
 	}
 
@@ -329,6 +353,7 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 	// 'category/(.+?)/(feed|rdf|rss|rss2|atom)/?$' => 'index.php?category_name=$matches[1]&feed=$matches[2]',
 	function test_category_feed() {
 		self::factory()->term->create( array( 'name' => 'cat-a', 'taxonomy' => 'category' ) );
+
 		// check the long form
 		$types = array('feed', 'rdf', 'rss', 'rss2', 'atom');
 		foreach ($types as $type) {

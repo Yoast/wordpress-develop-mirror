@@ -20,7 +20,8 @@ body.rtl {
 	font-family: Tahoma, "Times New Roman", "Bitstream Charter", Times, serif;
 }
 
-body.locale-he-il {
+body.locale-he-il,
+body.locale-vi {
 	font-family: Arial, "Times New Roman", "Bitstream Charter", Times, serif;
 }
 
@@ -322,7 +323,7 @@ a[data-wplink-url-error]:before {
 .wpview-error p {
 	margin: 0;
 	text-align: center;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 .wpview-type-gallery:after {

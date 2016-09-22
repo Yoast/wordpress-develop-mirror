@@ -121,7 +121,8 @@ function ms_site_check() {
  * Retrieve the closest matching network for a domain and path.
  *
  * @since 3.9.0
- * @since 4.4.0 Converted to a wrapper for WP_Network::get_by_path()
+ *
+ * @internal In 4.4.0, converted to a wrapper for WP_Network::get_by_path()
  *
  * @param string   $domain   Domain to check.
  * @param string   $path     Path to check.
@@ -136,8 +137,8 @@ function get_network_by_path( $domain, $path, $segments = null ) {
  * Retrieve an object containing information about the requested network.
  *
  * @since 3.9.0
- * @since 4.4.0 Converted to leverage WP_Network
- * @since 4.6.0 Converted to use `get_network()`
+ *
+ * @internal In 4.6.0, converted to use get_network()
  *
  * @param object|int $network The network's database row or ID.
  * @return WP_Network|false Object containing network information if found, false if not.
@@ -155,7 +156,6 @@ function wp_get_network( $network ) {
  * Retrieve a site object by its domain and path.
  *
  * @since 3.9.0
- * @since 4.6.0 Converted to use get_sites()
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
@@ -283,7 +283,8 @@ function get_site_by_path( $domain, $path, $segments = null ) {
  *
  * @param string $domain    The requested domain.
  * @param string $path      The requested path.
- * @param bool   $subdomain Whether a subdomain (true) or subdirectory (false) configuration.
+ * @param bool   $subdomain Optional. Whether a subdomain (true) or subdirectory (false) configuration.
+ *                          Default false.
  * @return bool|string True if bootstrap successfully populated `$current_blog` and `$current_site`.
  *                     False if bootstrap could not be properly completed.
  *                     Redirect URL if parts exist, but the request as a whole can not be fulfilled.

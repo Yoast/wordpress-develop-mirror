@@ -296,14 +296,13 @@ final class _WP_Editors {
 	/**
 	 * @static
 	 *
-	 * @global string $wp_version
 	 * @global string $tinymce_version
 	 *
 	 * @param string $editor_id
 	 * @param array  $set
 	 */
 	public static function editor_settings($editor_id, $set) {
-		global $wp_version, $tinymce_version;
+		global $tinymce_version;
 
 		if ( empty(self::$first_init) ) {
 			if ( is_admin() ) {
@@ -559,7 +558,7 @@ final class _WP_Editors {
 				}
 
 				$suffix = SCRIPT_DEBUG ? '' : '.min';
-				$version = 'ver=' . $wp_version;
+				$version = 'ver=' . get_bloginfo( 'version' );
 				$dashicons = includes_url( "css/dashicons$suffix.css?$version" );
 
 				// WordPress default stylesheet and dashicons
@@ -789,7 +788,8 @@ final class _WP_Editors {
 
 		if ( self::$has_medialib ) {
 			add_thickbox();
-			wp_enqueue_script('media-upload');
+			wp_enqueue_script( 'media-upload' );
+			wp_enqueue_script( 'wp-embed' );
 		}
 
 		/**
@@ -1022,7 +1022,8 @@ final class _WP_Editors {
 			/* translators: word count */
 			'Words: {0}' => sprintf( __( 'Words: %s' ), '{0}' ),
 			'Paste is now in plain text mode. Contents will now be pasted as plain text until you toggle this option off.' => __( 'Paste is now in plain text mode. Contents will now be pasted as plain text until you toggle this option off.' ) . "\n\n" . __( 'If you&#8217;re looking to paste rich content from Microsoft Word, try turning this option off. The editor will clean up text pasted from Word automatically.' ),
-			'Rich Text Area. Press ALT-F9 for menu. Press ALT-F10 for toolbar. Press ALT-0 for help' => __( 'Rich Text Area. Press Alt-Shift-H for help' ),
+			'Rich Text Area. Press ALT-F9 for menu. Press ALT-F10 for toolbar. Press ALT-0 for help' => __( 'Rich Text Area. Press Alt-Shift-H for help.' ),
+			'Rich Text Area. Press Control-Option-H for help.' => __( 'Rich Text Area. Press Control-Option-H for help.' ),
 			'You have unsaved changes are you sure you want to navigate away?' => __( 'The changes you made will be lost if you navigate away from this page.' ),
 			'Your browser doesn\'t support direct access to the clipboard. Please use the Ctrl+X/C/V keyboard shortcuts instead.' => __( 'Your browser does not support direct access to the clipboard. Please use keyboard shortcuts or your browser&#8217;s edit menu instead.' ),
 
@@ -1063,7 +1064,7 @@ final class _WP_Editors {
 			'Ctrl + letter:' => __( 'Ctrl + letter:' ),
 			'Letter' => __( 'Letter' ),
 			'Action' => __( 'Action' ),
-			'Invalid host name.' => __( 'Invalid host name.' ),
+			'Warning: the link has been inserted but may have errors. Please test it.' => __( 'Warning: the link has been inserted but may have errors. Please test it.' ),
 			'To move focus to other buttons use Tab or the arrow keys. To return focus to the editor press Escape or use one of the buttons.' =>
 				__( 'To move focus to other buttons use Tab or the arrow keys. To return focus to the editor press Escape or use one of the buttons.' ),
 			'When starting a new paragraph with one of these formatting shortcuts followed by a space, the formatting will be applied automatically. Press Backspace or Escape to undo.' =>
@@ -1129,13 +1130,12 @@ final class _WP_Editors {
 	/**
 	 *
 	 * @static
-	 * @global string $wp_version
 	 * @global string $tinymce_version
 	 * @global bool   $concatenate_scripts
 	 * @global bool   $compress_scripts
 	 */
 	public static function editor_js() {
-		global $wp_version, $tinymce_version, $concatenate_scripts, $compress_scripts;
+		global $tinymce_version, $concatenate_scripts, $compress_scripts;
 
 		/**
 		 * Filters "tiny_mce_version" is deprecated
@@ -1213,7 +1213,7 @@ final class _WP_Editors {
 
 		$baseurl = self::$baseurl;
 		// Load tinymce.js when running from /src, else load wp-tinymce.js.gz (production) or tinymce.min.js (SCRIPT_DEBUG)
-		$mce_suffix = false !== strpos( $wp_version, '-src' ) ? '' : '.min';
+		$mce_suffix = false !== strpos( get_bloginfo( 'version' ), '-src' ) ? '' : '.min';
 
 		if ( $tmce_on ) {
 			if ( $compressed ) {
@@ -1257,6 +1257,14 @@ final class _WP_Editors {
 			var init, id, $wrap;
 
 			if ( typeof tinymce !== 'undefined' ) {
+				// Fix RTL
+				tinymce.on( 'addeditor', function( event ) {
+					event.editor.rtl = event.editor.settings.rtl_ui ||
+						( event.editor.editorManager &&
+						event.editor.editorManager.i18n &&
+						event.editor.editorManager.i18n.rtl );
+				}, true );
+
 				for ( id in tinyMCEPreInit.mceInit ) {
 					init = tinyMCEPreInit.mceInit[id];
 					$wrap = tinymce.$( '#wp-' + id + '-wrap' );
@@ -1284,13 +1292,7 @@ final class _WP_Editors {
 		</script>
 		<?php
 
-		$has_wplink = in_array( 'wplink', self::$plugins, true );
-
-		if ( $has_wplink ) {
-			echo '<input type="hidden" id="_wplink_urltest_nonce" value="' . wp_create_nonce( 'wp-test-url' ) . '" />';
-		}
-
-		if ( $has_wplink || in_array( 'link', self::$qt_buttons, true ) ) {
+		if ( in_array( 'wplink', self::$plugins, true ) || in_array( 'link', self::$qt_buttons, true ) ) {
 			self::wp_link_dialog();
 		}
 

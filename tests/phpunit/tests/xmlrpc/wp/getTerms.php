@@ -17,7 +17,7 @@ class Tests_XMLRPC_wp_getTerms extends WP_XMLRPC_UnitTestCase {
 		$result = $this->myxmlrpcserver->wp_getTerms( array( 1, 'editor', 'editor', '' ) );
 		$this->assertInstanceOf( 'IXR_Error', $result );
 		$this->assertEquals( 403, $result->code );
-		$this->assertEquals( __( 'Invalid taxonomy' ), $result->message );
+		$this->assertEquals( __( 'Invalid taxonomy.' ), $result->message );
 	}
 
 	function test_invalid_taxonomy() {
@@ -26,7 +26,7 @@ class Tests_XMLRPC_wp_getTerms extends WP_XMLRPC_UnitTestCase {
 		$result = $this->myxmlrpcserver->wp_getTerms( array( 1, 'editor', 'editor', 'not_existing' ) );
 		$this->assertInstanceOf( 'IXR_Error', $result );
 		$this->assertEquals( 403, $result->code );
-		$this->assertEquals( __( 'Invalid taxonomy' ), $result->message );
+		$this->assertEquals( __( 'Invalid taxonomy.' ), $result->message );
 	}
 
 	function test_incapable_user() {
@@ -66,7 +66,7 @@ class Tests_XMLRPC_wp_getTerms extends WP_XMLRPC_UnitTestCase {
 		$num_terms = 12;
 		register_taxonomy( $tax_name, 'post' );
 		for( $i = 0; $i < $num_terms; $i++ )
-			wp_insert_term( rand_str( 10 ), $tax_name );
+			wp_insert_term( "term_{$i}", $tax_name );
 
 
 		// test fetching all terms

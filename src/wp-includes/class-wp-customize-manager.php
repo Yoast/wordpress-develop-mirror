@@ -305,18 +305,17 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Return true if it's an AJAX request.
+	 * Return true if it's an Ajax request.
 	 *
 	 * @since 3.4.0
 	 * @since 4.2.0 Added `$action` param.
 	 * @access public
 	 *
-	 * @param string|null $action Whether the supplied AJAX action is being run.
-	 * @return bool True if it's an AJAX request, false otherwise.
+	 * @param string|null $action Whether the supplied Ajax action is being run.
+	 * @return bool True if it's an Ajax request, false otherwise.
 	 */
 	public function doing_ajax( $action = null ) {
-		$doing_ajax = ( defined( 'DOING_AJAX' ) && DOING_AJAX );
-		if ( ! $doing_ajax ) {
+		if ( ! wp_doing_ajax() ) {
 			return false;
 		}
 
@@ -333,11 +332,11 @@ final class WP_Customize_Manager {
 
 	/**
 	 * Custom wp_die wrapper. Returns either the standard message for UI
-	 * or the AJAX message.
+	 * or the Ajax message.
 	 *
 	 * @since 3.4.0
 	 *
-	 * @param mixed $ajax_message AJAX return
+	 * @param mixed $ajax_message Ajax return
 	 * @param mixed $message UI message
 	 */
 	protected function wp_die( $ajax_message, $message = null ) {
@@ -353,7 +352,7 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Return the AJAX wp_die() handler if it's a customized request.
+	 * Return the Ajax wp_die() handler if it's a customized request.
 	 *
 	 * @since 3.4.0
 	 *
@@ -609,7 +608,7 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Prevents AJAX requests from following redirects when previewing a theme
+	 * Prevents Ajax requests from following redirects when previewing a theme
 	 * by issuing a 200 response instead of a 30x.
 	 *
 	 * Instead, the JS will sniff out the location header.
@@ -651,11 +650,13 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Return the sanitized value for a given setting from the request's POST data.
+	 * Returns the sanitized value for a given setting from the request's POST data.
 	 *
 	 * @since 3.4.0
-	 * @since 4.1.1 Introduced `$default` parameter.
-	 * @since 4.6.0 Return `$default` when setting post value is invalid.
+	 * @since 4.1.1 Introduced the `$default` parameter.
+	 * @since 4.6.0 `$default` is now returned early when the setting post value is invalid.
+	 * @access public
+	 *
 	 * @see WP_REST_Server::dispatch()
 	 * @see WP_Rest_Request::sanitize_params()
 	 * @see WP_Rest_Request::has_valid_params()
@@ -762,7 +763,7 @@ final class WP_Customize_Manager {
 
 	/**
 	 * Prevent sending a 404 status when returning the response for the customize
-	 * preview, since it causes the jQuery AJAX to fail. Send 200 instead.
+	 * preview, since it causes the jQuery Ajax to fail. Send 200 instead.
 	 *
 	 * @since 4.0.0
 	 * @access public
@@ -987,18 +988,20 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Validate setting values.
+	 * Validates setting values.
 	 *
-	 * Sanitization is applied to the values before being passed for validation.
 	 * Validation is skipped for unregistered settings or for values that are
-	 * already null since they will be skipped anyway.
+	 * already null since they will be skipped anyway. Sanitization is applied
+	 * to values that pass validation, and values that become null or `WP_Error`
+	 * after sanitizing are marked invalid.
 	 *
 	 * @since 4.6.0
 	 * @access public
+	 *
 	 * @see WP_REST_Request::has_valid_params()
 	 * @see WP_Customize_Setting::validate()
 	 *
-	 * @param array $setting_values Mapping of setting IDs to values to sanitize and validate.
+	 * @param array $setting_values Mapping of setting IDs to values to validate and sanitize.
 	 * @return array Mapping of setting IDs to return value of validate method calls, either `true` or `WP_Error`.
 	 */
 	public function validate_setting_values( $setting_values ) {
@@ -1026,7 +1029,7 @@ final class WP_Customize_Manager {
 	}
 
 	/**
-	 * Prepare setting validity for exporting to the client (JS).
+	 * Prepares setting validity for exporting to the client (JS).
 	 *
 	 * Converts `WP_Error` instance into array suitable for passing into the
 	 * `wp.customize.Notification` JS model.
@@ -1035,9 +1038,9 @@ final class WP_Customize_Manager {
 	 * @access public
 	 *
 	 * @param true|WP_Error $validity Setting validity.
-	 * @return true|array If `$validity` was `WP_Error` then array mapping the error
-	 *                    codes to their respective `message` and `data` to pass
-	 *                    into the `wp.customize.Notification` JS model.
+	 * @return true|array If `$validity` was a WP_Error, the error codes will be array-mapped
+	 *                    to their respective `message` and `data` to pass into the
+	 *                    `wp.customize.Notification` JS model.
 	 */
 	public function prepare_setting_validity_for_js( $validity ) {
 		if ( is_wp_error( $validity ) ) {
@@ -1080,8 +1083,9 @@ final class WP_Customize_Manager {
 		/**
 		 * Fires before save validation happens.
 		 *
-		 * Plugins can add just-in-time `customize_validate_{$setting_id}` filters
+		 * Plugins can add just-in-time {@see 'customize_validate_{$this->ID}'} filters
 		 * at this point to catch any settings registered after `customize_register`.
+		 * The dynamic portion of the hook name, `$this->ID` refers to the setting ID.
 		 *
 		 * @since 4.6.0
 		 *
@@ -1142,7 +1146,7 @@ final class WP_Customize_Manager {
 		);
 
 		/**
-		 * Filters response data for a successful customize_save AJAX request.
+		 * Filters response data for a successful customize_save Ajax request.
 		 *
 		 * This filter does not apply if there was a nonce or authentication failure.
 		 *

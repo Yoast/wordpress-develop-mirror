@@ -563,7 +563,7 @@ function do_enclose( $content, $post_ID ) {
 	global $wpdb;
 
 	//TODO: Tidy this ghetto code up and make the debug code optional
-	include_once( ABSPATH . WPINC . '/class-IXR.php' );
+	include_once( ABSPATH . WPINC . '/class-IXR.php' ); 
 
 	$post_links = array();
 
@@ -1411,7 +1411,12 @@ function is_blog_installed() {
 		wp_load_translations_early();
 
 		// Die with a DB error.
-		$wpdb->error = sprintf( __( 'One or more database tables are unavailable. The database may need to be <a href="%s">repaired</a>.' ), 'maint/repair.php?referrer=is_blog_installed' );
+		$wpdb->error = sprintf(
+			/* translators: %s: database repair URL */
+			__( 'One or more database tables are unavailable. The database may need to be <a href="%s">repaired</a>.' ),
+			'maint/repair.php?referrer=is_blog_installed'
+		);
+
 		dead_db();
 	}
 
@@ -1895,7 +1900,11 @@ function wp_upload_dir( $time = null, $create_dir = true, $refresh_cache = false
 					$error_path = basename( $uploads['basedir'] ) . $uploads['subdir'];
 				}
 
-				$uploads['error'] = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?' ), esc_html( $error_path ) );
+				$uploads['error'] = sprintf(
+					/* translators: %s: directory path */
+					__( 'Unable to create directory %s. Is its parent directory writable by the server?' ),
+					esc_html( $error_path )
+				);
 			}
 
 			$tested_paths[ $path ] = $uploads['error'];
@@ -2034,13 +2043,16 @@ function wp_unique_filename( $dir, $filename, $unique_filename_callback = null )
 	$filename = sanitize_file_name($filename);
 
 	// Separate the filename into a name and extension.
-	$info = pathinfo($filename);
-	$ext = !empty($info['extension']) ? '.' . $info['extension'] : '';
-	$name = basename($filename, $ext);
+	$ext = pathinfo( $filename, PATHINFO_EXTENSION );
+	$name = pathinfo( $filename, PATHINFO_BASENAME );
+	if ( $ext ) {
+		$ext = '.' . $ext;
+	}
 
 	// Edge case: if file is named '.ext', treat as an empty name.
-	if ( $name === $ext )
+	if ( $name === $ext ) {
 		$name = '';
+	}
 
 	/*
 	 * Increment the file number until we have a unique file to save in $dir.
@@ -2154,7 +2166,11 @@ function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 		else
 			$error_path = basename( $upload['basedir'] ) . $upload['subdir'];
 
-		$message = sprintf( __( 'Unable to create directory %s. Is its parent directory writable by the server?' ), $error_path );
+		$message = sprintf(
+			/* translators: %s: directory path */
+			__( 'Unable to create directory %s. Is its parent directory writable by the server?' ),
+			$error_path
+		);
 		return array( 'error' => $message );
 	}
 
@@ -2438,7 +2454,7 @@ function wp_get_mime_types() {
 }
 
 /**
- * Retrieve list of common file extensions and their types.
+ * Retrieves the list of common file extensions and their types.
  *
  * @since 4.6.0
  *
@@ -2513,13 +2529,27 @@ function get_allowed_mime_types( $user = null ) {
  */
 function wp_nonce_ays( $action ) {
 	if ( 'log-out' == $action ) {
-		$html = sprintf( __( 'You are attempting to log out of %s' ), get_bloginfo( 'name' ) ) . '</p><p>';
+		$html = sprintf(
+			/* translators: %s: site name */
+			__( 'You are attempting to log out of %s' ),
+			get_bloginfo( 'name' )
+		);
+		$html .= '</p><p>';
 		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : '';
-		$html .= sprintf( __( "Do you really want to <a href='%s'>log out</a>?"), wp_logout_url( $redirect_to ) );
+		$html .= sprintf(
+			/* translators: %s: logout URL */
+			__( 'Do you really want to <a href="%s">log out</a>?' ),
+			wp_logout_url( $redirect_to )
+		);
 	} else {
 		$html = __( 'Are you sure you want to do this?' );
-		if ( wp_get_referer() )
-			$html .= "</p><p><a href='" . esc_url( remove_query_arg( 'updated', wp_get_referer() ) ) . "'>" . __( 'Please try again.' ) . "</a>";
+		if ( wp_get_referer() ) {
+			$html .= '</p><p>';
+			$html .= sprintf( '<a href="%s">%s</a>',
+				esc_url( remove_query_arg( 'updated', wp_get_referer() ) ),
+				__( 'Please try again.' )
+			);
+		}
 	}
 
 	wp_die( $html, __( 'WordPress Failure Notice' ), 403 );
@@ -2567,9 +2597,9 @@ function wp_die( $message = '', $title = '', $args = array() ) {
 		$title = '';
 	}
 
-	if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+	if ( wp_doing_ajax() ) {
 		/**
-		 * Filters callback for killing WordPress execution for AJAX requests.
+		 * Filters the callback for killing WordPress execution for Ajax requests.
 		 *
 		 * @since 3.4.0
 		 *
@@ -2578,7 +2608,7 @@ function wp_die( $message = '', $title = '', $args = array() ) {
 		$function = apply_filters( 'wp_die_ajax_handler', '_ajax_wp_die_handler' );
 	} elseif ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
 		/**
-		 * Filters callback for killing WordPress execution for XML-RPC requests.
+		 * Filters the callback for killing WordPress execution for XML-RPC requests.
 		 *
 		 * @since 3.4.0
 		 *
@@ -2587,7 +2617,7 @@ function wp_die( $message = '', $title = '', $args = array() ) {
 		$function = apply_filters( 'wp_die_xmlrpc_handler', '_xmlrpc_wp_die_handler' );
 	} else {
 		/**
-		 * Filters callback for killing WordPress execution for all non-AJAX, non-XML-RPC requests.
+		 * Filters the callback for killing WordPress execution for all non-Ajax, non-XML-RPC requests.
 		 *
 		 * @since 3.0.0
 		 *
@@ -2681,7 +2711,7 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 		body {
 			background: #fff;
 			color: #444;
-			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 			margin: 2em auto;
 			padding: 1em 2em;
 			max-width: 700px;
@@ -2835,9 +2865,19 @@ function _xmlrpc_wp_die_handler( $message, $title = '', $args = array() ) {
  * @since 3.4.0
  * @access private
  *
- * @param string $message Optional. Response to print. Default empty.
+ * @param string       $message Error message.
+ * @param string       $title   Optional. Error title (unused). Default empty.
+ * @param string|array $args    Optional. Arguments to control behavior. Default empty array.
  */
-function _ajax_wp_die_handler( $message = '' ) {
+function _ajax_wp_die_handler( $message, $title = '', $args = array() ) {
+	$defaults = array(
+		'response' => 200,
+	);
+	$r = wp_parse_args( $args, $defaults );
+
+	if ( ! headers_sent() ) {
+		status_header( $r['response'] );
+	}
 	if ( is_scalar( $message ) )
 		die( (string) $message );
 	die( '0' );
@@ -3054,14 +3094,17 @@ function _wp_json_prepare_data( $data ) {
  * Send a JSON response back to an Ajax request.
  *
  * @since 3.5.0
+ * @since 4.7.0 The `$status_code` parameter was added.
  *
- * @param mixed $response Variable (usually an array or object) to encode as JSON,
- *                        then print and die.
+ * @param mixed $response    Variable (usually an array or object) to encode as JSON,
+ *                           then print and die.
+ * @param int   $status_code The HTTP status code to output.
  */
-function wp_send_json( $response ) {
+function wp_send_json( $response, $status_code = 200 ) {
 	@header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ) );
+	status_header( $status_code );
 	echo wp_json_encode( $response );
-	if ( defined( 'DOING_AJAX' ) && DOING_AJAX )
+	if ( wp_doing_ajax() )
 		wp_die();
 	else
 		die;
@@ -3071,16 +3114,18 @@ function wp_send_json( $response ) {
  * Send a JSON response back to an Ajax request, indicating success.
  *
  * @since 3.5.0
+ * @since 4.7.0 The `$status_code` parameter was added.
  *
- * @param mixed $data Data to encode as JSON, then print and die.
+ * @param mixed $data        Data to encode as JSON, then print and die.
+ * @param int   $status_code The HTTP status code to output.
  */
-function wp_send_json_success( $data = null ) {
+function wp_send_json_success( $data = null, $status_code = 200 ) {
 	$response = array( 'success' => true );
 
 	if ( isset( $data ) )
 		$response['data'] = $data;
 
-	wp_send_json( $response );
+	wp_send_json( $response, $status_code );
 }
 
 /**
@@ -3093,10 +3138,12 @@ function wp_send_json_success( $data = null ) {
  *
  * @since 3.5.0
  * @since 4.1.0 The `$data` parameter is now processed if a WP_Error object is passed in.
+ * @since 4.7.0 The `$status_code` parameter was added.
  *
- * @param mixed $data Data to encode as JSON, then print and die.
+ * @param mixed $data        Data to encode as JSON, then print and die.
+ * @param int   $status_code The HTTP status code to output.
  */
-function wp_send_json_error( $data = null ) {
+function wp_send_json_error( $data = null, $status_code = 200 ) {
 	$response = array( 'success' => false );
 
 	if ( isset( $data ) ) {
@@ -3114,11 +3161,11 @@ function wp_send_json_error( $data = null ) {
 		}
 	}
 
-	wp_send_json( $response );
+	wp_send_json( $response, $status_code );
 }
 
 /**
- * Check that a JSONP callback is a valid JavaScript callback.
+ * Checks that a JSONP callback is a valid JavaScript callback.
  *
  * Only allows alphanumeric characters and the dot character in callback
  * function names. This helps to mitigate XSS attacks caused by directly
@@ -3134,7 +3181,7 @@ function wp_check_jsonp_callback( $callback ) {
 		return false;
 	}
 
-	$jsonp_callback = preg_replace( '/[^\w\.]/', '', $callback, -1, $illegal_char_count );
+	preg_replace( '/[^\w\.]/', '', $callback, -1, $illegal_char_count );
 
 	return 0 === $illegal_char_count;
 }
@@ -3190,28 +3237,29 @@ function _config_wp_siteurl( $url = '' ) {
  * Fills in the 'directionality' setting, enables the 'directionality'
  * plugin, and adds the 'ltr' button to 'toolbar1', formerly
  * 'theme_advanced_buttons1' array keys. These keys are then returned
- * in the $input (TinyMCE settings) array.
+ * in the $mce_init (TinyMCE settings) array.
  *
  * @since 2.1.0
  * @access private
  *
- * @param array $input MCE settings array.
+ * @param array $mce_init MCE settings array.
  * @return array Direction set for 'rtl', if needed by locale.
  */
-function _mce_set_direction( $input ) {
+function _mce_set_direction( $mce_init ) {
 	if ( is_rtl() ) {
-		$input['directionality'] = 'rtl';
+		$mce_init['directionality'] = 'rtl';
+		$mce_init['rtl_ui'] = true;
 
-		if ( ! empty( $input['plugins'] ) && strpos( $input['plugins'], 'directionality' ) === false ) {
-			$input['plugins'] .= ',directionality';
+		if ( ! empty( $mce_init['plugins'] ) && strpos( $mce_init['plugins'], 'directionality' ) === false ) {
+			$mce_init['plugins'] .= ',directionality';
 		}
 
-		if ( ! empty( $input['toolbar1'] ) && ! preg_match( '/\bltr\b/', $input['toolbar1'] ) ) {
-			$input['toolbar1'] .= ',ltr';
+		if ( ! empty( $mce_init['toolbar1'] ) && ! preg_match( '/\bltr\b/', $mce_init['toolbar1'] ) ) {
+			$mce_init['toolbar1'] .= ',ltr';
 		}
 	}
 
-	return $input;
+	return $mce_init;
 }
 
 
@@ -3902,10 +3950,10 @@ function _deprecated_argument( $function, $version, $message = null ) {
 /**
  * Marks a deprecated action or filter hook as deprecated and throws a notice.
  *
- * Use the 'deprecated_hook_run' action to get the backtrace describing where the
- * deprecated hook was called.
+ * Use the {@see 'deprecated_hook_run'} action to get the backtrace describing where
+ * the deprecated hook was called.
  *
- * Default behavior is to trigger a user error if WP_DEBUG is true.
+ * Default behavior is to trigger a user error if `WP_DEBUG` is true.
  *
  * This function is called by the do_action_deprecated() and apply_filters_deprecated()
  * functions, and so generally does not need to be called directly.
@@ -3932,7 +3980,7 @@ function _deprecated_hook( $hook, $version, $replacement = null, $message = null
 	do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
 
 	/**
-	 * Filter whether to trigger deprecated hook errors.
+	 * Filters whether to trigger deprecated hook errors.
 	 *
 	 * @since 4.6.0
 	 *
@@ -3987,14 +4035,23 @@ function _doing_it_wrong( $function, $message, $version ) {
 	 */
 	if ( WP_DEBUG && apply_filters( 'doing_it_wrong_trigger_error', true ) ) {
 		if ( function_exists( '__' ) ) {
-			$version = is_null( $version ) ? '' : sprintf( __( '(This message was added in version %s.)' ), $version );
+			if ( is_null( $version ) ) {
+				$version = '';
+			} else {
+				/* translators: %s: version number */
+				$version = sprintf( __( '(This message was added in version %s.)' ), $version );
+			}
 			/* translators: %s: Codex URL */
 			$message .= ' ' . sprintf( __( 'Please see <a href="%s">Debugging in WordPress</a> for more information.' ),
 				__( 'https://codex.wordpress.org/Debugging_in_WordPress' )
 			);
 			trigger_error( sprintf( __( '%1$s was called <strong>incorrectly</strong>. %2$s %3$s' ), $function, $message, $version ) );
 		} else {
-			$version = is_null( $version ) ? '' : sprintf( '(This message was added in version %s.)', $version );
+			if ( is_null( $version ) ) {
+				$version = '';
+			} else {
+				$version = sprintf( '(This message was added in version %s.)', $version );
+			}
 			$message .= sprintf( ' Please see <a href="%s">Debugging in WordPress</a> for more information.',
 				'https://codex.wordpress.org/Debugging_in_WordPress'
 			);
@@ -4237,23 +4294,19 @@ function wp_suspend_cache_invalidation( $suspend = true ) {
  *
  * @since 3.0.0
  *
- * @global object $current_site
- *
  * @param int $site_id Optional. Site ID to test. Defaults to current site.
  * @return bool True if $site_id is the main site of the network, or if not
  *              running Multisite.
  */
 function is_main_site( $site_id = null ) {
-	// This is the current network's information; 'site' is old terminology.
-	global $current_site;
-
-	if ( ! is_multisite() )
+	if ( ! is_multisite() ) {
 		return true;
+	}
 
-	if ( ! $site_id )
+	if ( ! $site_id ) {
 		$site_id = get_current_blog_id();
-
-	return (int) $site_id === (int) $current_site->blog_id;
+	}
+	return (int) $site_id === (int) get_current_site()->blog_id;
 }
 
 /**
@@ -5358,23 +5411,107 @@ function mysql_to_rfc3339( $date_string ) {
 }
 
 /**
- * Check if an object type exists. By default, these are `post`, `comment`, `user`, and `term`.
+ * Attempts to raise the PHP memory limit for memory intensive processes.
  *
- * @param  string $object_type Object type to check.
- * @return bool                True if the object type exists, false if not.
+ * Only allows raising the existing limit and prevents lowering it.
+ *
+ * @since 4.6.0
+ *
+ * @param string $context Optional. Context in which the function is called. Accepts either 'admin',
+ *                        'image', or an arbitrary other context. If an arbitrary context is passed,
+ *                        the similarly arbitrary {@see '{$context}_memory_limit'} filter will be
+ *                        invoked. Default 'admin'.
+ * @return bool|int|string The limit that was set or false on failure.
  */
-function wp_object_type_exists( $object_type ) {
-	/**
-	 * Filters WordPress object types.
-	 *
-	 * @since 4.6.0
-	 *
-	 * @param array  $types Array of object types.
-	 */
-	$types = apply_filters( 'wp_object_types', array( 'post', 'comment', 'user', 'term' ) );
+function wp_raise_memory_limit( $context = 'admin' ) {
+	// Exit early if the limit cannot be changed.
+	if ( false === wp_is_ini_value_changeable( 'memory_limit' ) ) {
+		return false;
+	}
 
-	if ( in_array( $object_type, $types ) ) {
-		return true;
+	$current_limit     = @ini_get( 'memory_limit' );
+	$current_limit_int = wp_convert_hr_to_bytes( $current_limit );
+
+	if ( -1 === $current_limit_int ) {
+		return false;
+	}
+
+	$wp_max_limit     = WP_MAX_MEMORY_LIMIT;
+	$wp_max_limit_int = wp_convert_hr_to_bytes( $wp_max_limit );
+	$filtered_limit   = $wp_max_limit;
+
+	switch ( $context ) {
+		case 'admin':
+			/**
+			 * Filters the maximum memory limit available for administration screens.
+			 *
+			 * This only applies to administrators, who may require more memory for tasks
+			 * like updates. Memory limits when processing images (uploaded or edited by
+			 * users of any role) are handled separately.
+			 *
+			 * The `WP_MAX_MEMORY_LIMIT` constant specifically defines the maximum memory
+			 * limit available when in the administration back end. The default is 256M
+			 * (256 megabytes of memory) or the original `memory_limit` php.ini value if
+			 * this is higher.
+			 *
+			 * @since 3.0.0
+			 * @since 4.6.0 The default now takes the original `memory_limit` into account.
+			 *
+			 * @param int|string $filtered_limit The maximum WordPress memory limit. Accepts an integer
+			 *                                   (bytes), or a shorthand string notation, such as '256M'.
+			 */
+			$filtered_limit = apply_filters( 'admin_memory_limit', $filtered_limit );
+			break;
+
+		case 'image':
+			/**
+			 * Filters the memory limit allocated for image manipulation.
+			 *
+			 * @since 3.5.0
+			 * @since 4.6.0 The default now takes the original `memory_limit` into account.
+			 *
+			 * @param int|string $filtered_limit Maximum memory limit to allocate for images.
+			 *                                   Default `WP_MAX_MEMORY_LIMIT` or the original
+			 *                                   php.ini `memory_limit`, whichever is higher.
+			 *                                   Accepts an integer (bytes), or a shorthand string
+			 *                                   notation, such as '256M'.
+			 */
+			$filtered_limit = apply_filters( 'image_memory_limit', $filtered_limit );
+			break;
+
+		default:
+			/**
+			 * Filters the memory limit allocated for arbitrary contexts.
+			 *
+			 * The dynamic portion of the hook name, `$context`, refers to an arbitrary
+			 * context passed on calling the function. This allows for plugins to define
+			 * their own contexts for raising the memory limit.
+			 *
+			 * @since 4.6.0
+			 *
+			 * @param int|string $filtered_limit Maximum memory limit to allocate for images.
+			 *                                   Default '256M' or the original php.ini `memory_limit`,
+			 *                                   whichever is higher. Accepts an integer (bytes), or a
+			 *                                   shorthand string notation, such as '256M'.
+			 */
+			$filtered_limit = apply_filters( "{$context}_memory_limit", $filtered_limit );
+			break;
+	}
+
+	$filtered_limit_int = wp_convert_hr_to_bytes( $filtered_limit );
+
+	if ( -1 === $filtered_limit_int || ( $filtered_limit_int > $wp_max_limit_int && $filtered_limit_int > $current_limit_int ) ) {
+		if ( false !== @ini_set( 'memory_limit', $filtered_limit ) ) {
+			return $filtered_limit;
+		} else {
+			return false;
+		}
+	} elseif ( -1 === $wp_max_limit_int || $wp_max_limit_int > $current_limit_int ) {
+		if ( false !== @ini_set( 'memory_limit', $wp_max_limit ) ) {
+			return $wp_max_limit;
+		} else {
+			return false;
+		}
 	}
 
 	return false;

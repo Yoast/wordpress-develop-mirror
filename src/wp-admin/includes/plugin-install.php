@@ -20,7 +20,7 @@
  *
  * The second filter, {@see 'plugins_api'}, allows a plugin to override the WordPress.org
  * Plugin Install API entirely. If `$action` is 'query_plugins' or 'plugin_information',
- * an object MUST be passed. If `$action` is 'hot_tags` or 'hot_categories', an array MUST
+ * an object MUST be passed. If `$action` is 'hot_tags' or 'hot_categories', an array MUST
  * be passed.
  *
  * Finally, the third filter, {@see 'plugins_api_result'}, makes it possible to filter the
@@ -130,7 +130,7 @@ function plugins_api( $action, $args = array() ) {
 	 * Passing a non-false value will effectively short-circuit the WordPress.org API request.
 	 *
 	 * If `$action` is 'query_plugins' or 'plugin_information', an object MUST be passed.
-	 * If `$action` is 'hot_tags` or 'hot_categories', an array should be passed.
+	 * If `$action` is 'hot_tags' or 'hot_categories', an array should be passed.
 	 *
 	 * @since 2.7.0
 	 *
@@ -210,10 +210,11 @@ function install_popular_tags( $args = array() ) {
  */
 function install_dashboard() {
 	?>
-	<p><?php printf( __( 'Plugins extend and expand the functionality of WordPress. You may automatically install plugins from the <a href="%1$s">WordPress Plugin Directory</a> or upload a plugin in .zip format by clicking the button at the top of this page.' ), 'https://wordpress.org/plugins/' ); ?></p>
+	<p><?php printf( __( 'Plugins extend and expand the functionality of WordPress. You may automatically install plugins from the <a href="%1$s">WordPress Plugin Directory</a> or upload a plugin in .zip format by clicking the button at the top of this page.' ), __( 'https://wordpress.org/plugins/' ) ); ?></p>
 
 	<?php display_plugins_table(); ?>
 
+	<div class="plugins-popular-tags-wrapper">
 	<h2><?php _e( 'Popular tags' ) ?></h2>
 	<p><?php _e( 'You may also browse based on the most popular tags in the Plugin Directory:' ) ?></p>
 	<?php
@@ -239,40 +240,32 @@ function install_dashboard() {
 		}
 		echo wp_generate_tag_cloud($tags, array( 'single_text' => __('%s plugin'), 'multiple_text' => __('%s plugins') ) );
 	}
-	echo '</p><br class="clear" />';
+	echo '</p><br class="clear" /></div>';
 }
 
 /**
- * Display search form for searching plugins.
+ * Displays a search form for searching plugins.
  *
  * @since 2.7.0
+ * @since 4.6.0 The `$type_selector` parameter was deprecated.
  *
- * @param bool $type_selector
+ * @param bool $deprecated Not used.
  */
-function install_search_form( $type_selector = true ) {
-	$type = isset($_REQUEST['type']) ? wp_unslash( $_REQUEST['type'] ) : 'term';
-	$term = isset($_REQUEST['s']) ? wp_unslash( $_REQUEST['s'] ) : '';
-	$input_attrs = '';
-	$button_type = 'button screen-reader-text';
-
-	// assume no $type_selector means it's a simplified search form
-	if ( ! $type_selector ) {
-		$input_attrs = 'class="wp-filter-search" placeholder="' . esc_attr__( 'Search Plugins' ) . '" ';
-	}
-
+function install_search_form( $deprecated = true ) {
+	$type = isset( $_REQUEST['type'] ) ? wp_unslash( $_REQUEST['type'] ) : 'term';
+	$term = isset( $_REQUEST['s'] ) ? wp_unslash( $_REQUEST['s'] ) : '';
 	?><form class="search-form search-plugins" method="get">
 		<input type="hidden" name="tab" value="search" />
-		<?php if ( $type_selector ) : ?>
+		<label class="screen-reader-text" for="typeselector"><?php _e( 'Search plugins by:' ); ?></label>
 		<select name="type" id="typeselector">
-			<option value="term"<?php selected('term', $type) ?>><?php _e('Keyword'); ?></option>
-			<option value="author"<?php selected('author', $type) ?>><?php _e('Author'); ?></option>
-			<option value="tag"<?php selected('tag', $type) ?>><?php _ex('Tag', 'Plugin Installer'); ?></option>
+			<option value="term"<?php selected( 'term', $type ); ?>><?php _e( 'Keyword' ); ?></option>
+			<option value="author"<?php selected( 'author', $type ); ?>><?php _e( 'Author' ); ?></option>
+			<option value="tag"<?php selected( 'tag', $type ); ?>><?php _ex( 'Tag', 'Plugin Installer' ); ?></option>
 		</select>
-		<?php endif; ?>
-		<label><span class="screen-reader-text"><?php _e('Search Plugins'); ?></span>
-			<input type="search" name="s" value="<?php echo esc_attr($term) ?>" <?php echo $input_attrs; ?>/>
+		<label><span class="screen-reader-text"><?php _e( 'Search Plugins' ); ?></span>
+			<input type="search" name="s" value="<?php echo esc_attr( $term ) ?>" class="wp-filter-search" placeholder="<?php esc_attr_e( 'Search Plugins' ); ?>" />
 		</label>
-		<?php submit_button( __( 'Search Plugins' ), $button_type, false, false, array( 'id' => 'search-submit' ) ); ?>
+		<?php submit_button( __( 'Search Plugins' ), 'button hide-if-js', false, false, array( 'id' => 'search-submit' ) ); ?>
 	</form><?php
 }
 
@@ -430,7 +423,6 @@ function install_plugin_install_status($api, $loop = false) {
  * @since 2.7.0
  *
  * @global string $tab
- * @global string $wp_version
  */
 function install_plugin_information() {
 	global $tab;
@@ -637,9 +629,11 @@ function install_plugin_information() {
 	</div>
 	<div id="section-holder" class="wrap">
 	<?php
-	if ( ! empty( $api->tested ) && version_compare( substr( $GLOBALS['wp_version'], 0, strlen( $api->tested ) ), $api->tested, '>' ) ) {
+	$wp_version = get_bloginfo( 'version' );
+
+	if ( ! empty( $api->tested ) && version_compare( substr( $wp_version, 0, strlen( $api->tested ) ), $api->tested, '>' ) ) {
 		echo '<div class="notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> This plugin has <strong>not been tested</strong> with your current version of WordPress.' ) . '</p></div>';
-	} elseif ( ! empty( $api->requires ) && version_compare( substr( $GLOBALS['wp_version'], 0, strlen( $api->requires ) ), $api->requires, '<' ) ) {
+	} elseif ( ! empty( $api->requires ) && version_compare( substr( $wp_version, 0, strlen( $api->requires ) ), $api->requires, '<' ) ) {
 		echo '<div class="notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> This plugin has <strong>not been marked as compatible</strong> with your version of WordPress.' ) . '</p></div>';
 	}
 
