@@ -53,6 +53,16 @@
 				sideSortablesHeight: 0
 			};
 
+		/**
+		 * @summary Resizes textarea based on scroll height and width.
+		 *
+		 * Resizes textarea based on scroll height and width. Doesn't shrink the
+		 * editor size below the 300px auto resize minimum height.
+		 *
+		 * @since 4.6.1
+		 *
+		 * @returns {void}
+		 */
 		var shrinkTextarea = window._.throttle( function() {
 			var x = window.scrollX || document.documentElement.scrollLeft;
 			var y = window.scrollY || document.documentElement.scrollTop;
@@ -73,6 +83,18 @@
 			}
 		}, 300 );
 
+		/**
+		 * @summary Resizes the text editor depending on the old text length.
+		 *
+		 * If there is an mceEditor and it is hidden, resizes the editor depending
+		 * on the old text length. If the current length of the text is smaller than
+		 * the old text length, shrink the text area. Otherwise resize the editor to
+		 * the scroll height.
+		 *
+		 * @since 4.6.1
+		 *
+		 * @returns {void}
+		 */
 		function textEditorResize() {
 			var length = textEditor.value.length;
 
@@ -94,6 +116,18 @@
 			oldTextLength = length;
 		}
 
+		/**
+		 * @summary Gets the heights and widths of elements.
+		 *
+		 * Gets the heights of the window, the adminbar, the tools, the menu,
+		 * the visualTop, the textTop, the bottom, the statusbar and sideSortables
+		 * and stores these in the heights object. Defaults to 0.
+		 * Gets the width of the window and stores this in the heights object.
+		 *
+		 * @since 4.0
+		 *
+		 * @returns {void}
+		 */
 		function getHeights() {
 			var windowWidth = $window.width();
 
@@ -110,50 +144,74 @@
 				sideSortablesHeight: $sideSortables.height() || 0
 			};
 
-			// Adjust for hidden
+			// Adjust for hidden menubar.
 			if ( heights.menuBarHeight < 3 ) {
 				heights.menuBarHeight = 0;
 			}
 		}
 
 		// We need to wait for TinyMCE to initialize.
+		/**
+		 * @summary
+		 *
+		 * @since
+		 *
+		 * @param event
+		 * @param editor
+		 *
+		 * @returns
+		 */
 		$document.on( 'tinymce-editor-init.editor-expand', function( event, editor ) {
+			// VK contains the type of key pressed. VK = virtual keyboard.
 			var VK = window.tinymce.util.VK,
+			/*
+				 * @summary Hides any float panel with a hover state, and tooltips.
+				 */
 				hideFloatPanels = _.debounce( function() {
 					! $( '.mce-floatpanel:hover' ).length && window.tinymce.ui.FloatPanel.hideAll();
 					$( '.mce-tooltip' ).hide();
 				}, 1000, true );
 
-			// Make sure it's the main editor.
+			// Makes sure it's the main editor.
 			if ( editor.id !== 'content' ) {
 				return;
 			}
 
-			// Copy the editor instance.
+			// Copies the editor instance.
 			mceEditor = editor;
 
-			// Set the minimum height to the initial viewport height.
+			// Sets the minimum height to the initial viewport height.
 			editor.settings.autoresize_min_height = autoresizeMinHeight;
 
-			// Get the necessary UI elements.
+			// Gets the necessary UI elements.
 			$visualTop = $contentWrap.find( '.mce-toolbar-grp' );
 			$visualEditor = $contentWrap.find( '.mce-edit-area' );
 			$statusBar = $contentWrap.find( '.mce-statusbar' );
 			$menuBar = $contentWrap.find( '.mce-menubar' );
 
+			/*
+			 * @summary Gets the offset of the editor.
+			 *
+			 * @returns {Number|Boolean} Returns the offset of the editor
+			 * or false if there is no offset height.
+			 */
 			function mceGetCursorOffset() {
 				var node = editor.selection.getNode(),
 					range, view, offset;
 
+				// If editor.wp.getView and the selection node from the editor selection
+				// are defined, use this as a view for the offset.
 				if ( editor.wp && editor.wp.getView && ( view = editor.wp.getView( node ) ) ) {
 					offset = view.getBoundingClientRect();
 				} else {
 					range = editor.selection.getRng();
 
+					// Tries to get the offset from a range.
 					try {
 						offset = range.getClientRects()[0];
 					} catch( er ) {}
 
+					// Gets the offset from the bounding client rectangle of the node.
 					if ( ! offset ) {
 						offset = node.getBoundingClientRect();
 					}
@@ -162,19 +220,23 @@
 				return offset.height ? offset : false;
 			}
 
-			// Make sure the cursor is always visible.
-			// This is not only necessary to keep the cursor between the toolbars,
-			// but also to scroll the window when the cursor moves out of the viewport to a wpview.
-			// Setting a buffer > 0 will prevent the browser default.
-			// Some browsers will scroll to the middle,
-			// others to the top/bottom of the *window* when moving the cursor out of the viewport.
+
+			/**
+			 * @summary Filters the special keys that should not be used for scrolling.
+			 *
+			 * @since
+			 *
+			 * @param {} event The event to get the key code from.
+			 *
+			 * @returns {void}
+			 */
 			function mceKeyup( event ) {
 				var key = event.keyCode;
 
-				// Bail on special keys.
+				// Bails on special keys. Key code 47 is a /
 				if ( key <= 47 && ! ( key === VK.SPACEBAR || key === VK.ENTER || key === VK.DELETE || key === VK.BACKSPACE || key === VK.UP || key === VK.LEFT || key === VK.DOWN || key === VK.UP ) ) {
 					return;
-				// OS keys, function keys, num lock, scroll lock
+				// OS keys, function keys, num lock, scroll lock. Key code 91-93 are OS keys. Key code 112-123 are F1 to F12. Key code 144 is num lock. Key code 145 is scroll lock.
 				} else if ( ( key >= 91 && key <= 93 ) || ( key >= 112 && key <= 123 ) || key === 144 || key === 145 ) {
 					return;
 				}
@@ -182,23 +244,50 @@
 				mceScroll( key );
 			}
 
+			/**
+			 * @summary
+			 *
+			 * @since
+			 *
+			 * Makes sure the cursor is always visible.
+			 * This is not only necessary to keep the cursor between the toolbars,
+			 * but also to scroll the window when the cursor moves out of the viewport to a wpview.
+			 * Setting a buffer > 0 will prevent the browser default.
+			 * Some browsers will scroll to the middle,
+			 * others to the top/bottom of the *window* when moving the cursor out of the viewport.
+			 *
+			 * @param {string} key The key code of the pressed key.
+			 */
 			function mceScroll( key ) {
 				var offset = mceGetCursorOffset(),
 					buffer = 50,
 					cursorTop, cursorBottom, editorTop, editorBottom;
 
+				// Doesn't scroll if there is no offset.
 				if ( ! offset ) {
 					return;
 				}
 
+				// Determines the cursorTop based on the offset and the top of the editor iframe.
 				cursorTop = offset.top + editor.iframeElement.getBoundingClientRect().top;
+
+				// Determines the cursorBottom based on the cursorTop and offset height.
 				cursorBottom = cursorTop + offset.height;
+
+				// Subtract the buffer from the cursorTop.
 				cursorTop = cursorTop - buffer;
+
+				// Add the buffer to the cursorBottom.
 				cursorBottom = cursorBottom + buffer;
 				editorTop = heights.adminBarHeight + heights.toolsHeight + heights.menuBarHeight + heights.visualTopHeight;
+
+				/*
+				 *  Sets the editorBottom based on the window Height, and adds the bottomHeight and statusBarHeight if the
+				 * advanced editor is enabled.
+				 */
 				editorBottom = heights.windowHeight - ( advanced ? heights.bottomHeight + heights.statusBarHeight : 0 );
 
-				// Don't scroll if the node is taller than the visible part of the editor
+				// Doesn't scroll if the node is taller than the visible part of the editor.
 				if ( editorBottom - editorTop < offset.height ) {
 					return;
 				}
