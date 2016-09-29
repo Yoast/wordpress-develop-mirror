@@ -11,9 +11,8 @@
 	 *
 	 * @since 3.7.9
 	 *
-	 * @global
 	 * @returns {Object} The switchEditor, wpautop, pre_wpautop, autop,
-	 * 					 removep functions.
+	 * removep functions.
 	 * @constructor
 	 */
 	function SwitchEditors() {
@@ -21,7 +20,7 @@
 			exports = {};
 
 		/**
-		 * @summary Initilizes the event binding for switching editors.
+		 * @summary Initializes the event binding for switching editors.
 		 *
 		 * @since 3.7.10
 		 *
@@ -68,8 +67,9 @@
 		 * Gets the height of the toolbar, returns the height if it is between
 		 * 10 and 200, else it returns 30.
 		 * @param {object} editor The tinyMCE editor.
+		 *
 		 * @returns {number} If the height is between 10 and 200 return the height,
-		 * 					 else return 30.
+		 * else return 30.
 		 */
 		function getToolbarHeight( editor ) {
 			var node = $$( '.mce-toolbar-grp', editor.getContainer() )[0],
@@ -90,9 +90,9 @@
 		 * Switches the editor based on which button is pressed.
 		 *
 		 * @param {string} id The id of the editor you want to change the editor mode for.
-		 *					  If an undefined id is given, it defaults to content.
+		 * If an undefined id is given, it defaults to content.
 		 * @param {string} mode The mode you want to switch to.
-		 * 						If an undefined mode is given, it defaults to toggle.
+		 * If an undefined mode is given, it defaults to toggle.
 		 *
 		 * @returns {void}
 		 */
@@ -239,6 +239,7 @@
 					return a.replace( /\r?\n/g, '<wp-line-break>' );
 				});
 			}
+
 			/*
 			 * Keeps <br> tags inside captions and remove line breaks by replacing
 			 * them with <wp-temp-br>.
@@ -265,6 +266,7 @@
 			html = html.replace( /\s*<\/p>\s*/gi, '\n\n' );
 			html = html.replace( /\n[\s\u00a0]+\n/g, '\n\n' );
 			html = html.replace( /\s*<br ?\/?>\s*/gi, '\n' );
+
 			/*
 			 * Fixes some block element newline issues.
 			 * Replaces white spaces with newlines in combination with <div>'s.
@@ -297,7 +299,7 @@
 				html = html.replace( /\s*<\/select>/g, '\n</select>' );
 			}
 
-			// Replaces white spaces with 2 newlines in combination with <hr>'s.
+			// Replaces white spaces with 2 newlines in combination with <hr> elements.
 			if ( html.indexOf( '<hr' ) !== -1 ) {
 				html = html.replace( /\s*<hr( [^>]*)?>\s*/g, '\n\n<hr$1>\n\n' );
 			}
@@ -461,8 +463,8 @@
 			// Removes whitespaces and a single br tag after a block level element.
 			text = text.replace( new RegExp( '(</?(?:' + blocklist + ')[^>]*>)\\s*<br />', 'gi' ), '$1' );
 			/*
-			 * Removes a br tag preceding white spaces followed by
-			 * p li div dl dd dt th pre td ul ol element..
+			 * Removes a br tag preceding white spaces followed by a
+			 * p, li, div, dl, dd, dt, th, pre, td, ul, or ol element.
 			 */
 			text = text.replace( /<br \/>(\s*<\/?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)>)/gi, '$1' );
 			// Removes white spaces, p tags and br tags in captions.
@@ -475,10 +477,10 @@
 			 *
 			 * Makes sure there is a paragraph open tag when there is a paragraph close tag
 			 * in a div, th, td, form, fieldset or dd element.
-			 * @param a the complete match
-			 * @param b the first capture group
-			 * @param c the second capture group
-			 * @returns the string in paragraph tags.
+			 * @param {string} a The complete match.
+			 * @param {string} b The first capture group.
+			 * @param {string} c The second capture group.
+			 * @returns {string} The string in paragraph tags.
 			 */
 			text = text.replace( /(<(?:div|th|td|form|fieldset|dd)[^>]*>)(.*?)<\/p>/g, function( a, b, c ) {
 				/*
