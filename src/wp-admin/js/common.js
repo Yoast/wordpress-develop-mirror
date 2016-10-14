@@ -17,6 +17,16 @@ adminMenu = {
 
 // show/hide/save table columns
 columns = {
+	/**
+	 * @summary Initializes the column toggles in the screen options.
+	 *
+	 * Binds an onClick event to the checkboxes to show or hide the table columns
+	 * based on their toggled state. And persists the toggled state.
+	 *
+	 * @since
+	 *
+	 * @return {void}
+	 */
 	init : function() {
 		var that = this;
 		$('.hide-column-tog', '#adv-settings').click( function() {
@@ -29,7 +39,15 @@ columns = {
 			columns.saveManageColumnsState();
 		});
 	},
-
+	/**
+	 * @summary Saves the toggled state for the columns.
+	 *
+	 * Saves whether the columns should be shown or hidden on a page.
+	 *
+	 * @since
+	 *
+	 * @return {void}
+	 */
 	saveManageColumnsState : function() {
 		var hidden = this.hidden();
 		$.post(ajaxurl, {
@@ -40,22 +58,52 @@ columns = {
 		});
 	},
 
+	/**
+	 * @summary Makes a column visible and adjusts the column span for the table.
+	 *
+	 * @since
+	 * @param {string} column The column name.
+	 *
+	 * @return {void}
+	 */
 	checked : function(column) {
 		$('.column-' + column).removeClass( 'hidden' );
 		this.colSpanChange(+1);
 	},
 
+	/**
+	 * @summary Hides a column and adjusts the column span for the table.
+	 *
+	 * @since
+	 * @param {string} column The column name.
+	 *
+	 * @return {void}
+	 */
 	unchecked : function(column) {
 		$('.column-' + column).addClass( 'hidden' );
 		this.colSpanChange(-1);
 	},
 
+	/**
+	 * @summary Get all hidden columns.
+	 *
+	 * @since
+	 *
+	 * @return {string} The hidden column names separated by a comma.
+	 */
 	hidden : function() {
 		return $( '.manage-column[id]' ).filter( ':hidden' ).map(function() {
 			return this.id;
 		}).get().join( ',' );
 	},
 
+	/**
+	 * @summary Gets the checked column toggles from the screen options.
+	 *
+	 * @since
+	 *
+	 * @return {string} String containing the checked column names.
+	 */
 	useCheckboxesForHidden : function() {
 		this.hidden = function(){
 			return $('.hide-column-tog').not(':checked').map(function() {
@@ -65,6 +113,11 @@ columns = {
 		};
 	},
 
+	/**
+	 * @summary Adjusts the column span for the table.
+	 *
+	 * @param {int} diff The modifier for the column span.
+	 */
 	colSpanChange : function(diff) {
 		var $t = $('table').find('.colspanchange'), n;
 		if ( !$t.length )
@@ -75,19 +128,37 @@ columns = {
 };
 
 $document.ready(function(){columns.init();});
-
+/**
+ * Validates that the required form fields are not empty.
+ *
+ * @param {jQuery} form The form to validate.
+ *
+ * @return {boolean} Returns true if all required fields are not an empty string.
+ */
 validateForm = function( form ) {
-	return !$( form )
-		.find( '.form-required' )
-		.filter( function() { return $( 'input:visible', this ).val() === ''; } )
-		.addClass( 'form-invalid' )
-		.find( 'input:visible' )
-		.change( function() { $( this ).closest( '.form-invalid' ).removeClass( 'form-invalid' ); } )
-		.length;
+return !$( form )
+	.find( '.form-required' )
+	.filter( function() { return $( 'input:visible', this ).val() === ''; } )
+	.addClass( 'form-invalid' )
+	.find( 'input:visible' )
+	.change( function() { $( this ).closest( '.form-invalid' ).removeClass( 'form-invalid' ); } )
+	.length;
 };
 
 // stub for doing better warnings
+/**
+ * @summary Shows message pop-up notice or confirmation message.
+ *
+ * @type {{warn: showNotice.warn, note: showNotice.note}}
+ *
+ * @return {void}
+ */
 showNotice = {
+	/**
+	 * @summary Shows a delete confirmation pop-up message.
+	 *
+	 * @return {boolean} Returns true if the message is confirmed.
+	 */
 	warn : function() {
 		var msg = commonL10n.warnDelete || '';
 		if ( confirm(msg) ) {
@@ -97,16 +168,35 @@ showNotice = {
 		return false;
 	},
 
+	/**
+	 * @summary Shows an alert message.
+	 *
+	 * @param text The text to display in the message.
+	 */
 	note : function(text) {
 		alert(text);
 	}
 };
 
+/**
+ * @summary The functions for the meta screen options panel.
+ *
+ * @type {{element: null, toggles: null, page: null, init: screenMeta.init,
+ *         toggleEvent: screenMeta.toggleEvent, open: screenMeta.open,
+ *         close: screenMeta.close}}
+ *
+ * @return {void}
+ */
 screenMeta = {
 	element: null, // #screen-meta
 	toggles: null, // .screen-meta-toggle
 	page:    null, // #wpcontent
 
+	/**
+	 * @summary Initialises the screen meta options panel.
+	 *
+	 * @return {void}
+	 */
 	init: function() {
 		this.element = $('#screen-meta');
 		this.toggles = $( '#screen-meta-links' ).find( '.show-settings' );
@@ -115,6 +205,11 @@ screenMeta = {
 		this.toggles.click( this.toggleEvent );
 	},
 
+	/**
+	 * @summary Toggles the screen meta options panel.
+	 *
+	 * @return {void}
+	 */
 	toggleEvent: function() {
 		var panel = $( '#' + $( this ).attr( 'aria-controls' ) );
 
@@ -127,6 +222,14 @@ screenMeta = {
 			screenMeta.open( panel, $(this) );
 	},
 
+	/**
+	 * @summary Opens the screen meta options panel.
+	 *
+	 * @param {jQuery} panel The screen meta options panel div.
+	 * @param {jQuery} button The toggle button.
+	 *
+	 * @return {void}
+	 */
 	open: function( panel, button ) {
 
 		$( '#screen-meta-links' ).find( '.screen-meta-toggle' ).not( button.parent() ).css( 'visibility', 'hidden' );
@@ -140,7 +243,20 @@ screenMeta = {
 		$document.trigger( 'screen:options:open' );
 	},
 
+	/**
+	 * Closes the screen meta options panel.
+	 *
+	 * @param panel The screen meta options panel div.
+	 * @param button The toggle button.
+	 *
+	 * @return {void}
+	 */
 	close: function( panel, button ) {
+		/**
+		 * @summary Hide the screen meta options panel.
+		 *
+		 * @return {void}
+		 */
 		panel.slideUp( 'fast', function() {
 			button.removeClass( 'screen-meta-active' ).attr( 'aria-expanded', false );
 			$('.screen-meta-toggle').css('visibility', '');
