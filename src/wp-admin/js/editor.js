@@ -60,7 +60,7 @@
 		 *
 		 * @param {Object} editor The tinyMCE editor.
 		 * @returns {number} If the height is between 10 and 200 return the height,
-		 *                                 else return 30.
+		 * 								else return 30.
 		 */
 		function getToolbarHeight( editor ) {
 			var node = $$( '.mce-toolbar-grp', editor.getContainer() )[0],
@@ -81,10 +81,10 @@
 		 *
 		 * @memberof switchEditors
 		 *
-		 * @param {string} id       The id of the editor you want to change the editor mode for.
-		 *                                       If an undefined id is given, it defaults to content.
-		 * @param {string} mode  The mode you want to switch to.
-		 *                                       If an undefined mode is given, it defaults to toggle.
+		 * @param {string} id			The id of the editor you want to change the editor mode for.
+		 *											If an undefined id is given, it defaults to content.
+		 * @param {string} mode	The mode you want to switch to.
+		 *											If an undefined mode is given, it defaults to toggle.
 		 * @returns {void}
 		 */
 		function switchEditor( id, mode ) {
