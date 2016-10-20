@@ -5,8 +5,12 @@ var showNotice, adminMenu, columns, validateForm, screenMeta;
 		$window = $( window ),
 		$body = $( document.body );
 
-// Removed in 3.3.
-// (perhaps) needed for back-compat
+/**
+ * @summary Removed in 3.3. (perhaps) needed for back-compatiblity
+ *
+ * @since 2.7
+ * @deprecated 3.3
+ */
 adminMenu = {
 	init : function() {},
 	fold : function() {},
@@ -23,7 +27,7 @@ columns = {
 	 * Binds an onClick event to the checkboxes to show or hide the table columns
 	 * based on their toggled state. And persists the toggled state.
 	 *
-	 * @since
+	 * @since 2.7
 	 *
 	 * @return {void}
 	 */
@@ -44,7 +48,7 @@ columns = {
 	 *
 	 * Saves whether the columns should be shown or hidden on a page.
 	 *
-	 * @since
+	 * @since 3.0
 	 *
 	 * @return {void}
 	 */
@@ -61,7 +65,7 @@ columns = {
 	/**
 	 * @summary Makes a column visible and adjusts the column span for the table.
 	 *
-	 * @since
+	 * @since 3.0
 	 * @param {string} column The column name.
 	 *
 	 * @return {void}
@@ -74,7 +78,7 @@ columns = {
 	/**
 	 * @summary Hides a column and adjusts the column span for the table.
 	 *
-	 * @since
+	 * @since 3.0
 	 * @param {string} column The column name.
 	 *
 	 * @return {void}
@@ -87,7 +91,7 @@ columns = {
 	/**
 	 * @summary Get all hidden columns.
 	 *
-	 * @since
+	 * @since 3.0
 	 *
 	 * @return {string} The hidden column names separated by a comma.
 	 */
@@ -100,7 +104,7 @@ columns = {
 	/**
 	 * @summary Gets the checked column toggles from the screen options.
 	 *
-	 * @since
+	 * @since 3.0
 	 *
 	 * @return {string} String containing the checked column names.
 	 */
@@ -116,6 +120,8 @@ columns = {
 	/**
 	 * @summary Adjusts the column span for the table.
 	 *
+	 * @since 3.1
+	 *
 	 * @param {int} diff The modifier for the column span.
 	 */
 	colSpanChange : function(diff) {
@@ -129,7 +135,9 @@ columns = {
 
 $document.ready(function(){columns.init();});
 /**
- * Validates that the required form fields are not empty.
+ * @summary Validates that the required form fields are not empty.
+ *
+ * @since 2.9
  *
  * @param {jQuery} form The form to validate.
  *
@@ -149,6 +157,8 @@ return !$( form )
 /**
  * @summary Shows message pop-up notice or confirmation message.
  *
+ * @since 2.7
+ *
  * @type {{warn: showNotice.warn, note: showNotice.note}}
  *
  * @return {void}
@@ -156,6 +166,8 @@ return !$( form )
 showNotice = {
 	/**
 	 * @summary Shows a delete confirmation pop-up message.
+	 *
+	 * @since 2.7
 	 *
 	 * @return {boolean} Returns true if the message is confirmed.
 	 */
@@ -171,6 +183,8 @@ showNotice = {
 	/**
 	 * @summary Shows an alert message.
 	 *
+	 * @since 2.7
+	 *
 	 * @param text The text to display in the message.
 	 */
 	note : function(text) {
@@ -180,6 +194,8 @@ showNotice = {
 
 /**
  * @summary The functions for the meta screen options panel.
+ *
+ * @since 3.2
  *
  * @type {{element: null, toggles: null, page: null, init: screenMeta.init,
  *         toggleEvent: screenMeta.toggleEvent, open: screenMeta.open,
@@ -195,6 +211,8 @@ screenMeta = {
 	/**
 	 * @summary Initialises the screen meta options panel.
 	 *
+	 * @since 3.2
+	 *
 	 * @return {void}
 	 */
 	init: function() {
@@ -207,6 +225,8 @@ screenMeta = {
 
 	/**
 	 * @summary Toggles the screen meta options panel.
+	 *
+	 * @since 3.2
 	 *
 	 * @return {void}
 	 */
@@ -225,6 +245,8 @@ screenMeta = {
 	/**
 	 * @summary Opens the screen meta options panel.
 	 *
+	 * @since 3.2
+	 *
 	 * @param {jQuery} panel The screen meta options panel div.
 	 * @param {jQuery} button The toggle button.
 	 *
@@ -235,6 +257,13 @@ screenMeta = {
 		$( '#screen-meta-links' ).find( '.screen-meta-toggle' ).not( button.parent() ).css( 'visibility', 'hidden' );
 
 		panel.parent().show();
+		/**
+		 * @summary Sets the focus to the meta options panel and adds the necessary CSS classes.
+		 *
+		 * @since 3.2
+		 *
+		 * @returns {void}
+		 */
 		panel.slideDown( 'fast', function() {
 			panel.focus();
 			button.addClass( 'screen-meta-active' ).attr( 'aria-expanded', true );
@@ -244,7 +273,9 @@ screenMeta = {
 	},
 
 	/**
-	 * Closes the screen meta options panel.
+	 * @summary Closes the screen meta options panel.
+	 *
+	 * @since 3.2
 	 *
 	 * @param panel The screen meta options panel div.
 	 * @param button The toggle button.
@@ -254,6 +285,8 @@ screenMeta = {
 	close: function( panel, button ) {
 		/**
 		 * @summary Hide the screen meta options panel.
+		 *
+		 * @since 3.2
 		 *
 		 * @return {void}
 		 */
@@ -268,7 +301,9 @@ screenMeta = {
 };
 
 /**
- * Help tabs.
+ * @summary Intializes the help tabs in the help panel.
+ *
+ * @returns {void}
  */
 $('.contextual-help-tabs').delegate('a', 'click', function(e) {
 	var link = $(this),
@@ -321,11 +356,20 @@ $document.ready( function() {
 		};
 
 
-	// when the menu is folded, make the fly-out submenu header clickable
+	/**
+	 * @summary When the menu is folded, make the fly-out submenu header clickable.
+	 *
+	 * @returns {void}
+	 */
 	$adminmenu.on('click.wp-submenu-head', '.wp-submenu-head', function(e){
 		$(e.target).parent().siblings('a').get(0).click();
 	});
 
+	/**
+	 * @summary Collapses the admin menu.
+	 *
+	 * @returns {void}
+	 */
 	$('#collapse-menu').on('click.collapse-menu', function() {
 		var respWidth, state;
 
@@ -367,7 +411,13 @@ $document.ready( function() {
 		$document.trigger( 'wp-collapse-menu', { state: state } );
 	});
 
-	// Handle the `aria-haspopup` attribute on the current menu item when it has a sub-menu.
+	/**
+	 * @summary Handle the `aria-haspopup` attribute on the current menu item when it has a sub-menu.
+	 *
+	 * @since 4.4
+	 *
+	 * @returns {void}
+	 */
 	function currentMenuItemHasPopup() {
 		var respWidth,
 			$current = $( 'a.wp-has-current-submenu' );
@@ -390,11 +440,13 @@ $document.ready( function() {
 	$document.on( 'wp-window-resized wp-responsive-activate wp-responsive-deactivate', currentMenuItemHasPopup );
 
 	/**
-	 * Ensure an admin submenu is within the visual viewport.
+	 * @summary Ensure an admin submenu is within the visual viewport.
 	 *
 	 * @since 4.1.0
 	 *
 	 * @param {jQuery} $menuItem The parent menu item containing the submenu.
+	 *
+	 * @returns {void}
 	 */
 	function adjustSubmenu( $menuItem ) {
 		var bottomOffset, pageHeight, adjustment, theFold, menutop, wintop, maxtop,
@@ -428,7 +480,11 @@ $document.ready( function() {
 		// iOS Safari works with touchstart, the rest work with click
 		mobileEvent = isIOS ? 'touchstart' : 'click';
 
-		// close any open submenus when touch/click is not on the menu
+		/**
+		 * @summary Close any open submenus when touch/click is not on the menu.
+		 *
+		 * @returns {null|void}
+		 */
 		$body.on( mobileEvent+'.wp-mobile-hover', function(e) {
 			if ( $adminmenu.data('wp-responsive') ) {
 				return;
@@ -439,6 +495,11 @@ $document.ready( function() {
 			}
 		});
 
+		/**
+		 * @summary Handles the opening or closing the submenu based on the mobile click|touch event.
+		 *
+		 * @returns {null|void}
+		 */
 		$adminmenu.find( 'a.wp-has-submenu' ).on( mobileEvent + '.wp-mobile-hover', function( event ) {
 			var $menuItem = $(this).parent();
 
@@ -460,6 +521,12 @@ $document.ready( function() {
 
 	if ( ! isIOS && ! isAndroid ) {
 		$adminmenu.find( 'li.wp-has-submenu' ).hoverIntent({
+
+			/**
+			 * @summary Opens the submenu when hovered over the menu item for desktops.
+			 *
+			 * @returns {null|void}
+			 */
 			over: function() {
 				var $menuItem = $( this ),
 					$submenu = $menuItem.find( '.wp-submenu' ),
@@ -478,6 +545,12 @@ $document.ready( function() {
 				$adminmenu.find( 'li.opensub' ).removeClass( 'opensub' );
 				$menuItem.addClass( 'opensub' );
 			},
+
+			/**
+			 * @summary Closes the submenu when no loger hovering the menu item.
+			 *
+			 * @returns {null|void}
+			 */
 			out: function(){
 				if ( $adminmenu.data( 'wp-responsive' ) ) {
 					// The menu is in responsive mode, bail
@@ -491,6 +564,11 @@ $document.ready( function() {
 			interval: 90
 		});
 
+		/**
+		 * @summary Opens the submenu on when focussed on the menu item.
+		 *
+		 * @returns {null|void}
+		 */
 		$adminmenu.on( 'focus.adminmenu', '.wp-submenu a', function( event ) {
 			if ( $adminmenu.data( 'wp-responsive' ) ) {
 				// The menu is in responsive mode, bail
@@ -498,12 +576,22 @@ $document.ready( function() {
 			}
 
 			$( event.target ).closest( 'li.menu-top' ).addClass( 'opensub' );
+
+			/**
+			 * @summary Closes the submenu on blur from the menu item.
+			 */
 		}).on( 'blur.adminmenu', '.wp-submenu a', function( event ) {
 			if ( $adminmenu.data( 'wp-responsive' ) ) {
 				return;
 			}
 
 			$( event.target ).closest( 'li.menu-top' ).removeClass( 'opensub' );
+
+			/**
+			 * @summary Adjusts the size for the submenu.
+			 *
+			 * @returns {void}
+			 */
 		}).find( 'li.wp-has-submenu.wp-not-current-submenu' ).on( 'focusin.adminmenu', function() {
 			adjustSubmenu( $( this ) );
 		});
@@ -515,7 +603,13 @@ $document.ready( function() {
 	 */
 	$( 'div.updated, div.error, div.notice' ).not( '.inline, .below-h2' ).insertAfter( $( '.wrap h1, .wrap h2' ).first() );
 
-	// Make notices dismissible
+	/**
+	 * @summary Make notices dismissible.
+	 *
+	 * @since 4.4
+	 *
+	 * @returns {void}
+	 */
 	function makeNoticesDismissible() {
 		$( '.notice.is-dismissible' ).each( function() {
 			var $el = $( this ),
@@ -542,7 +636,13 @@ $document.ready( function() {
 	// Init screen meta
 	screenMeta.init();
 
-	// This event needs to be delegated. Ticket #37973.
+	/**
+	 * @summary Checks a checkbox.
+	 *
+	 * This event needs to be delegated. Ticket #37973.
+	 *
+	 * @returns {boolean} Returns whether a checkbox is checked or not.
+	 */
 	$body.on( 'click', 'tbody .check-column :checkbox', function( event ) {
 		// Shift click to select a range of checkboxes.
 		if ( 'undefined' == event.shiftKey ) { return true; }
@@ -566,6 +666,14 @@ $document.ready( function() {
 
 		// Toggle the "Select all" checkboxes depending if the other ones are all checked or not.
 		var unchecked = $(this).closest('tbody').find(':checkbox').filter(':visible:enabled').not(':checked');
+
+		/**
+		 * @summary Determine if all checkboxes are checked.
+		 *
+		 * @since
+		 *
+		 * @returns {boolean} Returns true if there are no unchecked checkboxes.
+		 */
 		$(this).closest('table').children('thead, tfoot').find(':checkbox').prop('checked', function() {
 			return ( 0 === unchecked.length );
 		});
@@ -573,7 +681,13 @@ $document.ready( function() {
 		return true;
 	});
 
-	// This event needs to be delegated. Ticket #37973.
+	/**
+	 * @summary 
+	 *
+	 * This event needs to be delegated. Ticket #37973.
+	 *
+	 * @returns {boolean}
+	 */
 	$body.on( 'click.wp-toggle-checkboxes', 'thead .check-column :checkbox, tfoot .check-column :checkbox', function( event ) {
 		var $this = $(this),
 			$table = $this.closest( 'table' ),
@@ -714,6 +828,12 @@ $document.ready( function() {
 		input.on('change', toggleUploadButton);
 	})();
 
+	/**
+	 *
+	 * @param event
+	 *
+	 * @since 4.1
+	 */
 	function pinMenu( event ) {
 		var windowPos = $window.scrollTop(),
 			resizing = ! event || event.type !== 'scroll';
@@ -832,6 +952,9 @@ $document.ready( function() {
 		lastScrollPosition = windowPos;
 	}
 
+	/**
+	 * @since 4.1
+	 */
 	function resetHeights() {
 		height = {
 			window: $window.height(),
@@ -841,6 +964,9 @@ $document.ready( function() {
 		};
 	}
 
+	/**
+	 * @since 4.1
+	 */
 	function unpinMenu() {
 		if ( isIOS || ! menuIsPinned ) {
 			return;
