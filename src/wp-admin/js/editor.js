@@ -19,8 +19,6 @@
 		 *
 		 * @since 3.7.10
 		 *
-		 * Initializes the event binding for switching editors.
-		 *
 		 * @returns {void}
 		 */
 		function init() {
@@ -29,12 +27,13 @@
 				$$ = tinymce.$;
 
 				/**
-				 * @summary Binds onclick events for the editor buttons.
+				 * @summary Handles onclick events for the editor buttons.
 				 *
 				 * @since 3.7.10
 				 *
-				 * Binds an onclick event on the document.
-				 * Switches the editor if the clicked element has the 'wp-switch-editor' class.
+				 * Handles an onclick event on the document.
+				 * Switches the editor between visual and text,
+				 * if the clicked element has the 'wp-switch-editor' class.
 				 * If the class name is switch-html switches to the HTML editor,
 				 * if the class name is switch-tmce
 				 * switches to the TMCE editor.
@@ -59,12 +58,9 @@
 		 *
 		 * @since 3.7.2
 		 *
-		 * Retrieves the height of the toolbar, returns the height if it is between
-		 * 10 and 200, else it returns 30.
-		 *
 		 * @param {Object} editor The tinyMCE editor.
 		 * @returns {number} If the height is between 10 and 200 return the height,
-		 * else return 30.
+		 *                                 else return 30.
 		 */
 		function getToolbarHeight( editor ) {
 			var node = $$( '.mce-toolbar-grp', editor.getContainer() )[0],
@@ -78,16 +74,17 @@
 		}
 
 		/**
-		 * @summary Switches the editor based on which button is pressed.
+		 * @summary Switches the editor between visual and text
+		 *                     based on which button is pressed.
 		 *
 		 * @since 2.5
 		 *
 		 * @memberof switchEditors
 		 *
-		 * @param {string} id The id of the editor you want to change the editor mode for.
-		 * If an undefined id is given, it defaults to content.
-		 * @param {string} mode The mode you want to switch to.
-		 * If an undefined mode is given, it defaults to toggle.
+		 * @param {string} id       The id of the editor you want to change the editor mode for.
+		 *                                       If an undefined id is given, it defaults to content.
+		 * @param {string} mode  The mode you want to switch to.
+		 *                                       If an undefined mode is given, it defaults to toggle.
 		 * @returns {void}
 		 */
 		function switchEditor( id, mode ) {
