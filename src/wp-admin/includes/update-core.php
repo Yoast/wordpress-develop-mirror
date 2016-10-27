@@ -735,14 +735,15 @@ $_old_files = array(
 global $_new_bundled_files;
 
 $_new_bundled_files = array(
-	'plugins/akismet/'       => '2.0',
-	'themes/twentyten/'      => '3.0',
-	'themes/twentyeleven/'   => '3.2',
-	'themes/twentytwelve/'   => '3.5',
-	'themes/twentythirteen/' => '3.6',
-	'themes/twentyfourteen/' => '3.8',
-	'themes/twentyfifteen/'  => '4.1',
-	'themes/twentysixteen/'  => '4.4',
+	'plugins/akismet/'        => '2.0',
+	'themes/twentyten/'       => '3.0',
+	'themes/twentyeleven/'    => '3.2',
+	'themes/twentytwelve/'    => '3.5',
+	'themes/twentythirteen/'  => '3.6',
+	'themes/twentyfourteen/'  => '3.8',
+	'themes/twentyfifteen/'   => '4.1',
+	'themes/twentysixteen/'   => '4.4',
+	'themes/twentyseventeen/' => '4.7',
 );
 
 // If not explicitly defined as false, don't install new default themes.
@@ -907,6 +908,8 @@ function update_core($from, $to) {
 					continue;
 				if ( ! file_exists( $working_dir_local . $file ) )
 					continue;
+				if ( '.' === dirname( $file ) && in_array( pathinfo( $file, PATHINFO_EXTENSION ), array( 'html', 'txt' ) ) )
+					continue;
 				if ( md5_file( ABSPATH . $file ) === $checksum )
 					$skip[] = $file;
 				else
@@ -968,6 +971,10 @@ function update_core($from, $to) {
 				continue;
 			if ( ! file_exists( $working_dir_local . $file ) )
 				continue;
+			if ( '.' === dirname( $file ) && in_array( pathinfo( $file, PATHINFO_EXTENSION ), array( 'html', 'txt' ) ) ) {
+				$skip[] = $file;
+				continue;
+			}
 			if ( file_exists( ABSPATH . $file ) && md5_file( ABSPATH . $file ) == $checksum )
 				$skip[] = $file;
 			else

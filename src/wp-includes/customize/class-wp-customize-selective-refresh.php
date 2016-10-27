@@ -184,6 +184,11 @@ final class WP_Customize_Selective_Refresh {
 			'renderQueryVar' => self::RENDER_QUERY_VAR,
 			'l10n'           => array(
 				'shiftClickToEdit' => __( 'Shift-click to edit this element.' ),
+				'clickEditMenu' => __( 'Click to edit this menu.' ),
+				'clickEditWidget' => __( 'Click to edit this widget.' ),
+				'clickEditTitle' => __( 'Click to edit the site title.' ),
+				'clickEditMisc' => __( 'Click to edit this element.' ),
+				'editShortcutVisibilityToggle'  => __( 'Toggle edit shortcuts' ),
 				/* translators: %s: document.write() */
 				'badDocumentWrite' => sprintf( __( '%s is forbidden' ), 'document.write()' ),
 			),
@@ -306,8 +311,6 @@ final class WP_Customize_Selective_Refresh {
 		if ( ! $this->is_render_partials_request() ) {
 			return;
 		}
-
-		$this->manager->remove_preview_signature();
 
 		/*
 		 * Note that is_customize_preview() returning true will entail that the

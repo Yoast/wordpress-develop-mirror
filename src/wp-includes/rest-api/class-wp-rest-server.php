@@ -260,10 +260,11 @@ class WP_REST_Server {
 		 * Filters whether the REST API is enabled.
 		 *
 		 * @since 4.4.0
+		 * @deprecated 4.7.0 Use the rest_authentication_errors filter to restrict access to the API
 		 *
 		 * @param bool $rest_enabled Whether the REST API is enabled. Default true.
 		 */
-		$enabled = apply_filters( 'rest_enabled', true );
+		apply_filters_deprecated( 'rest_enabled', array( true ), '4.7.0', 'rest_authentication_errors', __( 'The REST API can no longer be completely disabled, the rest_authentication_errors can be used to restrict access to the API, instead.' ) );
 
 		/**
 		 * Filters whether jsonp is enabled.
@@ -276,10 +277,6 @@ class WP_REST_Server {
 
 		$jsonp_callback = null;
 
-		if ( ! $enabled ) {
-			echo $this->json_error( 'rest_disabled', __( 'The REST API is disabled on this site.' ), 404 );
-			return false;
-		}
 		if ( isset( $_GET['_jsonp'] ) ) {
 			if ( ! $jsonp_enabled ) {
 				echo $this->json_error( 'rest_callback_disabled', __( 'JSONP support is disabled on this site.' ), 400 );
@@ -866,10 +863,31 @@ class WP_REST_Server {
 					$check_required = $request->has_valid_params();
 					if ( is_wp_error( $check_required ) ) {
 						$response = $check_required;
+					} else {
+						$check_sanitized = $request->sanitize_params();
+						if ( is_wp_error( $check_sanitized ) ) {
+							$response = $check_sanitized;
+						}
 					}
-
-					$request->sanitize_params();
 				}
+
+				/**
+				 * Filters the response before executing any REST API callbacks.
+				 *
+				 * Allows plugins to perform additional validation after a
+				 * request is initialized and matched to a registered route,
+				 * but before it is executed.
+				 *
+				 * Note that this filter will not be called for requests that
+				 * fail to authenticate or match to a registered route.
+				 *
+				 * @since 4.7.0
+				 *
+				 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
+				 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+				 * @param WP_REST_Request  $request  Request used to generate the response.
+				 */
+				$response = apply_filters( 'rest_request_before_callbacks', $response, $handler, $request );
 
 				if ( ! is_wp_error( $response ) ) {
 					// Check permission specified on the route.
@@ -907,6 +925,28 @@ class WP_REST_Server {
 						$response = call_user_func( $callback, $request );
 					}
 				}
+
+				/**
+				 * Filters the response immediately after executing any REST API
+				 * callbacks.
+				 *
+				 * Allows plugins to perform any needed cleanup, for example,
+				 * to undo changes made during the {@see 'rest_request_before_callbacks'}
+				 * filter.
+				 *
+				 * Note that this filter will not be called for requests that
+				 * fail to authenticate or match to a registered route.
+				 *
+				 * Note that an endpoint's `permission_callback` can still be
+				 * called after this filter - see `rest_send_allow_header()`.
+				 *
+				 * @since 4.7.0
+				 *
+				 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
+				 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+				 * @param WP_REST_Request  $request  Request used to generate the response.
+				 */
+				$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
 
 				if ( is_wp_error( $response ) ) {
 					$response = $this->error_to_response( $response );

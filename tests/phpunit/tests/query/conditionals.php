@@ -55,7 +55,7 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 	}
 
 	function test_404() {
-		$this->go_to('/'.rand_str());
+		$this->go_to( '/notapage' );
 		$this->assertQueryTrue('is_404');
 	}
 
@@ -1041,6 +1041,17 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		$this->go_to( "/?page_id=$post_id" );
 		$this->assertFalse( is_page_template( array( 'test.php' ) ) );
 		$this->assertTrue( is_page_template( array('test.php', 'example.php') ) );
+	}
+
+	/**
+	 * @ticket 18375
+	 */
+	function test_is_page_template_other_post_type() {
+		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
+		update_post_meta( $post_id, '_wp_page_template', 'example.php' );
+		$this->go_to( get_post_permalink( $post_id ) );
+		$this->assertFalse( is_page_template( array( 'test.php' ) ) );
+		$this->assertTrue( is_page_template( array( 'test.php', 'example.php' ) ) );
 	}
 
 	/**

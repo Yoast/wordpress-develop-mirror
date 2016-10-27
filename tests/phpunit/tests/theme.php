@@ -14,16 +14,27 @@ class Tests_Theme extends WP_UnitTestCase {
 	);
 
 	function setUp() {
+		global $wp_theme_directories;
+
 		parent::setUp();
+
+		$backup_wp_theme_directories = $wp_theme_directories;
+		$wp_theme_directories = array( WP_CONTENT_DIR . '/themes' );
+
 		add_filter( 'extra_theme_headers', array( $this, '_theme_data_extra_headers' ) );
 		wp_clean_themes_cache();
 		unset( $GLOBALS['wp_themes'] );
 	}
 
 	function tearDown() {
+		global $wp_theme_directories;
+
+		$wp_theme_directories = $this->wp_theme_directories;
+
 		remove_filter( 'extra_theme_headers', array( $this, '_theme_data_extra_headers' ) );
 		wp_clean_themes_cache();
 		unset( $GLOBALS['wp_themes'] );
+
 		parent::tearDown();
 	}
 
@@ -267,7 +278,6 @@ class Tests_Theme extends WP_UnitTestCase {
 				$this->assertEquals(get_date_template(), get_query_template('date'));
 				$this->assertEquals(get_home_template(), get_query_template('home', array('home.php','index.php')));
 				$this->assertEquals(get_page_template(), get_query_template('page'));
-				$this->assertEquals(get_paged_template(), get_query_template('paged'));
 				$this->assertEquals(get_search_template(), get_query_template('search'));
 				$this->assertEquals(get_single_template(), get_query_template('single'));
 				$this->assertEquals(get_attachment_template(), get_query_template('attachment'));

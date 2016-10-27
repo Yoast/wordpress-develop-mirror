@@ -21,10 +21,12 @@
  * @param {Array}   settings.plugins.inactive           Base names of inactive plugins.
  * @param {Array}   settings.plugins.upgrade            Base names of plugins with updates available.
  * @param {Array}   settings.plugins.recently_activated Base names of recently activated plugins.
- * @param {object=} settings.totals                     Plugin/theme status information or null.
- * @param {number}  settings.totals.all                 Amount of all plugins or themes.
- * @param {number}  settings.totals.upgrade             Amount of plugins or themes with updates available.
- * @param {number}  settings.totals.disabled            Amount of disabled themes.
+ * @param {object=} settings.themes                     Plugin/theme status information or null.
+ * @param {number}  settings.themes.all                 Amount of all themes.
+ * @param {number}  settings.themes.upgrade             Amount of themes with updates available.
+ * @param {number}  settings.themes.disabled            Amount of disabled themes.
+ * @param {object=} settings.totals                     Combined information for available update counts.
+ * @param {number}  settings.totals.count               Holds the amount of available updates.
  */
 (function( $, wp, settings ) {
 	var $document = $( document );
@@ -179,7 +181,11 @@
 		if ( $notice.length ) {
 			$notice.replaceWith( $adminNotice );
 		} else {
-			$( '.wrap' ).find( '> h1' ).after( $adminNotice );
+			if ( 'customize' === pagenow ) {
+				$( '.customize-themes-notifications' ).append( $adminNotice );
+			} else {
+				$( '.wrap' ).find( '> h1' ).after( $adminNotice );
+			}
 		}
 
 		$document.trigger( 'wp-updates-notice-added' );
@@ -257,6 +263,70 @@
 	};
 
 	/**
+	 * Refreshes update counts everywhere on the screen.
+	 *
+	 * @since 4.7.0
+	 */
+	wp.updates.refreshCount = function() {
+		var $adminBarUpdates              = $( '#wp-admin-bar-updates' ),
+			$dashboardNavMenuUpdateCount  = $( 'a[href="update-core.php"] .update-plugins' ),
+			$pluginsNavMenuUpdateCount    = $( 'a[href="plugins.php"] .update-plugins' ),
+			$appearanceNavMenuUpdateCount = $( 'a[href="themes.php"] .update-plugins' ),
+			itemCount;
+
+		$adminBarUpdates.find( '.ab-item' ).removeAttr( 'title' );
+		$adminBarUpdates.find( '.ab-label' ).text( settings.totals.counts.total );
+
+		// Remove the update count from the toolbar if it's zero.
+		if ( 0 === settings.totals.counts.total ) {
+			$adminBarUpdates.find( '.ab-label' ).parents( 'li' ).remove();
+		}
+
+		// Update the "Updates" menu item.
+		$dashboardNavMenuUpdateCount.each( function( index, element ) {
+			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.total );
+		} );
+		if ( settings.totals.counts.total > 0 ) {
+			$dashboardNavMenuUpdateCount.find( '.update-count' ).text( settings.totals.counts.total );
+		} else {
+			$dashboardNavMenuUpdateCount.remove();
+		}
+
+		// Update the "Plugins" menu item.
+		$pluginsNavMenuUpdateCount.each( function( index, element ) {
+			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.plugins );
+		} );
+		if ( settings.totals.counts.total > 0 ) {
+			$pluginsNavMenuUpdateCount.find( '.plugin-count' ).text( settings.totals.counts.plugins );
+		} else {
+			$pluginsNavMenuUpdateCount.remove();
+		}
+
+		// Update the "Appearance" menu item.
+		$appearanceNavMenuUpdateCount.each( function( index, element ) {
+			element.className = element.className.replace( /count-\d+/, 'count-' + settings.totals.counts.themes );
+		} );
+		if ( settings.totals.counts.total > 0 ) {
+			$appearanceNavMenuUpdateCount.find( '.theme-count' ).text( settings.totals.counts.themes );
+		} else {
+			$appearanceNavMenuUpdateCount.remove();
+		}
+
+		// Update list table filter navigation.
+		if ( 'plugins' === pagenow || 'plugins-network' === pagenow ) {
+			itemCount = settings.totals.counts.plugins;
+		} else if ( 'themes' === pagenow || 'themes-network' === pagenow ) {
+			itemCount = settings.totals.counts.themes;
+		}
+
+		if ( itemCount > 0 ) {
+			$( '.subsubsub .upgrade .count' ).text( '(' + itemCount + ')' );
+		} else {
+			$( '.subsubsub .upgrade' ).remove();
+		}
+	};
+
+	/**
 	 * Decrements the update counts throughout the various menus.
 	 *
 	 * This includes the toolbar, the "Updates" menu item and the menu items
@@ -268,62 +338,15 @@
 	 *                      Can be 'plugin', 'theme'.
 	 */
 	wp.updates.decrementCount = function( type ) {
-		var $adminBarUpdates             = $( '#wp-admin-bar-updates' ),
-			$dashboardNavMenuUpdateCount = $( 'a[href="update-core.php"] .update-plugins' ),
-			count                        = $adminBarUpdates.find( '.ab-label' ).text(),
-			$menuItem, $itemCount, itemCount;
-
-		count = parseInt( count, 10 ) - 1;
-
-		if ( count < 0 || isNaN( count ) ) {
-			return;
-		}
-
-		$adminBarUpdates.find( '.ab-item' ).removeAttr( 'title' );
-		$adminBarUpdates.find( '.ab-label' ).text( count );
-
-		// Remove the update count from the toolbar if it's zero.
-		if ( ! count ) {
-			$adminBarUpdates.find( '.ab-label' ).parents( 'li' ).remove();
-		}
-
-		// Update the "Updates" menu item.
-		$dashboardNavMenuUpdateCount.each( function( index, element ) {
-			element.className = element.className.replace( /count-\d+/, 'count-' + count );
-		} );
-
-		$dashboardNavMenuUpdateCount.removeAttr( 'title' );
-		$dashboardNavMenuUpdateCount.find( '.update-count' ).text( count );
+		settings.totals.counts.total = Math.max( --settings.totals.counts.total, 0 );
 
 		if ( 'plugin' === type ) {
-			$menuItem  = $( '#menu-plugins' );
-			$itemCount = $menuItem.find( '.plugin-count' );
+			settings.totals.counts.plugins = Math.max( --settings.totals.counts.plugins, 0 );
 		} else if ( 'theme' === type ) {
-			$menuItem  = $( '#menu-appearance' );
-			$itemCount = $menuItem.find( '.theme-count' );
+			settings.totals.counts.themes = Math.max( --settings.totals.counts.themes, 0 );
 		}
 
-		// Decrement the counter of the other menu items.
-		if ( $itemCount ) {
-			itemCount = $itemCount.eq( 0 ).text();
-			itemCount = parseInt( itemCount, 10 ) - 1;
-		}
-
-		if ( itemCount < 0 || isNaN( itemCount ) ) {
-			return;
-		}
-
-		if ( itemCount > 0 ) {
-			$( '.subsubsub .upgrade .count' ).text( '(' + itemCount + ')' );
-
-			$itemCount.text( itemCount );
-			$menuItem.find( '.update-plugins' ).each( function( index, element ) {
-				element.className = element.className.replace( /count-\d+/, 'count-' + itemCount );
-			} );
-		} else {
-			$( '.subsubsub .upgrade' ).remove();
-			$menuItem.find( '.update-plugins' ).remove();
-		}
+		wp.updates.refreshCount( type );
 	};
 
 	/**
@@ -907,6 +930,17 @@
 		if ( 'themes-network' === pagenow ) {
 			$notice = $( '[data-slug="' + args.slug + '"]' ).find( '.update-message' ).removeClass( 'notice-error' ).addClass( 'updating-message notice-warning' ).find( 'p' );
 
+		} else if ( 'customize' === pagenow ) {
+
+			// Update the theme details UI.
+			$notice = $( '#update-theme' ).closest( '.notice' ).removeClass( 'notice-large' );
+
+			$notice.find( 'h3' ).remove();
+
+			// Add the top-level UI, and update both.
+			$notice = $notice.add( $( '#customize-control-theme-installed_' + args.slug ).find( '.update-message' ) );
+			$notice = $notice.addClass( 'updating-message' ).find( 'p' );
+
 		} else {
 			$notice = $( '#update-theme' ).closest( '.notice' ).removeClass( 'notice-large' );
 
@@ -948,6 +982,10 @@
 				message:   wp.updates.l10n.updated
 			},
 			$notice, newText;
+
+		if ( 'customize' === pagenow ) {
+			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container;
+		}
 
 		if ( 'themes-network' === pagenow ) {
 			$notice = $theme.find( '.update-message' );
@@ -1001,6 +1039,10 @@
 
 		if ( wp.updates.maybeHandleCredentialError( response, 'update-theme' ) ) {
 			return;
+		}
+
+		if ( 'customize' === pagenow ) {
+			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container;
 		}
 
 		if ( 'themes-network' === pagenow ) {
@@ -1105,7 +1147,7 @@
 				$message.siblings( '.preview' ).replaceWith( function () {
 					return $( '<a>' )
 						.attr( 'href', response.customizeUrl )
-						.addClass( 'button button-secondary load-customize' )
+						.addClass( 'button load-customize' )
 						.text( wp.updates.l10n.livePreview );
 				} );
 			}
@@ -1139,12 +1181,23 @@
 			return;
 		}
 
-		if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
-			$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
-			$card   = $( '.install-theme-info' ).prepend( $message );
+		if ( 'customize' === pagenow ) {
+			if ( $document.find( 'body' ).hasClass( 'modal-open' ) ) {
+				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
+				$card   = $( '.theme-overlay .theme-info' ).prepend( $message );
+			} else {
+				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
+				$card   = $button.closest( '.theme' ).addClass( 'theme-install-failed' ).append( $message );
+			}
+			$( '.wp-full-overlay' ).removeClass( 'customize-loading' );
 		} else {
-			$card   = $( '[data-slug="' + response.slug + '"]' ).removeClass( 'focus' ).addClass( 'theme-install-failed' ).append( $message );
-			$button = $card.find( '.theme-install' );
+			if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
+				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
+				$card   = $( '.install-theme-info' ).prepend( $message );
+			} else {
+				$card   = $( '[data-slug="' + response.slug + '"]' ).removeClass( 'focus' ).addClass( 'theme-install-failed' ).append( $message );
+				$button = $card.find( '.theme-install' );
+			}
 		}
 
 		$button
@@ -1217,7 +1270,7 @@
 			$themeRows.css( { backgroundColor: '#faafaa' } ).fadeOut( 350, function() {
 				var $views     = $( '.subsubsub' ),
 					$themeRow  = $( this ),
-					totals     = settings.totals,
+					totals     = settings.themes,
 					deletedRow = wp.template( 'item-deleted-row' );
 
 				if ( ! $themeRow.hasClass( 'plugin-update-tr' ) ) {
@@ -1655,6 +1708,12 @@
 			$pluginSearch        = $( '.plugins-php .wp-filter-search' ),
 			$pluginInstallSearch = $( '.plugin-install-php .wp-filter-search' );
 
+		settings = _.extend( settings, window._wpUpdatesItemCounts || {} );
+
+		if ( settings.totals ) {
+			wp.updates.refreshCount();
+		}
+
 		/*
 		 * Whether a user needs to submit filesystem credentials.
 		 *
@@ -1876,6 +1935,7 @@
 
 			wp.updates.installPlugin( {
 				slug:    $button.data( 'slug' ),
+				pagenow: pagenow,
 				success: wp.updates.installImporterSuccess,
 				error:   wp.updates.installImporterError
 			} );
@@ -2377,4 +2437,4 @@
 		 */
 		$( window ).on( 'beforeunload', wp.updates.beforeunload );
 	} );
-})( jQuery, window.wp, _.extend( window._wpUpdatesSettings, window._wpUpdatesItemCounts || {} ) );
+})( jQuery, window.wp, window._wpUpdatesSettings );
