@@ -5,8 +5,6 @@
  *
  * Allows for some configuration in wp-config.php (see default-constants.php)
  *
- * @internal This file must be parsable by PHP4.
- *
  * @package WordPress
  */
 
@@ -91,6 +89,7 @@ wp_set_lang_dir();
 
 // Load early WordPress files.
 require( ABSPATH . WPINC . '/compat.php' );
+require( ABSPATH . WPINC . '/class-wp-list-util.php' );
 require( ABSPATH . WPINC . '/functions.php' );
 require( ABSPATH . WPINC . '/class-wp-matchesmapregex.php' );
 require( ABSPATH . WPINC . '/class-wp.php' );
@@ -131,6 +130,7 @@ if ( SHORTINIT )
 // Load the L10n library.
 require_once( ABSPATH . WPINC . '/l10n.php' );
 require_once( ABSPATH . WPINC . '/class-wp-locale.php' );
+require_once( ABSPATH . WPINC . '/class-wp-locale-switcher.php' );
 
 // Run the installer if WordPress is not installed.
 wp_not_installed();
@@ -187,6 +187,7 @@ require( ABSPATH . WPINC . '/cron.php' );
 require( ABSPATH . WPINC . '/deprecated.php' );
 require( ABSPATH . WPINC . '/script-loader.php' );
 require( ABSPATH . WPINC . '/taxonomy.php' );
+require( ABSPATH . WPINC . '/class-wp-taxonomy.php' );
 require( ABSPATH . WPINC . '/class-wp-term.php' );
 require( ABSPATH . WPINC . '/class-wp-term-query.php' );
 require( ABSPATH . WPINC . '/class-wp-tax-query.php' );
@@ -217,6 +218,22 @@ require( ABSPATH . WPINC . '/rest-api.php' );
 require( ABSPATH . WPINC . '/rest-api/class-wp-rest-server.php' );
 require( ABSPATH . WPINC . '/rest-api/class-wp-rest-response.php' );
 require( ABSPATH . WPINC . '/rest-api/class-wp-rest-request.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-posts-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-attachments-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-post-types-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-post-statuses-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-revisions-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-taxonomies-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-terms-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-users-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-comments-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-settings-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-meta-fields.php' );
+require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-comment-meta-fields.php' );
+require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-post-meta-fields.php' );
+require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-term-meta-fields.php' );
+require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-user-meta-fields.php' );
 
 $GLOBALS['wp_embed'] = new WP_Embed();
 
@@ -383,6 +400,16 @@ unset( $locale_file );
  * @since 2.1.0
  */
 $GLOBALS['wp_locale'] = new WP_Locale();
+
+/**
+ *  WordPress Locale Switcher object for switching locales.
+ *
+ * @since 4.7.0
+ *
+ * @global WP_Locale_Switcher $wp_locale_switcher WordPress locale switcher object.
+ */
+$GLOBALS['wp_locale_switcher'] = new WP_Locale_Switcher();
+$GLOBALS['wp_locale_switcher']->init();
 
 // Load the functions for the active theme, for both parent and child theme if applicable.
 if ( ! wp_installing() || 'wp-activate.php' === $pagenow ) {

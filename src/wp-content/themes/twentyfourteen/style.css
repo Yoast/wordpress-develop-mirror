@@ -88,6 +88,7 @@ canvas,
 video {
 	display: inline-block;
 	max-width: 100%;
+	height: auto;
 }
 
 html {
@@ -608,6 +609,11 @@ video {
 	max-width: 100%;
 }
 
+#wp-custom-header iframe,
+#wp-custom-header video {
+	margin-bottom: -8px;
+}
+
 p > embed,
 p > iframe,
 p > object,
@@ -1039,6 +1045,10 @@ span + .edit-link:before,
 	outline: 1px dotted;
 }
 
+.secondary-navigation .customize-partial-edit-shortcut button,
+.footer-sidebar .widget:first-child .customize-partial-edit-shortcut button {
+	left: 0;
+}
 
 /**
  * 6.0 Content

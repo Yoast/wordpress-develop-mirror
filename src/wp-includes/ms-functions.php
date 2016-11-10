@@ -53,9 +53,9 @@ function get_active_blog_for_user( $user_id ) {
 	if ( false !== $primary_blog ) {
 		if ( ! isset( $blogs[ $primary_blog ] ) ) {
 			update_user_meta( $user_id, 'primary_blog', $first_blog->userblog_id );
-			$primary = get_blog_details( $first_blog->userblog_id );
+			$primary = get_site( $first_blog->userblog_id );
 		} else {
-			$primary = get_blog_details( $primary_blog );
+			$primary = get_site( $primary_blog );
 		}
 	} else {
 		//TODO Review this call to add_user_to_blog too - to get here the user must have a role on this blog?
@@ -71,7 +71,7 @@ function get_active_blog_for_user( $user_id ) {
 			foreach ( (array) $blogs as $blog_id => $blog ) {
 				if ( $blog->site_id != $wpdb->siteid )
 					continue;
-				$details = get_blog_details( $blog_id );
+				$details = get_site( $blog_id );
 				if ( is_object( $details ) && $details->archived == 0 && $details->spam == 0 && $details->deleted == 0 ) {
 					$ret = $blog;
 					if ( get_user_meta( $user_id , 'primary_blog', true ) != $blog_id )
@@ -161,8 +161,8 @@ function add_user_to_blog( $blog_id, $user_id, $role ) {
 
 	if ( !get_user_meta($user_id, 'primary_blog', true) ) {
 		update_user_meta($user_id, 'primary_blog', $blog_id);
-		$details = get_blog_details($blog_id);
-		update_user_meta($user_id, 'source_domain', $details->domain);
+		$site = get_site( $blog_id );
+		update_user_meta( $user_id, 'source_domain', $site->domain );
 	}
 
 	$user->set_role($role);
@@ -546,8 +546,8 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	global $wpdb, $domain;
 
-	$current_site = get_current_site();
-	$base = $current_site->path;
+	$current_network = get_network();
+	$base = $current_network->path;
 
 	$blog_title = strip_tags( $blog_title );
 
@@ -580,7 +580,7 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 		$errors->add('blogname',  __( 'Site name must be at least 4 characters.' ) );
 
 	// do not allow users to create a blog that conflicts with a page on the main blog.
-	if ( !is_subdomain_install() && $wpdb->get_var( $wpdb->prepare( "SELECT post_name FROM " . $wpdb->get_blog_prefix( $current_site->blog_id ) . "posts WHERE post_type = 'page' AND post_name = %s", $blogname ) ) )
+	if ( !is_subdomain_install() && $wpdb->get_var( $wpdb->prepare( "SELECT post_name FROM " . $wpdb->get_blog_prefix( $current_network->site_id ) . "posts WHERE post_type = 'page' AND post_name = %s", $blogname ) ) )
 		$errors->add( 'blogname', __( 'Sorry, you may not use that site name.' ) );
 
 	// all numeric?
@@ -612,7 +612,7 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 		$mydomain = "$domain";
 		$path = $base.$blogname.'/';
 	}
-	if ( domain_exists($mydomain, $path, $current_site->id) )
+	if ( domain_exists($mydomain, $path, $current_network->id) )
 		$errors->add( 'blogname', __( 'Sorry, that site already exists!' ) );
 
 	if ( username_exists( $blogname ) ) {
@@ -789,7 +789,7 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user, $user_ema
 	}
 
 	// Send email with activation link.
-	if ( !is_subdomain_install() || get_current_site()->id != 1 )
+	if ( !is_subdomain_install() || get_current_network_id() != 1 )
 		$activate_url = network_site_url("wp-activate.php?key=$key");
 	else
 		$activate_url = "http://{$domain}{$path}wp-activate.php?key=$key"; // @todo use *_url() API
@@ -800,6 +800,10 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user, $user_ema
 		$admin_email = 'support@' . $_SERVER['SERVER_NAME'];
 	$from_name = get_site_option( 'site_name' ) == '' ? 'WordPress' : esc_html( get_site_option( 'site_name' ) );
 	$message_headers = "From: \"{$from_name}\" <{$admin_email}>\n" . "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
+
+	$user = get_user_by( 'login', $user );
+	$switched_locale = switch_to_locale( get_user_locale( $user ) );
+
 	$message = sprintf(
 		/**
 		 * Filters the message content of the new blog notification email.
@@ -849,6 +853,11 @@ function wpmu_signup_blog_notification( $domain, $path, $title, $user, $user_ema
 		esc_url( 'http://' . $domain . $path )
 	);
 	wp_mail( $user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
+
+	if ( $switched_locale ) {
+		restore_previous_locale();
+	}
+
 	return true;
 }
 
@@ -886,6 +895,9 @@ function wpmu_signup_user_notification( $user, $user_email, $key, $meta = array(
 	 */
 	if ( ! apply_filters( 'wpmu_signup_user_notification', $user, $user_email, $key, $meta ) )
 		return false;
+
+	$user = get_user_by( 'login', $user );
+	$switched_locale = switch_to_locale( get_user_locale( $user ) );
 
 	// Send email with activation link.
 	$admin_email = get_site_option( 'admin_email' );
@@ -934,6 +946,11 @@ function wpmu_signup_user_notification( $user, $user_email, $key, $meta = array(
 		$user
 	);
 	wp_mail( $user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
+
+	if ( $switched_locale ) {
+		restore_previous_locale();
+	}
+
 	return true;
 }
 
@@ -1092,7 +1109,10 @@ function wpmu_create_user( $user_name, $password, $email ) {
  * @return int|WP_Error Returns WP_Error object on failure, int $blog_id on success
  */
 function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $site_id = 1 ) {
-	$defaults = array( 'public' => 0 );
+	$defaults = array(
+		'public' => 0,
+		'WPLANG' => get_site_option( 'WPLANG' ),
+	);
 	$meta = wp_parse_args( $meta, $defaults );
 
 	$domain = preg_replace( '/\s+/', '', sanitize_user( $domain, true ) );
@@ -1130,7 +1150,6 @@ function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $s
 			update_option( $key, $value );
 	}
 
-	add_option( 'WPLANG', get_site_option( 'WPLANG' ) );
 	update_option( 'blog_public', (int) $meta['public'] );
 
 	if ( ! is_super_admin( $user_id ) && ! get_user_meta( $user_id, 'primary_blog', true ) )
@@ -1333,6 +1352,7 @@ function insert_blog($domain, $path, $site_id) {
  */
 function install_blog( $blog_id, $blog_title = '' ) {
 	global $wpdb, $wp_roles;
+
 	// Cast for security
 	$blog_id = (int) $blog_id;
 
@@ -1360,7 +1380,7 @@ function install_blog( $blog_id, $blog_title = '' ) {
  		if ( 'https' === parse_url( get_site_option( 'siteurl' ), PHP_URL_SCHEME ) ) {
  			$siteurl = set_url_scheme( $siteurl, 'https' );
  		}
- 		if ( 'https' === parse_url( get_home_url( get_current_site()->blog_id ), PHP_URL_SCHEME ) ) {
+ 		if ( 'https' === parse_url( get_home_url( get_network()->site_id ), PHP_URL_SCHEME ) ) {
  			$home = set_url_scheme( $home, 'https' );
  		}
 
@@ -1372,7 +1392,7 @@ function install_blog( $blog_id, $blog_title = '' ) {
 	if ( get_site_option( 'ms_files_rewriting' ) )
 		update_option( 'upload_path', UPLOADBLOGSDIR . "/$blog_id/files" );
 	else
-		update_option( 'upload_path', get_blog_option( get_current_site()->blog_id, 'upload_path' ) );
+		update_option( 'upload_path', get_blog_option( get_network()->site_id, 'upload_path' ) );
 
 	update_option( 'blogname', wp_unslash( $blog_title ) );
 	update_option( 'admin_email', '' );
@@ -1427,7 +1447,7 @@ function install_blog_defaults($blog_id, $user_id) {
  * @return bool
  */
 function wpmu_welcome_notification( $blog_id, $user_id, $password, $title, $meta = array() ) {
-	$current_site = get_current_site();
+	$current_network = get_network();
 
 	/**
 	 * Filters whether to bypass the welcome email after site activation.
@@ -1444,6 +1464,10 @@ function wpmu_welcome_notification( $blog_id, $user_id, $password, $title, $meta
 	 */
 	if ( ! apply_filters( 'wpmu_welcome_notification', $blog_id, $user_id, $password, $title, $meta ) )
 		return false;
+
+	$user = get_userdata( $user_id );
+
+	$switched_locale = switch_to_locale( get_user_locale( $user ) );
 
 	$welcome_email = get_site_option( 'welcome_email' );
 	if ( $welcome_email == false ) {
@@ -1465,9 +1489,8 @@ We hope you enjoy your new site. Thanks!
 	}
 
 	$url = get_blogaddress_by_id($blog_id);
-	$user = get_userdata( $user_id );
 
-	$welcome_email = str_replace( 'SITE_NAME', $current_site->site_name, $welcome_email );
+	$welcome_email = str_replace( 'SITE_NAME', $current_network->site_name, $welcome_email );
 	$welcome_email = str_replace( 'BLOG_TITLE', $title, $welcome_email );
 	$welcome_email = str_replace( 'BLOG_URL', $url, $welcome_email );
 	$welcome_email = str_replace( 'USERNAME', $user->user_login, $welcome_email );
@@ -1497,9 +1520,8 @@ We hope you enjoy your new site. Thanks!
 	$message_headers = "From: \"{$from_name}\" <{$admin_email}>\n" . "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
 	$message = $welcome_email;
 
-	if ( empty( $current_site->site_name ) ) {
-		$current_site->site_name = 'WordPress';
-	}
+	if ( empty( $current_network->site_name ) )
+		$current_network->site_name = 'WordPress';
 
 	/**
 	 * Filters the subject of the welcome email after site activation.
@@ -1508,8 +1530,13 @@ We hope you enjoy your new site. Thanks!
 	 *
 	 * @param string $subject Subject of the email.
 	 */
-	$subject = apply_filters( 'update_welcome_subject', sprintf( __( 'New %1$s Site: %2$s' ), $current_site->site_name, wp_unslash( $title ) ) );
+	$subject = apply_filters( 'update_welcome_subject', sprintf( __( 'New %1$s Site: %2$s' ), $current_network->site_name, wp_unslash( $title ) ) );
 	wp_mail( $user->user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
+
+	if ( $switched_locale ) {
+		restore_previous_locale();
+	}
+
 	return true;
 }
 
@@ -1529,7 +1556,7 @@ We hope you enjoy your new site. Thanks!
  * @return bool
  */
 function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) {
-	$current_site = get_current_site();
+	$current_network = get_network();
 
 	/**
  	 * Filters whether to bypass the welcome email after user activation.
@@ -1549,6 +1576,8 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 
 	$user = get_userdata( $user_id );
 
+	$switched_locale = switch_to_locale( get_user_locale( $user ) );
+
 	/**
 	 * Filters the content of the welcome email after user activation.
 	 *
@@ -1562,7 +1591,7 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 	 * @param array  $meta          Signup meta data.
 	 */
 	$welcome_email = apply_filters( 'update_welcome_user_email', $welcome_email, $user_id, $password, $meta );
-	$welcome_email = str_replace( 'SITE_NAME', $current_site->site_name, $welcome_email );
+	$welcome_email = str_replace( 'SITE_NAME', $current_network->site_name, $welcome_email );
 	$welcome_email = str_replace( 'USERNAME', $user->user_login, $welcome_email );
 	$welcome_email = str_replace( 'PASSWORD', $password, $welcome_email );
 	$welcome_email = str_replace( 'LOGINLINK', wp_login_url(), $welcome_email );
@@ -1576,8 +1605,8 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 	$message_headers = "From: \"{$from_name}\" <{$admin_email}>\n" . "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
 	$message = $welcome_email;
 
-	if ( empty( $current_site->site_name ) )
-		$current_site->site_name = 'WordPress';
+	if ( empty( $current_network->site_name ) )
+		$current_network->site_name = 'WordPress';
 
 	/**
 	 * Filters the subject of the welcome email after user activation.
@@ -1586,9 +1615,33 @@ function wpmu_welcome_user_notification( $user_id, $password, $meta = array() ) 
 	 *
 	 * @param string $subject Subject of the email.
 	 */
-	$subject = apply_filters( 'update_welcome_user_subject', sprintf( __( 'New %1$s User: %2$s' ), $current_site->site_name, $user->user_login) );
+	$subject = apply_filters( 'update_welcome_user_subject', sprintf( __( 'New %1$s User: %2$s' ), $current_network->site_name, $user->user_login) );
 	wp_mail( $user->user_email, wp_specialchars_decode( $subject ), $message, $message_headers );
+
+	if ( $switched_locale ) {
+		restore_previous_locale();
+	}
+
 	return true;
+}
+
+/**
+ * Get the current network.
+ *
+ * Returns an object containing the 'id', 'domain', 'path', and 'site_name'
+ * properties of the network being viewed.
+ *
+ * @see wpmu_current_site()
+ *
+ * @since MU
+ *
+ * @global WP_Network $current_site
+ *
+ * @return WP_Network
+ */
+function get_current_site() {
+	global $current_site;
+	return $current_site;
 }
 
 /**
@@ -1741,8 +1794,8 @@ function check_upload_mimes( $mimes ) {
  *
  * WordPress MS stores a blog's post count as an option so as
  * to avoid extraneous COUNTs when a blog's details are fetched
- * with get_blog_details(). This function is called when posts
- * are published or unpublished to make sure the count stays current.
+ * with get_site(). This function is called when posts are published
+ * or unpublished to make sure the count stays current.
  *
  * @since MU
  *
@@ -1856,7 +1909,7 @@ function global_terms( $term_id, $deprecated = '' ) {
  * @return array The current site's domain
  */
 function redirect_this_site( $deprecated = '' ) {
-	return array( get_current_site()->domain );
+	return array( get_network()->domain );
 }
 
 /**
@@ -2003,7 +2056,7 @@ function add_new_user_to_blog( $user_id, $password, $meta ) {
 	if ( !empty( $meta[ 'add_to_blog' ] ) ) {
 		$blog_id = $meta[ 'add_to_blog' ];
 		$role = $meta[ 'new_role' ];
-		remove_user_from_blog($user_id, get_current_site()->blog_id); // remove user from main blog.
+		remove_user_from_blog($user_id, get_network()->site_id); // remove user from main blog.
 		add_user_to_blog( $blog_id, $user_id, $role );
 		update_user_meta( $user_id, 'primary_blog', $blog_id );
 	}
@@ -2017,7 +2070,7 @@ function add_new_user_to_blog( $user_id, $password, $meta ) {
  * @param PHPMailer $phpmailer The PHPMailer instance, passed by reference.
  */
 function fix_phpmailer_messageid( $phpmailer ) {
-	$phpmailer->Hostname = get_current_site()->domain;
+	$phpmailer->Hostname = get_network()->domain;
 }
 
 /**
