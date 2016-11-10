@@ -1,22 +1,29 @@
 /* global ajaxurl, attachMediaBoxL10n, _wpMediaGridSettings, showNotice */
 
 /**
- * Creates a dialog and retrieves all the posts that a particular media item can be attached to.
- *
  * @summary Creates a dialog containing posts that can have a particular media attached to it.
  *
- * @since 3.4.2
+ * Creates a dialog and retrieves all the posts that a particular media item can be attached to.
+ *
+ * @since 2.7
+ *
+ * @global
+ * @namespace
  *
  * @requires jQuery
  */
-
 var findPosts;
+
 ( function( $ ){
 	findPosts = {
 		/**
 		 * @summary Opens a dialog to attach media to a post.
 		 *
 		 * Adds an overlay prior to retrieving a list of posts to attach the media to.
+		 *
+		 * @since 2.7
+		 *
+		 * @memberOf findPosts
 		 *
 		 * @param {string} af_name The name of the affected element.
 		 * @param {string} af_val The value of the affected post element.
@@ -57,6 +64,10 @@ var findPosts;
 		/**
 		 * @summary Clears the found posts lists before hiding the attach media dialog.
 		 *
+		 * @since 2.7
+		 *
+		 * @memberOf findPosts
+		 *
 		 * @returns {void}
 		 */
 		close: function() {
@@ -67,6 +78,10 @@ var findPosts;
 
 		/**
 		 * @summary Binds a click event listener to the overlay which closes the attach media dialog.
+		 *
+		 * @since 3.5
+		 *
+		 * @memberOf findPosts
 		 *
 		 * @returns {void}
 		 */
@@ -81,7 +96,11 @@ var findPosts;
 		 *
 		 * Sends a post request to the admin_ajax.php requesting posts based on the search term provided by the user.
 		 * Defaults to all posts if no search term is provided.
-		 * 
+		 *
+		 * @since 2.7
+		 *
+		 * @memberOf findPosts
+		 *
 		 * @returns {void}
 		 */
 		send: function() {
@@ -117,7 +136,7 @@ var findPosts;
 	};
 
 	/**
-	 * Initializes the file once the DOM is fully loaded and attaches events to the various form elements.
+	 * @summary Initializes the file once the DOM is fully loaded and attaches events to the various form elements.
 	 *
 	 * @returns {void}
 	 */
@@ -174,7 +193,7 @@ var findPosts;
 		});
 
 		/**
-		 * Enable whole row to be clickable inside the post finder.
+		 * @summary Enables a whole row to be clickable inside the post finder.
 		 *
 		 * @returns {void}
 		 */
