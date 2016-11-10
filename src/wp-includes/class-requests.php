@@ -88,7 +88,7 @@ class Requests {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.6';
+	const VERSION = '1.7';
 
 	/**
 	 * Registered transport classes
@@ -749,15 +749,17 @@ class Requests {
 	 * @return string Decoded body
 	 */
 	protected static function decode_chunked($data) {
-		if (!preg_match('/^([0-9a-f]+)[^\r\n]*\r\n/i', trim($data))) {
+		if (!preg_match('/^([0-9a-f]+)(?:;(?:[\w-]*)(?:=(?:(?:[\w-]*)*|"(?:[^\r\n])*"))?)*\r\n/i', trim($data))) {
 			return $data;
 		}
+
+
 
 		$decoded = '';
 		$encoded = $data;
 
 		while (true) {
-			$is_chunked = (bool) preg_match('/^([0-9a-f]+)[^\r\n]*\r\n/i', $encoded, $matches);
+			$is_chunked = (bool) preg_match('/^([0-9a-f]+)(?:;(?:[\w-]*)(?:=(?:(?:[\w-]*)*|"(?:[^\r\n])*"))?)*\r\n/i', $encoded, $matches);
 			if (!$is_chunked) {
 				// Looks like it's not chunked after all
 				return $data;

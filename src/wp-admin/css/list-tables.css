@@ -555,15 +555,13 @@ tr.wp-locked .locked-indicator {
 	width: 16px;
 }
 
-tr.wp-locked .locked-indicator:before {
+tr.wp-locked .locked-indicator-icon:before {
 	color: #82878c;
 	content: "\f160";
 	display: inline-block;
-	float: left;
 	font: normal 20px/1 dashicons;
 	speak: none;
 	vertical-align: middle;
-	margin-left: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -581,7 +579,7 @@ tr .locked-info {
 }
 
 tr.wp-locked .locked-info {
-	margin-top: 8px;
+	margin-top: 4px;
 	height: auto;
 	opacity: 1;
 }
@@ -656,6 +654,7 @@ th.asc a:focus span.sorting-indicator {
 	margin-left: 2px;
 }
 
+.tablenav a.button,
 .tablenav a.button-secondary {
 	display: block;
 	margin: 3px 8px 0 0;
@@ -1350,7 +1349,8 @@ ul.cat-checklist {
 	padding: 0;
 }
 
-.plugins .plugin-update-tr .notice {
+.plugins .plugin-update-tr .notice,
+.plugins .plugin-update-tr div[class="update-message"] { /* back-compat for pre-4.6 */
 	margin: 5px 20px 15px 40px;
 }
 

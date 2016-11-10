@@ -101,8 +101,6 @@ class WP_Http {
 	 * @access public
 	 * @since 2.7.0
 	 *
-	 * @global string $wp_version
-	 *
 	 * @param string       $url  The request URL.
 	 * @param string|array $args {
 	 *     Optional. Array or string of HTTP request arguments.
@@ -116,7 +114,7 @@ class WP_Http {
 	 *     @type string       $httpversion         Version of the HTTP protocol to use. Accepts '1.0' and '1.1'.
 	 *                                             Default '1.0'.
 	 *     @type string       $user-agent          User-agent value sent.
-	 *                                             Default WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ).
+	 *                                             Default WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ).
 	 *     @type bool         $reject_unsafe_urls  Whether to pass URLs through wp_http_validate_url().
 	 *                                             Default false.
 	 *     @type bool         $blocking            Whether the calling code requires the result of the request.
@@ -148,8 +146,6 @@ class WP_Http {
 	 *                        A WP_Error instance upon error.
 	 */
 	public function request( $url, $args = array() ) {
-		global $wp_version;
-
 		$defaults = array(
 			'method' => 'GET',
 			/**
@@ -185,7 +181,7 @@ class WP_Http {
 			 *
 			 * @param string $user_agent WordPress user agent string.
 			 */
-			'user-agent' => apply_filters( 'http_headers_useragent', 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ) ),
+			'user-agent' => apply_filters( 'http_headers_useragent', 'WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ) ),
 			/**
 			 * Filters whether to pass URLs through wp_http_validate_url() in an HTTP request.
 			 *
@@ -315,8 +311,7 @@ class WP_Http {
 		}
 		if ( empty( $r['redirection'] ) ) {
 			$options['follow_redirects'] = false;
-		}
-		else {
+		} else {
 			$options['redirects'] = $r['redirection'];
 		}
 
@@ -325,17 +320,22 @@ class WP_Http {
 			$options['max_bytes'] = $r['limit_response_size'];
 		}
 
-		// If we've got cookies, use them
+		// If we've got cookies, use and convert them to Requests_Cookie.
 		if ( ! empty( $r['cookies'] ) ) {
-			$options['cookies'] = $r['cookies'];
+			$options['cookies'] = WP_Http::normalize_cookies( $r['cookies'] );
 		}
 
 		// SSL certificate handling
 		if ( ! $r['sslverify'] ) {
 			$options['verify'] = false;
-		}
-		else {
+			$options['verifyname'] = false;
+		} else {
 			$options['verify'] = $r['sslcertificates'];
+		}
+
+		// All non-GET/HEAD requests should put the arguments in the form body.
+		if ( 'HEAD' !== $type && 'GET' !== $type ) {
+			$options['data_format'] = 'body';
 		}
 
 		/**
@@ -353,10 +353,14 @@ class WP_Http {
 			$options['proxy'] = new Requests_Proxy_HTTP( $proxy->host() . ':' . $proxy->port() );
 
 			if ( $proxy->use_authentication() ) {
+				$options['proxy']->use_authentication = true;
 				$options['proxy']->user = $proxy->username();
 				$options['proxy']->pass = $proxy->password();
 			}
 		}
+
+		// Avoid issues where mbstring.func_overload is enabled
+		mbstring_binary_safe_encoding();
 
 		try {
 			$requests_response = Requests::request( $url, $headers, $data, $type, $options );
@@ -371,6 +375,8 @@ class WP_Http {
 		catch ( Requests_Exception $e ) {
 			$response = new WP_Error( 'http_request_failed', $e->getMessage() );
 		}
+
+		reset_mbstring_encoding();
 
 		/**
 		 * Fires after an HTTP API response is received and before the response is returned.
@@ -414,15 +420,43 @@ class WP_Http {
 	}
 
 	/**
+	 * Normalizes cookies for using in Requests.
+	 *
+	 * @since 4.6.0
+	 * @access public
+	 * @static
+	 *
+	 * @param array $cookies List of cookies to send with the request.
+	 * @return Requests_Cookie_Jar Cookie holder object.
+	 */
+	public static function normalize_cookies( $cookies ) {
+		$cookie_jar = new Requests_Cookie_Jar();
+
+		foreach ( $cookies as $name => $value ) {
+			if ( $value instanceof WP_Http_Cookie ) {
+				$cookie_jar[ $value->name ] = new Requests_Cookie( $value->name, $value->value, $value->get_attributes() );
+			} elseif ( is_scalar( $value ) ) {
+				$cookie_jar[ $name ] = new Requests_Cookie( $name, $value );
+			}
+		}
+
+		return $cookie_jar;
+	}
+
+	/**
 	 * Match redirect behaviour to browser handling.
 	 *
 	 * Changes 302 redirects from POST to GET to match browser handling. Per
 	 * RFC 7231, user agents can deviate from the strict reading of the
 	 * specification for compatibility purposes.
 	 *
-	 * @param string $location URL to redirect to.
-	 * @param array $headers Headers for the redirect.
-	 * @param array $options Redirect request options.
+	 * @since 4.6.0
+	 * @access public
+	 * @static
+	 *
+	 * @param string            $location URL to redirect to.
+	 * @param array             $headers  Headers for the redirect.
+	 * @param array             $options  Redirect request options.
 	 * @param Requests_Response $original Response object.
 	 */
 	public static function browser_redirect_compatibility( $location, $headers, $data, &$options, $original ) {

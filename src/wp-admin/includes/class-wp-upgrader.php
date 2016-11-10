@@ -39,6 +39,9 @@ require_once ABSPATH . 'wp-admin/includes/class-language-pack-upgrader-skin.php'
 /** Automatic_Upgrader_Skin class */
 require_once ABSPATH . 'wp-admin/includes/class-automatic-upgrader-skin.php';
 
+/** WP_Ajax_Upgrader_Skin class */
+require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
+
 /**
  * Core class used for upgrading/installing a local set of files via
  * the Filesystem Abstraction classes from a Zip file.
@@ -150,13 +153,13 @@ class WP_Upgrader {
 	 * @access public
 	 */
 	public function generic_strings() {
-		$this->strings['bad_request'] = __('Invalid Data provided.');
+		$this->strings['bad_request'] = __('Invalid data provided.');
 		$this->strings['fs_unavailable'] = __('Could not access filesystem.');
 		$this->strings['fs_error'] = __('Filesystem error.');
-		$this->strings['fs_no_root_dir'] = __('Unable to locate WordPress Root directory.');
-		$this->strings['fs_no_content_dir'] = __('Unable to locate WordPress Content directory (wp-content).');
-		$this->strings['fs_no_plugins_dir'] = __('Unable to locate WordPress Plugin directory.');
-		$this->strings['fs_no_themes_dir'] = __('Unable to locate WordPress Theme directory.');
+		$this->strings['fs_no_root_dir'] = __('Unable to locate WordPress root directory.');
+		$this->strings['fs_no_content_dir'] = __('Unable to locate WordPress content directory (wp-content).');
+		$this->strings['fs_no_plugins_dir'] = __('Unable to locate WordPress plugin directory.');
+		$this->strings['fs_no_themes_dir'] = __('Unable to locate WordPress theme directory.');
 		/* translators: %s: directory name */
 		$this->strings['fs_no_folder'] = __('Unable to locate needed folder (%s).');
 
@@ -830,7 +833,7 @@ class WP_Upgrader {
  	 * @param string $lock_name       The name of this unique lock.
  	 * @param int    $release_timeout Optional. The duration in seconds to respect an existing lock.
 	 *                                Default: 1 hour.
- 	 * @return bool False if a lock couldn't be created or if the lock is no longer valid. True otherwise.
+ 	 * @return bool False if a lock couldn't be created or if the lock is still valid. True otherwise.
  	 */
 	public static function create_lock( $lock_name, $release_timeout = null ) {
 		global $wpdb;
@@ -850,7 +853,7 @@ class WP_Upgrader {
 				return false;
 			}
 
-			// Check to see if the lock is still valid. If not, bail.
+			// Check to see if the lock is still valid. If it is, bail.
 			if ( $lock_result > ( time() - $release_timeout ) ) {
 				return false;
 			}
@@ -900,5 +903,5 @@ require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
 /** File_Upload_Upgrader class */
 require_once ABSPATH . 'wp-admin/includes/class-file-upload-upgrader.php';
 
-/** WP_Automatic_Upgrader class */
-require_once ABSPATH . 'wp-admin/includes/class-wp-automatic-upgrader.php';
+/** WP_Automatic_Updater class */
+require_once ABSPATH . 'wp-admin/includes/class-wp-automatic-updater.php';

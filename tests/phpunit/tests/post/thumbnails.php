@@ -16,11 +16,6 @@ class Tests_Post_Thumbnail_Template extends WP_UnitTestCase {
 		) );
 	}
 
-	public static function wpTearDownAfterClass() {
-		wp_delete_post( self::$post->ID, true );
-		wp_delete_attachment( self::$attachment_id, true );
-	}
-
 	function test_has_post_thumbnail() {
 		$this->assertFalse( has_post_thumbnail( self::$post ) );
 		$this->assertFalse( has_post_thumbnail( self::$post->ID ) );
@@ -232,5 +227,112 @@ class Tests_Post_Thumbnail_Template extends WP_UnitTestCase {
 		$actual = ob_get_clean();
 
 		$this->assertEquals( wp_get_attachment_url( self::$attachment_id ), $actual );
+	}
+
+	/**
+	 * @ticket 12922
+	 */
+	function test__wp_preview_post_thumbnail_filter() {
+		$old_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+
+		$GLOBALS['post'] = self::$post;
+		$_REQUEST['_thumbnail_id'] = self::$attachment_id;
+		$_REQUEST['preview_id'] = self::$post->ID;
+
+		$result = _wp_preview_post_thumbnail_filter( '', self::$post->ID, '_thumbnail_id' );
+
+		// Clean up.
+		$GLOBALS['post'] = $old_post;
+		unset( $_REQUEST['_thumbnail_id'] );
+		unset( $_REQUEST['preview_id'] );
+
+		$this->assertEquals( self::$attachment_id, $result );
+	}
+
+	/**
+	 * @ticket 37697
+	 */
+	function test__wp_preview_post_thumbnail_filter_secondary_post() {
+		$old_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+
+		$secondary_post = self::factory()->post->create( array(
+				'post_stauts' => 'publish',
+			)
+		);
+
+		$GLOBALS['post'] = self::$post;
+		$_REQUEST['_thumbnail_id'] = self::$attachment_id;
+		$_REQUEST['preview_id'] = $secondary_post;
+
+		$result = _wp_preview_post_thumbnail_filter( '', self::$post->ID, '_thumbnail_id' );
+
+		// Clean up.
+		$GLOBALS['post'] = $old_post;
+		unset( $_REQUEST['_thumbnail_id'] );
+		unset( $_REQUEST['preview_id'] );
+
+		$this->assertEmpty( $result );
+	}
+
+	/**
+	 * @ticket 12922
+	 */
+	function test_insert_post_with_post_thumbnail() {
+		$post_id = wp_insert_post( array(
+			'ID'            => self::$post->ID,
+			'post_status'   => 'publish',
+			'post_content'  => 'Post content',
+			'post_title'    => 'Post Title',
+			'_thumbnail_id' => self::$attachment_id,
+		) );
+
+		$thumbnail_id = get_post_thumbnail_id( $post_id );
+		$this->assertEquals( self::$attachment_id, $thumbnail_id );
+
+		$post_id = wp_insert_post( array(
+			'ID'            => $post_id,
+			'post_status'   => 'publish',
+			'post_content'  => 'Post content',
+			'post_title'    => 'Post Title',
+			'_thumbnail_id' => - 1, // -1 removes post thumbnail.
+		) );
+
+		$thumbnail_id = get_post_thumbnail_id( $post_id );
+		$this->assertEmpty( $thumbnail_id );
+	}
+
+	/**
+	 * @ticket 37658
+	 */
+	function test_insert_attachment_with_post_thumbnail() {
+		// Audio files support featured images.
+		$post_id = wp_insert_post( array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'post_content'   => 'Post content',
+			'post_title'     => 'Post Title',
+			'post_mime_type' => 'audio/mpeg',
+			'post_parent'    => 0,
+			'file'           => DIR_TESTDATA . '/audio/test-noise.mp3', // File does not exist, but does not matter here.
+			'_thumbnail_id'  => self::$attachment_id,
+		) );
+
+		$thumbnail_id = get_post_thumbnail_id( $post_id );
+		$this->assertEquals( self::$attachment_id, $thumbnail_id );
+
+		// Images do not support featured images.
+		$post_id = wp_insert_post( array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'post_content'   => 'Post content',
+			'post_title'     => 'Post Title',
+			'post_mime_type' => 'image/jpeg',
+			'post_parent'    => 0,
+			'file'           => DIR_TESTDATA . '/images/canola.jpg',
+			'_thumbnail_id'  => self::$attachment_id,
+		) );
+
+		$thumbnail_id = get_post_thumbnail_id( $post_id );
+		$this->assertEmpty( $thumbnail_id );
 	}
 }
