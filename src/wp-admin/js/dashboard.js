@@ -1,11 +1,18 @@
 /* global pagenow, ajaxurl, postboxes, wpActiveEditor:true */
 var ajaxWidgets, ajaxPopulateWidgets, quickPressLoad;
 
+/**
+ * Dashboard widget functionality
+ *
+ * @since ?
+ */
+
 jQuery(document).ready( function($) {
 	var welcomePanel = $( '#welcome-panel' ),
 		welcomePanelHide = $('#wp_welcome_panel-hide'),
 		updateWelcomePanel;
 
+	// Save the visibility of the welcome panel.
 	updateWelcomePanel = function( visible ) {
 		$.post( ajaxurl, {
 			action: 'update-welcome-panel',
@@ -14,10 +21,12 @@ jQuery(document).ready( function($) {
 		});
 	};
 
+	// Unhide the welcome panel if the Welcome Option checkbox is checked.
 	if ( welcomePanel.hasClass('hidden') && welcomePanelHide.prop('checked') ) {
 		welcomePanel.removeClass('hidden');
 	}
 
+	// Hide the welcome panel when the dismiss button or close button is clicked.
 	$('.welcome-panel-close, .welcome-panel-dismiss a', welcomePanel).click( function(e) {
 		e.preventDefault();
 		welcomePanel.addClass('hidden');
@@ -25,21 +34,40 @@ jQuery(document).ready( function($) {
 		$('#wp_welcome_panel-hide').prop('checked', false);
 	});
 
+	// Set welcome panel visibility based on Welcome Option checkbox value.
 	welcomePanelHide.click( function() {
 		welcomePanel.toggleClass('hidden', ! this.checked );
 		updateWelcomePanel( this.checked ? 1 : 0 );
 	});
 
-	// These widgets are sometimes populated via ajax
+	// These widgets can be populated via ajax.
 	ajaxWidgets = ['dashboard_primary'];
 
+	/**
+	 * Trigger widget updates via AJAX
+	 *
+	 * @since ?
+	 *
+	 * @param {string} el Optional. Widget to fetch or none to update all.
+	 * @returns void
+	 */
 	ajaxPopulateWidgets = function(el) {
+		/**
+		 * Fetch the latest representation of the widget via Ajax and show it.
+		 *
+		 * @param {int} i Interval to use to use in the timeout.
+		 * @param {string} id ID of the element which is going to be checked for changes.
+		 * @returns void
+		 */
 		function show(i, id) {
 			var p, e = $('#' + id + ' div.inside:visible').find('.widget-loading');
+			// If the element is found in the dom, queue to load latest representation.
 			if ( e.length ) {
 				p = e.parent();
 				setTimeout( function(){
+					// Request the widget content.
 					p.load( ajaxurl + '?action=dashboard-widgets&widget=' + id + '&pagenow=' + pagenow, '', function() {
+						// Hide the parent and slide it out for visual fancyness.
 						p.hide().slideDown('normal', function(){
 							$(this).css('display', '');
 						});
@@ -48,39 +76,59 @@ jQuery(document).ready( function($) {
 			}
 		}
 
+		// If we have received a specific element to fetch, check if it is valid.
 		if ( el ) {
 			el = el.toString();
+			// If the element is available as AJAX widget, show it.
 			if ( $.inArray(el, ajaxWidgets) !== -1 ) {
+				// Show element without any delay.
 				show(0, el);
 			}
 		} else {
+			// Walk through all ajaxWidgets, loading them after each other.
 			$.each( ajaxWidgets, show );
 		}
 	};
+
+	// Initially populate ajax widgets.
 	ajaxPopulateWidgets();
 
+	// Register ajax widgets as postbox toggles.
 	postboxes.add_postbox_toggles(pagenow, { pbshow: ajaxPopulateWidgets } );
 
-	/* QuickPress */
+	/**
+	 * Control the Quick Press (Quick Draft) widget
+	 *
+	 * @since ?
+	 */
 	quickPressLoad = function() {
 		var act = $('#quickpost-action'), t;
 
+		// Enable the submit buttons.
 		$( '#quick-press .submit input[type="submit"], #quick-press .submit input[type="reset"]' ).prop( 'disabled' , false );
 
 		t = $('#quick-press').submit( function( e ) {
 			e.preventDefault();
+
+			// Show a spinner.
 			$('#dashboard_quick_press #publishing-action .spinner').show();
+
+			// Disable the submit button to prevent duplicate submissions.
 			$('#quick-press .submit input[type="submit"], #quick-press .submit input[type="reset"]').prop('disabled', true);
 
+			// Post the entered data to save it.
 			$.post( t.attr( 'action' ), t.serializeArray(), function( data ) {
 				// Replace the form, and prepend the published post.
 				$('#dashboard_quick_press .inside').html( data );
 				$('#quick-press').removeClass('initial-form');
 				quickPressLoad();
 				highlightLatestPost();
+
+				// Focus the title to allow for quickly drafting another post.
 				$('#title').focus();
 			});
 
+			// Mark the entry with a background for a limited amount of time.
 			function highlightLatestPost () {
 				var latestPost = $('.drafts ul li').first();
 				latestPost.css('background', '#fffbe5');
@@ -92,6 +140,12 @@ jQuery(document).ready( function($) {
 
 		$('#publish').click( function() { act.val( 'post-quickpress-publish' ); } );
 
+		/**
+		 * Add accessibility context to inputs
+		 *
+		 * Use the 'screen-reader-text' class to hide the label when entering a value.
+		 * Apply it when the input is not empty or the input has focus.
+		 */
 		$('#title, #tags-input, #content').each( function() {
 			var input = $(this), prompt = $('#' + this.id + '-prompt-text');
 
@@ -123,9 +177,12 @@ jQuery(document).ready( function($) {
 	};
 	quickPressLoad();
 
+	// Enable the dragging functionality of the widgets.
 	$( '.meta-box-sortables' ).sortable( 'option', 'containment', '#wpwrap' );
 
+	// Adjust the height of the textarea based on the content
 	function autoResizeTextarea() {
+		// When IE8 or older is used to render this document, exit.
 		if ( document.documentMode && document.documentMode < 9 ) {
 			return;
 		}
@@ -155,15 +212,15 @@ jQuery(document).ready( function($) {
 			'display': 'none'
 		});
 
-		// propertychange is for IE < 9
+		// The 'propertychange' is used in IE < 9.
 		editor.on('focus input propertychange', function() {
 			var $this = $(this),
-				// &nbsp; is to ensure that the height of a final trailing newline is included.
+				// Add a non-breaking space to ensure that the height of a trailing newline is included.
 				textareaContent = $this.val() + '&nbsp;',
-				// 2px is for border-top & border-bottom
+				// Add 2px to compensate for border-top & border-bottom.
 				cloneHeight = clone.css('width', $this.css('width')).text(textareaContent).outerHeight() + 2;
 
-			// Default to having scrollbars
+			// Default to having scrollbars.
 			editor.css('overflow-y', 'auto');
 
 			// Only change the height if it has indeed changed and both heights are below the max.
@@ -179,7 +236,7 @@ jQuery(document).ready( function($) {
 				editorHeight = cloneHeight;
 			}
 
-			// No scrollbars as we change height, not for IE < 9
+			// Disable scrollbars because we adjust the height to the content.
 			editor.css('overflow', 'hidden');
 
 			$this.css('height', editorHeight + 'px');
