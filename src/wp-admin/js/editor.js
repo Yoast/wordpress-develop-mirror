@@ -54,13 +54,14 @@
 		}
 
 		/**
-		 * @summary Retrieves the height of the toolbar.
+		 * @summary Retrieves the height of the toolbar based on the container the
+		 * editor is placed in.
 		 *
 		 * @since 3.7.2
 		 *
 		 * @param {Object} editor The tinyMCE editor.
 		 * @returns {number} If the height is between 10 and 200 return the height,
-		 * 								else return 30.
+		 * else return 30.
 		 */
 		function getToolbarHeight( editor ) {
 			var node = $$( '.mce-toolbar-grp', editor.getContainer() )[0],
@@ -74,17 +75,16 @@
 		}
 
 		/**
-		 * @summary Switches the editor between visual and text
-		 *                     based on which button is pressed.
+		 * @summary Switches the editor between visual and text.
 		 *
 		 * @since 2.5
 		 *
 		 * @memberof switchEditors
 		 *
-		 * @param {string} id			The id of the editor you want to change the editor mode for.
-		 *											If an undefined id is given, it defaults to content.
-		 * @param {string} mode	The mode you want to switch to.
-		 *											If an undefined mode is given, it defaults to toggle.
+		 * @param {string} id The id of the editor you want to change the editor mode for.
+		 * If no id is given, it defaults to content.
+		 * @param {string} mode The mode you want to switch to.
+		 * If an undefined mode is given, it defaults to toggle.
 		 * @returns {void}
 		 */
 		function switchEditor( id, mode ) {
@@ -97,10 +97,7 @@
 				$textarea = $$( '#' + id ),
 				textarea = $textarea[0];
 
-			/*
-			 * If the mode is toggle, checks the current state of the editor
-			 * and switches to the other state.
-			 */
+			// Toggles the mode between visual and textual representation.
 			if ( 'toggle' === mode ) {
 				if ( editor && ! editor.isHidden() ) {
 					mode = 'html';
@@ -132,12 +129,12 @@
 				if ( editor ) {
 					editor.show();
 
-					// No point resizing the iframe in iOS.
+					// Don't resize the iframe in iOS.
 					if ( ! tinymce.Env.iOS && editorHeight ) {
 						toolbarHeight = getToolbarHeight( editor );
 						editorHeight = editorHeight - toolbarHeight + 14;
 
-						// Height cannot be under 50 or over 5000.
+						// Height must be between 50 and 5000.
 						if ( editorHeight > 50 && editorHeight < 5000 ) {
 							editor.theme.resizeTo( null, editorHeight );
 						}
@@ -164,7 +161,7 @@
 
 				if ( editor ) {
 
-					// Iframes aren't used in iOS.
+					// Don't resize the iframe in iOS.
 					if ( ! tinymce.Env.iOS ) {
 						iframe = editor.iframeElement;
 						editorHeight = iframe ? parseInt( iframe.style.height, 10 ) : 0;
@@ -173,7 +170,7 @@
 							toolbarHeight = getToolbarHeight( editor );
 							editorHeight = editorHeight + toolbarHeight - 14;
 
-							// Height cannot be under 50 or over 5000.
+							// Height must be between 50 and 5000.
 							if ( editorHeight > 50 && editorHeight < 5000 ) {
 								textarea.style.height = editorHeight + 'px';
 							}
@@ -255,35 +252,40 @@
 				});
 			}
 
-			// Pretties it up for the source editor by replacing with uniform newlines.
+			// Formats the text to be readable in the source editor.
 			html = html.replace( new RegExp( '\\s*</(' + blocklist1 + ')>\\s*', 'g' ), '</$1>\n' );
 			html = html.replace( new RegExp( '\\s*<((?:' + blocklist1 + ')(?: [^>]*)?)>', 'g' ), '\n<$1>' );
 
 			// Marks </p> if it has any attributes.
 			html = html.replace( /(<p [^>]+>.*?)<\/p>/g, '$1</p#>' );
 
-			// Separates <div> containing <p>.
+			// If the content of a container starts with a paragraph, replace the <p> tag with 2 newlines.
 			html = html.replace( /<div( [^>]*)?>\s*<p>/gi, '<div$1>\n\n' );
 
-			// Removes <p> and <br />.
+			// Removes <p> and </p> tags.
 			html = html.replace( /\s*<p>/gi, '' );
 			html = html.replace( /\s*<\/p>\s*/gi, '\n\n' );
+
+			// Removes white spaces between newlines. u00a0 is a no breaking space.
 			html = html.replace( /\n[\s\u00a0]+\n/g, '\n\n' );
+
+			// Removes <br> tags.
 			html = html.replace( /\s*<br ?\/?>\s*/gi, '\n' );
 
 			/*
 			 * Fixes some block element newline issues.
-			 * Replaces white spaces with newlines in combination with <div>'s.
+			 * Replaces white spaces with newlines in combination with <div> tags.
 			 */
 			html = html.replace( /\s*<div/g, '\n<div' );
 			html = html.replace( /<\/div>\s*/g, '</div>\n' );
 
-			// Replaces white spaces with newlines in combination with [caption]'s.
+			// Replaces white spaces with newlines in combination with [caption] shortcodes.
 			html = html.replace( /\s*\[caption([^\[]+)\[\/caption\]\s*/gi, '\n\n[caption$1[/caption]\n\n' );
 
 			/*
-			 * Replaces more than 2 newlines with 2 newlines
-			 * in combination with [caption]'s.
+			 * Limits the newlines in combination with [caption]'s to a maximum of
+			 * two consecutive occurrences.
+			 * .
 			 */
 			html = html.replace( /caption\]\n\n+\[caption/g, 'caption]\n\n[caption' );
 
@@ -294,21 +296,21 @@
 			html = html.replace( new RegExp('\\s*<((?:' + blocklist2 + ')(?: [^>]*)?)\\s*>', 'g' ), '\n<$1>' );
 			html = html.replace( new RegExp('\\s*</(' + blocklist2 + ')>\\s*', 'g' ), '</$1>\n' );
 
-			// Adds indentation by adding a tab in front of li, dt and dd elements.
+			// Adds indentation by adding a tab in front of <li>, <dt> and <dd> tags.
 			html = html.replace( /<((li|dt|dd)[^>]*)>/g, ' \t<$1>' );
 
-			// Replaces white spaces with newlines in combination with selects and options.
+			// Replaces white spaces with newlines in combination with <select> and <option> tags.
 			if ( html.indexOf( '<option' ) !== -1 ) {
 				html = html.replace( /\s*<option/g, '\n<option' );
 				html = html.replace( /\s*<\/select>/g, '\n</select>' );
 			}
 
-			// Replaces white spaces with 2 newlines in combination with <hr> elements.
+			// Replaces white spaces with 2 newlines in combination with <hr> tags.
 			if ( html.indexOf( '<hr' ) !== -1 ) {
 				html = html.replace( /\s*<hr( [^>]*)?>\s*/g, '\n\n<hr$1>\n\n' );
 			}
 
-			// Removes newlines in object-tags.
+			// Removes newlines in <object> tags.
 			if ( html.indexOf( '<object' ) !== -1 ) {
 				html = html.replace( /<object[\s\S]+?<\/object>/g, function( a ) {
 					return a.replace( /[\r\n]+/g, '' );
@@ -317,26 +319,29 @@
 
 			// Unmarks special paragraph closing tags.
 			html = html.replace( /<\/p#>/g, '</p>\n' );
+
+
+			// Adds a new line before <p> tags when there is content inside the paragraph
 			html = html.replace( /\s*(<p [^>]+>[\s\S]*?<\/p>)/g, '\n$1' );
 
 			/*
-			 * Replaces white spaces with newlines in combination with
-			 * the special paragraph tags.
+			 * Removes whitespaces at the start and end of a string.
+			 * u00a0 is a no breaking space.
 			 */
 			html = html.replace( /^\s+/, '' );
 			html = html.replace( /[\s\u00a0]+$/, '' );
 
-			// Trims whitespace at the start or end of the string.
+			// Replaces <wp-line-break> tags with a newline.
 			if ( preserve_linebreaks ) {
 				html = html.replace( /<wp-line-break>/g, '\n' );
 			}
 
-			// Puts back the <br> tags in captions.
+			// Restores the <wp-temp-br> with <br> tags.
 			if ( preserve_br ) {
 				html = html.replace( /<wp-temp-br([^>]*)>/g, '<br$1>' );
 			}
 
-			// Puts back preserved tags.
+			// Restores preserved tags.
 			if ( preserve.length ) {
 				html = html.replace( /<wp-preserve>/g, function() {
 					return preserve.shift();
@@ -378,8 +383,9 @@
 				return text;
 			}
 
-			// If there are multiple newlines in an object, remove them.
 			if ( text.indexOf( '<object' ) !== -1 ) {
+
+				// If there are multiple newlines in an <object>, remove them.
 				text = text.replace( /<object[\s\S]+?<\/object>/g, function( a ) {
 					return a.replace( /\n+/g, '' );
 				});
@@ -390,7 +396,7 @@
 				return a.replace( /[\n\t ]+/g, ' ' );
 			});
 
-			// Protects pre|script tags by replacing them with <wp-line-break>.
+			// Protects <pre> and <script> tags by replacing them with <wp-line-break>.
 			if ( text.indexOf( '<pre' ) !== -1 || text.indexOf( '<script' ) !== -1 ) {
 				preserve_linebreaks = true;
 				text = text.replace( /<(pre|script)[^>]*>[\s\S]*?<\/\1>/g, function( a ) {
@@ -398,17 +404,17 @@
 				});
 			}
 
-			// Keeps <br> tags inside captions and convert line breaks.
+			// Keeps <br> tags inside captions.
 			if ( text.indexOf( '[caption' ) !== -1 ) {
 				preserve_br = true;
 
-				// Replaces all white spaces and <br>'s with <wp-temp-br>.
+				// Replaces all white spaces and <br> tags with <wp-temp-br>.
 				text = text.replace( /\[caption[\s\S]+?\[\/caption\]/g, function( a ) {
 
-					// Keeps existing <br>.
+					// Protects <br> tags by converting them to <wp-temp-br> tags.
 					a = a.replace( /<br([^>]*)>/g, '<wp-temp-br$1>' );
 
-					// No line breaks inside HTML tags.
+					// Replaces all new lines and tabs with spaces inside HTML tags.
 					a = a.replace( /<[^<>]+>/g, function( b ) {
 
 						// Replaces newlines and tabs with a space.
@@ -420,12 +426,12 @@
 				});
 			}
 
-			// Adds 2 newlines at the end of the text.
+			// Appends 2 newlines at the end of the text.
 			text = text + '\n\n';
 
 			/*
-			 * Replaces a break tag followed by 1 or more spaces
-			 * and another break tag with 2 newlines.
+			 * Replaces a <br> tag followed by 1 or more spaces
+			 * and another <br> tag with 2 newlines.
 			 */
 			text = text.replace( /<br \/>\s*<br \/>/gi, '\n\n' );
 
@@ -441,67 +447,58 @@
 			 */
 			text = text.replace( new RegExp( '(</(?:' + blocklist + ')>)', 'gi' ), '$1\n\n' );
 
-			// Adds 2 newlines to a HR tag.
-			text = text.replace( /<hr( [^>]*)?>/gi, '<hr$1>\n\n' ); // hr is self closing block element
+			// Adds 2 newlines to a <hr> tag. <hr> is a self closing block element.
+			text = text.replace( /<hr( [^>]*)?>/gi, '<hr$1>\n\n' );
 
-			/*
-			 * Replaces an option open tag preceded by spaces
-			 * with an option tag without spaces.
-			 */
+			// Removes the spaces before an <option> tag.
 			text = text.replace( /\s*<option/gi, '<option' );
 
-			/*
-			 * Replaces an option end tag followed by spaces
-			 * with an option tag without spaces.
-			 */
+			// Removes the spaces after an <option> closing tag.
 			text = text.replace( /<\/option>\s*/gi, '</option>' );
 
-			/*
-			 * Replaces a newline followed by one or multiple spaces
-			 * and another newline with 2 newlines.
-			 */
+			// Removes the spaces between two newlines.
 			text = text.replace( /\n\s*\n+/g, '\n\n' );
 
-			// Replaces 2 newlines with a paragraph and a single newline.
+			// Converts 2 newlines to a paragraph and a single newline.
 			text = text.replace( /([\s\S]+?)\n\n/g, '<p>$1</p>\n' );
 
-			// Replaces p tags containing only white spaces with nothing.
+			// Removes empty paragraphs.
 			text = text.replace( /<p>\s*?<\/p>/gi, '');
 
-			// Removes spaces and p tags around block level elements.
+			// Removes spaces and <p> tags around block level elements.
 			text = text.replace( new RegExp( '<p>\\s*(</?(?:' + blocklist + ')(?: [^>]*)?>)\\s*</p>', 'gi' ), '$1' );
 
-			// Removes p tags around li elements.
+			// Removes <p> tags around li elements.
 			text = text.replace( /<p>(<li.+?)<\/p>/gi, '$1');
 
-			// Removes spaces and p tags from blockquotes.
+			// Removes spaces and <p> tags from blockquotes.
 			text = text.replace( /<p>\s*<blockquote([^>]*)>/gi, '<blockquote$1><p>');
 
-			// Removes spaces and switches the p tag and blockquote.
+			// Places the <blockquote> outside of the paragraph.
 			text = text.replace( /<\/blockquote>\s*<\/p>/gi, '</p></blockquote>');
 
-			// Removes spaces at the start and p tags from block level elements.
+			// Removes spaces at the start and <p> tags from block level elements.
 			text = text.replace( new RegExp( '<p>\\s*(</?(?:' + blocklist + ')(?: [^>]*)?>)', 'gi' ), '$1' );
 
-			// Removes spaces at the end and p tags from block level elements.
+			// Removes spaces at the end and <p> tags from block level elements.
 			text = text.replace( new RegExp( '(</?(?:' + blocklist + ')(?: [^>]*)?>)\\s*</p>', 'gi' ), '$1' );
 
-			// Removes spaces and newlines after a br tag.
+			// Removes spaces and newlines after a <br> tag.
 			text = text.replace( /(<br[^>]*>)\s*\n/gi, '$1' );
 
-			// Replaces spaces followed by a newline with a br tag followed by a new line.
+			// Replaces spaces followed by a newline with a <br> tag followed by a new line.
 			text = text.replace( /\s*\n/g, '<br />\n');
 
-			// Removes whitespaces and a single br tag after a block level element.
+			// Removes <br> tag that follows a block element directly, ignoring spaces.
 			text = text.replace( new RegExp( '(</?(?:' + blocklist + ')[^>]*>)\\s*<br />', 'gi' ), '$1' );
 
 			/*
 			 * Removes a br tag preceding white spaces followed by a
-			 * p, li, div, dl, dd, dt, th, pre, td, ul, or ol element.
+			 * <p>, <li>, <div>, <dl>, <dd>, <dt>, <th>, <pre>, <td>, <ul>, or <ol> tag.
 			 */
 			text = text.replace( /<br \/>(\s*<\/?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)>)/gi, '$1' );
 
-			// Removes white spaces, p tags and br tags in captions.
+			// Removes white spaces, <p> and <br> tags in captions.
 			text = text.replace( /(?:<p>|<br ?\/?>)*\s*\[caption([^\[]+)\[\/caption\]\s*(?:<\/p>|<br ?\/?>)*/gi, '[caption$1[/caption]' );
 
 			/**
@@ -519,8 +516,8 @@
 			text = text.replace( /(<(?:div|th|td|form|fieldset|dd)[^>]*>)(.*?)<\/p>/g, function( a, b, c ) {
 
 				/*
-				 * Checks if the matched group has a p open tag in it, if so we don't need to add
-				 * another one and the complete match can be returned.
+				 * Checks if the matched group has a p open tag in it. If so, we don't need to
+				 * enclose it with a paragraph.
 				 */
 				if ( c.match( /<p( [^>]*)?>/ ) ) {
 					return a;
@@ -533,12 +530,12 @@
 				return b + '<p>' + c + '</p>';
 			});
 
-			// Puts back the line breaks in pre|script.
+			// Restores the line breaks in <pre> and <script> tags.
 			if ( preserve_linebreaks ) {
 				text = text.replace( /<wp-line-break>/g, '\n' );
 			}
 
-			// Puts back the br-tags in captions.
+			// Restores the <br> tags in captions.
 			if ( preserve_br ) {
 				text = text.replace( /<wp-temp-br([^>]*)>/g, '<br$1>' );
 			}
@@ -550,7 +547,7 @@
 		 * @summary Modifies the data when a switch is made from HTML to text.
 		 *
 		 * Modifies the data when a switch is made.
-		 * Runs removep to remove the p tags from text.
+		 * Remove the <p> tags from text.
 		 * Returns the modified text.
 		 * Adds a trigger on beforePreWpautop and afterPreWpautop.
 		 *
@@ -606,7 +603,7 @@
 			return obj.data;
 		}
 
-		// Runs the init function on document ready if jQuery is available.
+		// Binds the init function to be run when the document is loaded.
 		if ( $ ) {
 			$( document ).ready( init );
 		} else if ( document.addEventListener ) {
@@ -615,8 +612,9 @@
 			document.addEventListener( 'DOMContentLoaded', init, false );
 			window.addEventListener( 'load', init, false );
 
-			// Uses the addEvent to bind the init event on document load.
 		} else if ( window.attachEvent ) {
+
+			// Uses the addEvent to bind the init event on document load.
 			window.attachEvent( 'onload', init );
 			document.attachEvent( 'onreadystatechange', function() {
 				if ( 'complete' === document.readyState ) {
@@ -647,6 +645,7 @@
 
 	/**
 	 * @namespace {SwitchEditors} switchEditors
+	 * Expose the switch editors to be used globally.
 	 */
 	window.switchEditors = new SwitchEditors();
 }( window.jQuery ));
