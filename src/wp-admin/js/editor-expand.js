@@ -164,8 +164,10 @@
 		$document.on( 'tinymce-editor-init.editor-expand', function( event, editor ) {
 			// VK contains the type of key pressed. VK = virtual keyboard.
 			var VK = window.tinymce.util.VK,
-			/*
+				/**
 				 * @summary Hides any float panel with a hover state, and tooltips.
+				 *
+				 * @returns {void}
 				 */
 				hideFloatPanels = _.debounce( function() {
 					! $( '.mce-floatpanel:hover' ).length && window.tinymce.ui.FloatPanel.hideAll();
@@ -226,7 +228,7 @@
 			 *
 			 * @since
 			 *
-			 * @param {} event The event to get the key code from.
+			 * @param {event} event The event to get the key code from.
 			 *
 			 * @returns {void}
 			 */
@@ -245,13 +247,12 @@
 			}
 
 			/**
-			 * @summary
+			 * @summary Makes sure the cursor is always visible in the editor.
 			 *
 			 * @since
 			 *
-			 * Makes sure the cursor is always visible.
-			 * This is not only necessary to keep the cursor between the toolbars,
-			 * but also to scroll the window when the cursor moves out of the viewport to a wpview.
+			 * Makes sure the cursor is kept between the toolbars of the editor and scrolls
+			 * the window when the cursor moves out of the viewport to a wpview.
 			 * Setting a buffer > 0 will prevent the browser default.
 			 * Some browsers will scroll to the middle,
 			 * others to the top/bottom of the *window* when moving the cursor out of the viewport.
@@ -282,7 +283,7 @@
 				editorTop = heights.adminBarHeight + heights.toolsHeight + heights.menuBarHeight + heights.visualTopHeight;
 
 				/*
-				 *  Sets the editorBottom based on the window Height, and adds the bottomHeight and statusBarHeight if the
+				 * Sets the editorBottom based on the window Height, and adds the bottomHeight and statusBarHeight if the
 				 * advanced editor is enabled.
 				 */
 				editorBottom = heights.windowHeight - ( advanced ? heights.bottomHeight + heights.statusBarHeight : 0 );
@@ -292,20 +293,51 @@
 					return;
 				}
 
+				/*
+				 * If the cursorTop is smaller than the editorTop and the up, left
+				 * or backspace key is pressed, the editor scrolls to the position defined
+				 * by the cursorTop, pageYOffset and editorTop.
+				 */
 				if ( cursorTop < editorTop && ( key === VK.UP || key === VK.LEFT || key === VK.BACKSPACE ) ) {
 					window.scrollTo( window.pageXOffset, cursorTop + window.pageYOffset - editorTop );
+				/*
+				 * If any other key is pressed or the cursorTop is bigger than the editorTop,
+				 * the editor scrolls to the position defined by the cursorBottom,
+				 * pageYOffset and editorBottom.
+				 */
 				} else if ( cursorBottom > editorBottom ) {
 					window.scrollTo( window.pageXOffset, cursorBottom + window.pageYOffset - editorBottom );
 				}
 			}
 
+			/**
+			 * @summary If the editor is fullscreen, call adjust.
+			 *
+			 * @since
+			 *
+			 * @param {event} event The FullscreenStateChanged event.
+			 *
+			 * @returns {void}
+			 */
 			function mceFullscreenToggled( event ) {
+				// event.state is true if the editor is fullscreen.
 				if ( ! event.state ) {
 					adjust();
 				}
 			}
 
 			// Adjust when switching editor modes.
+			/**
+			 * @summary Shows the editor when scrolled.
+			 *
+			 * Binds the hideFloatPanels function on the window scroll.mce-float-panels event.
+			 * Executes the wpAutoResize on the active editor.
+			 *
+			 * @since 4.0 ergens een keertje ofzo
+			 * //todo echt uitzoeken
+			 *
+			 * @returns {void}
+			 */
 			function mceShow() {
 				$window.on( 'scroll.mce-float-panels', hideFloatPanels );
 
@@ -315,6 +347,16 @@
 				}, 300 );
 			}
 
+			/**
+			 * @summary Resizes the editor.
+			 *
+			 * Removes all functions from the window scroll.mce-float-panels event.
+			 * Resizes the text editor and scrolls to a position based on the pageXOffset and adminBarHeight.
+			 *
+			 * @since
+			 *
+			 * @returns {void}
+			 */
 			function mceHide() {
 				$window.off( 'scroll.mce-float-panels' );
 
@@ -332,25 +374,49 @@
 				adjust();
 			}
 
+			/**
+			 * @summary Toggles advanced states.
+			 *
+			 * @since
+			 *
+			 * @returns {void}
+			 */
 			function toggleAdvanced() {
 				advanced = ! advanced;
 			}
 
+			/**
+			 * @summary Binds events of the editor and window.
+			 *
+			 * @since
+			 *
+			 * @returns {void}
+			 */
 			mceBind = function() {
 				editor.on( 'keyup', mceKeyup );
 				editor.on( 'show', mceShow );
 				editor.on( 'hide', mceHide );
 				editor.on( 'wp-toolbar-toggle', toggleAdvanced );
+
 				// Adjust when the editor resizes.
 				editor.on( 'setcontent wp-autoresize wp-toolbar-toggle', adjust );
+
 				// Don't hide the caret after undo/redo.
 				editor.on( 'undo redo', mceScroll );
+
 				// Adjust when exiting TinyMCE's fullscreen mode.
 				editor.on( 'FullscreenStateChanged', mceFullscreenToggled );
 
 				$window.off( 'scroll.mce-float-panels' ).on( 'scroll.mce-float-panels', hideFloatPanels );
 			};
 
+			/**
+			 * @summary Unbinds the events of the editor and window.
+			 *
+			 * @since
+			 *
+			 * @returns {void}
+			 */
 			mceUnbind = function() {
 				editor.off( 'keyup', mceKeyup );
 				editor.off( 'show', mceShow );
@@ -364,15 +430,25 @@
 			};
 
 			if ( $wrap.hasClass( 'wp-editor-expand' ) ) {
-				// Adjust "immediately"
+
+				// Adjust "immediately".
 				mceBind();
 				initialResize( adjust );
 			}
 		} );
 
-		// Adjust the toolbars based on the active editor mode.
+		/**
+		 * @summary Adjusts the toolbars based on the active editor mode.
+		 *
+		 * @since
+		 *
+		 * @param {event} event The event that calls this function.
+		 *
+		 * @returns {void}
+		 */
 		function adjust( event ) {
-			// Make sure we're not in fullscreen mode.
+
+			// Makes sure we're not in fullscreen mode.
 			if ( fullscreen && fullscreen.settings.visible ) {
 				return;
 			}
@@ -388,11 +464,15 @@
 				$top, $editor, sidebarTop, footerTop, canPin,
 				topPos, topHeight, editorPos, editorHeight;
 
-			// Refresh the heights
+			/*
+			 * Refreshes the heights if type isn't 'scroll'
+			 * or heights.windowHeight isn't set.
+			 */
 			if ( resize || ! heights.windowHeight ) {
 				getHeights();
 			}
 
+			// Resizes on resize event when the editor is in text mode.
 			if ( ! visual && type === 'resize' ) {
 				textEditorResize();
 			}
@@ -407,7 +487,7 @@
 				topHeight = heights.textTopHeight;
 			}
 
-			// TinyMCE still intializing.
+			// Returns if TinyMCE is still intializing.
 			if ( ! visual && ! $top.length ) {
 				return;
 			}
@@ -416,7 +496,10 @@
 			editorPos = $editor.offset().top;
 			editorHeight = $editor.outerHeight();
 
-			// Should we pin?
+			/*
+			 * If in visual mode, checks if the editorHeight is greater than the autoresizeMinHeight + topHeight.
+			 * If not in visual mode, checks if the editorHeight is greater than the autoresizeMinHeight + 20.
+			 */
 			canPin = visual ? autoresizeMinHeight + topHeight : autoresizeMinHeight + 20; // 20px from textarea padding
 			canPin = editorHeight > ( canPin + 5 );
 
@@ -446,11 +529,9 @@
 					$bottom.attr( 'style', '' );
 				}
 			} else {
-				// Maybe pin the top.
+				// Checks if the top is not already in a fixed position.
 				if ( ( ! fixedTop || resize ) &&
-					// Handle scrolling down.
 					( windowPos >= ( topPos - heights.toolsHeight - heights.adminBarHeight ) &&
-					// Handle scrolling up.
 					windowPos <= ( topPos - heights.toolsHeight - heights.adminBarHeight + editorHeight - buffer ) ) ) {
 					fixedTop = true;
 
@@ -473,9 +554,8 @@
 						top: heights.adminBarHeight + heights.toolsHeight + heights.menuBarHeight,
 						width: contentWrapWidth - ( borderWidth * 2 ) - ( visual ? 0 : ( $top.outerWidth() - $top.width() ) )
 					} );
-				// Maybe unpin the top.
+					// Checks if the top is already in a fixed position.
 				} else if ( fixedTop || resize ) {
-					// Handle scrolling up.
 					if ( windowPos <= ( topPos - heights.toolsHeight - heights.adminBarHeight ) ) {
 						fixedTop = false;
 
@@ -498,7 +578,6 @@
 							top: heights.menuBarHeight,
 							width: contentWrapWidth - ( borderWidth * 2 ) - ( visual ? 0 : ( $top.outerWidth() - $top.width() ) )
 						} );
-					// Handle scrolling down.
 					} else if ( windowPos >= ( topPos - heights.toolsHeight - heights.adminBarHeight + editorHeight - buffer ) ) {
 						fixedTop = false;
 
@@ -524,9 +603,9 @@
 					}
 				}
 
-				// Maybe adjust the bottom bar.
+				// Checks if the bottom is not already in a fixed position.
 				if ( ( ! fixedBottom || ( resize && advanced ) ) &&
-						// +[n] for the border around the .wp-editor-container.
+						// Adds borderWidth for the border around the .wp-editor-container.
 						( windowPos + heights.windowHeight ) <= ( editorPos + editorHeight + heights.bottomHeight + heights.statusBarHeight + borderWidth ) ) {
 
 					if ( event && event.deltaHeight > 0 && event.deltaHeight < 100 ) {
@@ -556,7 +635,7 @@
 					$bottom.attr( 'style', '' );
 				}
 			}
-
+***
 			// Sidebar pinning
 			if ( $postboxContainer.width() < 300 && heights.windowWidth > 600 && // sidebar position is changed with @media from CSS, make sure it is on the side
 				$document.height() > ( $sideSortables.height() + postBodyTop + 120 ) && // the sidebar is not the tallest element
