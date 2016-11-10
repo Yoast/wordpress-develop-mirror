@@ -94,14 +94,13 @@ var tagBox, array_unique_noempty;
 
 			delete current_tags[num];
 
-
+			// Sanitize the current tags and push them as if they're new tags.
 			$.each( current_tags, function( key, val ) {
-					val = $.trim( val );
-					if ( val ) {
-						new_tags.push( val );
-					}
+				val = $.trim( val );
+				if ( val ) {
+					new_tags.push( val );
 				}
-			);
+			} );
 
 			thetags.val( this.clean( new_tags.join( tagDelimiter ) ) );
 
