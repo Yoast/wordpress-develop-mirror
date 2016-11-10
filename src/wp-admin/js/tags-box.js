@@ -35,6 +35,12 @@ var tagBox, array_unique_noempty;
 
 	/**
 	 * The TagBox object.
+	 *
+	 * Contains functions to create and manage tags that can be associated with a post.
+	 *
+	 * @since 4.2
+	 * @namespace
+	 * @global
 	 */
 	tagBox = {
 
@@ -44,6 +50,8 @@ var tagBox, array_unique_noempty;
 		 * @summary Cleans up tags by removing redundant characters.
 		 *
 		 * @since 4.2
+		 *
+		 * @memberOf tagBox
 		 *
 		 * @param {string} tags The tags that need to be cleaned up.
 		 * @returns {string} The cleaned up tags.
@@ -64,6 +72,8 @@ var tagBox, array_unique_noempty;
 		 * @summary Parses tags and makes them editable.
 		 *
 		 * @since 4.2
+		 *
+		 * @memberOf tagBox
 		 *
 		 * @param {Object} el The tag element to retrieve the ID from.
 		 * @returns {boolean} Always returns false.
@@ -101,6 +111,8 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @since 4.2
 		 *
+		 * @memberOf tagBox
+		 *
 		 * @param {Object} el The container HTML element.
 		 *
 		 * @returns {void}
@@ -126,6 +138,8 @@ var tagBox, array_unique_noempty;
 			 * @summary Creates spans for every available tag and optionally adds a delete button.
 			 *
 	 		 * @since 4.2
+			 *
+			 * @memberOf tagBox
 			 *
 			 * @param key The key value of the current tag.
 			 * @param val The value of the current tag.
@@ -191,6 +205,8 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @since 4.2
 		 *
+		 * @memberOf tagBox
+		 *
 		 * @param {Object} el The container HTML element.
 		 * @param {Object|boolean} a Is either a link from the tag cloud or a hard set boolean value.
 		 * @param {*} f Determines whether or not focus should be applied to the input field.
@@ -233,6 +249,8 @@ var tagBox, array_unique_noempty;
 		 * @summary Retrieves the available tags from the database and creates an interactive tagcloud.
 		 *
 		 * @since 4.2
+		 *
+		 * @memberOf tagBox
 		 *
 		 * @param {string} id The ID to extract the indice from.
 		 * @returns {void}
@@ -283,6 +301,8 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @since 4.2
 		 *
+		 * @memberOf tagBox
+		 *
 		 * @returns {void}
 		 */
 		init : function() {
@@ -331,6 +351,8 @@ var tagBox, array_unique_noempty;
 			 *
 			 * @summary Flushes tags whenever the post is saved.
 			 *
+			 * @since 4.2
+			 *
 			 * @returns {void}
 			 */
 			$('#post').submit(function(){
@@ -343,6 +365,8 @@ var tagBox, array_unique_noempty;
 			 * Unbinds the click event and toggles all sibling tagcloud elements when clicking on the tagcloud-link.
 			 *
 			 * @summary Unbinds the click event and toggles siblings.
+			 *
+			 * @since 4.2
 			 *
 			 * @returns {bool} Always returns false.
 			 */
