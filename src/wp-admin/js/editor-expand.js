@@ -6,7 +6,7 @@
 		$adminBar = $( '#wpadminbar' ),
 		$footer = $( '#wpfooter' );
 
-	/* Autoresize editor. */
+	// Autoresize editor.
 	$( function() {
 		var $wrap = $( '#postdivrich' ),
 			$contentWrap = $( '#wp-content-wrap' ),
@@ -438,7 +438,10 @@
 		} );
 
 		/**
-		 * @summary Adjusts the toolbars based on the active editor mode.
+		 * @summary Adjusts the toolbars heights and positions..
+		 *
+		 * Adjusts the toolbar heights and positions based on the scroll position on the page,
+		 * the active editor mode and the heights of the editor, admin bar and side bar.
 		 *
 		 * @since
 		 *
@@ -635,21 +638,28 @@
 					$bottom.attr( 'style', '' );
 				}
 			}
-***
-			// Sidebar pinning
-			if ( $postboxContainer.width() < 300 && heights.windowWidth > 600 && // sidebar position is changed with @media from CSS, make sure it is on the side
-				$document.height() > ( $sideSortables.height() + postBodyTop + 120 ) && // the sidebar is not the tallest element
-				heights.windowHeight < editorHeight ) { // the editor is taller than the viewport
+
+			// The postbox container is positioned with @media from CSS. This makes sure it is pinned on the side.
+			if ( $postboxContainer.width() < 300 && heights.windowWidth > 600 &&
+
+				// Checks if the sidebar is not taller than the document height.
+				$document.height() > ( $sideSortables.height() + postBodyTop + 120 ) &&
+
+				// Checks if the editor is taller than the viewport.
+				heights.windowHeight < editorHeight ) {
 
 				if ( ( heights.sideSortablesHeight + pinnedToolsTop + sidebarBottom ) > heights.windowHeight || fixedSideTop || fixedSideBottom ) {
-					// Reset when scrolling to the top
+
+					// Resets the sideSortables style when scrolling to the top.
 					if ( windowPos + pinnedToolsTop <= postBodyTop ) {
 						$sideSortables.attr( 'style', '' );
 						fixedSideTop = fixedSideBottom = false;
 					} else {
+
+						// When scrolling down.
 						if ( windowPos > lastScrollPosition ) {
-							// Scrolling down
 							if ( fixedSideTop ) {
+
 								// let it scroll
 								fixedSideTop = false;
 								sidebarTop = $sideSortables.offset().top - heights.adminBarHeight;
@@ -675,8 +685,9 @@
 									bottom: sidebarBottom
 								});
 							}
+
+						// When scrolling up.
 						} else if ( windowPos < lastScrollPosition ) {
-							// Scrolling up
 							if ( fixedSideBottom ) {
 								// let it scroll
 								fixedSideBottom = false;
@@ -743,38 +754,73 @@
 			}
 		}
 
+		/**
+		 * @summary Resizes the editor and adjusts the toolbars.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function fullscreenHide() {
 			textEditorResize();
 			adjust();
 		}
 
+		/**
+		 * @summary Runs the passed function with 500ms intervals.
+		 *
+		 * @since
+		 *
+		 * @param {function} callback The function to run in the timeout.
+		 *
+		 * @returns {void}
+		 */
 		function initialResize( callback ) {
 			for ( var i = 1; i < 6; i++ ) {
 				setTimeout( callback, 500 * i );
 			}
 		}
 
+		/**
+		 * @summary Runs adjust after 100ms.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function afterScroll() {
 			clearTimeout( scrollTimer );
 			scrollTimer = setTimeout( adjust, 100 );
 		}
 
+		/**
+		 * @summary Binds editor expand events on elements.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function on() {
-			// Scroll to the top when triggering this from JS.
-			// Ensures toolbars are pinned properly.
+			/*
+			 * Scrolls to the top when triggering this from JS.
+			 * Ensures toolbars are pinned properly.
+			 */
 			if ( window.pageYOffset && window.pageYOffset > pageYOffsetAtTop ) {
 				window.scrollTo( window.pageXOffset, 0 );
 			}
 
 			$wrap.addClass( 'wp-editor-expand' );
 
-			// Adjust when the window is scrolled or resized.
+			// Adjusts when the window is scrolled or resized.
 			$window.on( 'scroll.editor-expand resize.editor-expand', function( event ) {
 				adjust( event.type );
 				afterScroll();
 			} );
 
-			// Adjust when collapsing the menu, changing the columns, changing the body class.
+			/*
+		 	 * Adjusts when collapsing the menu, changing the columns
+		 	 * or changing the body class.
+			 */
 			$document.on( 'wp-collapse-menu.editor-expand postboxes-columnchange.editor-expand editor-classchange.editor-expand', adjust )
 				.on( 'postbox-toggled.editor-expand postbox-moved.editor-expand', function() {
 					if ( ! fixedSideTop && ! fixedSideBottom && window.pageYOffset > pinnedToolsTop ) {
@@ -796,7 +842,7 @@
 			$textEditor.on( 'focus.editor-expand input.editor-expand propertychange.editor-expand', textEditorResize );
 			mceBind();
 
-			// Adjust when entering/exiting fullscreen mode.
+			// Adjusts when entering or exiting fullscreen mode.
 			fullscreen && fullscreen.pubsub.subscribe( 'hidden', fullscreenHide );
 
 			if ( mceEditor ) {
@@ -817,6 +863,13 @@
 			$document.trigger( 'editor-expand-on' );
 		}
 
+		/**
+		 * @summary Unbinds editor expand events.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function off() {
 			var height = parseInt( window.getUserSetting( 'ed_size', 300 ), 10 );
 
@@ -826,8 +879,10 @@
 				height = 5000;
 			}
 
-			// Scroll to the top when triggering this from JS.
-			// Ensures toolbars are reset properly.
+			/*
+			 * Scrolls to the top when triggering this from JS.
+			 * This ensures toolbars are reset properly.
+			 */
 			if ( window.pageYOffset && window.pageYOffset > pageYOffsetAtTop ) {
 				window.scrollTo( window.pageXOffset, 0 );
 			}
@@ -839,10 +894,10 @@
 			$textEditor.off( '.editor-expand' );
 			mceUnbind();
 
-			// Adjust when entering/exiting fullscreen mode.
+			// Adjusts when entering or exiting fullscreen mode.
 			fullscreen && fullscreen.pubsub.unsubscribe( 'hidden', fullscreenHide );
 
-			// Reset all css
+			// Resets all css
 			$.each( [ $visualTop, $textTop, $tools, $menuBar, $bottom, $statusBar, $contentWrap, $visualEditor, $textEditor, $sideSortables ], function( i, element ) {
 				element && element.attr( 'style', '' );
 			});
@@ -862,6 +917,7 @@
 				}
 			}
 
+			// If there is a height found in the user setting.
 			if ( height ) {
 				$textEditor.height( height );
 			}
@@ -869,11 +925,11 @@
 			$document.trigger( 'editor-expand-off' );
 		}
 
-		// Start on load
+		// Starts on load.
 		if ( $wrap.hasClass( 'wp-editor-expand' ) ) {
 			on();
 
-			// Ideally we need to resize just after CSS has fully loaded and QuickTags is ready.
+			// Resizes just after CSS has fully loaded and QuickTags is ready.
 			if ( $contentWrap.hasClass( 'html-active' ) ) {
 				initialResize( function() {
 					adjust();
@@ -882,7 +938,7 @@
 			}
 		}
 
-		// Show the on/off checkbox
+		// Shows the on/off checkbox.
 		$( '#adv-settings .editor-expand' ).show();
 		$( '#editor-expand-toggle' ).on( 'change.editor-expand', function() {
 			if ( $(this).prop( 'checked' ) ) {
@@ -894,14 +950,14 @@
 			}
 		});
 
-		// Expose on() and off()
+		// Exposes on() and off().
 		window.editorExpand = {
 			on: on,
 			off: off
 		};
 	} );
 
-	/* DFW. */
+	/* Distraction Free Writing. */
 	$( function() {
 		var $body = $( document.body ),
 			$wrap = $( '#wpcontent' ),
@@ -945,12 +1001,26 @@
 			mouseY = event.pageY;
 		} );
 
+		/**
+		 * @summary Recalculates the editor rectangle.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function recalcEditorRect() {
 			editorRect = $editor.offset();
 			editorRect.right = editorRect.left + $editor.outerWidth();
 			editorRect.bottom = editorRect.top + $editor.outerHeight();
 		}
 
+		/**
+		 * @summary Activates the distraction free writing mode.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function activate() {
 			if ( ! _isActive ) {
 				_isActive = true;
@@ -960,6 +1030,13 @@
 			}
 		}
 
+		/**
+		 * @summary Deactivates the distraction free writing mode.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function deactivate() {
 			if ( _isActive ) {
 				off();
@@ -971,10 +1048,24 @@
 			}
 		}
 
+		/**
+		 * @summary Returns _isActive.
+		 *
+		 * @since
+		 *
+		 * @returns {boolean} Returns true is _isActive is true.
+		 */
 		function isActive() {
 			return _isActive;
 		}
 
+		/**
+		 * @summary Binds events on the editor for distraction free writing.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function on() {
 			if ( ! _isOn && _isActive ) {
 				_isOn = true;
@@ -991,6 +1082,13 @@
 			}
 		}
 
+		/**
+		 * @summary Unbinds events on the editor for distraction free writing.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function off() {
 			if ( _isOn ) {
 				_isOn = false;
@@ -1007,6 +1105,13 @@
 			}
 		}
 
+		/**
+		 * @summary Runs on or off.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function toggle() {
 			if ( _isOn ) {
 				off();
@@ -1015,10 +1120,30 @@
 			}
 		}
 
+		/**
+		 * @summary Returns the value of _isOn.
+		 *
+		 * @since
+		 *
+		 * @returns {boolean} Returns true if _isOn is true.
+		 */
 		function isOn() {
 			return _isOn;
 		}
 
+		/**
+		 * @summary Fades out all elements except for the editor.
+		 *
+		 * The fading is done based on key presses and mouse movements.
+		 * Also calls the fadeIn on certain key presses
+		 * or if the mouse leaves the editor.
+		 *
+		 * @since
+		 *
+		 * @param event
+		 *
+		 * @returns {void}
+		 */
 		function fadeOut( event ) {
 			var isMac,
 				key = event && event.keyCode;
@@ -1027,12 +1152,13 @@
 				isMac = ( window.navigator.platform.indexOf( 'Mac' ) > -1 );
 			}
 
-			// fadeIn and return on Escape and keyboard shortcut Alt+Shift+W and Ctrl+Opt+W.
+			// Fades in and returns on Escape and keyboard shortcut Alt+Shift+W and Ctrl+Opt+W.
 			if ( key === 27 || ( key === 87 && event.altKey && ( ( ! isMac && event.shiftKey ) || ( isMac && event.ctrlKey ) ) ) ) {
 				fadeIn( event );
 				return;
 			}
 
+			// Returns if any of the following keys or combinations of keys is pressed.
 			if ( event && ( event.metaKey || ( event.ctrlKey && ! event.altKey ) || ( event.altKey && event.shiftKey ) || ( key && (
 				// Special keys ( tab, ctrl, alt, esc, arrow keys... )
 				( key <= 47 && key !== 8 && key !== 13 && key !== 32 && key !== 46 ) ||
@@ -1060,7 +1186,7 @@
 				$editor.css( 'z-index', 9998 );
 
 				$overlay
-					// Always recalculate the editor area entering the overlay with the mouse.
+					// Always recalculate the editor area when entering the overlay with the mouse.
 					.on( 'mouseenter.focus', function() {
 						recalcEditorRect();
 
@@ -1086,7 +1212,7 @@
 
 						$window.off( 'scroll.focus' );
 					} )
-					// Fade in when the mouse moves away form the editor area.
+					// Fades in when the mouse moves away form the editor area.
 					.on( 'mousemove.focus', function( event ) {
 						var nx = event.clientX,
 							ny = event.clientY,
@@ -1127,7 +1253,8 @@
 						x = nx;
 						y = ny;
 					} )
-					// When the overlay is touched, always fade in and cancel the event.
+
+					// When the overlay is touched, fades in and cancels the event.
 					.on( 'touchstart.focus', function( event ) {
 						event.preventDefault();
 						fadeIn();
@@ -1147,6 +1274,15 @@
 			fadeOutSlug();
 		}
 
+		/**
+		 * @summary Fades all elements back in.
+		 *
+		 * @since
+		 *
+		 * @param event
+		 *
+		 * @returns {void}
+		 */
 		function fadeIn( event ) {
 			if ( faded ) {
 				faded = false;
@@ -1242,7 +1378,7 @@
 				$slugFocusEl.on( 'blur.focus', fadeOutSlug ).off( 'focus.focus' );
 			}
 		}
-
+		// 87 is W (?)
 		function toggleViaKeyboard( event ) {
 			if ( event.altKey && event.shiftKey && 87 === event.keyCode ) {
 				toggle();
