@@ -6,7 +6,13 @@
 		$adminBar = $( '#wpadminbar' ),
 		$footer = $( '#wpfooter' );
 
-	// Autoresize editor.
+	/**
+	 * @summary Handles the resizing of the editor
+	 *
+	 * @since
+	 *
+	 * @returns {void}
+	 */
 	$( function() {
 		var $wrap = $( '#postdivrich' ),
 			$contentWrap = $( '#wp-content-wrap' ),
@@ -152,12 +158,13 @@
 
 		// We need to wait for TinyMCE to initialize.
 		/**
-		 * @summary
+		 * @summary Binds all necessary functions for editor expand to the editor,
+		 * when the editor is initialized.
 		 *
 		 * @since
 		 *
-		 * @param event
-		 * @param editor
+		 * @param {event} event The TinyMCE editor init event
+		 * @param {object} editor The editor to bind the vents on.
 		 *
 		 * @returns
 		 */
@@ -326,15 +333,13 @@
 				}
 			}
 
-			// Adjust when switching editor modes.
 			/**
 			 * @summary Shows the editor when scrolled.
 			 *
 			 * Binds the hideFloatPanels function on the window scroll.mce-float-panels event.
 			 * Executes the wpAutoResize on the active editor.
 			 *
-			 * @since 4.0 ergens een keertje ofzo
-			 * //todo echt uitzoeken
+			 * @since
 			 *
 			 * @returns {void}
 			 */
@@ -660,12 +665,12 @@
 						if ( windowPos > lastScrollPosition ) {
 							if ( fixedSideTop ) {
 
-								// let it scroll
+								// Let it scroll.
 								fixedSideTop = false;
 								sidebarTop = $sideSortables.offset().top - heights.adminBarHeight;
 								footerTop = $footer.offset().top;
 
-								// don't get over the footer
+								// Don't get over the footer.
 								if ( footerTop < sidebarTop + heights.sideSortablesHeight + sidebarBottom ) {
 									sidebarTop = footerTop - heights.sideSortablesHeight - 12;
 								}
@@ -676,7 +681,7 @@
 									bottom: ''
 								});
 							} else if ( ! fixedSideBottom && heights.sideSortablesHeight + $sideSortables.offset().top + sidebarBottom < windowPos + heights.windowHeight ) {
-								// pin the bottom
+								// Pin the bottom.
 								fixedSideBottom = true;
 
 								$sideSortables.css({
@@ -689,12 +694,12 @@
 						// When scrolling up.
 						} else if ( windowPos < lastScrollPosition ) {
 							if ( fixedSideBottom ) {
-								// let it scroll
+								// Let it scroll.
 								fixedSideBottom = false;
 								sidebarTop = $sideSortables.offset().top - sidebarBottom;
 								footerTop = $footer.offset().top;
 
-								// don't get over the footer
+								// Don't get over the footer.
 								if ( footerTop < sidebarTop + heights.sideSortablesHeight + sidebarBottom ) {
 									sidebarTop = footerTop - heights.sideSortablesHeight - 12;
 								}
@@ -705,7 +710,7 @@
 									bottom: ''
 								});
 							} else if ( ! fixedSideTop && $sideSortables.offset().top >= windowPos + pinnedToolsTop ) {
-								// pin the top
+								// Pin the top.
 								fixedSideTop = true;
 
 								$sideSortables.css({
@@ -717,7 +722,7 @@
 						}
 					}
 				} else {
-					// if the sidebar container is smaller than the viewport, then pin/unpin the top when scrolling
+					// If the sidebar container is smaller than the viewport, then pin/unpin the top when scrolling.
 					if ( windowPos >= ( postBodyTop - pinnedToolsTop ) ) {
 
 						$sideSortables.css( {
@@ -957,7 +962,13 @@
 		};
 	} );
 
-	/* Distraction Free Writing. */
+	/**
+	 * @summary Handles the distraction free writing of TinyMCE.
+	 *
+	 * @since
+	 *
+	 * @returns {void}
+	 */
 	$( function() {
 		var $body = $( document.body ),
 			$wrap = $( '#wpcontent' ),
@@ -1140,7 +1151,7 @@
 		 *
 		 * @since
 		 *
-		 * @param event
+		 * @param event The event that triggers this function.
 		 *
 		 * @returns {void}
 		 */
@@ -1279,7 +1290,7 @@
 		 *
 		 * @since
 		 *
-		 * @param event
+		 * @param event The event that triggers this function.
 		 *
 		 * @returns {void}
 		 */
@@ -1322,6 +1333,13 @@
 			fadeInSlug();
 		}
 
+		/**
+		 * @summary Fades in if the focused element based on it position.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function maybeFadeIn() {
 			setTimeout( function() {
 				var position = document.activeElement.compareDocumentPosition( $editor.get( 0 ) );
@@ -1337,6 +1355,13 @@
 			}, 0 );
 		}
 
+		/**
+		 * @summary Fades out the admin bar based on focus on the admin bar.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function fadeOutAdminBar() {
 			if ( ! fadedAdminBar && faded ) {
 				fadedAdminBar = true;
@@ -1351,6 +1376,13 @@
 			}
 		}
 
+		/**
+		 * @summary Fades in the admin bar.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function fadeInAdminBar() {
 			if ( fadedAdminBar ) {
 				fadedAdminBar = false;
@@ -1359,6 +1391,13 @@
 			}
 		}
 
+		/**
+		 * @summary Fades out the edit slug box.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function fadeOutSlug() {
 			if ( ! fadedSlug && faded && ! $slug.find( ':focus').length ) {
 				fadedSlug = true;
@@ -1369,6 +1408,13 @@
 			}
 		}
 
+		/**
+		 * @summary Fades in the edit slug box.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function fadeInSlug() {
 			if ( fadedSlug ) {
 				fadedSlug = false;
@@ -1378,7 +1424,18 @@
 				$slugFocusEl.on( 'blur.focus', fadeOutSlug ).off( 'focus.focus' );
 			}
 		}
-		// 87 is W (?)
+
+		/**
+		 * @summary Triggers the toggle on Alt + Shift + W.
+		 *
+		 * Keycode 87 = w.
+		 *
+		 * @since
+		 *
+		 * @param {event} event The event to trigger the toggle.
+		 *
+		 * @returns {void}
+		 */
 		function toggleViaKeyboard( event ) {
 			if ( event.altKey && event.shiftKey && 87 === event.keyCode ) {
 				toggle();
@@ -1389,6 +1446,16 @@
 			$content.on( 'keydown.focus-shortcut', toggleViaKeyboard );
 		}
 
+		/**
+		 * @summary Adds the distraction free writing button when setting up TinyMCE.
+		 *
+		 * @since
+		 *
+		 * @param {event} event The TinyMCE editor setup event.
+		 * @param {object} editor The editor to add the button to.
+		 *
+		 * @returns {void}
+		 */
 		$document.on( 'tinymce-editor-setup.focus', function( event, editor ) {
 			editor.addButton( 'dfw', {
 				active: _isOn,
@@ -1420,6 +1487,16 @@
 			editor.addShortcut( 'access+w', '', 'wpToggleDFW' );
 		} );
 
+		/**
+		 * @summary Binds and unbinds events on the editor.
+		 *
+		 * @since
+		 *
+		 * @param {event} event The TinyMCE editor init event.
+		 * @param {object} editor The editor to bind events on.
+		 *
+		 * @returns {void}
+		 */
 		$document.on( 'tinymce-editor-init.focus', function( event, editor ) {
 			var mceBind, mceUnbind;
 
@@ -1455,9 +1532,10 @@
 					mceBind();
 				}
 
+				// Binds and unbinds based on the distraction free writing focus.
 				$document.on( 'dfw-on.focus', mceBind ).on( 'dfw-off.focus', mceUnbind );
 
-				// Make sure the body focuses when clicking outside it.
+				// Focuses the editor when it is the target of the click event.
 				editor.on( 'click', function( event ) {
 					if ( event.target === editor.getDoc().documentElement ) {
 						editor.focus();
@@ -1466,9 +1544,20 @@
 			}
 		} );
 
+		/**
+		 * @summary  Binds events on quicktags init.
+		 *
+		 * @since
+		 *
+		 * @param {event} event The quicktags init event.
+		 * @param {object} editor The editor to bind events on.
+		 *
+		 * @returns {void}
+		 */
 		$document.on( 'quicktags-init', function( event, editor ) {
 			var $button;
 
+			// Binds the distraction free writing events if the distraction free writing button is available.
 			if ( editor.settings.buttons && ( ',' + editor.settings.buttons + ',' ).indexOf( ',dfw,' ) !== -1 ) {
 				$button = $( '#' + editor.name + '_dfw' );
 
