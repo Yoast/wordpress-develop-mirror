@@ -480,17 +480,19 @@ class WP_Customize_Setting {
 			return false;
 		}
 
+		$id_base = $this->id_data['base'];
+
 		/**
 		 * Fires when the WP_Customize_Setting::save() method is called.
 		 *
-		 * The dynamic portion of the hook name, `$this->id_data['base']` refers to
+		 * The dynamic portion of the hook name, `$id_base` refers to
 		 * the base slug of the setting name.
 		 *
 		 * @since 3.4.0
 		 *
 		 * @param WP_Customize_Setting $this WP_Customize_Setting instance.
 		 */
-		do_action( 'customize_save_' . $this->id_data['base'], $this );
+		do_action( "customize_save_{$id_base}", $this );
 
 		$this->update( $value );
 	}
@@ -696,6 +698,15 @@ class WP_Customize_Setting {
 		$is_core_type = ( 'option' === $this->type || 'theme_mod' === $this->type );
 
 		if ( ! $is_core_type && ! $this->is_multidimensional_aggregated ) {
+
+			// Use post value if previewed and a post value is present.
+			if ( $this->is_previewed ) {
+				$value = $this->post_value( null );
+				if ( null !== $value ) {
+					return $value;
+				}
+			}
+
 			$value = $this->get_root_value( $this->default );
 
 			/**

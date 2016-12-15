@@ -1025,7 +1025,7 @@ function uninstall_plugin($plugin) {
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $file );
 		include( WP_PLUGIN_DIR . '/' . $file );
 
-		add_action( 'uninstall_' . $file, $callable );
+		add_action( "uninstall_{$file}", $callable );
 
 		/**
 		 * Fires in uninstall_plugin() once the plugin has been uninstalled.
@@ -1035,7 +1035,7 @@ function uninstall_plugin($plugin) {
 		 *
 		 * @since 2.7.0
 		 */
-		do_action( 'uninstall_' . $file );
+		do_action( "uninstall_{$file}" );
 	}
 }
 
@@ -1763,67 +1763,6 @@ function user_can_access_admin_page() {
 }
 
 /* Whitelist functions */
-
-/**
- * Register a setting and its sanitization callback
- *
- * @since 2.7.0
- *
- * @global array $new_whitelist_options
- *
- * @param string $option_group A settings group name. Should correspond to a whitelisted option key name.
- * 	Default whitelisted option key names include "general," "discussion," and "reading," among others.
- * @param string $option_name The name of an option to sanitize and save.
- * @param callable $sanitize_callback A callback function that sanitizes the option's value.
- */
-function register_setting( $option_group, $option_name, $sanitize_callback = '' ) {
-	global $new_whitelist_options;
-
-	if ( 'misc' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.0.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'misc' ) );
-		$option_group = 'general';
-	}
-
-	if ( 'privacy' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.5.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'privacy' ) );
-		$option_group = 'reading';
-	}
-
-	$new_whitelist_options[ $option_group ][] = $option_name;
-	if ( $sanitize_callback != '' )
-		add_filter( "sanitize_option_{$option_name}", $sanitize_callback );
-}
-
-/**
- * Unregister a setting
- *
- * @since 2.7.0
- *
- * @global array $new_whitelist_options
- *
- * @param string   $option_group
- * @param string   $option_name
- * @param callable $sanitize_callback
- */
-function unregister_setting( $option_group, $option_name, $sanitize_callback = '' ) {
-	global $new_whitelist_options;
-
-	if ( 'misc' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.0.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'misc' ) );
-		$option_group = 'general';
-	}
-
-	if ( 'privacy' == $option_group ) {
-		_deprecated_argument( __FUNCTION__, '3.5.0', sprintf( __( 'The "%s" options group has been removed. Use another settings group.' ), 'privacy' ) );
-		$option_group = 'reading';
-	}
-
-	$pos = array_search( $option_name, (array) $new_whitelist_options[ $option_group ] );
-	if ( $pos !== false )
-		unset( $new_whitelist_options[ $option_group ][ $pos ] );
-	if ( $sanitize_callback != '' )
-		remove_filter( "sanitize_option_{$option_name}", $sanitize_callback );
-}
 
 /**
  * Refreshes the value of the options whitelist available via the 'whitelist_options' hook.

@@ -542,11 +542,24 @@ class Test_WP_Customize_Nav_Menus extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'WP_Error', $r );
 		$this->assertEquals( 'unknown_post_type', $r->get_error_code() );
 
+		$r = $menus->insert_auto_draft_post( array( 'post_status' => 'publish', 'post_title' => 'Bad', 'post_type' => 'post' ) );
+		$this->assertInstanceOf( 'WP_Error', $r );
+		$this->assertEquals( 'status_forbidden', $r->get_error_code() );
+
 		$r = $menus->insert_auto_draft_post( array( 'post_title' => 'Hello World', 'post_type' => 'post' ) );
 		$this->assertInstanceOf( 'WP_Post', $r );
 		$this->assertEquals( 'Hello World', $r->post_title );
+		$this->assertEquals( '', $r->post_name );
+		$this->assertEquals( 'hello-world', get_post_meta( $r->ID, '_customize_draft_post_name', true ) );
 		$this->assertEquals( 'post', $r->post_type );
-		$this->assertEquals( sanitize_title( $r->post_title ), $r->post_name );
+
+		$r = $menus->insert_auto_draft_post( array( 'post_title' => 'Hello World', 'post_type' => 'post', 'post_name' => 'greetings-world', 'post_content' => 'Hi World' ) );
+		$this->assertInstanceOf( 'WP_Post', $r );
+		$this->assertEquals( 'Hello World', $r->post_title );
+		$this->assertEquals( 'post', $r->post_type );
+		$this->assertEquals( '', $r->post_name );
+		$this->assertEquals( 'greetings-world', get_post_meta( $r->ID, '_customize_draft_post_name', true ) );
+		$this->assertEquals( 'Hi World', $r->post_content );
 	}
 
 	/**
@@ -728,10 +741,17 @@ class Test_WP_Customize_Nav_Menus extends WP_UnitTestCase {
 		$menus = new WP_Customize_Nav_Menus( $this->wp_customize );
 		do_action( 'customize_register', $this->wp_customize );
 
-		$post_ids = $this->factory()->post->create_many( 3, array(
-			'post_status' => 'auto-draft',
-			'post_type' => 'post',
-		) );
+		$post_ids = array();
+		for ( $i = 0; $i < 3; $i += 1 ) {
+			$r = $menus->insert_auto_draft_post( array(
+				'post_title' => 'Auto Draft ' . $i,
+				'post_type' => 'post',
+				'post_name' => 'auto-draft-' . $i,
+			) );
+			$this->assertInstanceOf( 'WP_Post', $r );
+			$post_ids[] = $r->ID;
+		}
+
 		$pre_published_post_id = $this->factory()->post->create( array( 'post_status' => 'publish' ) );
 
 		$setting_id = 'nav_menus_created_posts';
@@ -742,6 +762,8 @@ class Test_WP_Customize_Nav_Menus extends WP_UnitTestCase {
 		$this->assertEquals( $post_ids, $setting->post_value() );
 		foreach ( $post_ids as $post_id ) {
 			$this->assertEquals( 'auto-draft', get_post_status( $post_id ) );
+			$this->assertEmpty( get_post( $post_id )->post_name );
+			$this->assertNotEmpty( get_post_meta( $post_id, '_customize_draft_post_name', true ) );
 		}
 
 		$save_action_count = did_action( 'customize_save_nav_menus_created_posts' );
@@ -749,7 +771,14 @@ class Test_WP_Customize_Nav_Menus extends WP_UnitTestCase {
 		$this->assertEquals( $save_action_count + 1, did_action( 'customize_save_nav_menus_created_posts' ) );
 		foreach ( $post_ids as $post_id ) {
 			$this->assertEquals( 'publish', get_post_status( $post_id ) );
+			$this->assertRegExp( '/^auto-draft-\d+$/', get_post( $post_id )->post_name );
+			$this->assertEmpty( get_post_meta( $post_id, '_customize_draft_post_name', true ) );
 		}
+
+		// Ensure that unique slugs were assigned.
+		$posts = array_map( 'get_post', $post_ids );
+		$post_names = wp_list_pluck( $posts, 'post_name' );
+		$this->assertEqualSets( $post_names, array_unique( $post_names ) );
 	}
 
 	/**
