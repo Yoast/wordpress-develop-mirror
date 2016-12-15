@@ -9,7 +9,7 @@
 	/**
 	 * @summary Handles the resizing of the editor
 	 *
-	 * @since
+	 * @since 4.0.0
 	 *
 	 * @returns {void}
 	 */
@@ -130,7 +130,7 @@
 		 * and stores these in the heights object. Defaults to 0.
 		 * Gets the width of the window and stores this in the heights object.
 		 *
-		 * @since 4.0
+		 * @since 4.0.0
 		 *
 		 * @returns {void}
 		 */
@@ -161,7 +161,7 @@
 		 * @summary Binds all necessary functions for editor expand to the editor,
 		 * when the editor is initialized.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @param {event} event The TinyMCE editor init event
 		 * @param {object} editor The editor to bind the vents on.
@@ -233,7 +233,7 @@
 			/**
 			 * @summary Filters the special keys that should not be used for scrolling.
 			 *
-			 * @since
+			 * @since 4.0.0
 			 *
 			 * @param {event} event The event to get the key code from.
 			 *
@@ -339,7 +339,7 @@
 			 * Binds the hideFloatPanels function on the window scroll.mce-float-panels event.
 			 * Executes the wpAutoResize on the active editor.
 			 *
-			 * @since
+			 * @since 4.0.0
 			 *
 			 * @returns {void}
 			 */
@@ -358,7 +358,7 @@
 			 * Removes all functions from the window scroll.mce-float-panels event.
 			 * Resizes the text editor and scrolls to a position based on the pageXOffset and adminBarHeight.
 			 *
-			 * @since
+			 * @since 4.0.0
 			 *
 			 * @returns {void}
 			 */
@@ -393,7 +393,7 @@
 			/**
 			 * @summary Binds events of the editor and window.
 			 *
-			 * @since
+			 * @since 4.0.0
 			 *
 			 * @returns {void}
 			 */
@@ -418,7 +418,7 @@
 			/**
 			 * @summary Unbinds the events of the editor and window.
 			 *
-			 * @since
+			 * @since 4.0.0
 			 *
 			 * @returns {void}
 			 */
@@ -448,7 +448,7 @@
 		 * Adjusts the toolbar heights and positions based on the scroll position on the page,
 		 * the active editor mode and the heights of the editor, admin bar and side bar.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @param {event} event The event that calls this function.
 		 *
@@ -762,7 +762,7 @@
 		/**
 		 * @summary Resizes the editor and adjusts the toolbars.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @returns {void}
 		 */
@@ -774,7 +774,7 @@
 		/**
 		 * @summary Runs the passed function with 500ms intervals.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @param {function} callback The function to run in the timeout.
 		 *
@@ -789,7 +789,7 @@
 		/**
 		 * @summary Runs adjust after 100ms.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @returns {void}
 		 */
@@ -801,7 +801,7 @@
 		/**
 		 * @summary Binds editor expand events on elements.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @returns {void}
 		 */
@@ -871,7 +871,7 @@
 		/**
 		 * @summary Unbinds editor expand events.
 		 *
-		 * @since
+		 * @since 4.0.0
 		 *
 		 * @returns {void}
 		 */
