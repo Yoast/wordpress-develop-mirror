@@ -147,14 +147,32 @@
 				self.toggler.click();
 			}
 		},
+		/**
+		 * @summary Binds event listeners to the color picker.
+		 *
+		 * @since 3.5
+		 *
+		 * @access private
+		 */
 		_addListeners: function() {
 			var self = this;
 
-			// prevent any clicks inside this widget from leaking to the top and closing it
+			/**
+			 * @summary Prevent any clicks inside this widget from leaking to the top and closing it.
+			 *
+			 * @since 3.5
+			 *
+			 * @param {Event} event The event that's being called.
+			 */
 			self.wrap.on( 'click.wpcolorpicker', function( event ) {
 				event.stopPropagation();
 			});
 
+			/**
+			 * @summary Open or close the color picker depending on the class.
+			 *
+			 * @since 3.5
+			 */
 			self.toggler.click( function(){
 				if ( self.toggler.hasClass( 'wp-picker-open' ) ) {
 					self.close();
@@ -163,20 +181,39 @@
 				}
 			});
 
+			/**
+			 * @summary Checks if value is empty when changing the color in the color picker.
+			 *
+			 * Checks if value is empty when changing the color in the color picker.
+			 * If so, the background color is cleared.
+			 *
+			 * @since 3.5
+			 *
+			 * @param {Event} event The event that's being called.
+			 */
 			self.element.change( function( event ) {
 				var me = $( this ),
 					val = me.val();
-				// Empty = clear
+
 				if ( val === '' || val === '#' ) {
 					self.toggler.css( 'backgroundColor', '' );
-					// fire clear callback if we have one
+					// Fire clear callback if we have one.
 					if ( $.isFunction( self.options.clear ) ) {
 						self.options.clear.call( this, event );
 					}
 				}
 			});
 
-			// open a keyboard-focused closed picker with space or enter
+			/**
+			 * @summary Enables the user to open the color picker with their keyboard.
+			 *
+			 * Enables the user to open the color picker with their keyboard.
+			 * This is possible by using the space or enter key.
+			 *
+			 * @since 3.5
+			 *
+			 * @param {Event} event The event that's being called.
+			 */
 			self.toggler.on( 'keyup', function( event ) {
 				if ( event.keyCode === 13 || event.keyCode === 32 ) {
 					event.preventDefault();
@@ -184,6 +221,15 @@
 				}
 			});
 
+			/**
+			 * @summary Enables the user to clear or revert the color in the color picker.
+			 *
+			 * Enables the user to either clear the color in the color picker or revert back to the default color.
+			 *
+			 * @since 3.5
+			 *
+			 * @param {Event} event The event that's being called.
+			 */
 			self.button.click( function( event ) {
 				var me = $( this );
 				if ( me.hasClass( 'wp-picker-clear' ) ) {
@@ -197,6 +243,11 @@
 				}
 			});
 		},
+		/**
+		 * @summary Opens the color picker dialog.
+		 *
+		 * @since 3.5
+		 */
 		open: function() {
 			this.element.show().iris( 'toggle' ).focus();
 			this.button.removeClass( 'hidden' );
@@ -204,6 +255,11 @@
 			this.toggler.addClass( 'wp-picker-open' );
 			$( 'body' ).trigger( 'click.wpcolorpicker' ).on( 'click.wpcolorpicker', this.close );
 		},
+		/**
+		 * @summary Closes the color picker dialog.
+		 *
+		 * @since 3.5
+		 */
 		close: function() {
 			this.element.hide().iris( 'toggle' );
 			this.button.addClass( 'hidden' );
@@ -211,16 +267,29 @@
 			this.toggler.removeClass( 'wp-picker-open' );
 			$( 'body' ).off( 'click.wpcolorpicker', this.close );
 		},
-		// $("#input").wpColorPicker('color') returns the current color
-		// $("#input").wpColorPicker('color', '#bada55') to set
+		/**
+		 * @summary Returns iris object or sets new color.
+		 *
+		 * Returns the iris object if no new color is provided. If a new color is provided, it sets the new color.
+		 *
+		 * @param newColor {string|*} The new color to use. Can be undefined.
+		 * @returns {string} The element's color
+		 */
 		color: function( newColor ) {
 			if ( newColor === undef ) {
 				return this.element.iris( 'option', 'color' );
 			}
 			this.element.iris( 'option', 'color', newColor );
 		},
-		//$("#input").wpColorPicker('defaultColor') returns the current default color
-		//$("#input").wpColorPicker('defaultColor', newDefaultColor) to set
+		/**
+		 * @summary Returns iris object or sets new default color.
+		 *
+		 * Returns the iris object if no new default color is provided.
+		 * If a new default color is provided, it sets the new default color.
+		 *
+		 * @param newDefaultColor {string|*} The new default color to use. Can be undefined.
+		 * @returns {boolean|string} The element's color
+		 */
 		defaultColor: function( newDefaultColor ) {
 			if ( newDefaultColor === undef ) {
 				return this.options.defaultColor;
@@ -230,5 +299,6 @@
 		}
 	};
 
+	// Registers the color picker as a widget.
 	$.widget( 'wp.wpColorPicker', ColorPicker );
 }( jQuery ) );
