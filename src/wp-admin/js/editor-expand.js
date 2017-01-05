@@ -1336,7 +1336,7 @@
 		/**
 		 * @summary Fades in if the focused element based on it position.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1358,7 +1358,7 @@
 		/**
 		 * @summary Fades out the admin bar based on focus on the admin bar.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1379,7 +1379,7 @@
 		/**
 		 * @summary Fades in the admin bar.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1394,7 +1394,7 @@
 		/**
 		 * @summary Fades out the edit slug box.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1411,7 +1411,7 @@
 		/**
 		 * @summary Fades in the edit slug box.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1430,7 +1430,7 @@
 		 *
 		 * Keycode 87 = w.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param {event} event The event to trigger the toggle.
 		 *
@@ -1449,7 +1449,7 @@
 		/**
 		 * @summary Adds the distraction free writing button when setting up TinyMCE.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param {event} event The TinyMCE editor setup event.
 		 * @param {object} editor The editor to add the button to.
@@ -1490,7 +1490,7 @@
 		/**
 		 * @summary Binds and unbinds events on the editor.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param {event} event The TinyMCE editor init event.
 		 * @param {object} editor The editor to bind events on.
@@ -1547,7 +1547,7 @@
 		/**
 		 * @summary  Binds events on quicktags init.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param {event} event The quicktags init event.
 		 * @param {object} editor The editor to bind events on.
