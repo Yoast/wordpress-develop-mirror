@@ -256,7 +256,7 @@
 			/**
 			 * @summary Makes sure the cursor is always visible in the editor.
 			 *
-			 * @since
+			 * @since 4.1.0
 			 *
 			 * Makes sure the cursor is kept between the toolbars of the editor and scrolls
 			 * the window when the cursor moves out of the viewport to a wpview.
@@ -320,7 +320,7 @@
 			/**
 			 * @summary If the editor is fullscreen, call adjust.
 			 *
-			 * @since
+			 * @since 4.1.0
 			 *
 			 * @param {event} event The FullscreenStateChanged event.
 			 *
@@ -382,7 +382,7 @@
 			/**
 			 * @summary Toggles advanced states.
 			 *
-			 * @since
+			 * @since 4.1.0
 			 *
 			 * @returns {void}
 			 */
@@ -965,7 +965,7 @@
 	/**
 	 * @summary Handles the distraction free writing of TinyMCE.
 	 *
-	 * @since
+	 * @since 4.1.0
 	 *
 	 * @returns {void}
 	 */
@@ -1015,7 +1015,7 @@
 		/**
 		 * @summary Recalculates the editor rectangle.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1028,7 +1028,7 @@
 		/**
 		 * @summary Activates the distraction free writing mode.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1044,7 +1044,7 @@
 		/**
 		 * @summary Deactivates the distraction free writing mode.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1062,7 +1062,7 @@
 		/**
 		 * @summary Returns _isActive.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {boolean} Returns true is _isActive is true.
 		 */
@@ -1073,7 +1073,7 @@
 		/**
 		 * @summary Binds events on the editor for distraction free writing.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1096,7 +1096,7 @@
 		/**
 		 * @summary Unbinds events on the editor for distraction free writing.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1119,7 +1119,7 @@
 		/**
 		 * @summary Runs on or off.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1134,7 +1134,7 @@
 		/**
 		 * @summary Returns the value of _isOn.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {boolean} Returns true if _isOn is true.
 		 */
@@ -1149,7 +1149,7 @@
 		 * Also calls the fadeIn on certain key presses
 		 * or if the mouse leaves the editor.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param event The event that triggers this function.
 		 *
@@ -1288,7 +1288,7 @@
 		/**
 		 * @summary Fades all elements back in.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param event The event that triggers this function.
 		 *
