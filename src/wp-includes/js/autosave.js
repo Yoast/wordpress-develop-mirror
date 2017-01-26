@@ -5,15 +5,26 @@ window.autosave = function() {
 };
 
 ( function( $, window ) {
+	/**
+	 * @summary Auto saves the post.
+	 *
+	 * @since
+	 *
+	 * @returns {{getPostData: getPostData, getCompareString: getCompareString, disableButtons: disableButtons, enableButtons: enableButtons, local: ({hasStorage, getSavedPostData, save, suspend, resume}|*), server: ({tempBlockSave, triggerSave, postChanged, suspend, resume}|*)}}
+	 */
 	function autosave() {
 		var initialCompareString,
 			lastTriggerSave = 0,
 			$document = $(document);
 
 		/**
-		 * Returns the data saved in both local and remote autosave
+		 * @summary Returns the data saved in both local and remote autosave.
 		 *
-		 * @return object Object containing the post data
+		 * @since
+		 *
+		 * @param {string} type The type of autosave either local or remote.
+		 *
+		 * @returns {Object} Object containing the post data.
 		 */
 		function getPostData( type ) {
 			var post_name, parent_id, data,
