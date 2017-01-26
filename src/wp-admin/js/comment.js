@@ -1,4 +1,12 @@
 /* global postboxes, commentL10n */
+
+/**
+ * @summary Binds to the document ready event.
+ *
+ * @since 2.5.0
+ *
+ * @param {jQuery} $ The jQuery object.
+ */
 jQuery(document).ready( function($) {
 
 	postboxes.add_postbox_toggles('comment');
@@ -9,6 +17,15 @@ jQuery(document).ready( function($) {
 		$timestampwrap = $timestampdiv.find( '.timestamp-wrap' ),
 		$edittimestamp = $timestampdiv.siblings( 'a.edit-timestamp' );
 
+	/**
+	 * @summary 
+	 *
+	 * @since
+	 *
+	 * @listens $edittimestamp:click
+	 *
+	 * @param {Event} event The event object.
+	 */
 	$edittimestamp.click( function( event ) {
 		if ( $timestampdiv.is( ':hidden' ) ) {
 			$timestampdiv.slideDown( 'fast', function() {
