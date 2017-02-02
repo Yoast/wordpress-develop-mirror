@@ -18,9 +18,7 @@ jQuery(document).ready( function($) {
 		$edittimestamp = $timestampdiv.siblings( 'a.edit-timestamp' );
 
 	/**
-	 * @summary 
-	 *
-	 * @since
+	 * @summary Adds event that opens the time stamp form if the form is hidden.
 	 *
 	 * @listens $edittimestamp:click
 	 *
@@ -28,6 +26,7 @@ jQuery(document).ready( function($) {
 	 */
 	$edittimestamp.click( function( event ) {
 		if ( $timestampdiv.is( ':hidden' ) ) {
+			// Slide down the from and sets focus on the first field.
 			$timestampdiv.slideDown( 'fast', function() {
 				$( 'input, select', $timestampwrap ).first().focus();
 			} );
@@ -35,6 +34,14 @@ jQuery(document).ready( function($) {
 		}
 		event.preventDefault();
 	});
+
+	/**
+	 * @summary Resets the time stamp values when 'cancel' is clicked.
+	 *
+	 * @listens .cancel-timestamp:click
+	 *
+	 * @param {Event} event The event object.
+	 */
 
 	$timestampdiv.find('.cancel-timestamp').click( function( event ) {
 		// Move focus back to the Edit link.
@@ -49,6 +56,13 @@ jQuery(document).ready( function($) {
 		event.preventDefault();
 	});
 
+	/**
+	 * @summary Sets the time stamp values when the ok button is clicked.
+	 *
+	 * @listens .save-timestamp:click
+	 *
+	 * @param {Event} event The event object.
+	 */
 	$timestampdiv.find('.save-timestamp').click( function( event ) { // crazyhorse - multiple ok cancels
 		var aa = $('#aa').val(), mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val(),
 			newD = new Date( aa, mm - 1, jj, hh, mn );
