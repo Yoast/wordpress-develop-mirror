@@ -80,7 +80,16 @@ window.autosave = function() {
 			return data;
 		}
 
-		// Concatenate title, content and excerpt. Used to track changes when auto-saving.
+		/**
+		 * @summary Concatenates the title, content and excerpt.
+		 *
+		 * This is used to track changes when auto-saving.
+		 *
+		 * @since
+		 *
+		 * @param {object} postData the object containing the post data.
+		 * @returns {string} concatenated string with title, content and excerpt.
+		 */
 		function getCompareString( postData ) {
 			if ( typeof postData === 'object' ) {
 				return ( postData.post_title || '' ) + '::' + ( postData.content || '' ) + '::' + ( postData.excerpt || '' );
@@ -89,27 +98,62 @@ window.autosave = function() {
 			return ( $('#title').val() || '' ) + '::' + ( $('#content').val() || '' ) + '::' + ( $('#excerpt').val() || '' );
 		}
 
+		/**
+		 * @summary Disables save buttons.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function disableButtons() {
 			$document.trigger('autosave-disable-buttons');
 			// Re-enable 5 sec later. Just gives autosave a head start to avoid collisions.
 			setTimeout( enableButtons, 5000 );
 		}
 
+		/**
+		 * @summary Enables ave buttons.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+		 */
 		function enableButtons() {
 			$document.trigger( 'autosave-enable-buttons' );
 		}
 
+		/**
+		 * @summary Gets the content editor.
+		 *
+		 * @since
+		 *
+		 * @returns {boolean|*} returns either false if the editor is undefined,
+		 * 									or the instance of the content editor.
+		 */
 		function getEditor() {
 			return typeof tinymce !== 'undefined' && tinymce.get('content');
 		}
 
-		// Autosave in localStorage
+		/**
+		 * @summary Autosaves in the localStorage.
+		 *
+		 *
+		 * @since
+		 *
+		 * @returns {{hasStorage: *, getSavedPostData: getSavedPostData, save: save, suspend: suspend, resume: resume}}
+		 */
 		function autosaveLocal() {
 			var blog_id, post_id, hasStorage, intervalTimer,
 				lastCompareString,
 				isSuspended = false;
 
-			// Check if the browser supports sessionStorage and it's not disabled
+			/**
+			 * @summary Checks if the browser supports sessionStorage and it's not disabled.
+			 *
+			 * @since
+			 *
+			 * @returns {boolean} true if the sessionStorage is supported and enabled.
+			 */
 			function checkStorage() {
 				var test = Math.random().toString(),
 					result = false;
@@ -125,9 +169,11 @@ window.autosave = function() {
 			}
 
 			/**
-			 * Initialize the local storage
+			 * @summary Initializes the local storage.
 			 *
-			 * @return mixed False if no sessionStorage in the browser or an Object containing all postData for this blog
+			 * @since
+			 *
+			 * @return {bool|object} False if no sessionStorage in the browser or an Object containing all postData for this blog.
 			 */
 			function getStorage() {
 				var stored_obj = false;
@@ -146,11 +192,11 @@ window.autosave = function() {
 			}
 
 			/**
-			 * Set the storage for this blog
+			 * @summary Sets the storage for this blog.
 			 *
 			 * Confirms that the data was saved successfully.
 			 *
-			 * @return bool
+			 * @return {bool} true if the data was saved successfully, false if it wasn't saved.
 			 */
 			function setStorage( stored_obj ) {
 				var key;
@@ -165,9 +211,11 @@ window.autosave = function() {
 			}
 
 			/**
-			 * Get the saved post data for the current post
+			 * @summary Gets the saved post data for the current post.
 			 *
-			 * @return mixed False if no storage or no data or the postData as an Object
+			 * @since
+			 *
+			 * @return {bool|object} False if no storage or no data or the postData as an Object.
 			 */
 			function getSavedPostData() {
 				var stored = getStorage();
@@ -180,12 +228,15 @@ window.autosave = function() {
 			}
 
 			/**
-			 * Set (save or delete) post data in the storage.
+			 * @summary Sets (save or delete) post data in the storage.
 			 *
 			 * If stored_data evaluates to 'false' the storage key for the current post will be removed
 			 *
-			 * $param stored_data The post data to store or null/false/empty to delete the key
-			 * @return bool
+			 * @since
+			 *
+			 * @param {object|bool|null}stored_data The post data to store or null/false/empty to delete the key
+			 *
+			 * @return {bool} true if data is stored, false if data was removed.
 			 */
 			function setData( stored_data ) {
 				var stored = getStorage();
@@ -205,22 +256,39 @@ window.autosave = function() {
 				return setStorage( stored );
 			}
 
+			/**
+			 * @summary Sets isSuspended to true.
+			 *
+			 * @since
+			 *
+			 * @returns {void}
+			 */
 			function suspend() {
 				isSuspended = true;
 			}
 
+			/**
+			 * @summary Sets isSuspended to false..
+			 *
+			 * @since
+			 *
+			 * @returns {void}
+			 */
 			function resume() {
 				isSuspended = false;
 			}
 
 			/**
-			 * Save post data for the current post
+			 * @summary Saves post data for the current post.
 			 *
 			 * Runs on a 15 sec. interval, saves when there are differences in the post title or content.
 			 * When the optional data is provided, updates the last saved post data.
 			 *
-			 * $param data optional Object The post data for saving, minimum 'post_title' and 'content'
-			 * @return bool
+			 * @since
+			 *
+			 * @param {Object} data The post data for saving, minimum 'post_title' and 'content'.
+			 *
+			 * @returns {bool}
 			 */
 			function save( data ) {
 				var postData, compareString,
@@ -260,6 +328,9 @@ window.autosave = function() {
 			}
 
 			// Run on DOM ready
+			/**
+			 *
+			 */
 			function run() {
 				post_id = $('#post_ID').val() || 0;
 
