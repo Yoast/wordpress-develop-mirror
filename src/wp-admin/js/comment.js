@@ -23,10 +23,11 @@ jQuery(document).ready( function($) {
 	 * @listens $edittimestamp:click
 	 *
 	 * @param {Event} event The event object.
+	 * @returns {void}
 	 */
 	$edittimestamp.click( function( event ) {
 		if ( $timestampdiv.is( ':hidden' ) ) {
-			// Slide down the from and sets focus on the first field.
+			// Slide down the form and sets focus on the first field.
 			$timestampdiv.slideDown( 'fast', function() {
 				$( 'input, select', $timestampwrap ).first().focus();
 			} );
@@ -36,11 +37,12 @@ jQuery(document).ready( function($) {
 	});
 
 	/**
-	 * @summary Resets the time stamp values when 'cancel' is clicked.
+	 * @summary Resets the time stamp values when the cancel button is clicked.
 	 *
 	 * @listens .cancel-timestamp:click
 	 *
 	 * @param {Event} event The event object.
+	 * @returns {void}
 	 */
 
 	$timestampdiv.find('.cancel-timestamp').click( function( event ) {
@@ -62,6 +64,7 @@ jQuery(document).ready( function($) {
 	 * @listens .save-timestamp:click
 	 *
 	 * @param {Event} event The event object.
+	 * @returns {void}
 	 */
 	$timestampdiv.find('.save-timestamp').click( function( event ) { // crazyhorse - multiple ok cancels
 		var aa = $('#aa').val(), mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val(),
