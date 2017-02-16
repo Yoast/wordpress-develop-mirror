@@ -30,58 +30,58 @@
 	var Heartbeat = function() {
 		var $document = $(document),
 			settings = {
-				// Suspend/resume
+				// Suspend/resume.
 				suspend: false,
 
-				// Whether suspending is enabled
+				// Whether suspending is enabled.
 				suspendEnabled: true,
 
-				// Current screen id, defaults to the JS global 'pagenow' when present (in the admin) or 'front'
+				// Current screen id, defaults to the JS global 'pagenow' when present (in the admin) or 'front'.
 				screenId: '',
 
-				// XHR request URL, defaults to the JS global 'ajaxurl' when present
+				// XHR request URL, defaults to the JS global 'ajaxurl' when present.
 				url: '',
 
-				// Timestamp, start of the last connection request
+				// Timestamp, start of the last connection request.
 				lastTick: 0,
 
-				// Container for the enqueued items
+				// Container for the enqueued items.
 				queue: {},
 
-				// Connect interval (in seconds)
+				// Connect interval (in seconds).
 				mainInterval: 60,
 
-				// Used when the interval is set to 5 sec. temporarily
+				// Used when the interval is set to 5 sec. temporarily.
 				tempInterval: 0,
 
-				// Used when the interval is reset
+				// Used when the interval is reset.
 				originalInterval: 0,
 
 				// Used to limit the number of AJAX requests.
 				minimalInterval: 0,
 
-				// Used together with tempInterval
+				// Used together with tempInterval.
 				countdown: 0,
 
-				// Whether a connection is currently in progress
+				// Whether a connection is currently in progress.
 				connecting: false,
 
-				// Whether a connection error occurred
+				// Whether a connection error occurred.
 				connectionError: false,
 
-				// Used to track non-critical errors
+				// Used to track non-critical errors.
 				errorcount: 0,
 
-				// Whether at least one connection has completed successfully
+				// Whether at least one connection has completed successfully.
 				hasConnected: false,
 
-				// Whether the current browser window is in focus and the user is active
+				// Whether the current browser window is in focus and the user is active.
 				hasFocus: true,
 
 				// Timestamp, last time the user was active. Checked every 30 sec.
 				userActivity: 0,
 
-				// Flags whether events tracking user activity were set
+				// Flags whether events tracking user activity were set.
 				userActivityEvents: false,
 
 				checkFocusTimer: 0,
@@ -295,8 +295,8 @@
 		 *
 		 * @since 3.8
 		 *
-		 * @param string error The error type passed from the XHR
-		 * @param int status The HTTP status code passed from jqXHR (200, 404, 500, etc.)
+		 * @param string error The error type passed from the XHR.
+		 * @param int status The HTTP status code passed from jqXHR (200, 404, 500, etc.).
 		 *
 		 * @returns void
 		 */
@@ -306,7 +306,7 @@
 			if ( error ) {
 				switch ( error ) {
 					case 'abort':
-						// do nothing
+						// do nothing.
 						break;
 					case 'timeout':
 						// no response for 30 sec.
@@ -358,7 +358,7 @@
 		}
 
 		/**
-		 * Gathers the data and connects to the server
+		 * Gathers the data and connects to the server.
 		 *
 		 * @access private
 		 *
@@ -378,7 +378,7 @@
 			settings.lastTick = time();
 
 			heartbeatData = $.extend( {}, settings.queue );
-			// Clear the data queue, anything added after this point will be send on the next tick
+			// Clear the data queue, anything added after this point will be send on the next tick.
 			settings.queue = {};
 
 			$document.trigger( 'heartbeat-send', [ heartbeatData ] );
@@ -583,7 +583,7 @@
 			}
 		}
 
-		// Public methods
+		// Public methods.
 
 		/**
 		 * Checks whether the window (or any local iframe in it) has focus, or the user is active.
@@ -745,6 +745,7 @@
 		 * @since 3.6
 		 *
 		 * @param string handle The handle for the data.
+		 *
 		 * @returns boolean Whether some data is queued with this handle.
 		 */
 		function isQueued( handle ) {
@@ -759,6 +760,7 @@
 		 * @since 3.7
 		 *
 		 * @param string handle The handle for the data.
+		 *
 		 * @returns void
 		 */
 		function dequeue( handle ) {
@@ -773,6 +775,7 @@
 		 * @since 3.7
 		 *
 		 * @param string handle The handle for the data
+		 *
 		 * @returns mixed The data or undefined.
 		 */
 		function getQueuedItem( handle ) {
@@ -783,7 +786,7 @@
 
 		initialize();
 
-		// Expose public methods
+		// Expose public methods.
 		return {
 			hasFocus: hasFocus,
 			connectNow: connectNow,
