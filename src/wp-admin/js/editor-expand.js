@@ -7,7 +7,7 @@
 		$footer = $( '#wpfooter' );
 
 	/**
-	 * @summary Handles the resizing of the editor
+	 * @summary Handles the resizing of the editor.
 	 *
 	 * @since 4.0.0
 	 *
@@ -92,9 +92,9 @@
 		/**
 		 * @summary Resizes the text editor depending on the old text length.
 		 *
-		 * If there is an mceEditor and it is hidden, resizes the editor depending
+		 * If there is an mceEditor and it is hidden, it resizes the editor depending
 		 * on the old text length. If the current length of the text is smaller than
-		 * the old text length, shrink the text area. Otherwise resize the editor to
+		 * the old text length, it shrinks the text area. Otherwise it resizes the editor to
 		 * the scroll height.
 		 *
 		 * @since 4.6.1
@@ -123,7 +123,7 @@
 		}
 
 		/**
-		 * @summary Gets the heights and widths of elements.
+		 * @summary Gets the height and widths of elements.
 		 *
 		 * Gets the heights of the window, the adminbar, the tools, the menu,
 		 * the visualTop, the textTop, the bottom, the statusbar and sideSortables
@@ -158,21 +158,21 @@
 
 		// We need to wait for TinyMCE to initialize.
 		/**
-		 * @summary Binds all necessary functions for editor expand to the editor,
+		 * @summary Binds all necessary functions for editor expand to the editor
 		 * when the editor is initialized.
 		 *
 		 * @since 4.0.0
 		 *
-		 * @param {event} event The TinyMCE editor init event
+		 * @param {event} event The TinyMCE editor init event.
 		 * @param {object} editor The editor to bind the vents on.
 		 *
-		 * @returns
+		 * @returns {void}
 		 */
 		$document.on( 'tinymce-editor-init.editor-expand', function( event, editor ) {
 			// VK contains the type of key pressed. VK = virtual keyboard.
 			var VK = window.tinymce.util.VK,
 				/**
-				 * @summary Hides any float panel with a hover state, and tooltips.
+				 * @summary Hides any float panel with a hover state. Additionally hides tooltips.
 				 *
 				 * @returns {void}
 				 */
@@ -181,18 +181,18 @@
 					$( '.mce-tooltip' ).hide();
 				}, 1000, true );
 
-			// Makes sure it's the main editor.
+			// Make sure it's the main editor.
 			if ( editor.id !== 'content' ) {
 				return;
 			}
 
-			// Copies the editor instance.
+			// Copy the editor instance.
 			mceEditor = editor;
 
-			// Sets the minimum height to the initial viewport height.
+			// Set the minimum height to the initial viewport height.
 			editor.settings.autoresize_min_height = autoresizeMinHeight;
 
-			// Gets the necessary UI elements.
+			// Get the necessary UI elements.
 			$visualTop = $contentWrap.find( '.mce-toolbar-grp' );
 			$visualEditor = $contentWrap.find( '.mce-edit-area' );
 			$statusBar = $contentWrap.find( '.mce-statusbar' );
@@ -208,19 +208,21 @@
 				var node = editor.selection.getNode(),
 					range, view, offset;
 
-				// If editor.wp.getView and the selection node from the editor selection
-				// are defined, use this as a view for the offset.
+				/*
+				 * If editor.wp.getView and the selection node from the editor selection
+				 * are defined, use this as a view for the offset.
+				 */
 				if ( editor.wp && editor.wp.getView && ( view = editor.wp.getView( node ) ) ) {
 					offset = view.getBoundingClientRect();
 				} else {
 					range = editor.selection.getRng();
 
-					// Tries to get the offset from a range.
+					// Try to get the offset from a range.
 					try {
 						offset = range.getClientRects()[0];
 					} catch( er ) {}
 
-					// Gets the offset from the bounding client rectangle of the node.
+					// Get the offset from the bounding client rectangle of the node.
 					if ( ! offset ) {
 						offset = node.getBoundingClientRect();
 					}
@@ -228,7 +230,6 @@
 
 				return offset.height ? offset : false;
 			}
-
 
 			/**
 			 * @summary Filters the special keys that should not be used for scrolling.
@@ -242,7 +243,7 @@
 			function mceKeyup( event ) {
 				var key = event.keyCode;
 
-				// Bails on special keys. Key code 47 is a /
+				// Bail on special keys. Key code 47 is a /
 				if ( key <= 47 && ! ( key === VK.SPACEBAR || key === VK.ENTER || key === VK.DELETE || key === VK.BACKSPACE || key === VK.UP || key === VK.LEFT || key === VK.DOWN || key === VK.UP ) ) {
 					return;
 				// OS keys, function keys, num lock, scroll lock. Key code 91-93 are OS keys. Key code 112-123 are F1 to F12. Key code 144 is num lock. Key code 145 is scroll lock.
@@ -256,13 +257,13 @@
 			/**
 			 * @summary Makes sure the cursor is always visible in the editor.
 			 *
-			 * @since
-			 *
 			 * Makes sure the cursor is kept between the toolbars of the editor and scrolls
 			 * the window when the cursor moves out of the viewport to a wpview.
 			 * Setting a buffer > 0 will prevent the browser default.
 			 * Some browsers will scroll to the middle,
 			 * others to the top/bottom of the *window* when moving the cursor out of the viewport.
+			 *
+			 * @since 4.1.0
 			 *
 			 * @param {string} key The key code of the pressed key.
 			 */
@@ -276,10 +277,10 @@
 					return;
 				}
 
-				// Determines the cursorTop based on the offset and the top of the editor iframe.
+				// Determine the cursorTop based on the offset and the top of the editor iframe.
 				cursorTop = offset.top + editor.iframeElement.getBoundingClientRect().top;
 
-				// Determines the cursorBottom based on the cursorTop and offset height.
+				// Determine the cursorBottom based on the cursorTop and offset height.
 				cursorBottom = cursorTop + offset.height;
 
 				// Subtract the buffer from the cursorTop.
@@ -290,26 +291,27 @@
 				editorTop = heights.adminBarHeight + heights.toolsHeight + heights.menuBarHeight + heights.visualTopHeight;
 
 				/*
-				 * Sets the editorBottom based on the window Height, and adds the bottomHeight and statusBarHeight if the
+				 * Set the editorBottom based on the window Height, and add the bottomHeight and statusBarHeight if the
 				 * advanced editor is enabled.
 				 */
 				editorBottom = heights.windowHeight - ( advanced ? heights.bottomHeight + heights.statusBarHeight : 0 );
 
-				// Doesn't scroll if the node is taller than the visible part of the editor.
+				// Don't scroll if the node is taller than the visible part of the editor.
 				if ( editorBottom - editorTop < offset.height ) {
 					return;
 				}
 
 				/*
 				 * If the cursorTop is smaller than the editorTop and the up, left
-				 * or backspace key is pressed, the editor scrolls to the position defined
+				 * or backspace key is pressed, scroll the editor to the position defined
 				 * by the cursorTop, pageYOffset and editorTop.
 				 */
 				if ( cursorTop < editorTop && ( key === VK.UP || key === VK.LEFT || key === VK.BACKSPACE ) ) {
 					window.scrollTo( window.pageXOffset, cursorTop + window.pageYOffset - editorTop );
+
 				/*
 				 * If any other key is pressed or the cursorTop is bigger than the editorTop,
-				 * the editor scrolls to the position defined by the cursorBottom,
+				 * scroll the editor to the position defined by the cursorBottom,
 				 * pageYOffset and editorBottom.
 				 */
 				} else if ( cursorBottom > editorBottom ) {
@@ -318,9 +320,9 @@
 			}
 
 			/**
-			 * @summary If the editor is fullscreen, call adjust.
+			 * @summary If the editor is fullscreen, calls adjust.
 			 *
-			 * @since
+			 * @since 4.1.0
 			 *
 			 * @param {event} event The FullscreenStateChanged event.
 			 *
@@ -382,7 +384,7 @@
 			/**
 			 * @summary Toggles advanced states.
 			 *
-			 * @since
+			 * @since 4.1.0
 			 *
 			 * @returns {void}
 			 */
@@ -443,7 +445,7 @@
 		} );
 
 		/**
-		 * @summary Adjusts the toolbars heights and positions..
+		 * @summary Adjusts the toolbars heights and positions.
 		 *
 		 * Adjusts the toolbar heights and positions based on the scroll position on the page,
 		 * the active editor mode and the heights of the editor, admin bar and side bar.
@@ -473,14 +475,14 @@
 				topPos, topHeight, editorPos, editorHeight;
 
 			/*
-			 * Refreshes the heights if type isn't 'scroll'
+			 * Refresh the heights if type isn't 'scroll'
 			 * or heights.windowHeight isn't set.
 			 */
 			if ( resize || ! heights.windowHeight ) {
 				getHeights();
 			}
 
-			// Resizes on resize event when the editor is in text mode.
+			// Resize on resize event when the editor is in text mode.
 			if ( ! visual && type === 'resize' ) {
 				textEditorResize();
 			}
@@ -495,7 +497,7 @@
 				topHeight = heights.textTopHeight;
 			}
 
-			// Returns if TinyMCE is still intializing.
+			// Return if TinyMCE is still intializing.
 			if ( ! visual && ! $top.length ) {
 				return;
 			}
@@ -537,7 +539,7 @@
 					$bottom.attr( 'style', '' );
 				}
 			} else {
-				// Checks if the top is not already in a fixed position.
+				// Check if the top is not already in a fixed position.
 				if ( ( ! fixedTop || resize ) &&
 					( windowPos >= ( topPos - heights.toolsHeight - heights.adminBarHeight ) &&
 					windowPos <= ( topPos - heights.toolsHeight - heights.adminBarHeight + editorHeight - buffer ) ) ) {
@@ -611,9 +613,9 @@
 					}
 				}
 
-				// Checks if the bottom is not already in a fixed position.
+				// Check if the bottom is not already in a fixed position.
 				if ( ( ! fixedBottom || ( resize && advanced ) ) &&
-						// Adds borderWidth for the border around the .wp-editor-container.
+						// Add borderWidth for the border around the .wp-editor-container.
 						( windowPos + heights.windowHeight ) <= ( editorPos + editorHeight + heights.bottomHeight + heights.statusBarHeight + borderWidth ) ) {
 
 					if ( event && event.deltaHeight > 0 && event.deltaHeight < 100 ) {
@@ -644,18 +646,18 @@
 				}
 			}
 
-			// The postbox container is positioned with @media from CSS. This makes sure it is pinned on the side.
+			// The postbox container is positioned with @media from CSS. Ensure it is pinned on the side.
 			if ( $postboxContainer.width() < 300 && heights.windowWidth > 600 &&
 
-				// Checks if the sidebar is not taller than the document height.
+				// Check if the sidebar is not taller than the document height.
 				$document.height() > ( $sideSortables.height() + postBodyTop + 120 ) &&
 
-				// Checks if the editor is taller than the viewport.
+				// Check if the editor is taller than the viewport.
 				heights.windowHeight < editorHeight ) {
 
 				if ( ( heights.sideSortablesHeight + pinnedToolsTop + sidebarBottom ) > heights.windowHeight || fixedSideTop || fixedSideBottom ) {
 
-					// Resets the sideSortables style when scrolling to the top.
+					// Reset the sideSortables style when scrolling to the top.
 					if ( windowPos + pinnedToolsTop <= postBodyTop ) {
 						$sideSortables.attr( 'style', '' );
 						fixedSideTop = fixedSideBottom = false;
@@ -807,8 +809,8 @@
 		 */
 		function on() {
 			/*
-			 * Scrolls to the top when triggering this from JS.
-			 * Ensures toolbars are pinned properly.
+			 * Scroll to the top when triggering this from JS.
+			 * Ensure the toolbars are pinned properly.
 			 */
 			if ( window.pageYOffset && window.pageYOffset > pageYOffsetAtTop ) {
 				window.scrollTo( window.pageXOffset, 0 );
@@ -816,14 +818,14 @@
 
 			$wrap.addClass( 'wp-editor-expand' );
 
-			// Adjusts when the window is scrolled or resized.
+			// Adjust when the window is scrolled or resized.
 			$window.on( 'scroll.editor-expand resize.editor-expand', function( event ) {
 				adjust( event.type );
 				afterScroll();
 			} );
 
 			/*
-		 	 * Adjusts when collapsing the menu, changing the columns
+		 	 * Adjust when collapsing the menu, changing the columns
 		 	 * or changing the body class.
 			 */
 			$document.on( 'wp-collapse-menu.editor-expand postboxes-columnchange.editor-expand editor-classchange.editor-expand', adjust )
@@ -847,7 +849,7 @@
 			$textEditor.on( 'focus.editor-expand input.editor-expand propertychange.editor-expand', textEditorResize );
 			mceBind();
 
-			// Adjusts when entering or exiting fullscreen mode.
+			// Adjust when entering or exiting fullscreen mode.
 			fullscreen && fullscreen.pubsub.subscribe( 'hidden', fullscreenHide );
 
 			if ( mceEditor ) {
@@ -885,8 +887,8 @@
 			}
 
 			/*
-			 * Scrolls to the top when triggering this from JS.
-			 * This ensures toolbars are reset properly.
+			 * Scroll to the top when triggering this from JS.
+			 * Ensure the toolbars are reset properly.
 			 */
 			if ( window.pageYOffset && window.pageYOffset > pageYOffsetAtTop ) {
 				window.scrollTo( window.pageXOffset, 0 );
@@ -899,10 +901,10 @@
 			$textEditor.off( '.editor-expand' );
 			mceUnbind();
 
-			// Adjusts when entering or exiting fullscreen mode.
+			// Adjust when entering or exiting fullscreen mode.
 			fullscreen && fullscreen.pubsub.unsubscribe( 'hidden', fullscreenHide );
 
-			// Resets all css
+			// Reset all css
 			$.each( [ $visualTop, $textTop, $tools, $menuBar, $bottom, $statusBar, $contentWrap, $visualEditor, $textEditor, $sideSortables ], function( i, element ) {
 				element && element.attr( 'style', '' );
 			});
@@ -930,11 +932,11 @@
 			$document.trigger( 'editor-expand-off' );
 		}
 
-		// Starts on load.
+		// Start on load.
 		if ( $wrap.hasClass( 'wp-editor-expand' ) ) {
 			on();
 
-			// Resizes just after CSS has fully loaded and QuickTags is ready.
+			// Resize just after CSS has fully loaded and QuickTags is ready.
 			if ( $contentWrap.hasClass( 'html-active' ) ) {
 				initialResize( function() {
 					adjust();
@@ -943,7 +945,7 @@
 			}
 		}
 
-		// Shows the on/off checkbox.
+		// Show the on/off checkbox.
 		$( '#adv-settings .editor-expand' ).show();
 		$( '#editor-expand-toggle' ).on( 'change.editor-expand', function() {
 			if ( $(this).prop( 'checked' ) ) {
@@ -955,7 +957,7 @@
 			}
 		});
 
-		// Exposes on() and off().
+		// Expose on() and off().
 		window.editorExpand = {
 			on: on,
 			off: off
@@ -965,7 +967,7 @@
 	/**
 	 * @summary Handles the distraction free writing of TinyMCE.
 	 *
-	 * @since
+	 * @since 4.1.0
 	 *
 	 * @returns {void}
 	 */
@@ -1015,7 +1017,7 @@
 		/**
 		 * @summary Recalculates the editor rectangle.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1028,7 +1030,7 @@
 		/**
 		 * @summary Activates the distraction free writing mode.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1044,7 +1046,7 @@
 		/**
 		 * @summary Deactivates the distraction free writing mode.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1062,7 +1064,7 @@
 		/**
 		 * @summary Returns _isActive.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {boolean} Returns true is _isActive is true.
 		 */
@@ -1073,7 +1075,7 @@
 		/**
 		 * @summary Binds events on the editor for distraction free writing.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1096,7 +1098,7 @@
 		/**
 		 * @summary Unbinds events on the editor for distraction free writing.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1119,7 +1121,7 @@
 		/**
 		 * @summary Runs on or off.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -1134,7 +1136,7 @@
 		/**
 		 * @summary Returns the value of _isOn.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @returns {boolean} Returns true if _isOn is true.
 		 */
@@ -1149,7 +1151,7 @@
 		 * Also calls the fadeIn on certain key presses
 		 * or if the mouse leaves the editor.
 		 *
-		 * @since
+		 * @since 4.1.0
 		 *
 		 * @param event The event that triggers this function.
 		 *
