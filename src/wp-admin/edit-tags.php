@@ -81,7 +81,7 @@ case 'add-tag':
 
 	$ret = wp_insert_term( $_POST['tag-name'], $taxonomy, $_POST );
 	if ( $ret && !is_wp_error( $ret ) )
-		$location = add_query_arg( 'message', 1, $location );
+		$location = add_query_arg( 'message', 1, $referer );
 	else
 		$location = add_query_arg( array( 'error' => true, 'message' => 4 ), $referer );
 
@@ -436,8 +436,10 @@ do_action( "{$taxonomy}_term_new_form_tag" );
 
 	wp_dropdown_categories( $dropdown_args );
 	?>
-	<?php if ( 'category' == $taxonomy ) : // @todo: Generic text for hierarchical taxonomies ?>
-		<p><?php _e('Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have children categories for Bebop and Big Band. Totally optional.'); ?></p>
+	<?php if ( 'category' == $taxonomy ) : ?>
+		<p><?php _e( 'Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have children categories for Bebop and Big Band. Totally optional.' ); ?></p>
+	<?php else : ?>
+		<p><?php _e( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ); ?></p>
 	<?php endif; ?>
 </div>
 <?php endif; // is_taxonomy_hierarchical() ?>

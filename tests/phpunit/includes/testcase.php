@@ -57,6 +57,13 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 	}
 
 	public static function setUpBeforeClass() {
+		global $wpdb;
+
+		$wpdb->suppress_errors = false;
+		$wpdb->show_errors = true;
+		$wpdb->db_connect();
+		ini_set('display_errors', 1 );
+
 		parent::setUpBeforeClass();
 
 		$c = self::get_called_class();
@@ -98,11 +105,8 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 			$this->_backup_hooks();
 		}
 
-		global $wpdb, $wp_rewrite;
-		$wpdb->suppress_errors = false;
-		$wpdb->show_errors = true;
-		$wpdb->db_connect();
-		ini_set('display_errors', 1 );
+		global $wp_rewrite;
+
 		$this->clean_up_global_scope();
 
 		/*
@@ -180,8 +184,10 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 	 * it has a chance to do so.
 	 */
 	protected function reset_post_types() {
-		foreach ( get_post_types() as $pt ) {
-			_unregister_post_type( $pt );
+		foreach ( get_post_types( array(), 'objects' ) as $pt ) {
+			if ( empty( $pt->tests_no_auto_unregister ) ) {
+				_unregister_post_type( $pt->name );
+			}
 		}
 		create_initial_post_types();
 	}
@@ -433,6 +439,33 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 		ksort( $expected );
 		ksort( $actual );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Asserts that the given variable is a multidimensional array, and that all arrays are non-empty.
+	 *
+	 * @param array $array
+	 */
+	function assertNonEmptyMultidimensionalArray( $array ) {
+		$this->assertTrue( is_array( $array ) );
+		$this->assertNotEmpty( $array );
+
+		foreach( $array as $sub_array ) {
+			$this->assertTrue( is_array( $sub_array ) );
+			$this->assertNotEmpty( $sub_array );
+		}
+	}
+
+	/**
+	 * Asserts that a condition is not false.
+	 *
+	 * @param bool   $condition
+	 * @param string $message
+	 *
+	 * @throws PHPUnit_Framework_AssertionFailedError
+	 */
+	public static function assertNotFalse( $condition, $message = '' ) {
+		self::assertThat( $condition, self::logicalNot( self::isFalse() ), $message );
 	}
 
 	/**

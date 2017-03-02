@@ -173,9 +173,12 @@ class WP_Term_Query {
 	 *     @type array        $meta_query             Optional. Meta query clauses to limit retrieved terms by.
 	 *                                                See `WP_Meta_Query`. Default empty.
 	 *     @type string       $meta_key               Limit terms to those matching a specific metadata key.
-	 *                                                Can be used in conjunction with `$meta_value`.
+	 *                                                Can be used in conjunction with `$meta_value`. Default empty.
 	 *     @type string       $meta_value             Limit terms to those matching a specific metadata value.
-	 *                                                Usually used in conjunction with `$meta_key`.
+	 *                                                Usually used in conjunction with `$meta_key`. Default empty.
+	 *     @type string       $meta_type              Type of object metadata is for (e.g., comment, post, or user).
+	 *                                                Default empty.
+	 *     @type string       $meta_compare           Comparison operator to test the 'meta_value'. Default empty.
 	 * }
 	 */
 	public function __construct( $query = '' ) {
@@ -294,18 +297,18 @@ class WP_Term_Query {
 	/**
 	 * Get terms, based on query_vars.
 	 *
-	 * @param 4.6.0
+	 * @since 4.6.0
 	 * @access public
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @return array
+	 * @return array List of terms.
 	 */
 	public function get_terms() {
 		global $wpdb;
 
 		$this->parse_query( $this->query_vars );
-		$args = $this->query_vars;
+		$args = &$this->query_vars;
 
 		// Set up meta_query so it's available to 'pre_get_terms'.
 		$this->meta_query = new WP_Meta_Query();
@@ -870,10 +873,10 @@ class WP_Term_Query {
 	 * Generate the ORDER BY clause for an 'orderby' param that is potentially related to a meta query.
 	 *
 	 * @since 4.6.0
-	 * @access public
+	 * @access protected
 	 *
 	 * @param string $orderby_raw Raw 'orderby' value passed to WP_Term_Query.
-	 * @return string
+	 * @return string ORDER BY clause.
 	 */
 	protected function parse_orderby_meta( $orderby_raw ) {
 		$orderby = '';

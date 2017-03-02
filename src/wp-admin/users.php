@@ -122,7 +122,7 @@ case 'promote':
 			wp_die(__('Sorry, you are not allowed to edit this user.'));
 		// The new role of the current user must also have the promote_users cap or be a multisite super admin
 		if ( $id == $current_user->ID && ! $wp_roles->role_objects[ $role ]->has_cap('promote_users')
-			&& ! ( is_multisite() && is_super_admin() ) ) {
+			&& ! ( is_multisite() && current_user_can( 'manage_network_users' ) ) ) {
 				$update = 'err_admin_role';
 				continue;
 		}
@@ -508,6 +508,10 @@ if ( strlen( $usersearch ) ) {
 <form method="get">
 
 <?php $wp_list_table->search_box( __( 'Search Users' ), 'user' ); ?>
+
+<?php if ( ! empty( $_REQUEST['role'] ) ) { ?>
+<input type="hidden" name="role" value="<?php echo esc_attr( $_REQUEST['role'] ); ?>" />
+<?php } ?>
 
 <?php $wp_list_table->display(); ?>
 </form>

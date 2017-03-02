@@ -417,7 +417,6 @@ final class _WP_Editors {
 						'wpdialogs',
 						'wptextpattern',
 						'wpview',
-						'wpembed',
 					);
 
 					if ( ! self::$has_medialib ) {
@@ -681,8 +680,10 @@ final class _WP_Editors {
 						$body_class .= ' post-format-standard';
 				}
 
-				if ( $page_template = get_page_template_slug( $post ) ) {
-					$page_template = str_replace( '.', '-', basename( $page_template, '.php' ) );
+				$page_template = get_page_template_slug( $post );
+
+				if ( $page_template !== false ) {
+					$page_template = empty( $page_template ) ? 'default' : str_replace( '.', '-', basename( $page_template, '.php' ) );
 					$body_class .= ' page-template-' . sanitize_html_class( $page_template );
 				}
 			}

@@ -113,18 +113,19 @@ function get_the_category_by_ID( $cat_ID ) {
 }
 
 /**
- * Retrieve category list in either HTML list or custom format.
+ * Retrieve category list for a post in either HTML list or custom format.
  *
  * @since 1.5.1
  *
  * @global WP_Rewrite $wp_rewrite
  *
- * @param string $separator Optional, default is empty string. Separator for between the categories.
+ * @param string $separator Optional. Separator between the categories. By default, the links are placed
+ *                          in an unordered list. An empty string will result in the default behavior.
  * @param string $parents Optional. How to display the parents.
  * @param int $post_id Optional. Post ID to retrieve categories.
  * @return string
  */
-function get_the_category_list( $separator = '', $parents='', $post_id = false ) {
+function get_the_category_list( $separator = '', $parents = '', $post_id = false ) {
 	global $wp_rewrite;
 	if ( ! is_object_in_taxonomy( get_post_type( $post_id ), 'category' ) ) {
 		/** This filter is documented in wp-includes/category-template.php */
@@ -236,15 +237,16 @@ function in_category( $category, $post = null ) {
 }
 
 /**
- * Display the category list for the post.
+ * Display category list for a post in either HTML list or custom format.
  *
  * @since 0.71
  *
- * @param string $separator Optional, default is empty string. Separator for between the categories.
+ * @param string $separator Optional. Separator between the categories. By default, the links are placed
+ *                          in an unordered list. An empty string will result in the default behavior.
  * @param string $parents Optional. How to display the parents.
  * @param int $post_id Optional. Post ID to retrieve categories.
  */
-function the_category( $separator = '', $parents='', $post_id = false ) {
+function the_category( $separator = '', $parents = '', $post_id = false ) {
 	echo get_the_category_list( $separator, $parents, $post_id );
 }
 
@@ -342,8 +344,8 @@ function wp_dropdown_categories( $args = '' ) {
 
 	// Back compat.
 	if ( isset( $args['type'] ) && 'link' == $args['type'] ) {
-		/* translators: 1: "type => link", 2: "taxonomy => link_category" alternative */
 		_deprecated_argument( __FUNCTION__, '3.0.0',
+			/* translators: 1: "type => link", 2: "taxonomy => link_category" */
 			sprintf( __( '%1$s is deprecated. Use %2$s instead.' ),
 				'<code>type => link</code>',
 				'<code>taxonomy => link_category</code>'
@@ -718,10 +720,12 @@ function wp_tag_cloud( $args = '' ) {
 }
 
 /**
- * Default topic count scaling for tag links
+ * Default topic count scaling for tag links.
  *
- * @param int $count number of posts with that tag
- * @return int scaled count
+ * @since 2.9.0
+ *
+ * @param int $count Number of posts with that tag.
+ * @return int Scaled count.
  */
 function default_topic_count_scale( $count ) {
 	return round(log10($count + 1) * 100);

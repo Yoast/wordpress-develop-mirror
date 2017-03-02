@@ -246,7 +246,7 @@ function wp_ajax_autocomplete_user() {
 		wp_die( -1 );
 
 	/** This filter is documented in wp-admin/user-new.php */
-	if ( ! is_super_admin() && ! apply_filters( 'autocomplete_users_for_site_admins', false ) )
+	if ( ! current_user_can( 'manage_network_users' ) && ! apply_filters( 'autocomplete_users_for_site_admins', false ) )
 		wp_die( -1 );
 
 	$return = array();
@@ -472,11 +472,11 @@ function _wp_ajax_add_hierarchical_term() {
 		$category_nicename = sanitize_title($cat_name);
 		if ( '' === $category_nicename )
 			continue;
-		if ( !$cat_id = term_exists( $cat_name, $taxonomy->name, $parent ) )
-			$cat_id = wp_insert_term( $cat_name, $taxonomy->name, array( 'parent' => $parent ) );
-		if ( is_wp_error( $cat_id ) ) {
+
+		$cat_id = wp_insert_term( $cat_name, $taxonomy->name, array( 'parent' => $parent ) );
+		if ( ! $cat_id || is_wp_error( $cat_id ) ) {
 			continue;
-		} elseif ( is_array( $cat_id ) ) {
+		} else {
 			$cat_id = $cat_id['term_id'];
 		}
 		$checked_categories[] = $cat_id;
@@ -806,11 +806,11 @@ function wp_ajax_add_link_category( $action ) {
 		$slug = sanitize_title($cat_name);
 		if ( '' === $slug )
 			continue;
-		if ( !$cat_id = term_exists( $cat_name, 'link_category' ) )
-			$cat_id = wp_insert_term( $cat_name, 'link_category' );
-		if ( is_wp_error( $cat_id ) ) {
+
+		$cat_id = wp_insert_term( $cat_name, 'link_category' );
+		if ( ! $cat_id || is_wp_error( $cat_id ) ) {
 			continue;
-		} elseif ( is_array( $cat_id ) ) {
+		} else {
 			$cat_id = $cat_id['term_id'];
 		}
 		$cat_name = esc_html( $cat_name );
@@ -1966,9 +1966,11 @@ function wp_ajax_delete_inactive_widgets() {
 	}
 
 	unset( $_POST['removeinactivewidgets'], $_POST['action'] );
-
+	/** This action is documented in wp-admin/includes/ajax-actions.php */
 	do_action( 'load-widgets.php' );
+	/** This action is documented in wp-admin/includes/ajax-actions.php */
 	do_action( 'widgets.php' );
+	/** This action is documented in wp-admin/widgets.php */
 	do_action( 'sidebar_admin_setup' );
 
 	$sidebars_widgets = wp_get_sidebars_widgets();
@@ -3002,7 +3004,6 @@ function wp_ajax_parse_embed() {
 		$parsed = $styles . $html . $scripts;
 	}
 
-
 	if ( ! empty( $no_ssl_support ) || ( is_ssl() && ( preg_match( '%<(iframe|script|embed) [^>]*src="http://%', $parsed ) ||
 		preg_match( '%<link [^>]*href="http://%', $parsed ) ) ) ) {
 		// Admin is ssl and the embed is not. Iframes, scripts, and other "active content" will be blocked.
@@ -3012,10 +3013,23 @@ function wp_ajax_parse_embed() {
 		) );
 	}
 
-	wp_send_json_success( array(
+	$return = array(
 		'body' => $parsed,
 		'attr' => $wp_embed->last_attr
-	) );
+	);
+
+	if ( strpos( $parsed, 'class="wp-embedded-content' ) ) {
+		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			$script_src = includes_url( 'js/wp-embed.js' );
+		} else {
+			$script_src = includes_url( 'js/wp-embed.min.js' );
+		}
+
+		$return['head'] = '<script src="' . $script_src . '"></script>';
+		$return['sandbox'] = true;
+	}
+
+	wp_send_json_success( $return );
 }
 
 /**
@@ -3112,7 +3126,7 @@ function wp_ajax_destroy_sessions() {
 		$message = __( 'You are now logged out everywhere else.' );
 	} else {
 		$sessions->destroy_all();
-		/* translators: 1: User's display name. */
+		/* translators: %s: User's display name. */
 		$message = sprintf( __( '%s has been logged out.' ), $user->display_name );
 	}
 

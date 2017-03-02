@@ -128,8 +128,8 @@ endif;
 /**
  * Display a front page section.
  *
- * @param $partial WP_Customize_Partial Partial associated with a selective refresh request.
- * @param $id integer Front page section to display.
+ * @param WP_Customize_Partial $partial Partial associated with a selective refresh request.
+ * @param integer              $id Front page section to display.
  */
 function twentyseventeen_front_page_section( $partial = null, $id = 0 ) {
 	if ( is_a( $partial, 'WP_Customize_Partial' ) ) {
@@ -141,7 +141,6 @@ function twentyseventeen_front_page_section( $partial = null, $id = 0 ) {
 
 	global $post; // Modify the global post object before setting up post data.
 	if ( get_theme_mod( 'panel_' . $id ) ) {
-		global $post;
 		$post = get_post( get_theme_mod( 'panel_' . $id ) );
 		setup_postdata( $post );
 		set_query_var( 'panel', $id );
@@ -176,6 +175,11 @@ function twentyseventeen_categorized_blog() {
 		$category_count = count( $categories );
 
 		set_transient( 'twentyseventeen_categories', $category_count );
+	}
+
+	// Allow viewing case of 0 or 1 categories in post preview.
+	if ( is_preview() ) {
+		return true;
 	}
 
 	return $category_count > 1;

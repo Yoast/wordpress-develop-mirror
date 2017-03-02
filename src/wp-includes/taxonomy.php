@@ -1077,9 +1077,12 @@ function get_term_to_edit( $id, $taxonomy ) {
  *     @type array        $meta_query             Meta query clauses to limit retrieved terms by.
  *                                                See `WP_Meta_Query`. Default empty.
  *     @type string       $meta_key               Limit terms to those matching a specific metadata key. Can be used in
- *                                                conjunction with `$meta_value`.
+ *                                                conjunction with `$meta_value`. Default empty.
  *     @type string       $meta_value             Limit terms to those matching a specific metadata value. Usually used
- *                                                in conjunction with `$meta_key`.
+ *                                                in conjunction with `$meta_key`. Default empty.
+ *     @type string       $meta_type              Type of object metadata is for (e.g., comment, post, or user).
+ *                                                Default empty.
+ *     @type string       $meta_compare           Comparison operator to test the 'meta_value'. Default empty.
  * }
  * @param array $deprecated Argument array, when using the legacy function parameter format. If present, this
  *                          parameter will be interpreted as `$args`, and the first function parameter will
@@ -2213,8 +2216,9 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
  * @global wpdb $wpdb The WordPress database abstraction object.
  *
  * @param int              $object_id The object to relate to.
- * @param array|int|string $terms     A single term slug, single term id, or array of either term slugs or ids.
- *                                    Will replace all existing related terms in this taxonomy.
+ * @param string|int|array $terms     A single term slug, single term id, or array of either term slugs or ids.
+ *                                    Will replace all existing related terms in this taxonomy. Passing an
+ *                                    empty value will remove all related terms.
  * @param string           $taxonomy  The context in which to relate the term to the object.
  * @param bool             $append    Optional. If false will delete difference of terms. Default false.
  * @return array|WP_Error Term taxonomy IDs of the affected terms.
@@ -2341,7 +2345,7 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
  * @since 3.6.0
  *
  * @param int              $object_id The ID of the object to which the terms will be added.
- * @param array|int|string $terms     The slug(s) or ID(s) of the term(s) to add.
+ * @param string|int|array $terms     The slug(s) or ID(s) of the term(s) to add.
  * @param array|string     $taxonomy  Taxonomy name.
  * @return array|WP_Error Term taxonomy IDs of the affected terms.
  */
@@ -2357,7 +2361,7 @@ function wp_add_object_terms( $object_id, $terms, $taxonomy ) {
  * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @param int              $object_id The ID of the object from which the terms will be removed.
- * @param array|int|string $terms     The slug(s) or ID(s) of the term(s) to remove.
+ * @param string|int|array $terms     The slug(s) or ID(s) of the term(s) to remove.
  * @param array|string     $taxonomy  Taxonomy name.
  * @return bool|WP_Error True on success, false or WP_Error on failure.
  */
@@ -2943,7 +2947,7 @@ function clean_object_term_cache($object_ids, $object_type) {
 	 * @since 2.5.0
 	 *
 	 * @param array  $object_ids An array of object IDs.
-	 * @param string $objet_type Object type.
+	 * @param string $object_type Object type.
 	 */
 	do_action( 'clean_object_term_cache', $object_ids, $object_type );
 }
