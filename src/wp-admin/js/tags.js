@@ -1,10 +1,21 @@
 /* global ajaxurl, wpAjax, tagsl10n, showNotice, validateForm */
+/**
+ * Contains logic for both adding and deleting tags. For deleting tags it makes a request
+ * to the server to delete the tag. For adding tags it makes a request to the server to
+ * add the tag.
+ *
+ * @summary Contains logic for deleting and adding tags
+ */
 
 jQuery(document).ready(function($) {
 
 	/**
-	 * Adds an event handler to the delete term link on the term overview page. Cancels default event handling and event
-	 * bubbling.
+	 * @summary Adds an event handler to the delete term link on the term overview page.
+	 *
+	 * Adds an event handler to the delete term link on the term overview page.
+	 * Cancels default event handling and event bubbling.
+	 *
+	 * @returns boolean Always returns false to cancel the default event handling.
 	 */
 	$( '#the-list' ).on( 'click', '.delete-tag', function() {
 		var t = $(this), tr = t.parents('tr'), r = true, data;
@@ -16,16 +27,24 @@ jQuery(document).ready(function($) {
 			data = t.attr('href').replace(/[^?]*\?/, '').replace(/action=delete/, 'action=delete-tag');
 
 			/**
-			 * Does a request to the server to delete the term for which the user clicked on the delete term link.
+			 * @summary Makes a request to the server to delete the term that
+			 * corresponds to the delete term button.
 			 *
 			 * @param {string} r The response from the server.
+			 * @returns {void}
 			 */
 			$.post(ajaxurl, data, function(r){
 				if ( '1' == r ) {
 					$('#ajax-response').empty();
 					tr.fadeOut('normal', function(){ tr.remove(); });
 
-					// Remove the term from the parent box and tag cloud
+					/**
+					 * @summary Remove the term from the parent box and the tag cloud
+					 *
+					 * `data.match(/tag_ID=(\d+)/)[1]` matches the term id from the data variable.
+					 * This term id is then used to select the relevant HTML elements:
+					 * The parent box and the tag cloud.
+					 */
 					$('select#parent option[value="' + data.match(/tag_ID=(\d+)/)[1] + '"]').remove();
 					$('a.tag-link-' + data.match(/tag_ID=(\d+)/)[1]).remove();
 
@@ -46,8 +65,11 @@ jQuery(document).ready(function($) {
 	});
 
 	/**
-	 * Adds an event handler to the form submit on the term overview page. Cancels default event handling and event
-	 * bubbling.
+	 * @summary Adds an event handler tot he form submit on the term overview page.
+	 *
+	 * Cancels default event handling and event bubbling.
+	 *
+	 * @returns boolean Always returns false to cancel the default event handling.
 	 */
 	$('#submit').click(function(){
 		var form = $(this).parents('form');
@@ -59,6 +81,7 @@ jQuery(document).ready(function($) {
 		 * Does a request to the server to add a new term to the database
 		 * 
 		 * @param {string} r The response from the server.
+		 * @returns {void}
 		 */
 		$.post(ajaxurl, $('#addtag').serialize(), function(r){
 			var res, parent, term, indent, i;
