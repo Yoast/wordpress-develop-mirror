@@ -272,7 +272,7 @@
 					buffer = 50,
 					cursorTop, cursorBottom, editorTop, editorBottom;
 
-				// Doesn't scroll if there is no offset.
+				// Don't scroll if there is no offset.
 				if ( ! offset ) {
 					return;
 				}
@@ -564,7 +564,7 @@
 						top: heights.adminBarHeight + heights.toolsHeight + heights.menuBarHeight,
 						width: contentWrapWidth - ( borderWidth * 2 ) - ( visual ? 0 : ( $top.outerWidth() - $top.width() ) )
 					} );
-					// Checks if the top is already in a fixed position.
+					// Check if the top is already in a fixed position.
 				} else if ( fixedTop || resize ) {
 					if ( windowPos <= ( topPos - heights.toolsHeight - heights.adminBarHeight ) ) {
 						fixedTop = false;
@@ -1015,7 +1015,7 @@
 		} );
 
 		/**
-		 * @summary Recalculates the editor rectangle.
+		 * @summary Recalculates the bottom and right position of the editor in the DOM.
 		 *
 		 * @since 4.1.0
 		 *
@@ -1119,7 +1119,7 @@
 		}
 
 		/**
-		 * @summary Runs on or off.
+		 * @summary Binds or unbinds the editor expand events.
 		 *
 		 * @since 4.1.0
 		 *
@@ -1165,13 +1165,13 @@
 				isMac = ( window.navigator.platform.indexOf( 'Mac' ) > -1 );
 			}
 
-			// Fades in and returns on Escape and keyboard shortcut Alt+Shift+W and Ctrl+Opt+W.
+			// Fade in and returns on Escape and keyboard shortcut Alt+Shift+W and Ctrl+Opt+W.
 			if ( key === 27 || ( key === 87 && event.altKey && ( ( ! isMac && event.shiftKey ) || ( isMac && event.ctrlKey ) ) ) ) {
 				fadeIn( event );
 				return;
 			}
 
-			// Returns if any of the following keys or combinations of keys is pressed.
+			// Return if any of the following keys or combinations of keys is pressed.
 			if ( event && ( event.metaKey || ( event.ctrlKey && ! event.altKey ) || ( event.altKey && event.shiftKey ) || ( key && (
 				// Special keys ( tab, ctrl, alt, esc, arrow keys... )
 				( key <= 47 && key !== 8 && key !== 13 && key !== 32 && key !== 46 ) ||
@@ -1225,7 +1225,7 @@
 
 						$window.off( 'scroll.focus' );
 					} )
-					// Fades in when the mouse moves away form the editor area.
+					// Fade in when the mouse moves away form the editor area.
 					.on( 'mousemove.focus', function( event ) {
 						var nx = event.clientX,
 							ny = event.clientY,
@@ -1267,7 +1267,7 @@
 						y = ny;
 					} )
 
-					// When the overlay is touched, fades in and cancels the event.
+					// When the overlay is touched, fade in and cancel the event.
 					.on( 'touchstart.focus', function( event ) {
 						event.preventDefault();
 						fadeIn();
@@ -1534,10 +1534,10 @@
 					mceBind();
 				}
 
-				// Binds and unbinds based on the distraction free writing focus.
+				// Bind and unbind based on the distraction free writing focus.
 				$document.on( 'dfw-on.focus', mceBind ).on( 'dfw-off.focus', mceUnbind );
 
-				// Focuses the editor when it is the target of the click event.
+				// Focuse the editor when it is the target of the click event.
 				editor.on( 'click', function( event ) {
 					if ( event.target === editor.getDoc().documentElement ) {
 						editor.focus();
@@ -1559,7 +1559,7 @@
 		$document.on( 'quicktags-init', function( event, editor ) {
 			var $button;
 
-			// Binds the distraction free writing events if the distraction free writing button is available.
+			// Bind the distraction free writing events if the distraction free writing button is available.
 			if ( editor.settings.buttons && ( ',' + editor.settings.buttons + ',' ).indexOf( ',dfw,' ) !== -1 ) {
 				$button = $( '#' + editor.name + '_dfw' );
 
