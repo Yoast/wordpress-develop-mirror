@@ -3588,7 +3588,7 @@ Attachments = View.extend({
 	initSortable: function() {
 		var collection = this.collection;
 
-		if ( wp.media.isTouchDevice || ! this.options.sortable || ! $.fn.sortable ) {
+		if ( ! this.options.sortable || ! $.fn.sortable ) {
 			return;
 		}
 
@@ -3647,7 +3647,7 @@ Attachments = View.extend({
 	},
 
 	refreshSortable: function() {
-		if ( wp.media.isTouchDevice || ! this.options.sortable || ! $.fn.sortable ) {
+		if ( ! this.options.sortable || ! $.fn.sortable ) {
 			return;
 		}
 
@@ -3772,9 +3772,14 @@ AttachmentsBrowser = View.extend({
 		this.controller.on( 'toggle:upload:attachment', this.toggleUploader, this );
 		this.controller.on( 'edit:selection', this.editSelection );
 		this.createToolbar();
+		// In the Media Library, the sidebar is used to display errors before the attachments grid.
+		if ( this.options.sidebar && 'errors' === this.options.sidebar ) {
+			this.createSidebar();
+		}
 		this.createUploader();
 		this.createAttachments();
-		if ( this.options.sidebar ) {
+		// For accessibility reasons, place the normal sidebar after the attachments, see ticket #36909.
+		if ( this.options.sidebar && 'errors' !== this.options.sidebar ) {
 			this.createSidebar();
 		}
 		this.updateContent();
@@ -3956,7 +3961,9 @@ AttachmentsBrowser = View.extend({
 					controller: this.controller,
 					priority: -55,
 					click: function() {
-						var removed = [], selection = this.controller.state().get( 'selection' );
+						var removed = [],
+							destroy = [],
+							selection = this.controller.state().get( 'selection' );
 
 						if ( ! selection.length || ! window.confirm( l10n.warnBulkDelete ) ) {
 							return;
@@ -3968,11 +3975,20 @@ AttachmentsBrowser = View.extend({
 								return;
 							}
 
-							model.destroy();
+							destroy.push( model );
 						} );
 
-						selection.remove( removed );
-						this.controller.trigger( 'selection:action:done' );
+						if ( removed.length ) {
+							selection.remove( removed );
+						}
+
+						if ( destroy.length ) {
+							$.when.apply( null, destroy.map( function (item) {
+								return item.destroy();
+							} ) ).then( _.bind( function() {
+								this.controller.trigger( 'selection:action:done' );
+							}, this ) );
+						}
 					}
 				}).render() );
 			}
@@ -6698,6 +6714,8 @@ Modal = wp.media.View.extend({
 		'keydown': 'keydown'
 	},
 
+	clickedOpenerEl: null,
+
 	initialize: function() {
 		_.defaults( this.options, {
 			container: document.body,
@@ -6765,6 +6783,8 @@ Modal = wp.media.View.extend({
 			return this;
 		}
 
+		this.clickedOpenerEl = document.activeElement;
+
 		if ( ! this.views.attached ) {
 			this.attach();
 		}
@@ -6815,8 +6835,12 @@ Modal = wp.media.View.extend({
 		// Hide modal and remove restricted media modal tab focus once it's closed
 		this.$el.hide().undelegate( 'keydown' );
 
-		// Put focus back in useful location once modal is closed
-		$('#wpbody-content').focus();
+		// Put focus back in useful location once modal is closed.
+		if ( null !== this.clickedOpenerEl ) {
+			this.clickedOpenerEl.focus();
+		} else {
+			$( '#wpbody-content' ).focus();
+		}
 
 		this.propagate('close');
 
@@ -7061,14 +7085,12 @@ Search = wp.media.View.extend({
 
 	attributes: {
 		type:        'search',
-		placeholder: l10n.search
+		placeholder: l10n.searchMediaPlaceholder
 	},
 
 	events: {
 		'input':  'search',
-		'keyup':  'search',
-		'change': 'search',
-		'search': 'search'
+		'keyup':  'search'
 	},
 
 	/**
@@ -7079,13 +7101,13 @@ Search = wp.media.View.extend({
 		return this;
 	},
 
-	search: function( event ) {
+	search: _.debounce( function( event ) {
 		if ( event.target.value ) {
 			this.model.set( 'search', event.target.value );
 		} else {
 			this.model.unset('search');
 		}
-	}
+	}, 300 )
 });
 
 module.exports = Search;
@@ -7716,9 +7738,11 @@ Toolbar = View.extend({
 				disabled = false;
 
 			// Prevent insertion of attachments if any of them are still uploading
-			disabled = _.some( selection.models, function( attachment ) {
-				return attachment.get('uploading') === true;
-			});
+			if ( selection && selection.models ) {
+				disabled = _.some( selection.models, function( attachment ) {
+					return attachment.get('uploading') === true;
+				});
+			}
 
 			if ( requires.selection && selection && ! selection.length ) {
 				disabled = true;
@@ -8377,7 +8401,7 @@ UploaderWindow = wp.media.View.extend({
 	initialize: function() {
 		var uploader;
 
-		this.$browser = $('<a href="#" class="browser" />').hide().appendTo('body');
+		this.$browser = $( '<button type="button" class="browser" />' ).hide().appendTo( 'body' );
 
 		uploader = this.options.uploader = _.defaults( this.options.uploader || {}, {
 			dropzone:  this.$el,

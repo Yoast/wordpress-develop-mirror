@@ -31,6 +31,35 @@
 				.replace( /<p[^>]+data-wpview-marker="([^"]+)"[^>]*>[\s\S]*?<\/p>/g, callback );
 		}
 
+		editor.on( 'init', function() {
+			var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+			if ( MutationObserver ) {
+				new MutationObserver( function() {
+					editor.fire( 'wp-body-class-change' );
+				} )
+				.observe( editor.getBody(), {
+					attributes: true,
+					attributeFilter: ['class']
+				} );
+			}
+
+			// Pass on body class name changes from the editor to the wpView iframes.
+			editor.on( 'wp-body-class-change', function() {
+				var className = editor.getBody().className;
+
+				editor.$( 'iframe[class="wpview-sandbox"]' ).each( function( i, iframe ) {
+					// Make sure it is a local iframe
+					// jshint scripturl: true
+					if ( ! iframe.src || iframe.src === 'javascript:""' ) {
+						try {
+							iframe.contentWindow.document.body.className = className;
+						} catch( er ) {}
+					}
+				});
+			} );
+		});
+
 		// Scan new content for matching view patterns and replace them with markers.
 		editor.on( 'beforesetcontent', function( event ) {
 			var node;
@@ -63,12 +92,18 @@
 		} );
 
 		// Replace any new markers nodes with views.
-		editor.on( 'setcontent', function() {
+		editor.on( 'setcontent', function( event ) {
+			if ( event.load && ! event.initial && editor.quirks.refreshContentEditable ) {
+				// Make sure there is a selection in Gecko browsers.
+				// Or it will refresh the content internally which resets the iframes.
+				editor.quirks.refreshContentEditable();
+			}
+
 			wp.mce.views.render();
 		} );
 
 		// Empty view nodes for easier processing.
-		editor.on( 'preprocess', function( event ) {
+		editor.on( 'preprocess hide', function( event ) {
 			editor.$( 'div[data-wpview-text], p[data-wpview-marker]', event.node ).each( function( i, node ) {
 				node.innerHTML = '.';
 			} );
@@ -155,7 +190,7 @@
 				] );
 
 				editor.on( 'wptoolbar', function( event ) {
-					if ( isView( event.element ) ) {
+					if ( ! event.collapsed && isView( event.element ) ) {
 						event.toolbar = toolbar;
 					}
 				} );

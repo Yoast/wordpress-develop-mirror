@@ -333,13 +333,6 @@ class Requests_Transport_cURL implements Requests_Transport {
 				curl_setopt($this->handle, CURLOPT_POST, true);
 				curl_setopt($this->handle, CURLOPT_POSTFIELDS, $data);
 				break;
-			case Requests::PATCH:
-			case Requests::PUT:
-			case Requests::DELETE:
-			case Requests::OPTIONS:
-				curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, $options['type']);
-				curl_setopt($this->handle, CURLOPT_POSTFIELDS, $data);
-				break;
 			case Requests::HEAD:
 				curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, $options['type']);
 				curl_setopt($this->handle, CURLOPT_NOBODY, true);
@@ -347,6 +340,15 @@ class Requests_Transport_cURL implements Requests_Transport {
 			case Requests::TRACE:
 				curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, $options['type']);
 				break;
+			case Requests::PATCH:
+			case Requests::PUT:
+			case Requests::DELETE:
+			case Requests::OPTIONS:
+			default:
+				curl_setopt($this->handle, CURLOPT_CUSTOMREQUEST, $options['type']);
+				if (!empty($data)) {
+					curl_setopt($this->handle, CURLOPT_POSTFIELDS, $data);
+				}
 		}
 
 		// cURL requires a minimum timeout of 1 second when using the system
@@ -373,8 +375,9 @@ class Requests_Transport_cURL implements Requests_Transport {
 		curl_setopt($this->handle, CURLOPT_URL, $url);
 		curl_setopt($this->handle, CURLOPT_REFERER, $url);
 		curl_setopt($this->handle, CURLOPT_USERAGENT, $options['useragent']);
-		curl_setopt($this->handle, CURLOPT_HTTPHEADER, $headers);
-
+		if (!empty($headers)) {
+			curl_setopt($this->handle, CURLOPT_HTTPHEADER, $headers);
+		}
 		if ($options['protocol_version'] === 1.1) {
 			curl_setopt($this->handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 		}
@@ -456,7 +459,7 @@ class Requests_Transport_cURL implements Requests_Transport {
 	 * @param string $data Body data
 	 * @return integer Length of provided data
 	 */
-	protected function stream_body($handle, $data) {
+	public function stream_body($handle, $data) {
 		$this->hooks->dispatch('request.progress', array($data, $this->response_bytes, $this->response_byte_limit));
 		$data_length = strlen($data);
 
@@ -522,7 +525,7 @@ class Requests_Transport_cURL implements Requests_Transport {
 	 * @return boolean True if the transport is valid, false otherwise.
 	 */
 	public static function test($capabilities = array()) {
-		if (!function_exists('curl_init') && !function_exists('curl_exec')) {
+		if (!function_exists('curl_init') || !function_exists('curl_exec')) {
 			return false;
 		}
 

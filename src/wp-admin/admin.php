@@ -138,21 +138,7 @@ else
 	require(ABSPATH . 'wp-admin/menu.php');
 
 if ( current_user_can( 'manage_options' ) ) {
-	/**
-	 * Filters the maximum memory limit available for administration screens.
-	 *
-	 * This only applies to administrators, who may require more memory for tasks like updates.
-	 * Memory limits when processing images (uploaded or edited by users of any role) are
-	 * handled separately.
-	 *
-	 * The WP_MAX_MEMORY_LIMIT constant specifically defines the maximum memory limit available
-	 * when in the administration back end. The default is 256M, or 256 megabytes of memory.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @param string 'WP_MAX_MEMORY_LIMIT' The maximum WordPress memory limit. Default 256M.
-	 */
-	@ini_set( 'memory_limit', apply_filters( 'admin_memory_limit', WP_MAX_MEMORY_LIMIT ) );
+	wp_raise_memory_limit( 'admin' );
 }
 
 /**
@@ -223,7 +209,7 @@ if ( isset($plugin_page) ) {
 		 *
 		 * @since 2.1.0
 		 */
-		do_action( 'load-' . $page_hook );
+		do_action( "load-{$page_hook}" );
 		if (! isset($_GET['noheader']))
 			require_once(ABSPATH . 'wp-admin/admin-header.php');
 
@@ -235,8 +221,9 @@ if ( isset($plugin_page) ) {
 		 */
 		do_action( $page_hook );
 	} else {
-		if ( validate_file($plugin_page) )
-			wp_die(__('Invalid plugin page'));
+		if ( validate_file( $plugin_page ) ) {
+			wp_die( __( 'Invalid plugin page.' ) );
+		}
 
 		if ( !( file_exists(WP_PLUGIN_DIR . "/$plugin_page") && is_file(WP_PLUGIN_DIR . "/$plugin_page") ) && !( file_exists(WPMU_PLUGIN_DIR . "/$plugin_page") && is_file(WPMU_PLUGIN_DIR . "/$plugin_page") ) )
 			wp_die(sprintf(__('Cannot load %s.'), htmlentities($plugin_page)));
@@ -253,7 +240,7 @@ if ( isset($plugin_page) ) {
 		 *
 		 * @since 1.5.0
 		 */
-		do_action( 'load-' . $plugin_page );
+		do_action( "load-{$plugin_page}" );
 
 		if ( !isset($_GET['noheader']))
 			require_once(ABSPATH . 'wp-admin/admin-header.php');
@@ -292,7 +279,7 @@ if ( isset($plugin_page) ) {
 	 *
 	 * @since 3.5.0
 	 */
-	do_action( 'load-importer-' . $importer );
+	do_action( "load-importer-{$importer}" );
 
 	$parent_file = 'tools.php';
 	$submenu_file = 'import.php';
@@ -340,7 +327,7 @@ if ( isset($plugin_page) ) {
 	 *
 	 * @since 2.1.0
 	 */
-	do_action( 'load-' . $pagenow );
+	do_action( "load-{$pagenow}" );
 
 	/*
 	 * The following hooks are fired to ensure backward compatibility.

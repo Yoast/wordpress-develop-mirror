@@ -211,7 +211,7 @@ body {
 body {
 	background: #f1f1f1;
 	color: #444;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 13px;
 	line-height: 1.4em;
 	min-width: 600px;
@@ -244,6 +244,7 @@ td {
 	line-height: inherit;
 }
 
+/* Any change to the default link style must be applied to button-link too. */
 a {
 	color: #0073aa;
 	-webkit-transition-property: border, background, color;
@@ -464,7 +465,8 @@ code {
 	word-wrap: break-word;
 }
 
-.widefat a {
+.widefat a,
+.widefat button.button-link {
 	text-decoration: none;
 }
 
@@ -572,8 +574,18 @@ code {
 	font-size: 23px;
 	font-weight: 400;
 	margin: 0;
-	padding: 9px 15px 4px 0;
+	padding: 9px 0 4px 0;
 	line-height: 29px;
+}
+
+.wrap h1.wp-heading-inline {
+	display: inline-block;
+	margin-right: 5px;
+}
+
+.wp-header-end {
+	visibility: hidden;
+	margin: -2px 0 0;
 }
 
 .subtitle {
@@ -582,6 +594,7 @@ code {
 	color: #555d66;
 	font-size: 14px;
 	font-weight: 400;
+	line-height: 1;
 }
 
 .wrap .add-new-h2, /* deprecated */
@@ -605,6 +618,10 @@ code {
 	color: #0073aa; /* some of these controls are button elements and don't inherit from links */
 	cursor: pointer;
 	outline: 0;
+}
+
+.wrap .wp-heading-inline + .page-title-action {
+	margin-left: 0;
 }
 
 .wrap .add-new-h2:hover, /* deprecated */
@@ -679,7 +696,7 @@ ul.striped > :nth-child(odd),
 }
 
 .wp-ui-highlight {
-	color: white;
+	color: #fff;
 	background-color: #1e8cbe;
 }
 .wp-ui-text-highlight {
@@ -758,7 +775,7 @@ img.emoji {
 
 /* @todo can we combine these into a class or use an existing dashicon one? */
 .welcome-panel .welcome-panel-close:before,
-.tagchecklist span a:before,
+.tagchecklist .ntdelbutton .remove-tag-icon:before,
 #bulk-titles div a:before,
 .notice-dismiss:before {
 	background: none;
@@ -778,16 +795,39 @@ img.emoji {
 	margin: 0;
 }
 
-.tagchecklist span a:before,
 #bulk-titles div a:before {
 	margin: 1px 0;
 }
 
+.tagchecklist .ntdelbutton .remove-tag-icon:before {
+	margin-left: 2px;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
+	color: #0073aa;
+	/* vertically center the icon cross browsers */
+	line-height: 1.28;
+}
+
+.tagchecklist .ntdelbutton:focus {
+	outline: 0;
+}
+
 .welcome-panel .welcome-panel-close:hover:before,
 .welcome-panel .welcome-panel-close:focus:before,
-.tagchecklist span a:hover:before,
-#bulk-titles div a:hover:before {
+.tagchecklist .ntdelbutton:hover .remove-tag-icon:before,
+.tagchecklist .ntdelbutton:focus .remove-tag-icon:before,
+#bulk-titles div a:hover:before,
+#bulk-titles div a:focus:before {
 	color: #c00;
+}
+
+.tagchecklist .ntdelbutton:focus .remove-tag-icon:before {
+	-webkit-box-shadow:
+		0 0 0 1px #5b9dd9,
+		0 0 2px 1px rgba(30, 140, 190, .8);
+	box-shadow:
+		0 0 0 1px #5b9dd9,
+		0 0 2px 1px rgba(30, 140, 190, .8);
 }
 
 .key-labels label {
@@ -825,6 +865,8 @@ hr {
 	border-bottom: 1px solid #fafafa;
 }
 
+.widget-control-remove,
+.widget-control-remove:focus,
 .row-actions span.delete a,
 .row-actions span.trash a,
 .row-actions span.spam a,
@@ -841,7 +883,6 @@ hr {
 abbr.required,
 span.required,
 .file-error,
-.widget-control-remove:hover,
 .row-actions .delete a:hover,
 .row-actions .trash a:hover,
 .row-actions .spam a:hover,
@@ -853,8 +894,11 @@ span.required,
 #media-items a.delete-permanently:hover,
 #nav-menu-footer .menu-delete:hover {
 	color: #f00;
-	text-decoration: none;
 	border: none;
+}
+
+.widget-control-remove:hover {
+	color: #f00;
 }
 
 /*------------------------------------------------------------------------------
@@ -869,10 +913,8 @@ span.required,
 }
 
 #delete-action {
-	line-height: 28px;
-	vertical-align: middle;
-	text-align: left;
 	float: left;
+	line-height: 28px;
 }
 
 #publishing-action {
@@ -1042,37 +1084,51 @@ th.action-links {
 	display: inline-block;
 }
 
-.wp-filter .drawer-toggle {
-	display: inline-block;
-	margin: 0 10px;
-	padding: 4px 6px;
+.wp-filter .button.drawer-toggle {
+	margin: 10px 9px 0;
+	padding: 0 10px 0 6px;
+	border-color: transparent;
+	background-color: transparent;
 	color: #666;
-	cursor: pointer;
+	vertical-align: baseline;
+	-webkit-box-shadow: none;
+	box-shadow: none;
 }
 
 .wp-filter .drawer-toggle:before {
-	display: inline-block;
-	vertical-align: top;
 	content: "\f111";
 	margin: 0 5px 0 0;
-	width: 16px;
-	height: 16px;
 	color: #72777c;
-	-webkit-transition: color .1s ease-in 0;
-	transition: color .1s ease-in 0;
-	font-family: dashicons;
-	font-size: 16px;
-	line-height: 1;
-	text-align: center;
-	text-decoration: inherit;
-	font-weight: 400;
-	font-style: normal;
+	font: normal 16px/1 dashicons;
+	vertical-align: text-bottom;
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
-.wp-filter .drawer-toggle:hover,
-.wp-filter .drawer-toggle:hover:before {
+.wp-filter .button.drawer-toggle:hover,
+.wp-filter .drawer-toggle:hover:before,
+.wp-filter .button.drawer-toggle:focus,
+.wp-filter .drawer-toggle:focus:before {
+	background-color: transparent;
 	color: #00a0d2;
+}
+
+.wp-filter .button.drawer-toggle:hover,
+.wp-filter .button.drawer-toggle:focus:active {
+	border-color: transparent;
+}
+
+.wp-filter .button.drawer-toggle:focus {
+	border-color: #5b9dd9;
+}
+
+.wp-filter .button.drawer-toggle:active {
+	background: transparent;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	-webkit-transform: none;
+	-ms-transform: none;
+	transform: none;
 }
 
 .wp-filter .drawer-toggle.current:before {
@@ -1089,7 +1145,7 @@ th.action-links {
 	width: 100%;
 }
 
-.show-favorites-form .wp-filter .favorites-form {
+.show-favorites-form .favorites-form {
 	display: block;
 }
 
@@ -1107,21 +1163,20 @@ th.action-links {
 	width: 100%;
 }
 
-.show-filters .wp-filter .drawer-toggle:hover,
-.show-filters .wp-filter .drawer-toggle:focus {
-	background: rgb(46, 162, 204);
-}
-
 .show-filters .filter-links a.current {
 	border-bottom: none;
 }
 
-.show-filters .wp-filter .drawer-toggle {
+.show-filters .wp-filter .button.drawer-toggle {
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
-	border: none;
 	background: #72777c;
 	color: #fff;
+}
+
+.show-filters .wp-filter .drawer-toggle:hover,
+.show-filters .wp-filter .drawer-toggle:focus {
+	background: rgb(46, 162, 204);
 }
 
 .show-filters .wp-filter .drawer-toggle:before {
@@ -1167,7 +1222,13 @@ th.action-links {
 }
 
 .filter-drawer .buttons {
+	clear: both;
 	margin-bottom: 20px;
+}
+
+.filter-drawer .filter-group + .buttons {
+	margin-bottom: 0;
+	padding-top: 20px;
 }
 
 .filter-drawer .buttons .button span {
@@ -1180,6 +1241,11 @@ th.action-links {
 .wp-filter .button.clear-filters {
 	display: none;
 	margin-left: 10px;
+}
+
+.wp-filter .button-link.edit-filters {
+	padding: 0 5px;
+	line-height: 28px;
 }
 
 .filtered-by {
@@ -1223,6 +1289,7 @@ th.action-links {
 	padding: 20px;
 }
 
+.show-filters .favorites-form,
 .show-filters .content-filterable,
 .show-filters.filters-applied.loading-content .content-filterable,
 .loading-content .content-filterable,
@@ -1305,6 +1372,10 @@ div.error {
 	box-shadow: 0 1px 1px 0 rgba( 0, 0, 0, 0.1 );
 	margin: 5px 15px 2px;
 	padding: 1px 12px;
+}
+
+div[class="update-message"] { /* back-compat for pre-4.6 */
+	padding: 0.5em 12px 0.5em 0;
 }
 
 .notice p,
@@ -1528,23 +1599,13 @@ form.upgrade .hint {
 	color: #66c6e4;
 }
 
-.button.updated-message,
-.notice .button-link {
+.button.updated-message {
 	-webkit-transition-property: border, background, color;
 	transition-property: border, background, color;
 	-webkit-transition-duration: .05s;
 	transition-duration: .05s;
 	-webkit-transition-timing-function: ease-in-out;
 	transition-timing-function: ease-in-out;
-}
-
-.notice .button-link {
-	color: #0073aa;
-}
-
-.notice .button-link:hover,
-.notice .button-link:active {
-	color: #00a0d2;
 }
 
 @media aural {
@@ -1985,7 +2046,11 @@ html.wp-toolbar {
 	float: right;
 	width: 36px;
 	height: 36px;
+	margin: 0;
 	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
 }
 
 .js .postbox .handlediv {
@@ -2093,14 +2158,6 @@ html.wp-toolbar {
 	font-style: italic;
 }
 
-#wpfooter a {
-	text-decoration: none;
-}
-
-#wpfooter a:hover {
-	text-decoration: underline;
-}
-
 /*------------------------------------------------------------------------------
   25.0 - Tabbed Admin Screen Interface (Experimental)
 ------------------------------------------------------------------------------*/
@@ -2155,7 +2212,7 @@ h3 .nav-tab, /* Back-compat for pre-4.4 */
 
 h1.nav-tab-wrapper, /* Back-compat for pre-4.4 */
 .wrap h2.nav-tab-wrapper, /* higher specificity to override .wrap > h2:first-child */
-h3.nav-tab-wrapper {
+.nav-tab-wrapper {
 	border-bottom: 1px solid #ccc;
 	margin: 0;
 	padding-top: 9px;
@@ -2274,13 +2331,45 @@ body.iframe {
 	display: block;
 }
 
-.importers td {
-	padding-right: 14px;
-}
-
 .importers {
 	font-size: 16px;
 	width: auto;
+}
+
+.importers td {
+	padding-right: 14px;
+	line-height: 1.5em;
+}
+
+.importers .import-system {
+	max-width: 250px;
+}
+
+.importers td.desc {
+	max-width: 500px;
+}
+
+.importer-title,
+.importer-desc,
+.importer-action {
+	display: block;
+}
+
+.importer-title {
+	color: #000;
+	font-size: 14px;
+	font-weight: 400;
+	margin-bottom: .2em;
+}
+
+.importer-action {
+	line-height: 20px; /* Same as with .updating-message */
+	color: #ddd;
+	margin-bottom: 1em;
+}
+
+.not-installed-main-site .importer-action {
+	color: #555;
 }
 
 #post-body #post-body-content #namediv h3, /* Back-compat for pre-4.4 */
@@ -2786,6 +2875,11 @@ div.action-links {
 	font-size: 13px;
 }
 
+/* For non-js plugin installation screen ticket #36430. */
+.update-php .button.button-primary {
+	margin-right: 1em;
+}
+
 @media screen and ( max-width: 771px ) {
 	#plugin-information-title.with-banner {
 		height: 100px;
@@ -2828,7 +2922,7 @@ div.action-links {
 	#section-holder {
 		position: static;
 		margin: 0;
-		padding-bottom: 70px; /* reset from the two column height fix, plus accomodate footer */
+		padding-bottom: 70px; /* reset from the two column height fix, plus accommodate footer */
 	}
 
 	#plugin-information .fyi h3,
@@ -2991,7 +3085,8 @@ img {
 
 /* Metabox collapse arrow indicators */
 .js .sidebar-name .sidebar-name-arrow:before,
-.js .meta-box-sortables .postbox .toggle-indicator:before {
+.js .meta-box-sortables .postbox .toggle-indicator:before,
+.bulk-action-notice .toggle-indicator:before {
 	content: "\f142";
 	display: inline-block;
 	font: normal 20px/1 dashicons;
@@ -3002,7 +3097,8 @@ img {
 }
 
 .js .widgets-holder-wrap.closed .sidebar-name-arrow:before,
-.js .meta-box-sortables .postbox.closed .handlediv .toggle-indicator:before {
+.js .meta-box-sortables .postbox.closed .handlediv .toggle-indicator:before,
+.bulk-action-notice .bulk-action-errors-collapsed .toggle-indicator:before {
 	content: "\f140";
 }
 
@@ -3030,6 +3126,12 @@ img {
 
 .rtl.js .postbox .handlediv .toggle-indicator:before {
 	text-indent: 1px; /* account for the dashicon alignment */
+}
+
+.bulk-action-notice .toggle-indicator:before {
+	line-height: 16px;
+	vertical-align: top;
+	color: #72777c;
 }
 
 .js .postbox .handlediv:focus {
@@ -3062,7 +3164,9 @@ img {
 	font-size: 13px;
 	width: 97%;
 	background: #f9f9f9;
-	outline: none;
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
 }
 
 /* rtl:ignore */
@@ -3160,6 +3264,7 @@ img {
 }
 
 .handlediv,
+.postbox .handlediv.button-link,
 .item-edit,
 .sidebar-name-arrow,
 .accordion-section-title:after {
@@ -3174,6 +3279,8 @@ img {
 .widget-action:focus,
 .handlediv:hover,
 .handlediv:focus,
+.postbox .handlediv.button-link:hover,
+.postbox .handlediv.button-link:focus,
 .item-edit:hover,
 .item-edit:focus,
 .sidebar-name:hover .sidebar-name-arrow,
@@ -3288,7 +3395,8 @@ img {
 	display: none;
 }
 
-.control-section .accordion-section-title {
+.control-section .accordion-section-title,
+.customize-pane-child .accordion-section-title {
 	border-left: none;
 	border-right: none;
 	padding: 10px 10px 11px 14px;
@@ -3296,7 +3404,8 @@ img {
 	background: #fff;
 }
 
-.control-section .accordion-section-title:after {
+.control-section .accordion-section-title:after,
+.customize-pane-child .accordion-section-title:after {
 	top: 11px;
 }
 
@@ -3490,9 +3599,7 @@ img {
 	.sidebar-name-arrow,
 	.sidebar-name:hover .sidebar-name-arrow,
 	.meta-box-sortables .postbox:hover .handlediv,
-	.tagchecklist span a,
 	#bulk-titles div a,
-	.tagchecklist span a:hover,
 	#bulk-titles div a:hover {
 		background: none !important;
 	}
@@ -3550,6 +3657,10 @@ img {
 	#collapse-menu,
 	.post-format-select {
 		display: none !important;
+	}
+
+	.wrap h1.wp-heading-inline {
+		margin-bottom: 0.5em;
 	}
 
 	.wrap .add-new-h2, /* deprecated */
@@ -3677,6 +3788,12 @@ img {
 	.filter-drawer .filter-group-feature label {
 		line-height: 25px;
 	}
+
+	.wp-filter .button.drawer-toggle {
+		font-size: 13px;
+		line-height: 26px;
+		height: 28px;
+	}
 }
 
 /* Smartphone */
@@ -3702,7 +3819,7 @@ img {
 
 	h1.nav-tab-wrapper,
 	.wrap h2.nav-tab-wrapper,
-	h3.nav-tab-wrapper {
+	.nav-tab-wrapper {
 		border-bottom: 0;
 	}
 

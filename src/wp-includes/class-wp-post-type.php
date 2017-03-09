@@ -11,6 +11,8 @@
  * Core class used for interacting with post types.
  *
  * @since 4.6.0
+ *
+ * @see register_post_type()
  */
 final class WP_Post_Type {
 	/**
@@ -32,7 +34,7 @@ final class WP_Post_Type {
 	public $label;
 
 	/**
-	 * An array of labels for this post type.
+	 * Labels object for this post type.
 	 *
 	 * If not set, post labels are inherited for non-hierarchical types
 	 * and page labels for hierarchical ones.
@@ -41,7 +43,7 @@ final class WP_Post_Type {
 	 *
 	 * @since 4.6.0
 	 * @access public
-	 * @var array $labels
+	 * @var object $labels
 	 */
 	public $labels;
 
@@ -307,7 +309,7 @@ final class WP_Post_Type {
 	 *
 	 * @since 4.6.0
 	 * @access public
-	 * @var array $cap
+	 * @var object $cap
 	 */
 	public $cap;
 
@@ -364,7 +366,7 @@ final class WP_Post_Type {
 		$args = wp_parse_args( $args );
 
 		/**
-		 * Filter the arguments for registering a post type.
+		 * Filters the arguments for registering a post type.
 		 *
 		 * @since 4.4.0
 		 *

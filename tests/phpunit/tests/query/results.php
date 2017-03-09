@@ -67,20 +67,6 @@ class Tests_Query_Results extends WP_UnitTestCase {
 		self::$post_ids[] = self::$child_four = $factory->post->create( array( 'post_title' => 'child-four', 'post_parent' => self::$parent_two, 'post_date' => '2007-01-01 00:00:04' ) );
 	}
 
-	public static function wpTearDownAfterClass() {
-		foreach ( self::$cat_ids as $cat_id ) {
-			wp_delete_term( $cat_id, 'category' );
-		}
-
-		foreach ( self::$tag_ids as $tag_id ) {
-			wp_delete_term( $tag_id, 'post_tag' );
-		}
-
-		foreach ( self::$post_ids as $post_id ) {
-			wp_delete_post( $post_id, true );
-		}
-	}
-
 	function setUp() {
 		parent::setUp();
 
@@ -380,6 +366,108 @@ class Tests_Query_Results extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 39055
+	 */
+	function test_query_orderby_post_parent__in_with_order_desc() {
+		$post_parent__in_array = array( self::$parent_two, self::$parent_one );
+		$expected_returned_array = array( 'child-three', 'child-four', 'child-one', 'child-two' );
+
+		$posts = $this->q->query( array(
+			'post_parent__in' => $post_parent__in_array,
+			'orderby'         => 'post_parent__in',
+			'order'           => 'desc',
+		) );
+
+		// order=desc does not influence the order of returned results (returns same order as order=asc)
+		$this->assertEquals( $expected_returned_array, wp_list_pluck( $posts, 'post_title' ) );
+	}
+
+	/**
+	 * @ticket 39055
+	 */
+	function test_query_orderby_post__in_with_no_order_specified() {
+		$post__in_array = array( self::$post_ids[2], self::$post_ids[0], self::$post_ids[1] );
+		$expected_returned_array = array( self::$post_ids[2], self::$post_ids[0], self::$post_ids[1] );
+
+		$q = new WP_Query( array(
+			'post__in' => $post__in_array,
+			'orderby'  => 'post__in',
+			'fields'   => 'ids'
+		) );
+
+		// Expect post ids in the same order as post__in array when no 'order' param is passed in
+		$this->assertSame( $expected_returned_array, $q->posts );
+	}
+
+	/**
+	 * @ticket 39055
+	 */
+	function test_query_orderby_post__in_with_order_asc() {
+		$post__in_array = array( self::$post_ids[2], self::$post_ids[0], self::$post_ids[1] );
+		$expected_returned_array = array( self::$post_ids[2], self::$post_ids[0], self::$post_ids[1] );
+
+		$q = new WP_Query( array(
+			'post__in' => $post__in_array,
+			'orderby'  => 'post__in',
+			'order'    => 'asc',
+			'fields'   => 'ids'
+		) );
+
+		// Expect post ids in the same order as post__in array when order=asc is passed in
+		$this->assertSame( $expected_returned_array, $q->posts );
+	 }
+
+	/**
+	 * @ticket 39055
+	 */
+	function test_query_orderby_post__in_with_order_desc() {
+		$post__in_array = array( self::$post_ids[1], self::$post_ids[2], self::$post_ids[0] );
+		$expected_returned_array = array( self::$post_ids[1], self::$post_ids[2], self::$post_ids[0] );
+
+		$q = new WP_Query( array(
+			'post__in' => $post__in_array,
+			'orderby'  => 'post__in',
+			'order'    => 'desc',
+			'fields'   => 'ids'
+		) );
+
+		// Note that results are returned in the order specified in the post__in array
+		// Order=desc does not have an effect on the order of returned results
+		$this->assertSame( $expected_returned_array, $q->posts );
+	}
+
+	/**
+	 * @ticket 39055
+	 */
+	function test_query_orderby_post_name__in_with_order_asc() {
+		$post_name__in_array = array( 'parent-two', 'parent-one', 'parent-three' );
+
+		$q = new WP_Query( array(
+			'post_name__in' => $post_name__in_array,
+			'orderby'       => 'post_name__in',
+			'order'         => 'asc'
+		) );
+
+		$this->assertSame( $post_name__in_array, array_unique( wp_list_pluck( $q->posts, 'post_title' ) ) );
+	}
+
+	/**
+	 * @ticket 39055
+	 */
+	function test_query_orderby_post_name__in_with_order_desc() {
+		$post_name__in_array = array( 'parent-two', 'parent-one', 'parent-three' );
+
+		$q = new WP_Query( array(
+			'post_name__in' => $post_name__in_array,
+			'orderby'       => 'post_name__in',
+			'order'         => 'desc'
+		) );
+
+		// order=desc does not influence the order of returned results (returns same order as order=asc)
+		$this->assertSame( $post_name__in_array, array_unique( wp_list_pluck( $q->posts, 'post_title' ) ) );
+	}
+
+	/**
 	 * @ticket 27252
 	 * @ticket 31194
 	 */
@@ -456,17 +544,17 @@ class Tests_Query_Results extends WP_UnitTestCase {
 	 * @ticket 16854
 	 */
 	function test_query_author_vars() {
-		$author_1 = self::factory()->user->create( array( 'user_login' => 'admin1', 'user_pass' => rand_str(), 'role' => 'author' ) );
-		$post_1 = self::factory()->post->create( array( 'post_title' => rand_str(), 'post_author' => $author_1, 'post_date' => '2007-01-01 00:00:00' ) );
+		$author_1 = self::factory()->user->create( array( 'user_login' => 'author1', 'role' => 'author' ) );
+		$post_1 = self::factory()->post->create( array( 'post_title' => 'Post 1', 'post_author' => $author_1, 'post_date' => '2007-01-01 00:00:00' ) );
 
-		$author_2 = self::factory()->user->create( array( 'user_login' => rand_str(), 'user_pass' => rand_str(), 'role' => 'author' ) );
-		$post_2 = self::factory()->post->create( array( 'post_title' => rand_str(), 'post_author' => $author_2, 'post_date' => '2007-01-01 00:00:00' ) );
+		$author_2 = self::factory()->user->create( array( 'user_login' => 'author2', 'role' => 'author' ) );
+		$post_2 = self::factory()->post->create( array( 'post_title' => 'Post 2', 'post_author' => $author_2, 'post_date' => '2007-01-01 00:00:00' ) );
 
-		$author_3 = self::factory()->user->create( array( 'user_login' => rand_str(), 'user_pass' => rand_str(), 'role' => 'author' ) );
-		$post_3 = self::factory()->post->create( array( 'post_title' => rand_str(), 'post_author' => $author_3, 'post_date' => '2007-01-01 00:00:00' ) );
+		$author_3 = self::factory()->user->create( array( 'user_login' => 'author3', 'role' => 'author' ) );
+		$post_3 = self::factory()->post->create( array( 'post_title' => 'Post 3', 'post_author' => $author_3, 'post_date' => '2007-01-01 00:00:00' ) );
 
-		$author_4 = self::factory()->user->create( array( 'user_login' => rand_str(), 'user_pass' => rand_str(), 'role' => 'author' ) );
-		$post_4 = self::factory()->post->create( array( 'post_title' => rand_str(), 'post_author' => $author_4, 'post_date' => '2007-01-01 00:00:00' ) );
+		$author_4 = self::factory()->user->create( array( 'user_login' => 'author4', 'role' => 'author' ) );
+		$post_4 = self::factory()->post->create( array( 'post_title' => 'Post 4', 'post_author' => $author_4, 'post_date' => '2007-01-01 00:00:00' ) );
 
 		$posts = $this->q->query( array(
 			'author' => '',
@@ -549,7 +637,7 @@ class Tests_Query_Results extends WP_UnitTestCase {
 		$this->assertEqualSets( array( $author_3, $author_4 ), $author_ids );
 
 		$posts = $this->q->query( array(
-			'author_name' => 'admin1',
+			'author_name' => 'author1',
 			'post__in' => array( $post_1, $post_2, $post_3, $post_4 )
 		) );
 		$author_ids = array_unique( wp_list_pluck( $posts, 'post_author' ) );

@@ -254,7 +254,7 @@ class Tests_Taxonomy extends WP_UnitTestCase {
 	public function test_get_objects_in_term_should_return_invalid_taxonomy_error() {
 		$terms = get_objects_in_term( 1, 'invalid_taxonomy' );
 		$this->assertInstanceOf( 'WP_Error', $terms );
-		$this->assertEquals( 'Invalid taxonomy', $terms->get_error_message() );
+		$this->assertEquals( 'invalid_taxonomy', $terms->get_error_code() );
 	}
 
 	public function test_get_objects_in_term_should_return_empty_array() {
@@ -697,7 +697,7 @@ class Tests_Taxonomy extends WP_UnitTestCase {
 
 		$this->assertSame( 1, count( $wp_filter['wp_ajax_add-foo'] ) );
 		$this->assertTrue( unregister_taxonomy( 'foo' ) );
-		$this->assertSame( array(), $wp_filter['wp_ajax_add-foo'] );
+		$this->assertArrayNotHasKey( 'wp_ajax_add-foo', $wp_filter );
 	}
 
 	/**
@@ -710,4 +710,15 @@ class Tests_Taxonomy extends WP_UnitTestCase {
 		$this->assertFalse( taxonomy_exists( 'foo' ) );
 	}
 
+	/**
+	 * @ticket 39308
+	 */
+	public function test_taxonomy_name_property_should_not_get_overridden_by_passed_args() {
+		register_taxonomy( 'foo', 'post', array( 'name' => 'bar' ) );
+
+		$taxonomy = get_taxonomy( 'foo' );
+		unregister_taxonomy( 'foo' );
+
+		$this->assertSame( 'foo', $taxonomy->name );
+	}
 }

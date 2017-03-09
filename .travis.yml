@@ -30,12 +30,12 @@ matrix:
         - mysql-client-core-5.6
         - mysql-client-5.6
   - php: 7.0
+  - php: 7.1
   - php: nightly
   allow_failures:
   - php: hhvm
   - php: nightly
 before_install:
-- git clone https://github.com/WordPress/twentysixteen.git src/wp-content/themes/twentysixteen
 - |
   if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
       mysql -u root -e "CREATE DATABASE wordpress_tests;"
@@ -51,12 +51,14 @@ before_install:
     echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   fi
 before_script:
+- stable='^[0-9\.]+$'; if [[ "$TRAVIS_PHP_VERSION" =~ $stable ]]; then phpenv config-rm xdebug.ini; fi
 - npm install -g npm
 - npm install -g grunt-cli
 - npm install
 - npm prune
 - mysql --version
 - phpenv versions
+- php --version
 - npm --version
 - node --version
 script: grunt $WP_TRAVISCI

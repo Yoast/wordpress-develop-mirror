@@ -286,11 +286,11 @@ class Tests_Mail extends WP_UnitTestCase {
 	 * > If an entity is of type "multipart" the Content-Transfer-Encoding is
 	 * > not permitted to have any value other than "7bit", "8bit" or
 	 * > "binary".
-	 * http://tools.ietf.org/html/rfc2045#section-6.4
+	 * https://tools.ietf.org/html/rfc2045#section-6.4
 	 *
 	 * > "Content-Transfer-Encoding: 7BIT" is assumed if the
 	 * > Content-Transfer-Encoding header field is not present.
-	 * http://tools.ietf.org/html/rfc2045#section-6.1
+	 * https://tools.ietf.org/html/rfc2045#section-6.1
 	 *
 	 * @ticket 28039
 	 */
@@ -306,5 +306,90 @@ class Tests_Mail extends WP_UnitTestCase {
 		);
 
 		$this->assertNotContains( 'quoted-printable', $GLOBALS['phpmailer']->mock_sent[0]['header'] );
+	}
+
+	/**
+	 * @ticket 21659
+	 */
+	public function test_wp_mail_addresses_arent_encoded() {
+		$to      = 'Lukáš To <to@example.org>';
+		$subject = 'Testing #21659';
+		$message = 'Only the name should be encoded, not the address.';
+
+		$headers = array(
+			'From'     => 'From: Lukáš From <from@example.org>',
+			'Cc'       => 'Cc: Lukáš CC <cc@example.org>',
+			'Bcc'      => 'Bcc: Lukáš BCC <bcc@example.org>',
+			'Reply-To' => 'Reply-To: Lukáš Reply-To <reply_to@example.org>',
+		);
+
+		$expected = array(
+			'To'       => 'To: =?UTF-8?B?THVrw6HFoSBUbw==?= <to@example.org>',
+			'From'     => 'From: =?UTF-8?Q?Luk=C3=A1=C5=A1_From?= <from@example.org>',
+			'Cc'       => 'Cc: =?UTF-8?B?THVrw6HFoSBDQw==?= <cc@example.org>',
+			'Bcc'      => 'Bcc: =?UTF-8?B?THVrw6HFoSBCQ0M=?= <bcc@example.org>',
+			'Reply-To' => 'Reply-To: =?UTF-8?Q?Luk=C3=A1=C5=A1_Reply-To?= <reply_to@example.org>',
+		);
+
+		wp_mail( $to, $subject, $message, array_values( $headers ) );
+
+		$mailer        = tests_retrieve_phpmailer_instance();
+		$sent_headers  = preg_split( "/\r\n|\n|\r/", $mailer->get_sent()->header );
+		$headers['To'] = "To: $to";
+
+		foreach ( $headers as $header => $value ) {
+			$target_headers = preg_grep( "/^$header:/", $sent_headers );
+			$this->assertEquals( $expected[ $header ], array_pop( $target_headers ) );
+		}
+	}
+
+	/**
+	 * Test that the Sender field in the SMTP envelope is not set by Core.
+	 *
+	 * Correctly setting the Sender requires knowledge that is not available
+	 * to Core. An incorrect value will often lead to messages being rejected
+	 * by the receiving MTA, so it's the admin's responsibility to
+	 * set it correctly.
+	 *
+	 * @ticket 37736
+	 */
+	public function test_wp_mail_sender_not_set() {
+		wp_mail( 'user@example.org', 'Testing the Sender field', 'The Sender field should not have been set.' );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$this->assertEquals( '', $mailer->Sender );
+	}
+
+	/**
+	 * @ticket 35598
+	 */
+	public function test_phpmailer_exception_thrown() {
+		$to       = 'an_invalid_address';
+		$subject  = 'Testing';
+		$message  = 'Test Message';
+
+		$ma = new MockAction();
+		add_action( 'wp_mail_failed', array( &$ma, 'action' ) );
+
+		wp_mail( $to, $subject, $message );
+
+		$this->assertEquals( 1, $ma->get_call_count() );
+
+		$expected_error_data = array(
+			'to'          => array( 'an_invalid_address' ),
+			'subject'     => 'Testing',
+			'message'     => 'Test Message',
+			'headers'     => array(),
+			'attachments' => array(),
+			'phpmailer_exception_code' => 2,
+		);
+
+		//Retrieve the arguments passed to the 'wp_mail_failed' hook callbacks
+		$all_args = $ma->get_args();
+		$call_args = array_pop( $all_args );
+
+		$this->assertEquals( 'wp_mail_failed', $call_args[0]->get_error_code() );
+		$this->assertEquals( $expected_error_data, $call_args[0]->get_error_data() );
 	}
 }

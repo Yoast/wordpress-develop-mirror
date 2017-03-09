@@ -4,6 +4,11 @@ html {
 	cursor: text;
 }
 
+html.ios {
+	width: 100px;
+    min-width: 100%;
+}
+
 body {
 	font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
 	font-size: 16px;
@@ -20,7 +25,8 @@ body.rtl {
 	font-family: Tahoma, "Times New Roman", "Bitstream Charter", Times, serif;
 }
 
-body.locale-he-il {
+body.locale-he-il,
+body.locale-vi {
 	font-family: Arial, "Times New Roman", "Bitstream Charter", Times, serif;
 }
 
@@ -205,6 +211,11 @@ audio {
 	visibility: hidden;
 }
 
+/* Fix for proprietary Mozilla display attribute, see #38757 */
+[_moz_abspos] {
+	outline: none;
+}
+
 a[data-wplink-url-error],
 a[data-wplink-url-error]:hover,
 a[data-wplink-url-error]:focus {
@@ -322,7 +333,7 @@ a[data-wplink-url-error]:before {
 .wpview-error p {
 	margin: 0;
 	text-align: center;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 .wpview-type-gallery:after {

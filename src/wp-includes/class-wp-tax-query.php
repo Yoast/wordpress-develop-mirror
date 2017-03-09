@@ -562,14 +562,14 @@ class WP_Tax_Query {
 	private function clean_query( &$query ) {
 		if ( empty( $query['taxonomy'] ) ) {
 			if ( 'term_taxonomy_id' !== $query['field'] ) {
-				$query = new WP_Error( 'Invalid taxonomy' );
+				$query = new WP_Error( 'invalid_taxonomy', __( 'Invalid taxonomy.' ) );
 				return;
 			}
 
 			// so long as there are shared terms, include_children requires that a taxonomy is set
 			$query['include_children'] = false;
 		} elseif ( ! taxonomy_exists( $query['taxonomy'] ) ) {
-			$query = new WP_Error( 'Invalid taxonomy' );
+			$query = new WP_Error( 'invalid_taxonomy', __( 'Invalid taxonomy.' ) );
 			return;
 		}
 
@@ -623,7 +623,12 @@ class WP_Tax_Query {
 					 * matter because `sanitize_term_field()` ignores the $term_id param when the
 					 * context is 'db'.
 					 */
-					$term = "'" . esc_sql( sanitize_term_field( $query['field'], $term, 0, $query['taxonomy'], 'db' ) ) . "'";
+					$clean_term = sanitize_term_field( $query['field'], $term, 0, $query['taxonomy'], 'db' );
+
+					// Match sanitization in wp_insert_term().
+					$clean_term = wp_unslash( $clean_term );
+
+					$term = "'" . esc_sql( $clean_term ) . "'";
 				}
 
 				$terms = implode( ",", $query['terms'] );
@@ -655,7 +660,7 @@ class WP_Tax_Query {
 		}
 
 		if ( 'AND' == $query['operator'] && count( $terms ) < count( $query['terms'] ) ) {
-			$query = new WP_Error( 'Inexistent terms' );
+			$query = new WP_Error( 'inexistent_terms', __( 'Inexistent terms.' ) );
 			return;
 		}
 

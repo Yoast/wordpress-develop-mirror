@@ -61,7 +61,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 		 *
 		 * @see wp_tag_cloud()
 		 *
-		 * @param array $current_taxonomy The taxonomy to use in the tag cloud. Default 'tags'.
+		 * @param array $args Args used for the tag cloud widget.
 		 */
 		$tag_cloud = wp_tag_cloud( apply_filters( 'widget_tag_cloud_args', array(
 			'taxonomy' => $current_taxonomy,
@@ -120,7 +120,7 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 		$instance['title'] = ! empty( $instance['title'] ) ? esc_attr( $instance['title'] ) : '';
 
 		echo '<p><label for="' . $title_id .'">' . __( 'Title:' ) . '</label>
-			<input type="text" class="widefat" id="' . $title_id .'" name="' . $this->get_field_name( 'title' ) .'" value="' . $instance['title'] .'" />
+			<input type="text" class="widefat" id="' . $title_id .'" name="' . $this->get_field_name( 'title' ) .'" value="' . $instance['title'] .'" placeholder="' . esc_attr__( '(Selected taxonomy name)' ) . '" />
 		</p>';
 
 		$taxonomies = get_taxonomies( array( 'show_tagcloud' => true ), 'object' );

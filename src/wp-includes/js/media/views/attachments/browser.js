@@ -41,9 +41,14 @@ AttachmentsBrowser = View.extend({
 		this.controller.on( 'toggle:upload:attachment', this.toggleUploader, this );
 		this.controller.on( 'edit:selection', this.editSelection );
 		this.createToolbar();
+		// In the Media Library, the sidebar is used to display errors before the attachments grid.
+		if ( this.options.sidebar && 'errors' === this.options.sidebar ) {
+			this.createSidebar();
+		}
 		this.createUploader();
 		this.createAttachments();
-		if ( this.options.sidebar ) {
+		// For accessibility reasons, place the normal sidebar after the attachments, see ticket #36909.
+		if ( this.options.sidebar && 'errors' !== this.options.sidebar ) {
 			this.createSidebar();
 		}
 		this.updateContent();
@@ -225,7 +230,9 @@ AttachmentsBrowser = View.extend({
 					controller: this.controller,
 					priority: -55,
 					click: function() {
-						var removed = [], selection = this.controller.state().get( 'selection' );
+						var removed = [],
+							destroy = [],
+							selection = this.controller.state().get( 'selection' );
 
 						if ( ! selection.length || ! window.confirm( l10n.warnBulkDelete ) ) {
 							return;
@@ -237,11 +244,20 @@ AttachmentsBrowser = View.extend({
 								return;
 							}
 
-							model.destroy();
+							destroy.push( model );
 						} );
 
-						selection.remove( removed );
-						this.controller.trigger( 'selection:action:done' );
+						if ( removed.length ) {
+							selection.remove( removed );
+						}
+
+						if ( destroy.length ) {
+							$.when.apply( null, destroy.map( function (item) {
+								return item.destroy();
+							} ) ).then( _.bind( function() {
+								this.controller.trigger( 'selection:action:done' );
+							}, this ) );
+						}
 					}
 				}).render() );
 			}

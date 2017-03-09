@@ -78,24 +78,17 @@ do_action( "{$taxonomy}_pre_edit_form", $tag, $taxonomy ); ?>
 		/* translators: %s: taxonomy name */
 		printf( _x( '&larr; Back to %s', 'admin screen' ), $tax->labels->name );
 	?></a></p>
-	<?php } else { ?>
-	<p><a href="<?php echo esc_url( wp_get_referer() ); ?>"><?php
-		/* translators: %s: taxonomy name */
-		printf( _x( '&larr; Back to %s', 'admin screen' ), $tax->labels->name );
-	?></a></p>
 	<?php } ?>
 </div>
 <?php endif; ?>
 
 <div id="ajax-response"></div>
 
-<form name="edittag" id="edittag" method="post" action="edit-tags.php" class="validate"
-<?php
+<form name="edittag" id="edittag" method="post" action="edit-tags.php" class="validate"<?php
 /**
  * Fires inside the Edit Term form tag.
  *
- * The dynamic portion of the hook name, `$taxonomy`, refers to
- * the taxonomy slug.
+ * The dynamic portion of the hook name, `$taxonomy`, refers to the taxonomy slug.
  *
  * @since 3.7.0
  */
@@ -153,7 +146,7 @@ do_action( "{$taxonomy}_term_edit_form_top", $tag, $taxonomy );
 <?php } ?>
 <?php if ( is_taxonomy_hierarchical($taxonomy) ) : ?>
 		<tr class="form-field term-parent-wrap">
-			<th scope="row"><label for="parent"><?php _ex( 'Parent', 'term parent' ); ?></label></th>
+			<th scope="row"><label for="parent"><?php echo esc_html( $tax->labels->parent_item ); ?></label></th>
 			<td>
 				<?php
 				$dropdown_args = array(
@@ -172,7 +165,9 @@ do_action( "{$taxonomy}_term_edit_form_top", $tag, $taxonomy );
 				$dropdown_args = apply_filters( 'taxonomy_parent_dropdown_args', $dropdown_args, $taxonomy, 'edit' );
 				wp_dropdown_categories( $dropdown_args ); ?>
 				<?php if ( 'category' == $taxonomy ) : ?>
-				<p class="description"><?php _e('Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have children categories for Bebop and Big Band. Totally optional.'); ?></p>
+					<p class="description"><?php _e( 'Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have children categories for Bebop and Big Band. Totally optional.' ); ?></p>
+				<?php else : ?>
+					<p class="description"><?php _e( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ); ?></p>
 				<?php endif; ?>
 			</td>
 		</tr>

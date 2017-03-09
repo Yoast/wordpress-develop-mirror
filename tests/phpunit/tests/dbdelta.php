@@ -801,4 +801,159 @@ class Tests_dbDelta extends WP_UnitTestCase {
 
 		$this->assertEmpty( $updates );
 	}
+
+	/**
+	 * @ticket 34874
+	 */
+	function test_key_names_are_not_case_sensitive_and_do_not_recreate_indices() {
+		global $wpdb;
+
+		$updates = dbDelta(
+			"
+			CREATE TABLE {$wpdb->prefix}dbdelta_test (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				column_1 varchar(255) NOT NULL,
+				column_2 text,
+				column_3 blob,
+				PRIMARY KEY  (id),
+				KEY KEY_1 (column_1),
+				KEY compOUND_key (id,column_1),
+				FULLTEXT KEY FULLtext_kEY (column_1)
+			) ENGINE=MyISAM
+			", false );
+
+		$this->assertEmpty( $updates );
+	}
+
+	/**
+	 * @ticket 34870
+	 */
+	function test_unchanged_key_lengths_do_not_recreate_index() {
+		global $wpdb;
+
+		$updates = dbDelta(
+			"
+			CREATE TABLE {$wpdb->prefix}dbdelta_test (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				column_1 varchar(255) NOT NULL,
+				column_2 text,
+				column_3 blob,
+				PRIMARY KEY  (id),
+				KEY key_1 (column_1(255)),
+				KEY compound_key (id,column_1),
+				FULLTEXT KEY fulltext_key (column_1)
+			) ENGINE=MyISAM
+			", false );
+
+		$this->assertEmpty( $updates );
+	}
+
+	/**
+	 * @ticket 34870
+	 */
+	function test_changed_key_lengths_do_not_recreate_index() {
+		global $wpdb;
+
+		$updates = dbDelta(
+			"
+			CREATE TABLE {$wpdb->prefix}dbdelta_test (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				column_1 varchar(255) NOT NULL,
+				column_2 text,
+				column_3 blob,
+				PRIMARY KEY  (id),
+				KEY key_1 (column_1),
+				KEY compound_key (id,column_1),
+				KEY changing_key_length (column_1(20)),
+				FULLTEXT KEY fulltext_key (column_1)
+			) ENGINE=MyISAM
+			" );
+
+		$this->assertSame( array(
+			"Added index {$wpdb->prefix}dbdelta_test KEY `changing_key_length` (`column_1`(20))"
+		), $updates );
+
+		$updates = dbDelta(
+			"
+			CREATE TABLE {$wpdb->prefix}dbdelta_test (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				column_1 varchar(255) NOT NULL,
+				column_2 text,
+				column_3 blob,
+				PRIMARY KEY  (id),
+				KEY key_1 (column_1),
+				KEY compound_key (id,column_1),
+				KEY changing_key_length (column_1(50)),
+				FULLTEXT KEY fulltext_key (column_1)
+			) ENGINE=MyISAM
+			" );
+
+		$this->assertEmpty( $updates );
+
+		$updates = dbDelta(
+			"
+			CREATE TABLE {$wpdb->prefix}dbdelta_test (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				column_1 varchar(255) NOT NULL,
+				column_2 text,
+				column_3 blob,
+				PRIMARY KEY  (id),
+				KEY key_1 (column_1),
+				KEY compound_key (id,column_1),
+				KEY changing_key_length (column_1(1)),
+				FULLTEXT KEY fulltext_key (column_1)
+			) ENGINE=MyISAM
+			" );
+
+		$this->assertEmpty( $updates );
+
+		$updates = dbDelta(
+			"
+			CREATE TABLE {$wpdb->prefix}dbdelta_test (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				column_1 varchar(255) NOT NULL,
+				column_2 text,
+				column_3 blob,
+				PRIMARY KEY  (id),
+				KEY key_1 (column_1),
+				KEY compound_key (id,column_1),
+				KEY changing_key_length (column_1),
+				FULLTEXT KEY fulltext_key (column_1)
+			) ENGINE=MyISAM
+			" );
+
+		$this->assertEmpty( $updates );
+	}
+
+	/**
+	 * @ticket 31679
+	 */
+	function test_column_type_change_with_hyphens_in_name() {
+		global $wpdb;
+
+		$schema = "
+			CREATE TABLE {$wpdb->prefix}dbdelta_test2 (
+				`foo-bar` varchar(255) DEFAULT NULL
+			)
+		";
+
+		$wpdb->query( $schema );
+
+		$schema_update = "
+			CREATE TABLE {$wpdb->prefix}dbdelta_test2 (
+				`foo-bar` text DEFAULT NULL
+			)
+		";
+
+		$updates = dbDelta( $schema_update );
+
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}dbdelta_test2" );
+
+		$this->assertSame(
+			array(
+				"{$wpdb->prefix}dbdelta_test2.foo-bar" => "Changed type of {$wpdb->prefix}dbdelta_test2.foo-bar from varchar(255) to text",
+			),
+			$updates
+		);
+	}
 }

@@ -17,7 +17,7 @@
 
 .media-modal,
 .media-frame {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 12px;
 	-webkit-overflow-scrolling: touch;
 }
@@ -80,7 +80,7 @@
 .media-frame input[type="url"],
 .media-frame textarea,
 .media-frame select {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 12px;
 	border-width: 1px;
 	border-style: solid;
@@ -187,6 +187,10 @@
 	z-index: 1000;
 	-webkit-transition: color .1s ease-in-out, background .1s ease-in-out;
 	transition: color .1s ease-in-out, background .1s ease-in-out;
+}
+
+.media-modal-close.button-link {
+	text-decoration: none;
 }
 
 .media-modal-close:active {
@@ -701,23 +705,17 @@
 	left: 0;
 }
 
-.media-frame.hide-menu .media-frame-menu {
-	left: -200px;
-}
-
 .media-frame.hide-toolbar .media-frame-content {
 	bottom: 0;
-}
-
-.media-frame.hide-toolbar .media-frame-toolbar {
-	bottom: -61px;
 }
 
 .media-frame.hide-router .media-frame-content {
 	top: 50px;
 }
 
-.media-frame.hide-router .media-frame-router {
+.media-frame.hide-menu .media-frame-menu,
+.media-frame.hide-router .media-frame-router,
+.media-frame.hide-toolbar .media-frame-toolbar {
 	display: none;
 }
 
@@ -807,7 +805,7 @@
 	padding: 4px;
 	font-size: 13px;
 	color: #444;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	-webkit-appearance: none;
 }
 
@@ -1001,6 +999,8 @@
 	border-radius: 3px;
 	-webkit-box-shadow: 0 0 0 1px rgba( 0, 0, 0, 0.3 );
 	box-shadow: 0 0 0 1px rgba( 0, 0, 0, 0.3 );
+	-webkit-transition: none;
+	transition: none;
 }
 
 .wp-core-ui .attachment-close:hover,
@@ -1013,12 +1013,14 @@
 	height: 24px;
 	width: 24px;
 	padding: 0;
+	border: 0;
 	position: absolute;
 	z-index: 10;
 	top: 0;
 	right: 0;
 	outline: none;
 	background: #eee;
+	cursor: pointer;
 	-webkit-box-shadow: 0 0 0 1px #fff, 0 0 0 2px rgba( 0, 0, 0, 0.15 );
 	box-shadow: 0 0 0 1px #fff, 0 0 0 2px rgba( 0, 0, 0, 0.15 );
 }
@@ -1256,6 +1258,8 @@
 	position: absolute;
 	top: 0;
 	right: 0;
+	-webkit-transition: none;
+	transition: none;
 }
 
 .upload-errors .upload-error {
@@ -1448,6 +1452,7 @@
 	line-height: 16px;
 	border-right: 1px solid #ddd;
 	color: #0073aa;
+	text-decoration: none;
 }
 
 .media-selection .button-link:hover,
@@ -1984,6 +1989,12 @@
 	padding: 0;
 	color: #666;
 	text-transform: uppercase;
+	text-decoration: none;
+}
+
+.image-details .advanced-toggle:hover,
+.image-details .advanced-toggle:active {
+	color: #666;
 }
 
 .image-details .advanced-toggle:after {

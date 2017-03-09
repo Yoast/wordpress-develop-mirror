@@ -483,3 +483,16 @@ test('setMode', function() {
 	equal(editor.theme.panel.find('button:last')[2].disabled(), false);
 	equal(clickCount, 2);
 });
+
+test('translate', function() {
+	tinymce.addI18n('en_US', {
+		'input i18n': 'output i18n'
+	});
+
+	equal(editor.translate('input i18n'), 'output i18n');
+});
+
+test('kamer word bounderies', function() {
+	editor.setContent('<p>!\u200b!\u200b!</p>');
+	equal(editor.getContent(), '<p>!\u200b!\u200b!</p>');
+});

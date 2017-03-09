@@ -5,10 +5,10 @@
 class Tests_External_HTTP_Basic extends WP_UnitTestCase {
 
 	function test_readme() {
+		// This test is designed to only run on trunk/master
+		$this->skipOnAutomatedBranches();
+
 		$readme = file_get_contents( ABSPATH . 'readme.html' );
-		preg_match( '#<br /> Version (.*)#', $readme, $matches );
-		list( $version ) = explode( '-', $GLOBALS['wp_version'] );
-		$this->assertEquals( $version, trim( $matches[1] ), "readme.html's version needs to be updated to $version." );
 
 		preg_match( '#Recommendations.*PHP</a> version <strong>([0-9.]*)#s', $readme, $matches );
 

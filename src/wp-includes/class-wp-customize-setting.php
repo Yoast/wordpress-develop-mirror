@@ -464,11 +464,12 @@ class WP_Customize_Setting {
 	}
 
 	/**
-	 * Check user capabilities and theme supports, and then save
+	 * Checks user capabilities and theme supports, and then saves
 	 * the value of the setting.
 	 *
 	 * @since 3.4.0
-	 * @since 4.6.0 Return the result of updating the value.
+	 *
+	 * @access public
 	 *
 	 * @return false|void False if cap check fails or value isn't set or is invalid.
 	 */
@@ -479,23 +480,27 @@ class WP_Customize_Setting {
 			return false;
 		}
 
+		$id_base = $this->id_data['base'];
+
 		/**
 		 * Fires when the WP_Customize_Setting::save() method is called.
 		 *
-		 * The dynamic portion of the hook name, `$this->id_data['base']` refers to
+		 * The dynamic portion of the hook name, `$id_base` refers to
 		 * the base slug of the setting name.
 		 *
 		 * @since 3.4.0
 		 *
 		 * @param WP_Customize_Setting $this WP_Customize_Setting instance.
 		 */
-		do_action( 'customize_save_' . $this->id_data['base'], $this );
+		do_action( "customize_save_{$id_base}", $this );
 
 		$this->update( $value );
 	}
 
 	/**
 	 * Fetch and sanitize the $_POST value for the setting.
+	 *
+	 * During a save request prior to save, post_value() provides the new value while value() does not.
 	 *
 	 * @since 3.4.0
 	 *
@@ -528,14 +533,15 @@ class WP_Customize_Setting {
 	}
 
 	/**
-	 * Validate an input.
+	 * Validates an input.
 	 *
 	 * @since 4.6.0
 	 * @access public
+	 *
 	 * @see WP_REST_Request::has_valid_params()
 	 *
 	 * @param mixed $value Value to validate.
-	 * @return true|WP_Error
+	 * @return true|WP_Error True if the input was validated, otherwise WP_Error.
 	 */
 	public function validate( $value ) {
 		if ( is_wp_error( $value ) ) {
@@ -548,9 +554,11 @@ class WP_Customize_Setting {
 		$validity = new WP_Error();
 
 		/**
-		 * Validate a Customize setting value.
+		 * Validates a Customize setting value.
 		 *
 		 * Plugins should amend the `$validity` object via its `WP_Error::add()` method.
+		 *
+		 * The dynamic portion of the hook name, `$this->ID`, refers to the setting ID.
 		 *
 		 * @since 4.6.0
 		 *
@@ -579,7 +587,7 @@ class WP_Customize_Setting {
 		$id_base = $this->id_data['base'];
 		if ( 'option' === $this->type ) {
 			return get_option( $id_base, $default );
-		} else if ( 'theme_mod' ) {
+		} elseif ( 'theme_mod' === $this->type ) {
 			return get_theme_mod( $id_base, $default );
 		} else {
 			/*
@@ -608,7 +616,7 @@ class WP_Customize_Setting {
 				$autoload = self::$aggregated_multidimensionals[ $this->type ][ $this->id_data['base'] ]['autoload'];
 			}
 			return update_option( $id_base, $value, $autoload );
-		} else if ( 'theme_mod' ) {
+		} elseif ( 'theme_mod' === $this->type ) {
 			set_theme_mod( $id_base, $value );
 			return true;
 		} else {
@@ -690,19 +698,28 @@ class WP_Customize_Setting {
 		$is_core_type = ( 'option' === $this->type || 'theme_mod' === $this->type );
 
 		if ( ! $is_core_type && ! $this->is_multidimensional_aggregated ) {
+
+			// Use post value if previewed and a post value is present.
+			if ( $this->is_previewed ) {
+				$value = $this->post_value( null );
+				if ( null !== $value ) {
+					return $value;
+				}
+			}
+
 			$value = $this->get_root_value( $this->default );
 
 			/**
 			 * Filters a Customize setting value not handled as a theme_mod or option.
 			 *
-			 * The dynamic portion of the hook name, `$this->id_date['base']`, refers to
-			 * the base slug of the setting name.
+			 * The dynamic portion of the hook name, `$id_base`, refers to
+			 * the base slug of the setting name, initialized from `$this->id_data['base']`.
 			 *
 			 * For settings handled as theme_mods or options, see those corresponding
 			 * functions for available hooks.
 			 *
 			 * @since 3.4.0
-			 * @since 4.6.0 Added the `$this` setting instance as the second param.
+			 * @since 4.6.0 Added the `$this` setting instance as the second parameter.
 			 *
 			 * @param mixed                $default The setting default value. Default empty.
 			 * @param WP_Customize_Setting $this    The setting instance.
@@ -750,9 +767,10 @@ class WP_Customize_Setting {
 	}
 
 	/**
-	 * Get the data to export to the client via JSON.
+	 * Retrieves the data to export to the client via JSON.
 	 *
 	 * @since 4.6.0
+	 * @access public
 	 *
 	 * @return array Array of parameters passed to JavaScript.
 	 */
