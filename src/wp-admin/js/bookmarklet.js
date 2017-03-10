@@ -1,3 +1,15 @@
+/**
+ *
+ *
+ * @summary
+ *
+ * @since
+ *
+ * @param {window} window The window.
+ * @param {document} document The document.
+ * @param {string} href The current opened URL.
+ * @param {string} pt_url The URL to post the content to.
+ */
 ( function( window, document, href, pt_url ) {
 	var encURI = window.encodeURIComponent,
 		form = document.createElement( 'form' ),
@@ -52,6 +64,11 @@
 		return;
 	}
 
+	/**
+	 *
+	 * @param name
+	 * @param value
+	 */
 	function add( name, value ) {
 		if ( typeof value === 'undefined' ) {
 			return;
