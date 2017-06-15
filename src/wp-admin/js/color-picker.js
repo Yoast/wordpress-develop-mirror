@@ -113,7 +113,7 @@
 				self.button.addClass( 'wp-picker-clear' ).val( wpColorPickerL10n.clear );
 			}
 
-			el.wrap( '<span class="wp-picker-input-wrap" />' ).after(self.button);
+			el.wrap( '<span class="wp-picker-input-wrap" />' ).after( self.button );
 
 			el.iris( {
 				target: self.pickerContainer,
