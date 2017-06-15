@@ -58,6 +58,13 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
 		$this->manager = $this->instantiate();
 		$this->undefined = new stdClass();
+
+		$orig_file = DIR_TESTDATA . '/images/canola.jpg';
+		$this->test_file = '/tmp/canola.jpg';
+		copy( $orig_file, $this->test_file );
+		$orig_file2 = DIR_TESTDATA . '/images/waffles.jpg';
+		$this->test_file2 = '/tmp/waffles.jpg';
+		copy( $orig_file2, $this->test_file2 );
 	}
 
 	/**
@@ -314,6 +321,25 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 	function test_import_theme_starter_content() {
 		wp_set_current_user( self::$admin_user_id );
 		register_nav_menu( 'top', 'Top' );
+		add_theme_support( 'custom-logo' );
+		add_theme_support( 'custom-header' );
+		add_theme_support( 'custom-background' );
+
+		$existing_canola_attachment_id = self::factory()->attachment->create_object( $this->test_file, 0, array(
+			'post_mime_type' => 'image/jpeg',
+			'post_type' => 'attachment',
+			'post_name' => 'canola',
+		) );
+		$existing_published_home_page_id = $this->factory()->post->create( array(
+			'post_name' => 'home',
+			'post_type' => 'page',
+			'post_status' => 'publish'
+		) );
+		$existing_auto_draft_about_page_id = $this->factory()->post->create( array(
+			'post_name' => 'about',
+			'post_type' => 'page',
+			'post_status' => 'auto-draft'
+		) );
 
 		global $wp_customize;
 		$wp_customize = new WP_Customize_Manager();
@@ -330,7 +356,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 				'top' => array(
 					'name'  => 'Menu Name',
 					'items' => array(
-						'page_home',
+						'link_home',
 						'page_about',
 						'page_blog',
 						'link_email',
@@ -351,15 +377,25 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 				'custom' => array(
 					'post_type' => 'post',
 					'post_title' => 'Custom',
-					'thumbnail' => '{{featured-image-logo}}',
+					'thumbnail' => '{{waffles}}',
+				),
+				'unknown_cpt' => array(
+					'post_type' => 'unknown_cpt',
+					'post_title' => 'Unknown CPT',
 				),
 			),
 			'attachments' => array(
-				'featured-image-logo' => array(
-					'post_title' => 'Featured Image',
-					'post_content' => 'Attachment Description',
-					'post_excerpt' => 'Attachment Caption',
-					'file' => DIR_TESTDATA . '/images/waffles.jpg',
+				'waffles' => array(
+					'post_title' => 'Waffles',
+					'post_content' => 'Waffles Attachment Description',
+					'post_excerpt' => 'Waffles Attachment Caption',
+					'file' => $this->test_file2,
+				),
+				'canola' => array(
+					'post_title' => 'Canola',
+					'post_content' => 'Canola Attachment Description',
+					'post_excerpt' => 'Canola Attachment Caption',
+					'file' => $this->test_file,
 				),
 			),
 			'options' => array(
@@ -369,8 +405,14 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 				'page_on_front'  => '{{home}}',
 				'page_for_posts' => '{{blog}}',
 			),
+			'theme_mods' => array(
+				'custom_logo' => '{{canola}}',
+				'header_image' => '{{waffles}}',
+				'background_image' => '{{waffles}}',
+			),
 		);
 
+		update_option( 'posts_per_page', 1 ); // To check #39022.
 		add_theme_support( 'starter-content', $starter_content_config );
 		$this->assertEmpty( $wp_customize->unsanitized_post_values() );
 		$wp_customize->import_theme_starter_content();
@@ -378,6 +420,9 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$expected_setting_ids = array(
 			'blogname',
 			'blogdescription',
+			'custom_logo',
+			'header_image_data',
+			'background_image',
 			'widget_text[2]',
 			'widget_meta[3]',
 			'sidebars_widgets[sidebar-1]',
@@ -406,20 +451,35 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertEquals( array( 'text-2', 'meta-3' ), $changeset_values['sidebars_widgets[sidebar-1]'] );
 
 		$posts_by_name = array();
-		$this->assertCount( 5, $changeset_values['nav_menus_created_posts'] );
+		$this->assertCount( 7, $changeset_values['nav_menus_created_posts'] );
+		$this->assertContains( $existing_published_home_page_id, $changeset_values['nav_menus_created_posts'], 'Expected reuse of non-auto-draft posts.' );
+		$this->assertContains( $existing_canola_attachment_id, $changeset_values['nav_menus_created_posts'], 'Expected reuse of non-auto-draft attachment.' );
+		$this->assertNotContains( $existing_auto_draft_about_page_id, $changeset_values['nav_menus_created_posts'], 'Expected non-reuse of auto-draft posts.' );
 		foreach ( $changeset_values['nav_menus_created_posts'] as $post_id ) {
 			$post = get_post( $post_id );
-			$this->assertEquals( 'auto-draft', $post->post_status );
-			$posts_by_name[ $post->post_name ] = $post->ID;
+			if ( $post->ID === $existing_published_home_page_id ) {
+				$this->assertEquals( 'publish', $post->post_status );
+			} elseif ( $post->ID === $existing_canola_attachment_id ) {
+				$this->assertEquals( 'inherit', $post->post_status );
+			} else {
+				$this->assertEquals( 'auto-draft', $post->post_status );
+				$this->assertEmpty( $post->post_name );
+			}
+			$post_name = $post->post_name;
+			if ( empty( $post_name ) ) {
+				$post_name = get_post_meta( $post->ID, '_customize_draft_post_name', true );
+			}
+			$posts_by_name[ $post_name ] = $post->ID;
 		}
-		$this->assertEquals( array( 'featured-image', 'home', 'about', 'blog', 'custom' ), array_keys( $posts_by_name ) );
+		$this->assertEquals( array( 'waffles', 'canola', 'home', 'about', 'blog', 'custom', 'unknown-cpt' ), array_keys( $posts_by_name ) );
 		$this->assertEquals( 'Custom', get_post( $posts_by_name['custom'] )->post_title );
 		$this->assertEquals( 'sample-page-template.php', get_page_template_slug( $posts_by_name['about'] ) );
 		$this->assertEquals( '', get_page_template_slug( $posts_by_name['blog'] ) );
-		$this->assertEquals( $posts_by_name['featured-image'], get_post_thumbnail_id( $posts_by_name['custom'] ) );
+		$this->assertEquals( $posts_by_name['waffles'], get_post_thumbnail_id( $posts_by_name['custom'] ) );
 		$this->assertEquals( '', get_post_thumbnail_id( $posts_by_name['blog'] ) );
-		$attachment_metadata = wp_get_attachment_metadata( $posts_by_name['featured-image'] );
-		$this->assertEquals( 'Featured Image', get_post( $posts_by_name['featured-image'] )->post_title );
+		$attachment_metadata = wp_get_attachment_metadata( $posts_by_name['waffles'] );
+		$this->assertEquals( 'Waffles', get_post( $posts_by_name['waffles'] )->post_title );
+		$this->assertEquals( 'waffles', get_post_meta( $posts_by_name['waffles'], '_customize_draft_post_name', true ) );
 		$this->assertArrayHasKey( 'file', $attachment_metadata );
 		$this->assertContains( 'waffles', $attachment_metadata['file'] );
 
@@ -428,7 +488,9 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertEquals( $posts_by_name['blog'], $changeset_values['page_for_posts'] );
 
 		$this->assertEquals( -1, $changeset_values['nav_menu_locations[top]'] );
-		$this->assertEquals( $posts_by_name['home'], $changeset_values['nav_menu_item[-1]']['object_id'] );
+		$this->assertEquals( 0, $changeset_values['nav_menu_item[-1]']['object_id'] );
+		$this->assertEquals( 'custom', $changeset_values['nav_menu_item[-1]']['type'] );
+		$this->assertEquals( home_url( '/' ), $changeset_values['nav_menu_item[-1]']['url'] );
 
 		$this->assertEmpty( $wp_customize->changeset_data() );
 		$this->assertNull( $wp_customize->changeset_post_id() );
@@ -444,7 +506,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		// Ensure that re-importing doesn't cause auto-drafts to balloon.
 		$wp_customize->import_theme_starter_content();
 		$changeset_data = $wp_customize->changeset_data();
-		$this->assertEqualSets( array_values( $posts_by_name ), $changeset_data['nav_menus_created_posts']['value'], 'Auto-drafts should not get re-created and amended with each import.' );
+		$this->assertEqualSets( array_values( $posts_by_name ), $changeset_data['nav_menus_created_posts']['value'] ); // Auto-drafts should not get re-created and amended with each import.
 
 		// Test that saving non-starter content on top of the changeset clears the starter_content flag.
 		$wp_customize->save_changeset_post( array(
@@ -472,14 +534,31 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'starter_content', $changeset_data['blogdescription'] );
 
 		// Publish.
+		$this->assertEmpty( get_custom_logo() );
+		$this->assertEmpty( get_header_image() );
+		$this->assertEmpty( get_background_image() );
+		$this->assertEmpty( get_theme_mod( 'custom_logo' ) );
+		$this->assertEmpty( get_theme_mod( 'header_image' ) );
+		$this->assertEmpty( get_theme_mod( 'background_image' ) );
 		$this->assertEquals( 'auto-draft', get_post( $posts_by_name['about'] )->post_status );
-		$this->assertEquals( 'auto-draft', get_post( $posts_by_name['featured-image'] )->post_status );
+		$this->assertEquals( 'auto-draft', get_post( $posts_by_name['waffles'] )->post_status );
 		$this->assertNotEquals( $changeset_data['blogname']['value'], get_option( 'blogname' ) );
 		$r = $wp_customize->save_changeset_post( array( 'status' => 'publish' ) );
 		$this->assertInternalType( 'array', $r );
 		$this->assertEquals( 'publish', get_post( $posts_by_name['about'] )->post_status );
-		$this->assertEquals( 'inherit', get_post( $posts_by_name['featured-image'] )->post_status );
+		$this->assertEquals( 'inherit', get_post( $posts_by_name['waffles'] )->post_status );
 		$this->assertEquals( $changeset_data['blogname']['value'], get_option( 'blogname' ) );
+		$this->assertNotEmpty( get_theme_mod( 'custom_logo' ) );
+		$this->assertNotEmpty( get_theme_mod( 'header_image' ) );
+		$this->assertNotEmpty( get_theme_mod( 'background_image' ) );
+		$this->assertNotEmpty( get_custom_logo() );
+		$this->assertNotEmpty( get_header_image() );
+		$this->assertNotEmpty( get_background_image() );
+		$this->assertContains( 'canola', get_custom_logo() );
+		$this->assertContains( 'waffles', get_header_image() );
+		$this->assertContains( 'waffles', get_background_image() );
+		$this->assertEquals( 'waffles', get_post( $posts_by_name['waffles'] )->post_name );
+		$this->assertEmpty( get_post_meta( $posts_by_name['waffles'], '_customize_draft_post_name', true ) );
 	}
 
 	/**
@@ -627,10 +706,11 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 				'custom' => 'something',
 			),
 		);
+		$date = ( gmdate( 'Y' ) + 1 ) . '-12-01 00:00:00';
 		$r = $manager->save_changeset_post( array(
 			'status' => 'auto-draft',
 			'title' => 'Auto Draft',
-			'date_gmt' => '2010-01-01 00:00:00',
+			'date_gmt' => $date,
 			'data' => $pre_saved_data,
 		) );
 		$this->assertInternalType( 'array', $r );
@@ -651,7 +731,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		}
 		$this->assertEquals( 'Auto Draft', get_post( $post_id )->post_title );
 		$this->assertEquals( 'auto-draft', get_post( $post_id )->post_status );
-		$this->assertEquals( '2010-01-01 00:00:00', get_post( $post_id )->post_date_gmt );
+		$this->assertEquals( $date, get_post( $post_id )->post_date_gmt );
 		$this->assertNotEquals( 'Changeset Title', get_option( 'blogname' ) );
 		$this->assertArrayHasKey( 'setting_validities', $r );
 
@@ -1028,6 +1108,43 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 			'capability' => 'exist',
 		) );
 		return $manager;
+	}
+
+	/**
+	 * Test that updating an auto-draft changeset bumps its post_date to keep it from getting garbage collected by wp_delete_auto_drafts().
+	 *
+	 * @ticket 31089
+	 * @see wp_delete_auto_drafts()
+	 * @covers WP_Customize_Manager::save_changeset_post()
+	 */
+	function test_save_changeset_post_dumping_auto_draft_date() {
+		global $wp_customize;
+		wp_set_current_user( self::$admin_user_id );
+
+		$uuid = wp_generate_uuid4();
+		$changeset_post_id = wp_insert_post( array(
+			'post_type' => 'customize_changeset',
+			'post_content' => '{}',
+			'post_name' => $uuid,
+			'post_status' => 'auto-draft',
+			'post_date' => gmdate( 'Y-m-d H:i:s', strtotime( '-3 days' ) ),
+		) );
+
+		$post = get_post( $changeset_post_id );
+		$original_post_date = $post->post_date;
+
+		$wp_customize = $this->create_test_manager( $uuid );
+		$wp_customize->save_changeset_post( array(
+			'status' => 'auto-draft',
+			'data' => array(
+				'blogname' => array(
+					'value' => 'Admin 1 Title',
+				),
+			),
+		) );
+
+		$post = get_post( $changeset_post_id );
+		$this->assertNotEquals( $post->post_date, $original_post_date );
 	}
 
 	/**
@@ -1910,15 +2027,6 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_ios() method.
-	 *
-	 * @see WP_Customize_Manager::is_ios()
-	 */
-	function test_is_ios() {
-		$this->markTestSkipped( 'WP_Customize_Manager::is_ios() cannot be tested because it uses wp_is_mobile() which contains a static var.' );
-	}
-
-	/**
 	 * Test get_document_title_template() method.
 	 *
 	 * @see WP_Customize_Manager::get_document_title_template()
@@ -2511,6 +2619,31 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 
 		$result = $this->manager->panels();
 		$this->assertEquals( $panels_sorted, array_keys( $result ) );
+	}
+
+	/**
+	 * Verify sanitization of external header video URL will trim the whitespaces in the beginning and end of the URL.
+	 *
+	 * @ticket 39125
+	 */
+	function test_sanitize_external_header_video_trim() {
+		$this->manager->register_controls();
+		$setting = $this->manager->get_setting( 'external_header_video' );
+		$video_url = 'https://www.youtube.com/watch?v=KiS8rZBeIO0';
+
+		$whitespaces = array(
+			' ',  // space
+			"\t", // horizontal tab
+			"\n", // line feed
+			"\r", // carriage return,
+			"\f", // form feed,
+			"\v", // vertical tab
+		);
+
+		foreach ( $whitespaces as $whitespace  ) {
+			$sanitized = $setting->sanitize( $whitespace . $video_url . $whitespace );
+			$this->assertEquals( $video_url, $sanitized );
+		}
 	}
 }
 

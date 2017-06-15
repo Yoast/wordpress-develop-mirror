@@ -815,7 +815,7 @@ function register_post_status( $post_status, $args = array() ) {
 		$args->label = $post_status;
 
 	if ( false === $args->label_count )
-		$args->label_count = array( $args->label, $args->label );
+		$args->label_count = _n_noop( $args->label, $args->label );
 
 	$wp_post_statuses[$post_status] = $args;
 
@@ -985,6 +985,8 @@ function get_post_types( $args = array(), $output = 'names', $operator = 'and' )
  * @since 4.4.0 The `show_ui` argument is now enforced on the post type listing
  *              screen and post editing screen.
  * @since 4.6.0 Post type object returned is now an instance of WP_Post_Type.
+ * @since 4.7.0 Introduced `show_in_rest`, 'rest_base' and 'rest_controller_class'
+ *              arguments to register the post type in REST API.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -994,76 +996,79 @@ function get_post_types( $args = array(), $output = 'names', $operator = 'and' )
  * @param array|string $args {
  *     Array or string of arguments for registering a post type.
  *
- *     @type string      $label                Name of the post type shown in the menu. Usually plural.
- *                                             Default is value of $labels['name'].
- *     @type array       $labels               An array of labels for this post type. If not set, post
- *                                             labels are inherited for non-hierarchical types and page
- *                                             labels for hierarchical ones. See get_post_type_labels() for a full
- *                                             list of supported labels.
- *     @type string      $description          A short descriptive summary of what the post type is.
- *                                             Default empty.
- *     @type bool        $public               Whether a post type is intended for use publicly either via
- *                                             the admin interface or by front-end users. While the default
- *                                             settings of $exclude_from_search, $publicly_queryable, $show_ui,
- *                                             and $show_in_nav_menus are inherited from public, each does not
- *                                             rely on this relationship and controls a very specific intention.
- *                                             Default false.
- *     @type bool        $hierarchical         Whether the post type is hierarchical (e.g. page). Default false.
- *     @type bool        $exclude_from_search  Whether to exclude posts with this post type from front end search
- *                                             results. Default is the opposite value of $public.
- *     @type bool        $publicly_queryable   Whether queries can be performed on the front end for the post type
- *                                             as part of parse_request(). Endpoints would include:
- *                                             * ?post_type={post_type_key}
- *                                             * ?{post_type_key}={single_post_slug}
- *                                             * ?{post_type_query_var}={single_post_slug}
- *                                             If not set, the default is inherited from $public.
- *     @type bool        $show_ui              Whether to generate and allow a UI for managing this post type in the
- *                                             admin. Default is value of $public.
- *     @type bool        $show_in_menu         Where to show the post type in the admin menu. To work, $show_ui
- *                                             must be true. If true, the post type is shown in its own top level
- *                                             menu. If false, no menu is shown. If a string of an existing top
- *                                             level menu (eg. 'tools.php' or 'edit.php?post_type=page'), the post
- *                                             type will be placed as a sub-menu of that.
- *                                             Default is value of $show_ui.
- *     @type bool        $show_in_nav_menus    Makes this post type available for selection in navigation menus.
- *                                             Default is value $public.
- *     @type bool        $show_in_admin_bar    Makes this post type available via the admin bar. Default is value
- *                                             of $show_in_menu.
- *     @type int         $menu_position        The position in the menu order the post type should appear. To work,
- *                                             $show_in_menu must be true. Default null (at the bottom).
- *     @type string      $menu_icon            The url to the icon to be used for this menu. Pass a base64-encoded
- *                                             SVG using a data URI, which will be colored to match the color scheme
- *                                             -- this should begin with 'data:image/svg+xml;base64,'. Pass the name
- *                                             of a Dashicons helper class to use a font icon, e.g.
- *                                             'dashicons-chart-pie'. Pass 'none' to leave div.wp-menu-image empty
- *                                             so an icon can be added via CSS. Defaults to use the posts icon.
- *     @type string      $capability_type      The string to use to build the read, edit, and delete capabilities.
- *                                             May be passed as an array to allow for alternative plurals when using
- *                                             this argument as a base to construct the capabilities, e.g.
- *                                             array('story', 'stories'). Default 'post'.
- *     @type array       $capabilities         Array of capabilities for this post type. $capability_type is used
- *                                             as a base to construct capabilities by default.
- *                                             See get_post_type_capabilities().
- *     @type bool        $map_meta_cap         Whether to use the internal default meta capability handling.
- *                                             Default false.
- *     @type array       $supports             Core feature(s) the post type supports. Serves as an alias for calling
- *                                             add_post_type_support() directly. Core features include 'title',
- *                                             'editor', 'comments', 'revisions', 'trackbacks', 'author', 'excerpt',
- *                                             'page-attributes', 'thumbnail', 'custom-fields', and 'post-formats'.
- *                                             Additionally, the 'revisions' feature dictates whether the post type
- *                                             will store revisions, and the 'comments' feature dictates whether the
- *                                             comments count will show on the edit screen. Defaults is an array
- *                                             containing 'title' and 'editor'.
- *     @type callable    $register_meta_box_cb Provide a callback function that sets up the meta boxes for the
- *                                             edit form. Do remove_meta_box() and add_meta_box() calls in the
- *                                             callback. Default null.
- *     @type array       $taxonomies           An array of taxonomy identifiers that will be registered for the
- *                                             post type. Taxonomies can be registered later with register_taxonomy()
- *                                             or register_taxonomy_for_object_type().
- *                                             Default empty array.
- *     @type bool|string $has_archive          Whether there should be post type archives, or if a string, the
- *                                             archive slug to use. Will generate the proper rewrite rules if
- *                                             $rewrite is enabled. Default false.
+ *     @type string      $label                 Name of the post type shown in the menu. Usually plural.
+ *                                              Default is value of $labels['name'].
+ *     @type array       $labels                An array of labels for this post type. If not set, post
+ *                                              labels are inherited for non-hierarchical types and page
+ *                                              labels for hierarchical ones. See get_post_type_labels() for a full
+ *                                              list of supported labels.
+ *     @type string      $description           A short descriptive summary of what the post type is.
+ *                                              Default empty.
+ *     @type bool        $public                Whether a post type is intended for use publicly either via
+ *                                              the admin interface or by front-end users. While the default
+ *                                              settings of $exclude_from_search, $publicly_queryable, $show_ui,
+ *                                              and $show_in_nav_menus are inherited from public, each does not
+ *                                              rely on this relationship and controls a very specific intention.
+ *                                              Default false.
+ *     @type bool        $hierarchical          Whether the post type is hierarchical (e.g. page). Default false.
+ *     @type bool        $exclude_from_search   Whether to exclude posts with this post type from front end search
+ *                                              results. Default is the opposite value of $public.
+ *     @type bool        $publicly_queryable    Whether queries can be performed on the front end for the post type
+ *                                              as part of parse_request(). Endpoints would include:
+ *                                              * ?post_type={post_type_key}
+ *                                              * ?{post_type_key}={single_post_slug}
+ *                                              * ?{post_type_query_var}={single_post_slug}
+ *                                              If not set, the default is inherited from $public.
+ *     @type bool        $show_ui               Whether to generate and allow a UI for managing this post type in the
+ *                                              admin. Default is value of $public.
+ *     @type bool        $show_in_menu          Where to show the post type in the admin menu. To work, $show_ui
+ *                                              must be true. If true, the post type is shown in its own top level
+ *                                              menu. If false, no menu is shown. If a string of an existing top
+ *                                              level menu (eg. 'tools.php' or 'edit.php?post_type=page'), the post
+ *                                              type will be placed as a sub-menu of that.
+ *                                              Default is value of $show_ui.
+ *     @type bool        $show_in_nav_menus     Makes this post type available for selection in navigation menus.
+ *                                              Default is value $public.
+ *     @type bool        $show_in_admin_bar     Makes this post type available via the admin bar. Default is value
+ *                                              of $show_in_menu.
+ *     @type bool        $show_in_rest          Whether to add the post type route in the REST API 'wp/v2' namespace.
+ *     @type string      $rest_base             To change the base url of REST API route. Default is $post_type.
+ *     @type string      $rest_controller_class REST API Controller class name. Default is 'WP_REST_Posts_Controller'.
+ *     @type int         $menu_position         The position in the menu order the post type should appear. To work,
+ *                                              $show_in_menu must be true. Default null (at the bottom).
+ *     @type string      $menu_icon             The url to the icon to be used for this menu. Pass a base64-encoded
+ *                                              SVG using a data URI, which will be colored to match the color scheme
+ *                                              -- this should begin with 'data:image/svg+xml;base64,'. Pass the name
+ *                                              of a Dashicons helper class to use a font icon, e.g.
+ *                                              'dashicons-chart-pie'. Pass 'none' to leave div.wp-menu-image empty
+ *                                              so an icon can be added via CSS. Defaults to use the posts icon.
+ *     @type string      $capability_type       The string to use to build the read, edit, and delete capabilities.
+ *                                              May be passed as an array to allow for alternative plurals when using
+ *                                              this argument as a base to construct the capabilities, e.g.
+ *                                              array('story', 'stories'). Default 'post'.
+ *     @type array       $capabilities          Array of capabilities for this post type. $capability_type is used
+ *                                              as a base to construct capabilities by default.
+ *                                              See get_post_type_capabilities().
+ *     @type bool        $map_meta_cap          Whether to use the internal default meta capability handling.
+ *                                              Default false.
+ *     @type array       $supports              Core feature(s) the post type supports. Serves as an alias for calling
+ *                                              add_post_type_support() directly. Core features include 'title',
+ *                                              'editor', 'comments', 'revisions', 'trackbacks', 'author', 'excerpt',
+ *                                              'page-attributes', 'thumbnail', 'custom-fields', and 'post-formats'.
+ *                                              Additionally, the 'revisions' feature dictates whether the post type
+ *                                              will store revisions, and the 'comments' feature dictates whether the
+ *                                              comments count will show on the edit screen. Defaults is an array
+ *                                              containing 'title' and 'editor'.
+ *     @type callable    $register_meta_box_cb  Provide a callback function that sets up the meta boxes for the
+ *                                              edit form. Do remove_meta_box() and add_meta_box() calls in the
+ *                                              callback. Default null.
+ *     @type array       $taxonomies            An array of taxonomy identifiers that will be registered for the
+ *                                              post type. Taxonomies can be registered later with register_taxonomy()
+ *                                              or register_taxonomy_for_object_type().
+ *                                              Default empty array.
+ *     @type bool|string $has_archive           Whether there should be post type archives, or if a string, the
+ *                                              archive slug to use. Will generate the proper rewrite rules if
+ *                                              $rewrite is enabled. Default false.
  *     @type bool|array  $rewrite              {
  *         Triggers the handling of rewrites for this post type. To prevent rewrite, set to false.
  *         Defaults to true, using $post_type as slug. To specify rewrite rules, an array can be
@@ -1079,21 +1084,21 @@ function get_post_types( $args = array(), $output = 'names', $operator = 'and' )
  *                                  inherits from $permalink_epmask. If not specified and permalink_epmask
  *                                  is not set, defaults to EP_PERMALINK.
  *     }
- *     @type string|bool $query_var            Sets the query_var key for this post type. Defaults to $post_type
- *                                             key. If false, a post type cannot be loaded at
- *                                             ?{query_var}={post_slug}. If specified as a string, the query
- *                                             ?{query_var_string}={post_slug} will be valid.
- *     @type bool        $can_export           Whether to allow this post type to be exported. Default true.
- *     @type bool        $delete_with_user     Whether to delete posts of this type when deleting a user. If true,
- *                                             posts of this type belonging to the user will be moved to trash
- *                                             when then user is deleted. If false, posts of this type belonging
- *                                             to the user will *not* be trashed or deleted. If not set (the default),
- *                                             posts are trashed if post_type_supports('author'). Otherwise posts
- *                                             are not trashed or deleted. Default null.
- *     @type bool        $_builtin             FOR INTERNAL USE ONLY! True if this post type is a native or
- *                                             "built-in" post_type. Default false.
- *     @type string      $_edit_link           FOR INTERNAL USE ONLY! URL segment to use for edit link of
- *                                             this post type. Default 'post.php?post=%d'.
+ *     @type string|bool $query_var             Sets the query_var key for this post type. Defaults to $post_type
+ *                                              key. If false, a post type cannot be loaded at
+ *                                              ?{query_var}={post_slug}. If specified as a string, the query
+ *                                              ?{query_var_string}={post_slug} will be valid.
+ *     @type bool        $can_export            Whether to allow this post type to be exported. Default true.
+ *     @type bool        $delete_with_user      Whether to delete posts of this type when deleting a user. If true,
+ *                                              posts of this type belonging to the user will be moved to trash
+ *                                              when then user is deleted. If false, posts of this type belonging
+ *                                              to the user will *not* be trashed or deleted. If not set (the default),
+ *                                              posts are trashed if post_type_supports('author'). Otherwise posts
+ *                                              are not trashed or deleted. Default null.
+ *     @type bool        $_builtin              FOR INTERNAL USE ONLY! True if this post type is a native or
+ *                                              "built-in" post_type. Default false.
+ *     @type string      $_edit_link            FOR INTERNAL USE ONLY! URL segment to use for edit link of
+ *                                              this post type. Default 'post.php?post=%d'.
  * }
  * @return WP_Post_Type|WP_Error The registered post type object, or an error object.
  */
@@ -1350,7 +1355,7 @@ function _post_type_meta_capabilities( $capabilities = null ) {
  * @since 3.0.0
  * @since 4.3.0 Added the `featured_image`, `set_featured_image`, `remove_featured_image`,
  *              and `use_featured_image` labels.
- * @since 4.4.0 Added the `insert_into_item`, `uploaded_to_this_item`, `filter_items_list`,
+ * @since 4.4.0 Added the `archives`, `insert_into_item`, `uploaded_to_this_item`, `filter_items_list`,
  *              `items_list_navigation`, and `items_list` labels.
  * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
  * @since 4.7.0 Added the `view_items` and `attributes` labels.
@@ -1379,10 +1384,10 @@ function get_post_type_labels( $post_type_object ) {
 		'attributes' => array( __( 'Post Attributes' ), __( 'Page Attributes' ) ),
 		'insert_into_item' => array( __( 'Insert into post' ), __( 'Insert into page' ) ),
 		'uploaded_to_this_item' => array( __( 'Uploaded to this post' ), __( 'Uploaded to this page' ) ),
-		'featured_image' => array( __( 'Featured Image' ), __( 'Featured Image' ) ),
-		'set_featured_image' => array( __( 'Set featured image' ), __( 'Set featured image' ) ),
-		'remove_featured_image' => array( __( 'Remove featured image' ), __( 'Remove featured image' ) ),
-		'use_featured_image' => array( __( 'Use as featured image' ), __( 'Use as featured image' ) ),
+		'featured_image' => array( _x( 'Featured Image', 'post' ), _x( 'Featured Image', 'page' ) ),
+		'set_featured_image' => array( _x( 'Set featured image', 'post' ), _x( 'Set featured image', 'page' ) ),
+		'remove_featured_image' => array( _x( 'Remove featured image', 'post' ), _x( 'Remove featured image', 'page' ) ),
+		'use_featured_image' => array( _x( 'Use as featured image', 'post' ), _x( 'Use as featured image', 'page' ) ),
 		'filter_items_list' => array( __( 'Filter posts list' ), __( 'Filter pages list' ) ),
 		'items_list_navigation' => array( __( 'Posts list navigation' ), __( 'Pages list navigation' ) ),
 		'items_list' => array( __( 'Posts list' ), __( 'Pages list' ) ),
@@ -2056,7 +2061,7 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
 			 *                        values include 'raw', 'edit', 'db', 'display',
 			 *                        'attribute' and 'js'.
 			 */
-			$value = apply_filters( $field, $value, $post_id, $context );
+			$value = apply_filters( "{$field}", $value, $post_id, $context );
 		} else {
 			$value = apply_filters( "post_{$field}", $value, $post_id, $context );
 		}
@@ -2795,10 +2800,12 @@ function wp_untrash_post_comments( $post = null ) {
  *
  * @param int   $post_id Optional. The Post ID. Does not default to the ID of the
  *                       global $post. Default 0.
- * @param array $args    Optional. Category arguments. See wp_get_object_terms(). Default empty.
- * @return array List of categories. If the `$fields` argument passed via `$args` is 'all' or
- *               'all_with_object_id', an array of WP_Term objects will be returned. If `$fields`
- *               is 'ids', an array of category ids. If `$fields` is 'names', an array of category names.
+ * @param array $args    Optional. Category query parameters. Default empty array.
+ *                       See WP_Term_Query::__construct() for supported arguments.
+ * @return array|WP_Error List of categories. If the `$fields` argument passed via `$args` is 'all' or
+ *                        'all_with_object_id', an array of WP_Term objects will be returned. If `$fields`
+ *                        is 'ids', an array of category ids. If `$fields` is 'names', an array of category names.
+ *                        WP_Error object if 'category' taxonomy doesn't exist.
  */
 function wp_get_post_categories( $post_id = 0, $args = array() ) {
 	$post_id = (int) $post_id;
@@ -2821,8 +2828,10 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  *
  * @param int   $post_id Optional. The Post ID. Does not default to the ID of the
  *                       global $post. Default 0.
- * @param array $args Optional. Overwrite the defaults
- * @return array List of post tags.
+ * @param array $args    Optional. Tag query parameters. Default empty array.
+ *                       See WP_Term_Query::__construct() for supported arguments.
+ * @return array|WP_Error Array of WP_Term objects on success or empty array if no tags were found.
+ *                        WP_Error object if 'post_tag' taxonomy doesn't exist.
  */
 function wp_get_post_tags( $post_id = 0, $args = array() ) {
 	return wp_get_post_terms( $post_id, 'post_tag', $args);
@@ -2840,9 +2849,10 @@ function wp_get_post_tags( $post_id = 0, $args = array() ) {
  * @param int    $post_id  Optional. The Post ID. Does not default to the ID of the
  *                         global $post. Default 0.
  * @param string $taxonomy Optional. The taxonomy for which to retrieve terms. Default 'post_tag'.
- * @param array  $args     Optional. wp_get_object_terms() arguments. Default empty array.
- * @return array|WP_Error  List of post terms or empty array if no terms were found. WP_Error object
- *                         if `$taxonomy` doesn't exist.
+ * @param array  $args     Optional. Term query parameters. Default empty array.
+ *                         See WP_Term_Query::__construct() for supported arguments.
+ * @return array|WP_Error  Array of WP_Term objects on success or empty array if no terms were found.
+ *                         WP_Error object if `$taxonomy` doesn't exist.
  */
 function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
 	$post_id = (int) $post_id;
@@ -4466,7 +4476,7 @@ function get_page_uri( $page = 0 ) {
 }
 
 /**
- * Retrieve a list of pages.
+ * Retrieve a list of pages (or hierarchical post type items).
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
@@ -5927,7 +5937,9 @@ function _publish_post_hook( $post_id ) {
 		add_post_meta( $post_id, '_pingme', '1' );
 	add_post_meta( $post_id, '_encloseme', '1' );
 
-	wp_schedule_single_event(time(), 'do_pings');
+	if ( ! wp_next_scheduled( 'do_pings' ) ) {
+		wp_schedule_single_event( time(), 'do_pings' );
+	}
 }
 
 /**
@@ -6182,4 +6194,33 @@ function wp_add_trashed_suffix_to_post_name_for_post( $post ) {
 	$wpdb->update( $wpdb->posts, array( 'post_name' => $post_name ), array( 'ID' => $post->ID ) );
 	clean_post_cache( $post->ID );
 	return $post_name;
+}
+
+/**
+ * Filter the SQL clauses of an attachment query to include filenames.
+ *
+ * @since 4.7.0
+ * @access private
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param array $clauses An array including WHERE, GROUP BY, JOIN, ORDER BY,
+ *                       DISTINCT, fields (SELECT), and LIMITS clauses.
+ * @return array The modified clauses.
+ */
+function _filter_query_attachment_filenames( $clauses ) {
+	global $wpdb;
+	remove_filter( 'posts_clauses', __FUNCTION__ );
+
+	// Add a LEFT JOIN of the postmeta table so we don't trample existing JOINs.
+	$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS sq1 ON ( {$wpdb->posts}.ID = sq1.post_id AND sq1.meta_key = '_wp_attached_file' )";
+
+	$clauses['groupby'] = "{$wpdb->posts}.ID";
+
+	$clauses['where'] = preg_replace(
+		"/\({$wpdb->posts}.post_content (NOT LIKE|LIKE) (\'[^']+\')\)/",
+		"$0 OR ( sq1.meta_value $1 $2 )",
+		$clauses['where'] );
+
+	return $clauses;
 }
