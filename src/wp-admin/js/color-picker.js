@@ -12,10 +12,7 @@
 	 *
 	 * Creates a jQuery UI color picker that is used in the theme customizer.
 	 *
-	 * @since 3.5
-	 *
-	 * @access public
-	 *
+	 * @since 3.5.0
 	 */
 	ColorPicker = {
 		options: {
@@ -32,7 +29,7 @@
 		/**
 		 * @summary Creates a color picker that only allows you to adjust the hue.
 		 *
-		 * @since 3.5
+		 * @since 3.5.0
 		 *
 		 * @access private
 		 *
@@ -58,6 +55,8 @@
 				 *
 				 * @param {Event} event The event that's being called.
 				 * @param {HTMLElement} ui The HTMLElement containing the color picker.
+				 *
+				 * @returns {void}
 				 */
 				change: function( event, ui ) {
 					if ( $.isFunction( self.options.change ) ) {
@@ -73,7 +72,7 @@
 		 *
 		 * Creates the color picker, sets default values, css classes and wraps it all in HTML.
 		 *
-		 * @since 3.5
+		 * @since 3.5.0
 		 *
 		 * @access private
 		 *
@@ -125,10 +124,15 @@
 				/**
 				 * @summary Handles the onChange event if one has been defined in the options.
 				 *
-				 * Handles the onChange event if one has been defined in the options and additionally sets the background color for the toggler element.
+				 * Handles the onChange event if one has been defined in the options and additionally sets the background color
+				 * for the toggler element.
+				 *
+				 * @since 3.5.0
 				 *
 				 * @param {Event} event The event that's being called.
 				 * @param {HTMLElement} ui The HTMLElement containing the color picker.
+				 *
+				 * @returns {void}
 				 */
 				change: function( event, ui ) {
 					self.toggler.css( { backgroundColor: ui.color.toString() } );
@@ -150,9 +154,11 @@
 		/**
 		 * @summary Binds event listeners to the color picker.
 		 *
-		 * @since 3.5
+		 * @since 3.5.0
 		 *
 		 * @access private
+		 *
+		 * @returns {void}
 		 */
 		_addListeners: function() {
 			var self = this;
@@ -160,9 +166,11 @@
 			/**
 			 * @summary Prevent any clicks inside this widget from leaking to the top and closing it.
 			 *
-			 * @since 3.5
+			 * @since 3.5.0
 			 *
 			 * @param {Event} event The event that's being called.
+			 *
+			 * @returs {void}
 			 */
 			self.wrap.on( 'click.wpcolorpicker', function( event ) {
 				event.stopPropagation();
@@ -187,9 +195,11 @@
 			 * Checks if value is empty when changing the color in the color picker.
 			 * If so, the background color is cleared.
 			 *
-			 * @since 3.5
+			 * @since 3.5.0
 			 *
 			 * @param {Event} event The event that's being called.
+			 *
+			 * @returns {void}
 			 */
 			self.element.change( function( event ) {
 				var me = $( this ),
@@ -210,9 +220,11 @@
 			 * Enables the user to open the color picker with their keyboard.
 			 * This is possible by using the space or enter key.
 			 *
-			 * @since 3.5
+			 * @since 3.5.0
 			 *
 			 * @param {Event} event The event that's being called.
+			 *
+			 * @returns {void}
 			 */
 			self.toggler.on( 'keyup', function( event ) {
 				if ( event.keyCode === 13 || event.keyCode === 32 ) {
@@ -226,9 +238,11 @@
 			 *
 			 * Enables the user to either clear the color in the color picker or revert back to the default color.
 			 *
-			 * @since 3.5
+			 * @since 3.5.0
 			 *
 			 * @param {Event} event The event that's being called.
+			 *
+			 * @returns {void}
 			 */
 			self.button.click( function( event ) {
 				var me = $( this );
@@ -246,7 +260,9 @@
 		/**
 		 * @summary Opens the color picker dialog.
 		 *
-		 * @since 3.5
+		 * @since 3.5.0
+		 *
+		 * @returns {void}
 		 */
 		open: function() {
 			this.element.show().iris( 'toggle' ).focus();
@@ -258,7 +274,9 @@
 		/**
 		 * @summary Closes the color picker dialog.
 		 *
-		 * @since 3.5
+		 * @since 3.5.0
+		 *
+		 * @returns {void}
 		 */
 		close: function() {
 			this.element.hide().iris( 'toggle' );
@@ -273,6 +291,9 @@
 		 * Returns the iris object if no new color is provided. If a new color is provided, it sets the new color.
 		 *
 		 * @param newColor {string|*} The new color to use. Can be undefined.
+		 *
+		 * @since 3.5.0
+		 *
 		 * @returns {string} The element's color
 		 */
 		color: function( newColor ) {
@@ -288,6 +309,9 @@
 		 * If a new default color is provided, it sets the new default color.
 		 *
 		 * @param newDefaultColor {string|*} The new default color to use. Can be undefined.
+		 *
+		 * @since 3.5.0
+		 *
 		 * @returns {boolean|string} The element's color
 		 */
 		defaultColor: function( newDefaultColor ) {
