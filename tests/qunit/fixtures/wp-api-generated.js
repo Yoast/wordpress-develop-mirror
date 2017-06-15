@@ -10,6 +10,8 @@ mockedApiResponse.Schema = {
     "description": "Just another WordPress site",
     "url": "http://example.org",
     "home": "http://example.org",
+    "gmt_offset": "0",
+    "timezone_string": "",
     "namespaces": [
         "oembed/1.0",
         "wp/v2"
@@ -91,6 +93,56 @@ mockedApiResponse.Schema = {
             ],
             "_links": {
                 "self": "http://example.org/?rest_route=/oembed/1.0/embed"
+            }
+        },
+        "/oembed/1.0/proxy": {
+            "namespace": "oembed/1.0",
+            "methods": [
+                "GET"
+            ],
+            "endpoints": [
+                {
+                    "methods": [
+                        "GET"
+                    ],
+                    "args": {
+                        "url": {
+                            "required": true,
+                            "description": "The URL of the resource for which to fetch oEmbed data.",
+                            "type": "string"
+                        },
+                        "format": {
+                            "required": false,
+                            "default": "json",
+                            "enum": [
+                                "json",
+                                "xml"
+                            ],
+                            "description": "The oEmbed format to use.",
+                            "type": "string"
+                        },
+                        "maxwidth": {
+                            "required": false,
+                            "default": 600,
+                            "description": "The maximum width of the embed frame in pixels.",
+                            "type": "integer"
+                        },
+                        "maxheight": {
+                            "required": false,
+                            "description": "The maximum height of the embed frame in pixels.",
+                            "type": "integer"
+                        },
+                        "discover": {
+                            "required": false,
+                            "default": true,
+                            "description": "Whether to perform an oEmbed discovery request for non-whitelisted providers.",
+                            "type": "boolean"
+                        }
+                    }
+                }
+            ],
+            "_links": {
+                "self": "http://example.org/?rest_route=/oembed/1.0/proxy"
             }
         },
         "/wp/v2": {
@@ -224,12 +276,15 @@ mockedApiResponse.Schema = {
                             "required": false,
                             "default": "date",
                             "enum": [
+                                "author",
                                 "date",
-                                "relevance",
                                 "id",
                                 "include",
-                                "title",
-                                "slug"
+                                "modified",
+                                "parent",
+                                "relevance",
+                                "slug",
+                                "title"
                             ],
                             "description": "Sort collection by object attribute.",
                             "type": "string"
@@ -842,12 +897,15 @@ mockedApiResponse.Schema = {
                             "required": false,
                             "default": "date",
                             "enum": [
+                                "author",
                                 "date",
-                                "relevance",
                                 "id",
                                 "include",
-                                "title",
+                                "modified",
+                                "parent",
+                                "relevance",
                                 "slug",
+                                "title",
                                 "menu_order"
                             ],
                             "description": "Sort collection by object attribute.",
@@ -856,7 +914,7 @@ mockedApiResponse.Schema = {
                         "parent": {
                             "required": false,
                             "default": [],
-                            "description": "Limit result set to those of particular parent IDs.",
+                            "description": "Limit result set to items with particular parent IDs.",
                             "type": "array",
                             "items": {
                                 "type": "integer"
@@ -1377,12 +1435,15 @@ mockedApiResponse.Schema = {
                             "required": false,
                             "default": "date",
                             "enum": [
+                                "author",
                                 "date",
-                                "relevance",
                                 "id",
                                 "include",
-                                "title",
-                                "slug"
+                                "modified",
+                                "parent",
+                                "relevance",
+                                "slug",
+                                "title"
                             ],
                             "description": "Sort collection by object attribute.",
                             "type": "string"
@@ -1390,7 +1451,7 @@ mockedApiResponse.Schema = {
                         "parent": {
                             "required": false,
                             "default": [],
-                            "description": "Limit result set to those of particular parent IDs.",
+                            "description": "Limit result set to items with particular parent IDs.",
                             "type": "array",
                             "items": {
                                 "type": "integer"
@@ -1987,8 +2048,11 @@ mockedApiResponse.Schema = {
                         },
                         "slug": {
                             "required": false,
-                            "description": "Limit result set to terms with a specific slug.",
-                            "type": "string"
+                            "description": "Limit result set to terms with one or more specific slugs.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 },
@@ -2222,8 +2286,11 @@ mockedApiResponse.Schema = {
                         },
                         "slug": {
                             "required": false,
-                            "description": "Limit result set to terms with a specific slug.",
-                            "type": "string"
+                            "description": "Limit result set to terms with one or more specific slugs.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 },
@@ -2436,8 +2503,11 @@ mockedApiResponse.Schema = {
                         },
                         "slug": {
                             "required": false,
-                            "description": "Limit result set to users with a specific slug.",
-                            "type": "string"
+                            "description": "Limit result set to users with one or more specific slugs.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "roles": {
                             "required": false,
@@ -3095,7 +3165,7 @@ mockedApiResponse.Schema = {
                         },
                         "password": {
                             "required": false,
-                            "description": "The password for the post if it is password protected.",
+                            "description": "The password for the parent post of the comment (if the post is password protected).",
                             "type": "string"
                         }
                     }
@@ -3197,7 +3267,7 @@ mockedApiResponse.Schema = {
                         },
                         "password": {
                             "required": false,
-                            "description": "The password for the post if it is password protected.",
+                            "description": "The password for the parent post of the comment (if the post is password protected).",
                             "type": "string"
                         }
                     }
@@ -3376,19 +3446,86 @@ mockedApiResponse.oembed = {
             "_links": {
                 "self": "http://example.org/?rest_route=/oembed/1.0/embed"
             }
+        },
+        "/oembed/1.0/proxy": {
+            "namespace": "oembed/1.0",
+            "methods": [
+                "GET"
+            ],
+            "endpoints": [
+                {
+                    "methods": [
+                        "GET"
+                    ],
+                    "args": {
+                        "url": {
+                            "required": true,
+                            "description": "The URL of the resource for which to fetch oEmbed data.",
+                            "type": "string"
+                        },
+                        "format": {
+                            "required": false,
+                            "default": "json",
+                            "enum": [
+                                "json",
+                                "xml"
+                            ],
+                            "description": "The oEmbed format to use.",
+                            "type": "string"
+                        },
+                        "maxwidth": {
+                            "required": false,
+                            "default": 600,
+                            "description": "The maximum width of the embed frame in pixels.",
+                            "type": "integer"
+                        },
+                        "maxheight": {
+                            "required": false,
+                            "description": "The maximum height of the embed frame in pixels.",
+                            "type": "integer"
+                        },
+                        "discover": {
+                            "required": false,
+                            "default": true,
+                            "description": "Whether to perform an oEmbed discovery request for non-whitelisted providers.",
+                            "type": "boolean"
+                        }
+                    }
+                }
+            ],
+            "_links": {
+                "self": "http://example.org/?rest_route=/oembed/1.0/proxy"
+            }
         }
     }
 };
 
 mockedApiResponse.oembeds = {
-    "code": "rest_missing_callback_param",
-    "message": "Missing parameter(s): url",
-    "data": {
-        "status": 400,
-        "params": [
-            "url"
-        ]
-    }
+    "version": "1.0",
+    "provider_name": "Test Blog",
+    "provider_url": "http://example.org",
+    "author_name": "Test Blog",
+    "author_url": "http://example.org",
+    "title": "REST API Client Fixture: Post",
+    "type": "rich",
+    "width": 600,
+    "height": 338,
+    "html": "<blockquote class=\"wp-embedded-content\">...</blockquote>"
+};
+
+mockedApiResponse.oembedProxy = {
+    "version": "1.0",
+    "type": "video",
+    "provider_name": "YouTube",
+    "provider_url": "https://www.youtube.com",
+    "thumbnail_width": 480,
+    "width": 500,
+    "thumbnail_height": 360,
+    "html": "<iframe width=\"500\" height=\"375\" src=\"https://www.youtube.com/embed/i_cVJgIz_Cs?feature=oembed\" frameborder=\"0\" allowfullscreen></iframe>",
+    "author_name": "Jorge Rubira Santos",
+    "thumbnail_url": "https://i.ytimg.com/vi/i_cVJgIz_Cs/hqdefault.jpg",
+    "title": "No te olvides de poner el Where en el Delete From. (Una cancion para programadores)",
+    "height": 375
 };
 
 mockedApiResponse.PostsCollection = [
@@ -3523,7 +3660,7 @@ mockedApiResponse.PostModel = {
 
 mockedApiResponse.postRevisions = [
     {
-        "author": "2",
+        "author": 2,
         "date": "2017-02-14T00:00:00",
         "date_gmt": "2017-02-14T00:00:00",
         "id": 4,
@@ -3554,10 +3691,25 @@ mockedApiResponse.postRevisions = [
 ];
 
 mockedApiResponse.revision = {
-    "code": "rest_post_invalid_id",
-    "message": "Invalid revision ID.",
-    "data": {
-        "status": 404
+    "author": 2,
+    "date": "2017-02-14T00:00:00",
+    "date_gmt": "2017-02-14T00:00:00",
+    "id": 4,
+    "modified": "2017-02-14T00:00:00",
+    "modified_gmt": "2017-02-14T00:00:00",
+    "parent": 3,
+    "slug": "3-revision-v1",
+    "guid": {
+        "rendered": "http://example.org/?p=4"
+    },
+    "title": {
+        "rendered": "REST API Client Fixture: Post"
+    },
+    "content": {
+        "rendered": "<p>Updated post content.</p>\n"
+    },
+    "excerpt": {
+        "rendered": "<p>REST API Client Fixture: Post</p>\n"
     }
 };
 
@@ -3673,7 +3825,7 @@ mockedApiResponse.PageModel = {
 
 mockedApiResponse.pageRevisions = [
     {
-        "author": "2",
+        "author": 2,
         "date": "2017-02-14T00:00:00",
         "date_gmt": "2017-02-14T00:00:00",
         "id": 6,
@@ -3704,10 +3856,25 @@ mockedApiResponse.pageRevisions = [
 ];
 
 mockedApiResponse.pageRevision = {
-    "code": "rest_post_invalid_id",
-    "message": "Invalid revision ID.",
-    "data": {
-        "status": 404
+    "author": 2,
+    "date": "2017-02-14T00:00:00",
+    "date_gmt": "2017-02-14T00:00:00",
+    "id": 6,
+    "modified": "2017-02-14T00:00:00",
+    "modified_gmt": "2017-02-14T00:00:00",
+    "parent": 5,
+    "slug": "5-revision-v1",
+    "guid": {
+        "rendered": "http://example.org/?p=6"
+    },
+    "title": {
+        "rendered": "REST API Client Fixture: Page"
+    },
+    "content": {
+        "rendered": "<p>Updated page content.</p>\n"
+    },
+    "excerpt": {
+        "rendered": "<p>REST API Client Fixture: Page</p>\n"
     }
 };
 
@@ -3894,11 +4061,15 @@ mockedApiResponse.TypesCollection = {
 };
 
 mockedApiResponse.TypeModel = {
-    "code": "rest_no_route",
-    "message": "No route was found matching the URL and request method",
-    "data": {
-        "status": 404
-    }
+    "description": "",
+    "hierarchical": false,
+    "name": "Posts",
+    "slug": "post",
+    "taxonomies": [
+        "category",
+        "post_tag"
+    ],
+    "rest_base": "posts"
 };
 
 mockedApiResponse.StatusesCollection = {
@@ -4299,11 +4470,26 @@ mockedApiResponse.CommentsCollection = [
 ];
 
 mockedApiResponse.CommentModel = {
-    "code": "rest_comment_invalid_id",
-    "message": "Invalid comment ID.",
-    "data": {
-        "status": 404
-    }
+    "id": 2,
+    "post": 3,
+    "parent": 0,
+    "author": 0,
+    "author_name": "Internet of something or other",
+    "author_url": "http://lights.example.org/",
+    "date": "2017-02-14T00:00:00",
+    "date_gmt": "2017-02-14T00:00:00",
+    "content": {
+        "rendered": "<p>This is a comment</p>\n"
+    },
+    "link": "http://example.org/?p=3#comment-2",
+    "status": "approved",
+    "type": "comment",
+    "author_avatar_urls": {
+        "24": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=24&d=mm&r=g",
+        "48": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=48&d=mm&r=g",
+        "96": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=96&d=mm&r=g"
+    },
+    "meta": []
 };
 
 mockedApiResponse.settings = {

@@ -61,9 +61,6 @@ class Tests_Functions extends WP_UnitTestCase {
 	}
 
 	function test_path_is_absolute() {
-		if ( !is_callable('path_is_absolute') )
-			$this->markTestSkipped();
-
 		$absolute_paths = array(
 			'/',
 			'/foo/',
@@ -81,9 +78,6 @@ class Tests_Functions extends WP_UnitTestCase {
 	}
 
 	function test_path_is_not_absolute() {
-		if ( !is_callable('path_is_absolute') )
-			$this->markTestSkipped();
-
 		$relative_paths = array(
 			'',
 			'.',
@@ -916,6 +910,18 @@ class Tests_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 40017
+	 * @dataProvider _wp_get_image_mime
+	 */
+	public function test_wp_get_image_mime( $file, $expected ) {
+		if ( ! is_callable( 'exif_imagetype' ) && ! function_exists( 'getimagesize' ) ) {
+			$this->markTestSkipped( 'The exif PHP extension is not loaded.' );
+		}
+
+		$this->assertEquals( $expected, wp_get_image_mime( $file ) );
+	}
+
+	/**
 	 * @ticket 39550
 	 * @dataProvider _wp_check_filetype_and_ext_data
 	 */
@@ -929,14 +935,11 @@ class Tests_Functions extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 39550
+	 * @group ms-excluded
 	 */
 	function test_wp_check_filetype_and_ext_with_filtered_svg() {
 		if ( ! extension_loaded( 'fileinfo' ) ) {
 			$this->markTestSkipped( 'The fileinfo PHP extension is not loaded.' );
-		}
-
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run in multisite' );
 		}
 
 		$file = DIR_TESTDATA . '/uploads/video-play.svg';
@@ -957,14 +960,11 @@ class Tests_Functions extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 39550
+	 * @group ms-excluded
 	 */
 	function test_wp_check_filetype_and_ext_with_filtered_woff() {
 		if ( ! extension_loaded( 'fileinfo' ) ) {
 			$this->markTestSkipped( 'The fileinfo PHP extension is not loaded.' );
-		}
-
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run in multisite' );
 		}
 
 		$file = DIR_TESTDATA . '/uploads/dashicons.woff';
@@ -991,6 +991,41 @@ class Tests_Functions extends WP_UnitTestCase {
 	public function _filter_mime_types_woff( $mimes ) {
 		$mimes['woff'] = 'application/font-woff';
 		return $mimes;
+	}
+
+	/**
+	 * Data profider for test_wp_get_image_mime();
+	 */
+	public function _wp_get_image_mime() {
+		$data = array(
+			// Standard JPEG.
+			array(
+				DIR_TESTDATA . '/images/test-image.jpg',
+				'image/jpeg',
+			),
+			// Standard GIF.
+			array(
+				DIR_TESTDATA . '/images/test-image.gif',
+				'image/gif',
+			),
+			// Standard PNG.
+			array(
+				DIR_TESTDATA . '/images/test-image.png',
+				'image/png',
+			),
+			// Image with wrong extension.
+			array(
+				DIR_TESTDATA . '/images/test-image-mime-jpg.png',
+				'image/jpeg',
+			),
+			// Not an image.
+			array(
+				DIR_TESTDATA . '/uploads/dashicons.woff',
+				false,
+			),
+		);
+
+		return $data;
 	}
 
 	public function _wp_check_filetype_and_ext_data() {

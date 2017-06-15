@@ -96,11 +96,13 @@ function get_active_blog_for_user( $user_id ) {
  * The count is cached and updated twice daily. This is not a live count.
  *
  * @since MU 2.7
+ * @since 4.8.0 The $network_id parameter has been added.
  *
- * @return int
+ * @param int|null $network_id ID of the network. Default is the current network.
+ * @return int Number of active users on the network.
  */
-function get_user_count() {
-	return get_site_option( 'user_count' );
+function get_user_count( $network_id = null ) {
+	return get_network_option( $network_id, 'user_count' );
 }
 
 /**
@@ -109,15 +111,14 @@ function get_user_count() {
  * The count is cached and updated twice daily. This is not a live count.
  *
  * @since MU 1.0
+ * @since 3.7.0 The $network_id parameter has been deprecated.
+ * @since 4.8.0 The $network_id parameter is now being used.
  *
- * @param int $network_id Deprecated, not supported.
- * @return int
+ * @param int|null $network_id ID of the network. Default is the current network.
+ * @return int Number of active sites on the network.
  */
-function get_blog_count( $network_id = 0 ) {
-	if ( func_num_args() )
-		_deprecated_argument( __FUNCTION__, '3.1.0' );
-
-	return get_site_option( 'blog_count' );
+function get_blog_count( $network_id = null ) {
+	return get_network_option( $network_id, 'blog_count' );
 }
 
 /**
@@ -353,7 +354,7 @@ function is_email_address_unsafe( $user_email ) {
 
 	$is_email_address_unsafe = false;
 
-	if ( $banned_names && is_array( $banned_names ) ) {
+	if ( $banned_names && is_array( $banned_names ) && false !== strpos( $user_email, '@', 1 ) ) {
 		$banned_names = array_map( 'strtolower', $banned_names );
 		$normalized_email = strtolower( $user_email );
 
@@ -441,8 +442,11 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 		$errors->add( 'user_name',  __( 'Sorry, that username is not allowed.' ) );
 	}
 
-	if ( is_email_address_unsafe( $user_email ) )
-		$errors->add('user_email',  __('You cannot use that email address to signup. We are having problems with them blocking some of our email. Please use another email provider.'));
+	if ( ! is_email( $user_email ) ) {
+		$errors->add( 'user_email', __( 'Please enter a valid email address.' ) );
+	} elseif ( is_email_address_unsafe( $user_email ) ) {
+		$errors->add( 'user_email', __( 'You cannot use that email address to signup. We are having problems with them blocking some of our email. Please use another email provider.' ) );
+	}
 
 	if ( strlen( $user_name ) < 4 )
 		$errors->add('user_name',  __( 'Username must be at least 4 characters.' ) );
@@ -454,9 +458,6 @@ function wpmu_validate_user_signup($user_name, $user_email) {
 	// all numeric?
 	if ( preg_match( '/^[0-9]*$/', $user_name ) )
 		$errors->add('user_name', __('Sorry, usernames must have letters too!'));
-
-	if ( !is_email( $user_email ) )
-		$errors->add('user_email', __( 'Please enter a valid email address.' ) );
 
 	$limited_email_domains = get_site_option( 'limited_email_domains' );
 	if ( is_array( $limited_email_domains ) && ! empty( $limited_email_domains ) ) {
@@ -576,8 +577,19 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	if ( in_array( $blogname, $illegal_names ) )
 		$errors->add('blogname',  __( 'That name is not allowed.' ) );
 
-	if ( strlen( $blogname ) < 4 && !is_super_admin() )
-		$errors->add('blogname',  __( 'Site name must be at least 4 characters.' ) );
+	/**
+	 * Filters the minimum site name length required when validating a site signup.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param int $length The minimum site name length. Default 4.
+	 */
+	$minimum_site_name_length = apply_filters( 'minimum_site_name_length', 4 );
+
+	if ( strlen( $blogname ) < $minimum_site_name_length ) {
+		/* translators: %s: minimum site name length */
+		$errors->add( 'blogname', sprintf( _n( 'Site name must be at least %s character.', 'Site name must be at least %s characters.', $minimum_site_name_length ), number_format_i18n( $minimum_site_name_length ) ) );
+	}
 
 	// do not allow users to create a blog that conflicts with a page on the main blog.
 	if ( !is_subdomain_install() && $wpdb->get_var( $wpdb->prepare( "SELECT post_name FROM " . $wpdb->get_blog_prefix( $current_network->site_id ) . "posts WHERE post_type = 'page' AND post_name = %s", $blogname ) ) )
@@ -1363,7 +1375,7 @@ function insert_blog($domain, $path, $site_id) {
 	$blog_id = $wpdb->insert_id;
 	refresh_blog_details( $blog_id );
 
-	wp_maybe_update_network_site_counts();
+	wp_maybe_update_network_site_counts( $site_id );
 
 	return $blog_id;
 }
@@ -2272,10 +2284,13 @@ function wp_schedule_update_network_counts() {
  * Update the network-wide counts for the current network.
  *
  * @since 3.1.0
+ * @since 4.8.0 The $network_id parameter has been added.
+ *
+ * @param int|null $network_id ID of the network. Default is the current network.
  */
-function wp_update_network_counts() {
-	wp_update_network_user_counts();
-	wp_update_network_site_counts();
+function wp_update_network_counts( $network_id = null ) {
+	wp_update_network_user_counts( $network_id );
+	wp_update_network_site_counts( $network_id );
 }
 
 /**
@@ -2285,9 +2300,12 @@ function wp_update_network_counts() {
  * on a network when a site is created or its status is updated.
  *
  * @since 3.7.0
+ * @since 4.8.0 The $network_id parameter has been added.
+ *
+ * @param int|null $network_id ID of the network. Default is the current network.
  */
-function wp_maybe_update_network_site_counts() {
-	$is_small_network = ! wp_is_large_network( 'sites' );
+function wp_maybe_update_network_site_counts( $network_id = null ) {
+	$is_small_network = ! wp_is_large_network( 'sites', $network_id );
 
 	/**
 	 * Filters whether to update network site or user counts when a new site is created.
@@ -2302,7 +2320,7 @@ function wp_maybe_update_network_site_counts() {
 	if ( ! apply_filters( 'enable_live_network_counts', $is_small_network, 'sites' ) )
 		return;
 
-	wp_update_network_site_counts();
+	wp_update_network_site_counts( $network_id );
 }
 
 /**
@@ -2312,50 +2330,60 @@ function wp_maybe_update_network_site_counts() {
  * on a network when a user is created or its status is updated.
  *
  * @since 3.7.0
+ * @since 4.8.0 The $network_id parameter has been added.
+ *
+ * @param int|null $network_id ID of the network. Default is the current network.
  */
-function wp_maybe_update_network_user_counts() {
-	$is_small_network = ! wp_is_large_network( 'users' );
+function wp_maybe_update_network_user_counts( $network_id = null ) {
+	$is_small_network = ! wp_is_large_network( 'users', $network_id );
 
 	/** This filter is documented in wp-includes/ms-functions.php */
 	if ( ! apply_filters( 'enable_live_network_counts', $is_small_network, 'users' ) )
 		return;
 
-	wp_update_network_user_counts();
+	wp_update_network_user_counts( $network_id );
 }
 
 /**
  * Update the network-wide site count.
  *
  * @since 3.7.0
+ * @since 4.8.0 The $network_id parameter has been added.
  *
- * @global wpdb $wpdb WordPress database abstraction object.
+ * @param int|null $network_id ID of the network. Default is the current network.
  */
-function wp_update_network_site_counts() {
-	global $wpdb;
+function wp_update_network_site_counts( $network_id = null ) {
+	$network_id = (int) $network_id;
+	if ( ! $network_id ) {
+		$network_id = get_current_network_id();
+	}
 
 	$count = get_sites( array(
-		'network_id' => $wpdb->siteid,
+		'network_id' => $network_id,
 		'spam'       => 0,
 		'deleted'    => 0,
 		'archived'   => 0,
 		'count'      => true,
 	) );
 
-	update_site_option( 'blog_count', $count );
+	update_network_option( $network_id, 'blog_count', $count );
 }
 
 /**
  * Update the network-wide user count.
  *
  * @since 3.7.0
+ * @since 4.8.0 The $network_id parameter has been added.
  *
  * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|null $network_id ID of the network. Default is the current network.
  */
-function wp_update_network_user_counts() {
+function wp_update_network_user_counts( $network_id = null ) {
 	global $wpdb;
 
 	$count = $wpdb->get_var( "SELECT COUNT(ID) as c FROM $wpdb->users WHERE spam = '0' AND deleted = '0'" );
-	update_site_option( 'user_count', $count );
+	update_network_option( $network_id, 'user_count', $count );
 }
 
 /**
@@ -2468,27 +2496,37 @@ function upload_size_limit_filter( $size ) {
  * Plugins can alter this criteria using the {@see 'wp_is_large_network'} filter.
  *
  * @since 3.3.0
- * @param string $using 'sites or 'users'. Default is 'sites'.
+ * @since 4.8.0 The $network_id parameter has been added.
+ *
+ * @param string   $using      'sites or 'users'. Default is 'sites'.
+ * @param int|null $network_id ID of the network. Default is the current network.
  * @return bool True if the network meets the criteria for large. False otherwise.
  */
-function wp_is_large_network( $using = 'sites' ) {
+function wp_is_large_network( $using = 'sites', $network_id = null ) {
+	$network_id = (int) $network_id;
+	if ( ! $network_id ) {
+		$network_id = get_current_network_id();
+	}
+
 	if ( 'users' == $using ) {
-		$count = get_user_count();
+		$count = get_user_count( $network_id );
 		/**
 		 * Filters whether the network is considered large.
 		 *
 		 * @since 3.3.0
+		 * @since 4.8.0 The $network_id parameter has been added.
 		 *
 		 * @param bool   $is_large_network Whether the network has more than 10000 users or sites.
 		 * @param string $component        The component to count. Accepts 'users', or 'sites'.
 		 * @param int    $count            The count of items for the component.
+		 * @param int    $network_id       The ID of the network being checked.
 		 */
-		return apply_filters( 'wp_is_large_network', $count > 10000, 'users', $count );
+		return apply_filters( 'wp_is_large_network', $count > 10000, 'users', $count, $network_id );
 	}
 
-	$count = get_blog_count();
+	$count = get_blog_count( $network_id );
 	/** This filter is documented in wp-includes/ms-functions.php */
-	return apply_filters( 'wp_is_large_network', $count > 10000, 'sites', $count );
+	return apply_filters( 'wp_is_large_network', $count > 10000, 'sites', $count, $network_id );
 }
 
 /**

@@ -489,7 +489,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 			}
 		}
 
-		if ( $this->is_trash && current_user_can( get_post_type_object( $this->screen->post_type )->cap->edit_others_posts ) ) {
+		if ( $this->is_trash && current_user_can( get_post_type_object( $this->screen->post_type )->cap->edit_others_posts ) && $this->has_items() ) {
 			submit_button( __( 'Empty Trash' ), 'apply', 'delete_all', false );
 		}
 ?>
@@ -871,7 +871,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @since 4.3.0
 	 * @access public
 	 *
-	 * @global string $mode
+	 * @global string $mode List table view mode.
 	 *
 	 * @param WP_Post $post The current WP_Post object.
 	 */
@@ -968,7 +968,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @since 4.3.0
 	 * @access public
 	 *
-	 * @global string $mode
+	 * @global string $mode List table view mode.
 	 *
 	 * @param WP_Post $post The current WP_Post object.
 	 */
@@ -993,17 +993,33 @@ class WP_Posts_List_Table extends WP_List_Table {
 		}
 
 		if ( 'publish' === $post->post_status ) {
-			_e( 'Published' );
+			$status = __( 'Published' );
 		} elseif ( 'future' === $post->post_status ) {
 			if ( $time_diff > 0 ) {
-				echo '<strong class="error-message">' . __( 'Missed schedule' ) . '</strong>';
+				$status = '<strong class="error-message">' . __( 'Missed schedule' ) . '</strong>';
 			} else {
-				_e( 'Scheduled' );
+				$status = __( 'Scheduled' );
 			}
 		} else {
-			_e( 'Last Modified' );
+			$status = __( 'Last Modified' );
 		}
-		echo '<br />';
+
+		/**
+		 * Filters the status text of the post.
+		 *
+		 * @since 4.8.0
+		 *
+		 * @param string  $status      The status text.
+		 * @param WP_Post $post        Post object.
+		 * @param string  $column_name The column name.
+		 * @param string  $mode        The list display mode ('excerpt' or 'list').
+		 */
+		$status = apply_filters( 'post_date_column_status', $status, $post, 'date', $mode );
+
+		if ( $status ) {
+			echo $status . '<br />';
+		}
+
 		if ( 'excerpt' === $mode ) {
 			/**
 			 * Filters the published time of the post.
@@ -1272,7 +1288,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 				if ( $can_edit_post ) {
 					$preview_link = get_preview_post_link( $post );
 					$actions['view'] = sprintf(
-						'<a href="%s" rel="permalink" aria-label="%s">%s</a>',
+						'<a href="%s" rel="bookmark" aria-label="%s">%s</a>',
 						esc_url( $preview_link ),
 						/* translators: %s: post title */
 						esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ),
@@ -1281,7 +1297,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 				}
 			} elseif ( 'trash' != $post->post_status ) {
 				$actions['view'] = sprintf(
-					'<a href="%s" rel="permalink" aria-label="%s">%s</a>',
+					'<a href="%s" rel="bookmark" aria-label="%s">%s</a>',
 					get_permalink( $post->ID ),
 					/* translators: %s: post title */
 					esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ),
@@ -1300,7 +1316,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 			 * @since 2.8.0
 			 *
 			 * @param array $actions An array of row action links. Defaults are
-			 *                         'Edit', 'Quick Edit', 'Restore, 'Trash',
+			 *                         'Edit', 'Quick Edit', 'Restore', 'Trash',
 			 *                         'Delete Permanently', 'Preview', and 'View'.
 			 * @param WP_Post $post The post object.
 			 */
@@ -1315,7 +1331,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 			 * @since 2.8.0
 			 *
 			 * @param array $actions An array of row action links. Defaults are
-			 *                         'Edit', 'Quick Edit', 'Restore, 'Trash',
+			 *                         'Edit', 'Quick Edit', 'Restore', 'Trash',
 			 *                         'Delete Permanently', 'Preview', and 'View'.
 			 * @param WP_Post $post The post object.
 			 */
@@ -1330,7 +1346,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @global string $mode
+	 * @global string $mode List table view mode.
 	 */
 	public function inline_edit() {
 		global $mode;

@@ -58,6 +58,13 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
 		$this->manager = $this->instantiate();
 		$this->undefined = new stdClass();
+
+		$orig_file = DIR_TESTDATA . '/images/canola.jpg';
+		$this->test_file = '/tmp/canola.jpg';
+		copy( $orig_file, $this->test_file );
+		$orig_file2 = DIR_TESTDATA . '/images/waffles.jpg';
+		$this->test_file2 = '/tmp/waffles.jpg';
+		copy( $orig_file2, $this->test_file2 );
 	}
 
 	/**
@@ -318,8 +325,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		add_theme_support( 'custom-header' );
 		add_theme_support( 'custom-background' );
 
-		$canola_file = DIR_TESTDATA . '/images/canola.jpg';
-		$existing_canola_attachment_id = self::factory()->attachment->create_object( $canola_file, 0, array(
+		$existing_canola_attachment_id = self::factory()->attachment->create_object( $this->test_file, 0, array(
 			'post_mime_type' => 'image/jpeg',
 			'post_type' => 'attachment',
 			'post_name' => 'canola',
@@ -383,13 +389,13 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 					'post_title' => 'Waffles',
 					'post_content' => 'Waffles Attachment Description',
 					'post_excerpt' => 'Waffles Attachment Caption',
-					'file' => DIR_TESTDATA . '/images/waffles.jpg',
+					'file' => $this->test_file2,
 				),
 				'canola' => array(
 					'post_title' => 'Canola',
 					'post_content' => 'Canola Attachment Description',
 					'post_excerpt' => 'Canola Attachment Caption',
-					'file' => DIR_TESTDATA . '/images/canola.jpg',
+					'file' => $this->test_file,
 				),
 			),
 			'options' => array(
@@ -484,7 +490,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertEquals( -1, $changeset_values['nav_menu_locations[top]'] );
 		$this->assertEquals( 0, $changeset_values['nav_menu_item[-1]']['object_id'] );
 		$this->assertEquals( 'custom', $changeset_values['nav_menu_item[-1]']['type'] );
-		$this->assertEquals( home_url(), $changeset_values['nav_menu_item[-1]']['url'] );
+		$this->assertEquals( home_url( '/' ), $changeset_values['nav_menu_item[-1]']['url'] );
 
 		$this->assertEmpty( $wp_customize->changeset_data() );
 		$this->assertNull( $wp_customize->changeset_post_id() );
@@ -2018,15 +2024,6 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'string', $setting_id );
 		$this->assertInternalType( 'array', $setting_args );
 		return $setting_class;
-	}
-
-	/**
-	 * Test is_ios() method.
-	 *
-	 * @see WP_Customize_Manager::is_ios()
-	 */
-	function test_is_ios() {
-		$this->markTestSkipped( 'WP_Customize_Manager::is_ios() cannot be tested because it uses wp_is_mobile() which contains a static var.' );
 	}
 
 	/**

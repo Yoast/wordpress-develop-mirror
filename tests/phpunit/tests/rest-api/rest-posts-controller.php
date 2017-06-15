@@ -267,6 +267,72 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$this->assertErrorResponse( 'rest_invalid_param', $response, 400 );
 	}
 
+	public function test_get_items_orderby_author_query() {
+		$id2 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_author' => self::$editor_id ) );
+		$id3 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_author' => self::$editor_id ) );
+		$id1 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_author' => self::$author_id ) );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
+		$request->set_param( 'include', array( $id1, $id2, $id3 ) );
+		$request->set_param( 'orderby', 'author' );
+
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( self::$author_id, $data[0]['author'] );
+		$this->assertEquals( self::$editor_id, $data[1]['author'] );
+		$this->assertEquals( self::$editor_id, $data[2]['author'] );
+
+		$this->assertPostsOrderedBy( '{posts}.post_author DESC' );
+	}
+
+	public function test_get_items_orderby_modified_query() {
+		$id1 = $this->factory->post->create( array( 'post_status' => 'publish' ) );
+		$id2 = $this->factory->post->create( array( 'post_status' => 'publish' ) );
+		$id3 = $this->factory->post->create( array( 'post_status' => 'publish' ) );
+
+		$this->update_post_modified( $id1, '2016-04-20 4:26:20' );
+		$this->update_post_modified( $id2, '2016-02-01 20:24:02' );
+		$this->update_post_modified( $id3, '2016-02-21 12:24:02' );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
+		$request->set_param( 'include', array( $id1, $id2, $id3 ) );
+		$request->set_param( 'orderby', 'modified' );
+
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $id1, $data[0]['id'] );
+		$this->assertEquals( $id3, $data[1]['id'] );
+		$this->assertEquals( $id2, $data[2]['id'] );
+
+		$this->assertPostsOrderedBy( '{posts}.post_modified DESC' );
+	}
+
+	public function test_get_items_orderby_parent_query() {
+		$id1 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_type' => 'page' ) );
+		$id2 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_type' => 'page' ) );
+		$id3 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_type' => 'page', 'post_parent' => $id1 ) );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/pages' );
+		$request->set_param( 'include', array( $id1, $id2, $id3 ) );
+		$request->set_param( 'orderby', 'parent' );
+
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $id3, $data[0]['id'] );
+		// Check ordering. Default ORDER is DESC.
+		$this->assertEquals( $id1, $data[0]['parent'] );
+		$this->assertEquals( 0, $data[1]['parent'] );
+		$this->assertEquals( 0, $data[2]['parent'] );
+
+		$this->assertPostsOrderedBy( '{posts}.post_parent DESC' );
+	}
+
 	public function test_get_items_exclude_query() {
 		$id1 = $this->factory->post->create( array( 'post_status' => 'publish' ) );
 		$id2 = $this->factory->post->create( array( 'post_status' => 'publish' ) );
@@ -567,27 +633,6 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$request->set_param( 'orderby', 'relevance' );
 		$response = $this->server->dispatch( $request );
 		$this->assertErrorResponse( 'rest_no_search_term_defined', $response, 400 );
-	}
-
-	public function test_get_items_ignore_sticky_posts_by_default() {
-		$this->markTestSkipped( 'Broken, see https://github.com/WP-API/WP-API/issues/2210' );
-		$post_id1 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_date' => '2015-01-01 12:00:00', 'post_date_gmt' => '2015-01-01 12:00:00' ) );
-		$post_id2 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_date' => '2015-01-02 12:00:00', 'post_date_gmt' => '2015-01-02 12:00:00' ) );
-		$post_id3 = $this->factory->post->create( array( 'post_status' => 'publish', 'post_date' => '2015-01-03 12:00:00', 'post_date_gmt' => '2015-01-03 12:00:00' ) );
-		stick_post( $post_id2 );
-
-		// No stickies by default
-		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
-		$this->assertEquals( array( self::$post_id, $post_id3, $post_id2, $post_id1 ), wp_list_pluck( $data, 'id' ) );
-
-		// Permit stickies
-		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
-		$request->set_param( 'ignore_sticky_posts', false );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
-		$this->assertEquals( array( $post_id2, self::$post_id, $post_id3, $post_id1 ), wp_list_pluck( $data, 'id' ) );
 	}
 
 	public function test_get_items_offset_query() {
@@ -2835,7 +2880,6 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$request->set_param( 'force', 'false' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertNotInstanceOf( 'WP_Error', $response );
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'Deleted post', $data['title']['raw'] );
@@ -2850,7 +2894,6 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$request['force'] = true;
 		$response = $this->server->dispatch( $request );
 
-		$this->assertNotInstanceOf( 'WP_Error', $response );
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertTrue( $data['deleted'] );
@@ -2935,6 +2978,106 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$this->assertArrayHasKey( 'type', $properties );
 		$this->assertArrayHasKey( 'tags', $properties );
 		$this->assertArrayHasKey( 'categories', $properties );
+	}
+
+	/**
+	 * @ticket 39805
+	 */
+	public function test_get_post_view_context_properties() {
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$request->set_param( 'context', 'view' );
+		$response = $this->server->dispatch( $request );
+		$keys = array_keys( $response->get_data() );
+		sort( $keys );
+
+		$expected_keys = array(
+			'author',
+			'categories',
+			'comment_status',
+			'content',
+			'date',
+			'date_gmt',
+			'excerpt',
+			'featured_media',
+			'format',
+			'guid',
+			'id',
+			'link',
+			'meta',
+			'modified',
+			'modified_gmt',
+			'ping_status',
+			'slug',
+			'status',
+			'sticky',
+			'tags',
+			'template',
+			'title',
+			'type',
+		);
+
+		$this->assertEquals( $expected_keys, $keys );
+	}
+
+	public function test_get_post_edit_context_properties() {
+		wp_set_current_user( self::$editor_id );
+
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$request->set_param( 'context', 'edit' );
+		$response = $this->server->dispatch( $request );
+		$keys = array_keys( $response->get_data() );
+		sort( $keys );
+
+		$expected_keys = array(
+			'author',
+			'categories',
+			'comment_status',
+			'content',
+			'date',
+			'date_gmt',
+			'excerpt',
+			'featured_media',
+			'format',
+			'guid',
+			'id',
+			'link',
+			'meta',
+			'modified',
+			'modified_gmt',
+			'password',
+			'ping_status',
+			'slug',
+			'status',
+			'sticky',
+			'tags',
+			'template',
+			'title',
+			'type',
+		);
+
+		$this->assertEquals( $expected_keys, $keys );
+	}
+
+	public function test_get_post_embed_context_properties() {
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$request->set_param( 'context', 'embed' );
+		$response = $this->server->dispatch( $request );
+		$keys = array_keys( $response->get_data() );
+		sort( $keys );
+
+		$expected_keys = array(
+			'author',
+			'date',
+			'excerpt',
+			'featured_media',
+			'id',
+			'link',
+			'slug',
+			'title',
+			'type',
+		);
+
+		$this->assertEquals( $expected_keys, $keys );
 	}
 
 	public function test_status_array_enum_args() {

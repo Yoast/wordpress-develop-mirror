@@ -4,39 +4,29 @@ cache:
   apt: true
   directories:
     - node_modules
+    - vendor
+    - $HOME/.composer/cache
 env:
   global:
     - WP_TRAVISCI=travis:phpunit
 matrix:
   include:
-  - php: 7
+  - php: 7.1
     env: WP_TRAVISCI=travis:js
-  - php: 5.2
-  - php: 5.3
-  - php: 5.4
-  - php: 5.5
+  - php: 7.1
+  - php: 7.0
   - php: 5.6
   - php: 5.6
     env: WP_TRAVIS_OBJECT_CACHE=true
     services: memcached
-  - php: hhvm
-    sudo: required
-    dist: trusty
-    group: edge
-    addons:
-      apt:
-        packages:
-        - mysql-server-5.6
-        - mysql-client-core-5.6
-        - mysql-client-5.6
-  - php: 7.0
-  - php: 7.1
+  - php: 5.5
+  - php: 5.4
+  - php: 5.3
+  - php: 5.2
   - php: nightly
   allow_failures:
-  - php: hhvm
   - php: nightly
 before_install:
-- git clone https://github.com/WordPress/twentysixteen.git src/wp-content/themes/twentysixteen
 - |
   if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
       mysql -u root -e "CREATE DATABASE wordpress_tests;"
@@ -44,29 +34,72 @@ before_install:
       sed -i "s/youremptytestdbnamehere/wordpress_tests/" wp-tests-config.php
       sed -i "s/yourusernamehere/root/" wp-tests-config.php
       sed -i "s/yourpasswordhere//" wp-tests-config.php
-      svn checkout https://plugins.svn.wordpress.org/wordpress-importer/trunk tests/phpunit/data/plugins/wordpress-importer
+      svn checkout https://plugins.svn.wordpress.org/wordpress-importer/tags/0.6.3/ tests/phpunit/data/plugins/wordpress-importer
   fi
 - |
   if [[ "$WP_TRAVIS_OBJECT_CACHE" == "true" ]]; then
-    curl https://raw.githubusercontent.com/tollmanz/wordpress-pecl-memcached-object-cache/584392b56dc4adbe52bd2c7b86f875e23a3e5f75/object-cache.php > src/wp-content/object-cache.php
+    cp tests/phpunit/includes/object-cache.php src/wp-content/object-cache.php
     echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   fi
 before_script:
-- stable='^[0-9\.]+$'; if [[ "$TRAVIS_PHP_VERSION" =~ $stable ]]; then phpenv config-rm xdebug.ini; fi
-- npm install -g npm
+- |
+  # Remove Xdebug for a huge performance increase, but not from nightly:
+  stable='^[0-9\.]+$'
+  if [[ "$TRAVIS_PHP_VERSION" =~ $stable ]]; then
+    phpenv config-rm xdebug.ini
+  fi
+- |
+  # Export Composer's global bin dir to PATH, but not on PHP 5.2:
+  if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+    composer config --list --global
+    export PATH=`composer config --list --global | grep '\[home\]' | { read a; echo "${a#* }/vendor/bin:$PATH"; }`
+  fi
+- |
+  # Install the specified version of PHPUnit depending on the PHP version:
+  if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
+    case "$TRAVIS_PHP_VERSION" in
+      7.1|7.0|nightly)
+        echo "Using PHPUnit 6.1"
+        composer global require "phpunit/phpunit=6.1.*"
+        ;;
+      5.6|5.5|5.4|5.3)
+        echo "Using PHPUnit 4.8"
+        composer global require "phpunit/phpunit=4.8.*"
+        ;;
+      5.2)
+        # Do nothing, use default PHPUnit 3.6.x
+        echo "Using default PHPUnit, hopefully 3.6"
+        ;;
+      *)
+        echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
+        exit 1
+        ;;
+    esac
+  fi
+- npm --version
+- node --version
+- nvm install 6.9.1
 - npm install -g grunt-cli
 - npm install
 - npm prune
 - mysql --version
 - phpenv versions
 - php --version
+- php -m
 - npm --version
 - node --version
+- which phpunit
+- phpunit --version
+- curl --version
+- grunt --version
+- git --version
+- svn --version
+- locale -a
 script: grunt $WP_TRAVISCI
 notifications:
   slack:
     rooms:
-      secure: WuMCpfgrm0GIdPbYzsGOsakZ5x7QIbEBwD+CPHVXGKbL3ZbqQ+BVcDRnMiwzxjgf1vzg2de0taXCSMGKBxsWce23NZkOnmwPdIB8XOnwDV7T7zylgYD5S7p3gI6gV0l8Y3/gROdXFZap6viC1qRr4E79ow53RKk7E3WyOo7TWqo=
+      secure: PO3x/bhYXNFqAMtzDzpOAnHcg2KzG2gGbBDft1HlqN4O8hRJqrRs7hqsEe9wKZUs6qf9Jv0ZleJ5AmcSd0DbDAFsfqeWtnWpsj8NqOIWgLX0C2idvfNRzCX1mUd6E1hlAjjTGnKn4MV3m1dRurwcDqacSBVtbXKQ+yPSgM3eXYkDz8EFbTsMcda8pFskcXr98E7/YomU0QtgOcjXndxGZ53zUQ1rfaDwUJzGY3bn5nLoweVZsSIeEFSiNcip7Kt22zVlU0SAb6QlBf3F0h9IWoRD59BQ7pkl53FWzpXoHzUYOFmn0jB5y1vHMlHvTDVEmDuumpCEqnxVvLh33AwGtqYRWH36PEfTn/u1YTFr7FS7KbwrKw9Nn+jUZe3KFrVzgQNUt0El33mO0FbSoNEWJhxRarp0D1z3/HVsbon3Fwzt/3jBHGf9nI+tHH4u7KQ70+M7pzBsV7F7Lc60YnuKrcy/hkwObGB0Za9tMHPUw3c7b4ep6nSa4ts9S++IijLWDaNAq7K/j7fAfI1JrkPIw4T6PcGpNAADkmlCrvToKE4axExaJke/lkUb+3Pwdj0h7ePzPSrHT8aASlKFM1PuI1KRMn/J4wRLtGeLlfYXvVlaQYmJobJtYgoiNWJWMIybLGVBSVPohdGO3qIJbl8WNPN1cW2ZZTcEBprLe8y7MSo=
     on_start: never
     on_failure: always
     on_success: change

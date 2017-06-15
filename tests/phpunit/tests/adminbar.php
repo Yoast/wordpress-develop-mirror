@@ -72,12 +72,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 25162
+	 * @group ms-excluded
 	 */
 	public function test_admin_bar_contains_correct_links_for_users_with_no_role() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run in multisite' );
-		}
-
 		$this->assertFalse( user_can( self::$no_role_id, 'read' ) );
 
 		wp_set_current_user( self::$no_role_id );
@@ -100,12 +97,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 25162
+	 * @group ms-excluded
 	 */
 	public function test_admin_bar_contains_correct_links_for_users_with_role() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run in multisite' );
-		}
-
 		$this->assertTrue( user_can( self::$editor_id, 'read' ) );
 
 		wp_set_current_user( self::$editor_id );
@@ -131,12 +125,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 	/**
 	 * @ticket 25162
 	 * @group multisite
+	 * @group ms-required
 	 */
 	public function test_admin_bar_contains_correct_links_for_users_with_no_role_on_blog() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
-
 		$blog_id = self::factory()->blog->create( array(
 			'user_id' => self::$admin_id,
 		) );
@@ -181,12 +172,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 	/**
 	 * @ticket 25162
 	 * @group multisite
+	 * @group ms-required
 	 */
 	public function test_admin_bar_contains_correct_links_for_users_with_no_role_on_network() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
-
 		$this->assertTrue( user_can( self::$admin_id, 'read' ) );
 		$this->assertFalse( user_can( self::$no_role_id, 'read' ) );
 
@@ -425,12 +413,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 37949
+	 * @group ms-excluded
 	 */
 	public function test_admin_bar_contains_correct_about_link_for_users_with_role() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run in multisite' );
-		}
-
 		wp_set_current_user( self::$editor_id );
 
 		$wp_admin_bar = $this->get_standard_admin_bar();
@@ -445,12 +430,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 37949
+	 * @group ms-excluded
 	 */
 	public function test_admin_bar_contains_correct_about_link_for_users_with_no_role() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run in multisite' );
-		}
-
 		wp_set_current_user( self::$no_role_id );
 
 		$wp_admin_bar = $this->get_standard_admin_bar();
@@ -467,12 +449,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 	/**
 	 * @ticket 37949
 	 * @group multisite
+	 * @group ms-required
 	 */
 	public function test_admin_bar_contains_correct_about_link_for_users_with_no_role_in_multisite() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
-
 		// User is not a member of a site.
 		remove_user_from_blog( self::$no_role_id, get_current_blog_id() );
 
@@ -551,6 +530,98 @@ class Tests_AdminBar extends WP_UnitTestCase {
 		$this->assertNull( $node );
 	}
 
+	public function map_meta_cap_grant_create_users( $caps, $cap ) {
+		if ( 'create_users' === $cap ) {
+			$caps = array( 'exist' );
+		}
+
+		return $caps;
+	}
+
+	public function map_meta_cap_deny_create_users( $caps, $cap ) {
+		if ( 'create_users' === $cap ) {
+			$caps = array( 'do_not_allow' );
+		}
+
+		return $caps;
+	}
+
+	public function map_meta_cap_grant_promote_users( $caps, $cap ) {
+		if ( 'promote_users' === $cap ) {
+			$caps = array( 'exist' );
+		}
+
+		return $caps;
+	}
+
+	public function map_meta_cap_deny_promote_users( $caps, $cap ) {
+		if ( 'promote_users' === $cap ) {
+			$caps = array( 'do_not_allow' );
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * @ticket 39252
+	 */
+	public function test_new_user_link_exists_for_user_with_create_users() {
+		wp_set_current_user( self::$admin_id );
+
+		add_filter( 'map_meta_cap', array( $this, 'map_meta_cap_grant_create_users' ), 10, 2 );
+		add_filter( 'map_meta_cap', array( $this, 'map_meta_cap_deny_promote_users' ), 10, 2 );
+
+		$this->assertTrue( current_user_can( 'create_users' ) );
+		$this->assertFalse( current_user_can( 'promote_users' ) );
+
+		$wp_admin_bar = $this->get_standard_admin_bar();
+		$node         = $wp_admin_bar->get_node( 'new-user' );
+
+		// 'create_users' is sufficient in single- and multisite.
+		$this->assertNotEmpty( $node );
+	}
+
+	/**
+	 * @ticket 39252
+	 */
+	public function test_new_user_link_existence_for_user_with_promote_users() {
+		wp_set_current_user( self::$admin_id );
+
+		add_filter( 'map_meta_cap', array( $this, 'map_meta_cap_deny_create_users' ), 10, 2 );
+		add_filter( 'map_meta_cap', array( $this, 'map_meta_cap_grant_promote_users' ), 10, 2 );
+
+		$this->assertFalse( current_user_can( 'create_users' ) );
+		$this->assertTrue( current_user_can( 'promote_users' ) );
+
+		$wp_admin_bar = $this->get_standard_admin_bar();
+		$node         = $wp_admin_bar->get_node( 'new-user' );
+
+		if ( is_multisite() ) {
+			$this->assertNotEmpty( $node );
+		} else {
+			// 'promote_users' is insufficient in single-site.
+			$this->assertNull( $node );
+		}
+	}
+
+	/**
+	 * @ticket 39252
+	 */
+	public function test_new_user_link_does_not_exist_for_user_without_create_or_promote_users() {
+		wp_set_current_user( self::$admin_id );
+
+		add_filter( 'map_meta_cap', array( $this, 'map_meta_cap_deny_create_users' ), 10, 2 );
+		add_filter( 'map_meta_cap', array( $this, 'map_meta_cap_deny_promote_users' ), 10, 2 );
+
+		$this->assertFalse( current_user_can( 'create_users' ) );
+		$this->assertFalse( current_user_can( 'promote_users' ) );
+
+		$wp_admin_bar = $this->get_standard_admin_bar();
+		$node         = $wp_admin_bar->get_node( 'new-user' );
+
+		$this->assertNull( $node );
+	}
+
 	/**
 	 * @ticket 30937
 	 * @covers ::wp_admin_bar_customize_menu
@@ -586,12 +657,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 39082
+	 * @group ms-required
 	 */
 	public function test_my_sites_network_menu_for_regular_user() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
-
 		wp_set_current_user( self::$editor_id );
 
 		$wp_admin_bar = $this->get_standard_admin_bar();
@@ -604,12 +672,9 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 39082
+	 * @group ms-required
 	 */
 	public function test_my_sites_network_menu_for_super_admin() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
-
 		wp_set_current_user( self::$editor_id );
 
 		grant_super_admin( self::$editor_id );
@@ -624,13 +689,10 @@ class Tests_AdminBar extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 39082
+	 * @group ms-required
 	 */
 	public function test_my_sites_network_menu_for_regular_user_with_network_caps() {
 		global $current_user;
-
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
 
 		$network_user_caps = array( 'manage_network', 'manage_network_themes', 'manage_network_plugins' );
 

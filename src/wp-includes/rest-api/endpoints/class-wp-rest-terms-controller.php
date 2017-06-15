@@ -396,7 +396,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 	public function create_item( $request ) {
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
-				return new WP_Error( 'rest_taxonomy_not_hierarchical', __( 'Can not set parent term, taxonomy is not hierarchical.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_taxonomy_not_hierarchical', __( 'Cannot set parent term, taxonomy is not hierarchical.' ), array( 'status' => 400 ) );
 			}
 
 			$parent = get_term( (int) $request['parent'], $this->taxonomy );
@@ -502,7 +502,7 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $this->taxonomy ) ) {
-				return new WP_Error( 'rest_taxonomy_not_hierarchical', __( 'Can not set parent term, taxonomy is not hierarchical.' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_taxonomy_not_hierarchical', __( 'Cannot set parent term, taxonomy is not hierarchical.' ), array( 'status' => 400 ) );
 			}
 
 			$parent = get_term( (int) $request['parent'], $this->taxonomy );
@@ -977,8 +977,11 @@ class WP_REST_Terms_Controller extends WP_REST_Controller {
 		);
 
 		$query_params['slug'] = array(
-			'description'       => __( 'Limit result set to terms with a specific slug.' ),
-			'type'              => 'string',
+			'description'       => __( 'Limit result set to terms with one or more specific slugs.' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'string'
+			),
 		);
 
 		/**
