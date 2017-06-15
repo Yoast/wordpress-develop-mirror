@@ -266,6 +266,8 @@
 			 * @since 4.1.0
 			 *
 			 * @param {string} key The key code of the pressed key.
+			 *
+			 * @returns {void}
 			 */
 			function mceScroll( key ) {
 				var offset = mceGetCursorOffset(),
