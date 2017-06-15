@@ -32,7 +32,7 @@ function get_query_template( $type, $templates = array() ) {
 	 * The last element in the array should always be the fallback template for this query type.
 	 *
 	 * Possible values for `$type` include: 'index', '404', 'archive', 'author', 'category', 'tag', 'taxonomy', 'date',
-	 * 'embed', home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
+	 * 'embed', 'home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
 	 *
 	 * @since 4.7.0
 	 *
@@ -50,13 +50,16 @@ function get_query_template( $type, $templates = array() ) {
 	 * This hook also applies to various types of files loaded as part of the Template Hierarchy.
 	 *
 	 * Possible values for `$type` include: 'index', '404', 'archive', 'author', 'category', 'tag', 'taxonomy', 'date',
-	 * 'embed', home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
+	 * 'embed', 'home', 'frontpage', 'page', 'paged', 'search', 'single', 'singular', and 'attachment'.
 	 *
 	 * @since 1.5.0
+	 * @since 4.8.0 The `$type` and `$templates` parameters were added.
 	 *
-	 * @param string $template Path to the template. See locate_template().
+	 * @param string $template  Path to the template. See locate_template().
+	 * @param string $type      Filename without extension.
+	 * @param array  $templates A list of template candidates, in descending order of priority.
 	 */
-	return apply_filters( "{$type}_template", $template );
+	return apply_filters( "{$type}_template", $template, $type, $templates );
 }
 
 /**
@@ -135,8 +138,9 @@ function get_post_type_archive_template() {
 		$post_type = reset( $post_type );
 
 	$obj = get_post_type_object( $post_type );
-	if ( ! $obj->has_archive )
+	if ( ! ( $obj instanceof WP_Post_Type ) || ! $obj->has_archive ) {
 		return '';
+	}
 
 	return get_archive_template();
 }
@@ -418,10 +422,10 @@ function get_page_template() {
 		if ( $pagename_decoded !== $pagename ) {
 			$templates[] = "page-{$pagename_decoded}.php";
 		}
-		$templates[] = "page-$pagename.php";
+		$templates[] = "page-{$pagename}.php";
 	}
 	if ( $id )
-		$templates[] = "page-$id.php";
+		$templates[] = "page-{$id}.php";
 	$templates[] = 'page.php';
 
 	return get_query_template( 'page', $templates );

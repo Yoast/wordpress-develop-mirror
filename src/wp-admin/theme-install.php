@@ -28,6 +28,11 @@ if ( ! is_network_admin() ) {
 }
 
 $installed_themes = search_theme_directories();
+
+if ( false === $installed_themes ) {
+	$installed_themes = array();
+}
+
 foreach ( $installed_themes as $k => $v ) {
 	if ( false !== strpos( $k, '/' ) ) {
 		unset( $installed_themes[ $k ] );
@@ -57,7 +62,7 @@ wp_localize_script( 'theme', '_wpThemeSettings', array(
 		'noThemesFound'       => __( 'No themes found. Try a different search.' ),
 		'collapseSidebar'     => __( 'Collapse Sidebar' ),
 		'expandSidebar'       => __( 'Expand Sidebar' ),
-		/* translators: hidden accessibility text */
+		/* translators: accessibility text */
 		'selectFeatureFilter' => __( 'Select one or more Theme features to filter by' ),
 	),
 	'installedThemes' => array_keys( $installed_themes ),
@@ -164,7 +169,7 @@ include(ABSPATH . 'wp-admin/admin-header.php');
 
 		<button type="button" class="button drawer-toggle" aria-expanded="false"><?php _e( 'Feature Filter' ); ?></button>
 
-		<div class="search-form"></div>
+		<form class="search-form"></form>
 
 		<div class="favorites-form">
 			<?php
