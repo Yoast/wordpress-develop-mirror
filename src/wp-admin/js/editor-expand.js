@@ -198,7 +198,7 @@
 			$statusBar = $contentWrap.find( '.mce-statusbar' );
 			$menuBar = $contentWrap.find( '.mce-menubar' );
 
-			/*
+			/**
 			 * @summary Gets the offset of the editor.
 			 *
 			 * @returns {Number|Boolean} Returns the offset of the editor
