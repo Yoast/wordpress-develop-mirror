@@ -95,11 +95,15 @@ input[type="checkbox"] {
 
 /* Front Page */
 
+.wp-custom-header-video-button {
+	left: 30px;
+	right: auto;
+}
+
 .twentyseventeen-panel .recent-posts .entry-header .edit-link {
 	margin-left: 0;
 	margin-right: 1em;
 }
-
 
 /* Blog, Archive, Search */
 
@@ -238,6 +242,14 @@ input[type="checkbox"] {
 	padding-right: 1.5rem;
 }
 
+.widget_text ul {
+	margin: 0 1.5em 1.5em 0;
+}
+
+.widget_text ul li ul {
+	margin: 0 1.5em 0 0;
+}
+
 /* Footer */
 
 .social-navigation a {
@@ -349,6 +361,11 @@ input[type="checkbox"] {
 	/* Scroll down arrow */
 
 	.navigation-top .menu-scroll-down {
+		left: 0;
+		right: auto;
+	}
+
+	.site-header .menu-scroll-down {
 		left: 0;
 		right: auto;
 	}

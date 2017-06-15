@@ -50,10 +50,16 @@ function post_submit_meta_box( $post, $args = array() ) {
 <?php
 $preview_link = esc_url( get_preview_post_link( $post ) );
 if ( 'publish' == $post->post_status ) {
-	$preview_button = __( 'Preview Changes' );
+	$preview_button_text = __( 'Preview Changes' );
 } else {
-	$preview_button = __( 'Preview' );
+	$preview_button_text = __( 'Preview' );
 }
+
+$preview_button = sprintf( '%1$s<span class="screen-reader-text"> %2$s</span>',
+	$preview_button_text,
+	/* translators: accessibility text */
+	__( '(opens in a new window)' )
+);
 ?>
 <a class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
 <input type="hidden" name="wp-preview" id="wp-preview" value="" />
@@ -175,14 +181,18 @@ echo esc_html( $visibility_trans ); ?></span>
 $datef = __( 'M j, Y @ H:i' );
 if ( 0 != $post->ID ) {
 	if ( 'future' == $post->post_status ) { // scheduled for publishing at a future date
+		/* translators: Post date information. 1: Date on which the post is currently scheduled to be published */
 		$stamp = __('Scheduled for: <b>%1$s</b>');
 	} elseif ( 'publish' == $post->post_status || 'private' == $post->post_status ) { // already published
+		/* translators: Post date information. 1: Date on which the post was published */
 		$stamp = __('Published on: <b>%1$s</b>');
 	} elseif ( '0000-00-00 00:00:00' == $post->post_date_gmt ) { // draft, 1 or more saves, no date specified
 		$stamp = __('Publish <b>immediately</b>');
 	} elseif ( time() < strtotime( $post->post_date_gmt . ' +0000' ) ) { // draft, 1 or more saves, future date specified
+		/* translators: Post date information. 1: Date on which the post is to be published */
 		$stamp = __('Schedule for: <b>%1$s</b>');
 	} else { // draft, 1 or more saves, date specified
+		/* translators: Post date information. 1: Date on which the post is to be published */
 		$stamp = __('Publish on: <b>%1$s</b>');
 	}
 	$date = date_i18n( $datef, strtotime( $post->post_date ) );
@@ -193,7 +203,10 @@ if ( 0 != $post->ID ) {
 
 if ( ! empty( $args['args']['revisions_count'] ) ) : ?>
 <div class="misc-pub-section misc-pub-revisions">
-	<?php printf( __( 'Revisions: %s' ), '<b>' . number_format_i18n( $args['args']['revisions_count'] ) . '</b>' ); ?>
+	<?php
+		/* translators: Post revisions heading. 1: The number of available revisions */
+		printf( __( 'Revisions: %s' ), '<b>' . number_format_i18n( $args['args']['revisions_count'] ) . '</b>' );
+	?>
 	<a class="hide-if-no-js" href="<?php echo esc_url( get_edit_post_link( $args['args']['revision_id'] ) ); ?>"><span aria-hidden="true"><?php _ex( 'Browse', 'revisions' ); ?></span> <span class="screen-reader-text"><?php _e( 'Browse revisions' ); ?></span></a>
 </div>
 <?php endif;
@@ -299,6 +312,7 @@ function attachment_submit_meta_box( $post ) {
 	<?php
 	/* translators: Publish box date format, see https://secure.php.net/date */
 	$datef = __( 'M j, Y @ H:i' );
+	/* translators: Attachment information. 1: Date the attachment was uploaded */
 	$stamp = __('Uploaded on: <b>%1$s</b>');
 	$date = date_i18n( $datef, strtotime( $post->post_date ) );
 	?>
@@ -660,11 +674,11 @@ function post_comment_status_meta_box($post) {
 ?>
 <input name="advanced_view" type="hidden" value="1" />
 <p class="meta-options">
-	<label for="comment_status" class="selectit"><input name="comment_status" type="checkbox" id="comment_status" value="open" <?php checked($post->comment_status, 'open'); ?> /> <?php _e( 'Allow comments.' ) ?></label><br />
+	<label for="comment_status" class="selectit"><input name="comment_status" type="checkbox" id="comment_status" value="open" <?php checked($post->comment_status, 'open'); ?> /> <?php _e( 'Allow comments' ) ?></label><br />
 	<label for="ping_status" class="selectit"><input name="ping_status" type="checkbox" id="ping_status" value="open" <?php checked($post->ping_status, 'open'); ?> /> <?php
 		printf(
 			/* translators: %s: Codex URL */
-			__( 'Allow <a href="%s">trackbacks and pingbacks</a> on this page.' ),
+			__( 'Allow <a href="%s">trackbacks and pingbacks</a> on this page' ),
 			__( 'https://codex.wordpress.org/Introduction_to_Blogging#Managing_Comments' ) );
 		?></label>
 	<?php
@@ -813,8 +827,7 @@ function page_attributes_meta_box($post) {
 		$pages = wp_dropdown_pages( $dropdown_args );
 		if ( ! empty($pages) ) :
 ?>
-<p><strong><?php _e('Parent') ?></strong></p>
-<label class="screen-reader-text" for="parent_id"><?php _e('Parent') ?></label>
+<p class="post-attributes-label-wrapper"><label class="post-attributes-label" for="parent_id"><?php _e( 'Parent' ); ?></label></p>
 <?php echo $pages; ?>
 <?php
 		endif; // end empty pages check
@@ -823,9 +836,9 @@ function page_attributes_meta_box($post) {
 	if ( count( get_page_templates( $post ) ) > 0 && get_option( 'page_for_posts' ) != $post->ID ) :
 		$template = ! empty( $post->page_template ) ? $post->page_template : false;
 		?>
-<p><strong><?php _e('Template') ?></strong><?php
+<p class="post-attributes-label-wrapper"><label class="post-attributes-label" for="page_template"><?php _e( 'Template' ); ?></label><?php
 	/**
-	 * Fires immediately after the heading inside the 'Template' section
+	 * Fires immediately after the label inside the 'Template' section
 	 * of the 'Page Attributes' meta box.
 	 *
 	 * @since 4.4.0
@@ -835,12 +848,6 @@ function page_attributes_meta_box($post) {
 	 */
 	do_action( 'page_attributes_meta_box_template', $template, $post );
 ?></p>
-<label class="screen-reader-text" for="page_template">
-	<?php
-	$post_type_object = get_post_type_object( $post->post_type );
-	echo esc_html( $post_type_object->labels->attributes );
-	?>
-</label>
 <select name="page_template" id="page_template">
 <?php
 /**
@@ -859,8 +866,8 @@ $default_title = apply_filters( 'default_page_template_title',  __( 'Default Tem
 </select>
 <?php endif; ?>
 <?php if ( post_type_supports( $post->post_type, 'page-attributes' ) ) : ?>
-<p><strong><?php _e('Order') ?></strong></p>
-<p><label class="screen-reader-text" for="menu_order"><?php _e('Order') ?></label><input name="menu_order" type="text" size="4" id="menu_order" value="<?php echo esc_attr($post->menu_order) ?>" /></p>
+<p class="post-attributes-label-wrapper"><label class="post-attributes-label" for="menu_order"><?php _e( 'Order' ); ?></label></p>
+<input name="menu_order" type="text" size="4" id="menu_order" value="<?php echo esc_attr( $post->menu_order ); ?>" />
 <?php if ( 'page' == $post->post_type && get_current_screen()->get_help_tabs() ) : ?>
 <p><?php _e( 'Need help? Use the Help tab above the screen title.' ); ?></p>
 <?php endif;
@@ -1021,8 +1028,9 @@ function link_target_meta_box($link) { ?>
 function xfn_check( $class, $value = '', $deprecated = '' ) {
 	global $link;
 
-	if ( !empty( $deprecated ) )
-		_deprecated_argument( __FUNCTION__, '0.0.0' ); // Never implemented
+	if ( ! empty( $deprecated ) ) {
+		_deprecated_argument( __FUNCTION__, '2.5.0' ); // Never implemented
+	}
 
 	$link_rel = isset( $link->link_rel ) ? $link->link_rel : ''; // In PHP 5.3: $link_rel = $link->link_rel ?: '';
 	$rels = preg_split('/\s+/', $link_rel);

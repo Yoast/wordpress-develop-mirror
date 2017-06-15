@@ -29,10 +29,12 @@ function check_upload_size( $file ) {
 
 	$file_size = filesize( $file['tmp_name'] );
 	if ( $space_left < $file_size ) {
+		/* translators: 1: Required disk space in kilobytes */
 		$file['error'] = sprintf( __( 'Not enough space to upload. %1$s KB needed.' ), number_format( ( $file_size - $space_left ) / KB_IN_BYTES ) );
 	}
 
 	if ( $file_size > ( KB_IN_BYTES * get_site_option( 'fileupload_maxk', 1500 ) ) ) {
+		/* translators: 1: Maximum allowed file size in kilobytes */
 		$file['error'] = sprintf( __( 'This file is too big. Files must be less than %1$s KB in size.' ), get_site_option( 'fileupload_maxk', 1500 ) );
 	}
 
@@ -170,6 +172,16 @@ function wpmu_delete_blog( $blog_id, $drop = false ) {
 
 		clean_blog_cache( $blog );
 	}
+
+	/**
+	 * Fires after the site is deleted from the network.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param int  $blog_id The site ID.
+	 * @param bool $drop    True if site's tables should be dropped. Default is false.
+	 */
+	do_action( 'deleted_blog', $blog_id, $drop );
 
 	if ( $switch )
 		restore_current_blog();
@@ -313,10 +325,10 @@ All at ###SITENAME###
 	$content = str_replace( '###USERNAME###', $current_user->user_login, $content );
 	$content = str_replace( '###ADMIN_URL###', esc_url( self_admin_url( 'options.php?adminhash='.$hash ) ), $content );
 	$content = str_replace( '###EMAIL###', $value, $content );
-	$content = str_replace( '###SITENAME###', get_site_option( 'site_name' ), $content );
+	$content = str_replace( '###SITENAME###', wp_specialchars_decode( get_site_option( 'site_name' ), ENT_QUOTES ), $content );
 	$content = str_replace( '###SITEURL###', network_home_url(), $content );
 
-	wp_mail( $value, sprintf( __( '[%s] New Admin Email Address' ), wp_specialchars_decode( get_option( 'blogname' ) ) ), $content );
+	wp_mail( $value, sprintf( __( '[%s] New Admin Email Address' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ), $content );
 
 	if ( $switched_locale ) {
 		restore_previous_locale();
@@ -398,10 +410,10 @@ All at ###SITENAME###
 		$content = str_replace( '###USERNAME###', $current_user->user_login, $content );
 		$content = str_replace( '###ADMIN_URL###', esc_url( self_admin_url( 'profile.php?newuseremail=' . $hash ) ), $content );
 		$content = str_replace( '###EMAIL###', $_POST['email'], $content);
-		$content = str_replace( '###SITENAME###', get_site_option( 'site_name' ), $content );
+		$content = str_replace( '###SITENAME###', wp_specialchars_decode( get_site_option( 'site_name' ), ENT_QUOTES ), $content );
 		$content = str_replace( '###SITEURL###', network_home_url(), $content );
 
-		wp_mail( $_POST['email'], sprintf( __( '[%s] New Email Address' ), wp_specialchars_decode( get_option( 'blogname' ) ) ), $content );
+		wp_mail( $_POST['email'], sprintf( __( '[%s] New Email Address' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ), $content );
 		$_POST['email'] = $current_user->user_email;
 
 		if ( $switched_locale ) {
@@ -474,7 +486,10 @@ function display_space_usage() {
 		$space .= __( 'MB' );
 	}
 	?>
-	<strong><?php printf( __( 'Used: %1$s%% of %2$s' ), number_format( $percent_used ), $space ); ?></strong>
+	<strong><?php
+		/* translators: Storage space that's been used. 1: Percentage of used space, 2: Total space allowed in megabytes or gigabytes */
+		printf( __( 'Used: %1$s%% of %2$s' ), number_format( $percent_used ), $space );
+	?></strong>
 	<?php
 }
 
@@ -699,8 +714,10 @@ function _access_denied_splash() {
  * @return bool True if the user has proper permissions, false if they do not.
  */
 function check_import_new_users( $permission ) {
-	if ( !is_super_admin() )
+	if ( ! current_user_can( 'manage_network_users' ) ) {
 		return false;
+	}
+
 	return true;
 }
 // See "import_allow_fetch_attachments" and "import_attachment_size_limit" filters too.
@@ -768,7 +785,7 @@ function mu_dropdown_languages( $lang_files = array(), $current = '' ) {
 function site_admin_notice() {
 	global $wp_db_version, $pagenow;
 
-	if ( ! is_super_admin() ) {
+	if ( ! current_user_can( 'upgrade_network' ) ) {
 		return false;
 	}
 
@@ -1033,7 +1050,7 @@ jQuery(document).ready( function($) {
 		// Don't show a spinner for English and installed languages,
 		// as there is nothing to download.
 		if ( ! languageSelect.find( 'option:selected' ).data( 'installed' ) ) {
-			$( '#submit', this ).after( '<span class="spinner language-install-spinner" />' );
+			$( '#submit', this ).after( '<span class="spinner language-install-spinner is-active" />' );
 		}
 	});
 });

@@ -172,7 +172,7 @@ var tagBox, array_unique_noempty;
 					 */
 					xbutton = $( '<button type="button" id="' + id + '-check-num-' + key + '" class="ntdelbutton">' +
 						'<span class="remove-tag-icon" aria-hidden="true"></span>' +
-						'<span class="screen-reader-text">' + window.tagsSuggestL10n.removeTerm + ' ' + val + '</span>' +
+						'<span class="screen-reader-text">' + window.tagsSuggestL10n.removeTerm + ' ' + span.html() + '</span>' +
 						'</button>' );
 
 					/**
