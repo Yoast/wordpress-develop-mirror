@@ -15,6 +15,8 @@ jQuery(document).ready(function($) {
 	 * Adds an event handler to the delete term link on the term overview page.
 	 * Cancels default event handling and event bubbling.
 	 *
+	 * @since 2.8.0
+	 *
 	 * @returns boolean Always returns false to cancel the default event handling.
 	 */
 	$( '#the-list' ).on( 'click', '.delete-tag', function() {
@@ -31,6 +33,7 @@ jQuery(document).ready(function($) {
 			 * corresponds to the delete term button.
 			 *
 			 * @param {string} r The response from the server.
+			 *
 			 * @returns {void}
 			 */
 			$.post(ajaxurl, data, function(r){
@@ -87,6 +90,8 @@ jQuery(document).ready(function($) {
 	 * @summary Adds an event handler tot he form submit on the term overview page.
 	 *
 	 * Cancels default event handling and event bubbling.
+	 *
+	 * @since 2.8.0
 	 *
 	 * @returns boolean Always returns false to cancel the default event handling.
 	 */
