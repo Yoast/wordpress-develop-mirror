@@ -193,7 +193,7 @@ var findPosts;
 		});
 
 		/**
-		 * @summary Enables a whole row to be clickable inside the post finder.
+		 * @summary Enables clicking on the entire table row.
 		 *
 		 * @returns {void}
 		 */
