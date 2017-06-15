@@ -119,7 +119,7 @@ function the_modified_author() {
  *
  * @param string $field selects the field of the users record.
  * @param int $user_id Optional. User ID.
- * @return string The author's field from the current author's DB object.
+ * @return string The author's field from the current author's DB object, otherwise an empty string.
  */
 function get_the_author_meta( $field = '', $user_id = false ) {
 	$original_user_id = $user_id;
@@ -505,8 +505,7 @@ function is_multi_author() {
  * Helper function to clear the cache for number of authors.
  *
  * @since 3.2.0
- *
- * @private
+ * @access private
  */
 function __clear_multi_author_cache() {
 	delete_transient( 'is_multi_author' );

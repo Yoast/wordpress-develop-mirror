@@ -30,6 +30,14 @@ class Tests_REST_Request extends WP_UnitTestCase {
 		$this->assertNull( $this->request->get_header( 'missing' ) );
 		$this->assertNull( $this->request->get_header_as_array( 'missing' ) );
 	}
+	
+	public function test_remove_header() {
+		$this->request->add_header( 'Test-Header', 'value' );
+		$this->assertEquals( 'value', $this->request->get_header( 'Test-Header' ) );
+		
+		$this->request->remove_header( 'Test-Header' );
+		$this->assertNull( $this->request->get_header( 'Test-Header' ) );
+	}
 
 	public function test_header_multiple() {
 		$value1 = 'application/x-wp-example-1';
@@ -571,5 +579,32 @@ class Tests_REST_Request extends WP_UnitTestCase {
 		$using_home = home_url( '/wp/v2/posts/1' ) ;
 		$request = WP_REST_Request::from_url( $using_home );
 		$this->assertFalse( $request );
+	}
+
+	public function test_set_param() {
+		$request = new WP_REST_Request();
+		$request->set_param( 'param', 'value' );
+		$this->assertEquals( 'value', $request->get_param( 'param' ) );
+	}
+
+	public function test_set_param_follows_parameter_order() {
+		$request = new WP_REST_Request();
+		$request->add_header( 'content-type', 'application/json' );
+		$request->set_method( 'POST' );
+		$request->set_body( wp_json_encode( array(
+			'param' => 'value'
+		) ) );
+		$this->assertEquals( 'value', $request->get_param( 'param' ) );
+		$this->assertEquals(
+			array( 'param' => 'value' ),
+			$request->get_json_params()
+		);
+
+		$request->set_param( 'param', 'new_value' );
+		$this->assertEquals( 'new_value', $request->get_param( 'param' ) );
+		$this->assertEquals(
+			array( 'param' => 'new_value' ),
+			$request->get_json_params()
+		);
 	}
 }

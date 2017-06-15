@@ -2872,7 +2872,7 @@ function is_email( $email, $deprecated = false ) {
 		_deprecated_argument( __FUNCTION__, '3.0.0' );
 
 	// Test for the minimum length the email can be
-	if ( strlen( $email ) < 3 ) {
+	if ( strlen( $email ) < 6 ) {
 		/**
 		 * Filters whether an email address is valid.
 		 *
@@ -3109,7 +3109,7 @@ function iso8601_to_datetime( $date_string, $timezone = 'user' ) {
  */
 function sanitize_email( $email ) {
 	// Test for the minimum length the email can be
-	if ( strlen( $email ) < 3 ) {
+	if ( strlen( $email ) < 6 ) {
 		/**
 		 * Filters a sanitized email address.
 		 *
@@ -3377,7 +3377,7 @@ function wp_trim_words( $text, $num_words = 55, $more = null ) {
 	 * @since 3.3.0
 	 *
 	 * @param string $text          The trimmed text.
-	 * @param int    $num_words     The number of words to trim the text to. Default 5.
+	 * @param int    $num_words     The number of words to trim the text to. Default 55.
 	 * @param string $more          An optional string to append to the end of the trimmed text, e.g. &hellip;.
 	 * @param string $original_text The text before it was trimmed.
 	 */
@@ -5012,7 +5012,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @param string The emoji base URL for png images.
 		 */
-		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2.2.1/72x72/' ),
+		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2.3/72x72/' ),
 
 		/**
 		 * Filters the extension of the emoji png files.
@@ -5030,7 +5030,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @param string The emoji base URL for svg images.
 		 */
-		'svgUrl' => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2.2.1/svg/' ),
+		'svgUrl' => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2.3/svg/' ),
 
 		/**
 		 * Filters the extension of the emoji SVG files.
@@ -5142,7 +5142,7 @@ function wp_staticize_emoji( $text ) {
 	$text = wp_encode_emoji( $text );
 
 	/** This filter is documented in wp-includes/formatting.php */
-	$cdn_url = apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2.2.1/72x72/' );
+	$cdn_url = apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2.3/72x72/' );
 
 	/** This filter is documented in wp-includes/formatting.php */
 	$ext = apply_filters( 'emoji_ext', '.png' );

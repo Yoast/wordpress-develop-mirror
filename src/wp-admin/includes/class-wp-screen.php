@@ -308,6 +308,9 @@ final class WP_Screen {
 					if ( null === $post_type && is_object_in_taxonomy( 'post', $taxonomy ? $taxonomy : 'post_tag' ) )
 						$post_type = 'post';
 					break;
+				case 'upload':
+					$post_type = 'attachment';
+					break;
 			}
 		}
 
@@ -1193,6 +1196,8 @@ final class WP_Screen {
 	 * Render the list table view mode preferences.
 	 *
 	 * @since 4.4.0
+	 *
+	 * @global string $mode List table view mode.
 	 */
 	public function render_view_mode() {
 		$screen = get_current_screen();

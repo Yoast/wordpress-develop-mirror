@@ -64,6 +64,17 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
+	$( '#edittag' ).on( 'click', '.delete', function( e ) {
+		if ( 'undefined' === typeof showNotice ) {
+			return true;
+		}
+
+		var response = showNotice.warn();
+		if ( ! response ) {
+			e.preventDefault();
+		}
+	});
+
 	/**
 	 * @summary Adds an event handler tot he form submit on the term overview page.
 	 *
@@ -79,7 +90,7 @@ jQuery(document).ready(function($) {
 
 		/**
 		 * Does a request to the server to add a new term to the database
-		 * 
+		 *
 		 * @param {string} r The response from the server.
 		 * @returns {void}
 		 */
