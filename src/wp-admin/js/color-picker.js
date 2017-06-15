@@ -79,7 +79,7 @@
 		 * @returns {void}
 		 */
 		_create: function() {
-			// Return early if iris is not supported.
+			// Return early if Iris support is missing.
 			if ( ! $.support.iris ) {
 				return;
 			}
