@@ -64,11 +64,19 @@ jQuery(document).ready(function($) {
 		return false;
 	});
 
+	/**
+	 * Adds a deletion confirmation when removing a tag.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @returns {void}
+	 */
 	$( '#edittag' ).on( 'click', '.delete', function( e ) {
 		if ( 'undefined' === typeof showNotice ) {
 			return true;
 		}
 
+		// Confirms the deletion, a negative response means the deletion must not be executed.
 		var response = showNotice.warn();
 		if ( ! response ) {
 			e.preventDefault();
@@ -92,6 +100,7 @@ jQuery(document).ready(function($) {
 		 * Does a request to the server to add a new term to the database
 		 *
 		 * @param {string} r The response from the server.
+		 *
 		 * @returns {void}
 		 */
 		$.post(ajaxurl, $('#addtag').serialize(), function(r){
