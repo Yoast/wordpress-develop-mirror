@@ -129,18 +129,20 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 					'/>';
 				} );
 			}
-
-			// Remove spaces from empty paragraphs.
-			// Avoid backtracking, can freeze the editor. See #35890.
-			// (This is also quite faster than using only one regex.)
-			event.content = event.content.replace( /<p>([^<>]+)<\/p>/gi, function( tag, text ) {
-				if ( /^(&nbsp;|\s|\u00a0|\ufeff)+$/i.test( text ) ) {
-					return '<p><br /></p>';
-				}
-
-				return tag;
-			});
 		}
+	});
+
+	editor.on( 'setcontent', function() {
+		// Remove spaces from empty paragraphs.
+		editor.$( 'p' ).each( function( i, node ) {
+			if ( node.innerHTML && node.innerHTML.length < 10 ) {
+				var html = tinymce.trim( node.innerHTML );
+
+				if ( ! html || html === '&nbsp;' ) {
+					node.innerHTML = ( tinymce.Env.ie && tinymce.Env.ie < 11 ) ? '' : '<br data-mce-bogus="1">';
+				}
+			}
+		} );
 	});
 
 	editor.on( 'PostProcess', function( event ) {
@@ -541,11 +543,17 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 
 			editor.on( 'PastePostProcess', function( event ) {
 				// Remove empty paragraphs
-				each( dom.select( 'p', event.node ), function( node ) {
+				editor.$( 'p', event.node ).each( function( i, node ) {
 					if ( dom.isEmpty( node ) ) {
 						dom.remove( node );
 					}
 				});
+
+				if ( tinymce.isIE ) {
+					editor.$( 'a', event.node ).find( 'font, u' ).each( function( i, node ) {
+						dom.remove( node, true );
+					});
+				}
 			});
 		}
 
@@ -554,10 +562,10 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			var access = 'Shift+Alt+';
 			var meta = 'Ctrl+';
 
-			// For Mac: shift = \u2303, ctrl = \u21E7, cmd = \u2318, alt = \u2325
+			// For Mac: ctrl = \u2303, cmd = \u2318, alt = \u2325
 
 			if ( tinymce.Env.mac ) {
-				access = '\u2303\u2325 ';
+				access = '\u2303\u2325';
 				meta = '\u2318';
 			}
 
@@ -964,11 +972,12 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			}
 
 			if ( args.toolbar ) {
-				if ( activeToolbar !== args.toolbar ) {
-					activeToolbar = args.toolbar;
-					activeToolbar.show();
-				} else {
+				activeToolbar = args.toolbar;
+
+				if ( activeToolbar.visible() ) {
 					activeToolbar.reposition();
+				} else {
+					activeToolbar.show();
 				}
 			} else {
 				activeToolbar = false;
@@ -983,7 +992,7 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 
 		function hide( event ) {
 			if ( activeToolbar ) {
-				if ( activeToolbar.tempHide || event.type === 'hide' ) {
+				if ( activeToolbar.tempHide || event.type === 'hide' || event.type === 'blur' ) {
 					activeToolbar.hide();
 					activeToolbar = false;
 				} else if ( (

@@ -102,7 +102,7 @@ function twentyseventeen_get_svg( $args = array() ) {
 	 *
 	 * See https://core.trac.wordpress.org/ticket/38387.
 	 */
-	$svg .= ' <use xlink:href="#icon-' . esc_html( $args['icon'] ) . '"></use> ';
+	$svg .= ' <use href="#icon-' . esc_html( $args['icon'] ) . '" xlink:href="#icon-' . esc_html( $args['icon'] ) . '"></use> ';
 
 	// Add some markup to use as a fallback for browsers that do not support SVGs.
 	if ( $args['fallback'] ) {
@@ -212,7 +212,7 @@ function twentyseventeen_social_links_icons() {
 	 *
 	 * @since Twenty Seventeen 1.0
 	 *
-	 * @param array $social_links_icons
+	 * @param array $social_links_icons Array of social links icons.
 	 */
 	return apply_filters( 'twentyseventeen_social_links_icons', $social_links_icons );
 }

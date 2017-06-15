@@ -119,14 +119,16 @@ class WP_Test_REST_Post_Types_Controller extends WP_Test_REST_Controller_Testcas
 		$response = $this->server->dispatch( $request );
 		$data = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 7, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'capabilities', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'hierarchical', $properties );
 		$this->assertArrayHasKey( 'labels', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'slug', $properties );
+		$this->assertArrayHasKey( 'supports', $properties );
 		$this->assertArrayHasKey( 'taxonomies', $properties );
+		$this->assertArrayHasKey( 'rest_base', $properties );
 	}
 
 	public function test_get_additional_field_registration() {
@@ -170,6 +172,7 @@ class WP_Test_REST_Post_Types_Controller extends WP_Test_REST_Controller_Testcas
 		$this->assertEquals( $post_type_obj->name, $data['slug'] );
 		$this->assertEquals( $post_type_obj->description, $data['description'] );
 		$this->assertEquals( $post_type_obj->hierarchical, $data['hierarchical'] );
+		$this->assertEquals( $post_type_obj->rest_base, $data['rest_base'] );
 
 		$links = test_rest_expand_compact_links( $links );
 		$this->assertEquals( rest_url( 'wp/v2/types' ), $links['collection'][0]['href'] );
@@ -177,9 +180,11 @@ class WP_Test_REST_Post_Types_Controller extends WP_Test_REST_Controller_Testcas
 		if ( 'edit' === $context ) {
 			$this->assertEquals( $post_type_obj->cap, $data['capabilities'] );
 			$this->assertEquals( $post_type_obj->labels, $data['labels'] );
+			$this->assertEquals( get_all_post_type_supports( $post_type_obj->name ), $data['supports'] );
 		} else {
 			$this->assertFalse( isset( $data['capabilities'] ) );
 			$this->assertFalse( isset( $data['labels'] ) );
+			$this->assertFalse( isset( $data['supports'] ) );
 		}
 	}
 

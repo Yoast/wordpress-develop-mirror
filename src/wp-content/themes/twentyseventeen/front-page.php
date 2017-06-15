@@ -4,7 +4,7 @@
  *
  * If the user has selected a static page for their homepage, this is what will
  * appear.
- * Learn more: http://codex.wordpress.org/Template_Hierarchy
+ * Learn more: https://codex.wordpress.org/Template_Hierarchy
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
@@ -35,7 +35,7 @@ get_header(); ?>
 			 *
 			 * @since Twenty Seventeen 1.0
 			 *
-			 * @param $num_sections integer
+			 * @param int $num_sections Number of front page sections.
 			 */
 			$num_sections = apply_filters( 'twentyseventeen_front_page_sections', 4 );
 			global $twentyseventeencounter;

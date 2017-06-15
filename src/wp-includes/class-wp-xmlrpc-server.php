@@ -382,6 +382,11 @@ class wp_xmlrpc_server extends IXR_Server {
 			if ( isset($meta['id']) ) {
 				$meta['id'] = (int) $meta['id'];
 				$pmeta = get_metadata_by_mid( 'post', $meta['id'] );
+
+				if ( ! $pmeta || $pmeta->post_id != $post_id ) {
+					continue;
+				}
+
 				if ( isset($meta['key']) ) {
 					$meta['key'] = wp_unslash( $meta['key'] );
 					if ( $meta['key'] !== $pmeta->meta_key )
@@ -1270,7 +1275,7 @@ class wp_xmlrpc_server extends IXR_Server {
 			}
 		} elseif ( isset( $post_data['sticky'] ) )  {
 			if ( ! current_user_can( $post_type->cap->edit_others_posts ) ) {
-				return new IXR_Error( 401, __( 'Sorry, you are not allowed to stick this post.' ) );
+				return new IXR_Error( 401, __( 'Sorry, you are not allowed to make posts sticky.' ) );
 			}
 
 			$sticky = wp_validate_boolean( $post_data['sticky'] );
@@ -1295,10 +1300,31 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * @return IXR_Error|string
 	 */
 	protected function _insert_post( $user, $content_struct ) {
-		$defaults = array( 'post_status' => 'draft', 'post_type' => 'post', 'post_author' => 0,
-			'post_password' => '', 'post_excerpt' => '', 'post_content' => '', 'post_title' => '' );
+		$defaults = array(
+			'post_status'    => 'draft',
+			'post_type'      => 'post',
+			'post_author'    => null,
+			'post_password'  => null,
+			'post_excerpt'   => null,
+			'post_content'   => null,
+			'post_title'     => null,
+			'post_date'      => null,
+			'post_date_gmt'  => null,
+			'post_format'    => null,
+			'post_name'      => null,
+			'post_thumbnail' => null,
+			'post_parent'    => null,
+			'ping_status'    => null,
+			'comment_status' => null,
+			'custom_fields'  => null,
+			'terms_names'    => null,
+			'terms'          => null,
+			'sticky'         => null,
+			'enclosure'      => null,
+			'ID'             => null,
+		);
 
-		$post_data = wp_parse_args( $content_struct, $defaults );
+		$post_data = wp_parse_args( array_intersect_key( $content_struct, $defaults ), $defaults );
 
 		$post_type = get_post_type_object( $post_data['post_type'] );
 		if ( ! $post_type )
@@ -1488,9 +1514,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 			$post_data['tax_input'] = $terms;
 			unset( $post_data['terms'], $post_data['terms_names'] );
-		} else {
-			// Do not allow direct submission of 'tax_input', clients must use 'terms' and/or 'terms_names'.
-			unset( $post_data['tax_input'], $post_data['post_category'], $post_data['tags_input'] );
 		}
 
 		if ( isset( $post_data['post_format'] ) ) {
@@ -1795,7 +1818,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		}
 
 		if ( ! current_user_can( $post_type->cap->edit_posts ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts in this post type.' ));
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts in this post type.' ) );
 
 		$query['post_type'] = $post_type->name;
 
@@ -2476,7 +2499,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		do_action( 'xmlrpc_call', 'wp.getUsers' );
 
 		if ( ! current_user_can( 'list_users' ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to browse users.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to list users.' ) );
 
 		$query = array( 'fields' => 'all_with_meta' );
 
@@ -4117,7 +4140,7 @@ class wp_xmlrpc_server extends IXR_Server {
 		$post_type = get_post_type_object( $post_type_name );
 
 		if ( ! current_user_can( $post_type->cap->edit_posts ) )
-			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit this post type.' ) );
+			return new IXR_Error( 401, __( 'Sorry, you are not allowed to edit posts in this post type.' ) );
 
 		return $this->_prepare_post_type( $post_type, $fields );
 	}

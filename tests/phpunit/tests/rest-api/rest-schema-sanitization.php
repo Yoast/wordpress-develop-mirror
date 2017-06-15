@@ -65,6 +65,17 @@ class WP_Test_REST_Schema_Sanitization extends WP_UnitTestCase {
 		$this->assertEquals( 'invalid', rest_sanitize_value_from_schema( 'invalid', $schema ) );
 	}
 
+	public function test_format_ip() {
+		$schema = array(
+			'type'  => 'string',
+			'format' => 'ip',
+		);
+
+		$this->assertEquals( '127.0.0.1', rest_sanitize_value_from_schema( '127.0.0.1', $schema ) );
+		$this->assertEquals( 'hello', rest_sanitize_value_from_schema( 'hello', $schema ) );
+		$this->assertEquals( '2001:DB8:0:0:8:800:200C:417A', rest_sanitize_value_from_schema( '2001:DB8:0:0:8:800:200C:417A', $schema ) );
+	}
+
 	public function test_type_array() {
 		$schema = array(
 			'type' => 'array',
@@ -74,6 +85,20 @@ class WP_Test_REST_Schema_Sanitization extends WP_UnitTestCase {
 		);
 		$this->assertEquals( array( 1 ), rest_sanitize_value_from_schema( array( 1 ), $schema ) );
 		$this->assertEquals( array( 1 ), rest_sanitize_value_from_schema( array( '1' ), $schema ) );
+	}
+
+	public function test_type_array_nested() {
+		$schema = array(
+			'type' => 'array',
+			'items' => array(
+				'type' => 'array',
+				'items' => array(
+					'type' => 'number',
+				),
+			),
+		);
+		$this->assertEquals( array( array( 1 ), array( 2 ) ), rest_sanitize_value_from_schema( array( array( 1 ), array( 2 ) ), $schema ) );
+		$this->assertEquals( array( array( 1 ), array( 2 ) ), rest_sanitize_value_from_schema( array( array( '1' ), array( '2' ) ), $schema ) );
 	}
 
 	public function test_type_array_as_csv() {
@@ -109,5 +134,33 @@ class WP_Test_REST_Schema_Sanitization extends WP_UnitTestCase {
 		);
 		$this->assertEquals( array( 'ribs', 'chicken' ), rest_sanitize_value_from_schema( 'ribs,chicken', $schema ) );
 		$this->assertEquals( array( 'chicken', 'coleslaw' ), rest_sanitize_value_from_schema( 'chicken,coleslaw', $schema ) );
+	}
+
+	public function test_type_array_is_associative() {
+		$schema = array(
+			'type' => 'array',
+			'items' => array(
+				'type' => 'string',
+			),
+		);
+		$this->assertEquals( array( '1', '2' ), rest_sanitize_value_from_schema( array( 'first' => '1', 'second' => '2' ), $schema ) );
+	}
+
+	public function test_type_unknown() {
+		$schema = array(
+			'type' => 'lalala',
+		);
+		$this->assertEquals( 'Best lyrics', rest_sanitize_value_from_schema( 'Best lyrics', $schema ) );
+		$this->assertEquals( 1.10, rest_sanitize_value_from_schema( 1.10, $schema ) );
+		$this->assertEquals( 1, rest_sanitize_value_from_schema( 1, $schema ) );
+	}
+
+	public function test_no_type() {
+		$schema = array(
+			'type' => null,
+		);
+		$this->assertEquals( 'Nothing', rest_sanitize_value_from_schema( 'Nothing', $schema ) );
+		$this->assertEquals( 1.10, rest_sanitize_value_from_schema( 1.10, $schema ) );
+		$this->assertEquals( 1, rest_sanitize_value_from_schema( 1, $schema ) );
 	}
 }

@@ -8,6 +8,9 @@
 class Tests_Basic extends WP_UnitTestCase {
 
 	function test_license() {
+		// This test is designed to only run on trunk/master
+		$this->skipOnAutomatedBranches();
+
 		$license = file_get_contents( ABSPATH . 'license.txt' );
 		preg_match( '#Copyright 2011-(\d+) by the contributors#', $license, $matches );
 		$this_year = date( 'Y' );
@@ -23,7 +26,18 @@ class Tests_Basic extends WP_UnitTestCase {
 			$version .= '.0';
 		}
 		$this->assertEquals( $version, $package_json['version'], "package.json's version needs to be updated to $version." );
+		return $package_json;
 	}
+
+	/**
+	 * @depends test_package_json
+	 */
+	function test_package_json_node_engine( $package_json ) {
+		$this->assertArrayHasKey( 'engines', $package_json );
+		$this->assertArrayHasKey( 'node', $package_json['engines'] );
+		$node = $package_json['engines']['node'];
+		$this->assertRegExp( '~^=?\d+\.\d+\.\d+$~', $node, "package.json's node version cannot be a range." );
+ 	}
 
 	// two tests for a lame bug in PHPUnit that broke the $GLOBALS reference
 	function test_globals() {
