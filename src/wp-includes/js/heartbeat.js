@@ -27,6 +27,15 @@
  */
 
 ( function( $, window, undefined ) {
+
+	/**
+	 * Constructs the Heartbeat API.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @returns {Object} An instance of the Heartbeat class.
+	 * @constructor
+	 */
 	var Heartbeat = function() {
 		var $document = $(document),
 			settings = {
@@ -84,7 +93,10 @@
 				// Flags whether events tracking user activity were set.
 				userActivityEvents: false,
 
+				// Timer that keeps track of how long a user has focus.
 				checkFocusTimer: 0,
+
+				// Timer that keeps track of how long needs to be waited before connecting to the server again.
 				beatTimer: 0
 			};
 
@@ -95,7 +107,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @returns void
 		 */
@@ -230,7 +242,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns int Returns the current time.
 		 */
@@ -243,7 +255,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns boolean Returns whether or not the iframe is from the same origin.
 		 */
@@ -276,7 +288,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 4.1.0
 		 *
 		 * @returns void
 		 */
@@ -293,7 +305,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @param string error The error type passed from the XHR.
 		 * @param int status The HTTP status code passed from jqXHR (200, 404, 500, etc.).
@@ -342,12 +354,12 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @returns void
 		 */
 		function clearErrorState() {
-			// Has connected successfully
+			// Has connected successfully.
 			settings.hasConnected = true;
 
 			if ( hasConnectionError() ) {
@@ -362,7 +374,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns void
 		 */
@@ -424,7 +436,7 @@
 
 				$document.trigger( 'heartbeat-tick', [response, textStatus, jqXHR] );
 
-				// Do this last, can trigger the next XHR if connection time > 5 sec. and newInterval == 'fast'
+				// Do this last, can trigger the next XHR if connection time > 5 sec. and newInterval == 'fast'.
 				if ( newInterval ) {
 					interval( newInterval );
 				}
@@ -441,7 +453,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @returns void
 		 */
@@ -487,7 +499,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns void
 		 */
@@ -500,7 +512,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns void
 		 */
@@ -521,7 +533,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns void
 		 */
@@ -548,7 +560,7 @@
 		 *
 		 * @access private
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @returns void
 		 */
@@ -588,7 +600,7 @@
 		/**
 		 * Checks whether the window (or any local iframe in it) has focus, or the user is active.
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns boolean True if the window or the user is active.
 		 */
@@ -599,7 +611,7 @@
 		/**
 		 * Checks whether there is a connection error.
 		 *
-		 * @since 3.8
+		 * @since 3.6.0
 		 *
 		 * @returns boolean True if a connection error was found.
 		 */
@@ -613,7 +625,7 @@
 		 * Will not open two concurrent connections. If a connection is in progress,
 		 * will connect again immediately after the current connection completes.
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @returns void
 		 */
@@ -629,7 +641,7 @@
 		 * Using this on many screens may overload the user's hosting account if several
 		 * browser windows/tabs are left open for a long time.
 		 *
-		 * @since 3.8
+		 * @since 3.8.0
 		 *
 		 * @returns void
 		 */
@@ -644,7 +656,7 @@
 		 * In this case the number of 'ticks' can be passed as second argument.
 		 * If the window doesn't have focus, the interval slows down to 2 min.
 		 *
-		 * @since 3.6
+		 * @since 3.6.0
 		 *
 		 * @param mixed speed Interval: 'fast' or 5, 15, 30, 60, 120.
 		 * @param string ticks Used with speed = 'fast' or 5, how many ticks before the interval reverts back.
@@ -719,7 +731,7 @@
 		 * If the same 'handle' is used more than once, the data is not overwritten when the third argument is 'true'.
 		 * Use wp.heartbeat.isQueued('handle') to see if any data is already queued for that handle.
 		 *
-		 * @since 3.6
+		 * @since 3.6.0
 		 *
 		 * @param string handle Unique handle for the data. The handle is used in PHP to receive the data.
 		 * @param mixed data The data to send.
@@ -742,7 +754,7 @@
 		/**
 		 * Checks if data with a particular handle is queued.
 		 *
-		 * @since 3.6
+		 * @since 3.6.0
 		 *
 		 * @param string handle The handle for the data.
 		 *
@@ -757,7 +769,7 @@
 		/**
 		 * Removes data with a particular handle from the queue.
 		 *
-		 * @since 3.7
+		 * @since 3.7.0
 		 *
 		 * @param string handle The handle for the data.
 		 *
@@ -772,9 +784,9 @@
 		/**
 		 * Gets data that was enqueued with a particular handle.
 		 *
-		 * @since 3.7
+		 * @since 3.7.0
 		 *
-		 * @param string handle The handle for the data
+		 * @param string handle The handle for the data.
 		 *
 		 * @returns mixed The data or undefined.
 		 */
