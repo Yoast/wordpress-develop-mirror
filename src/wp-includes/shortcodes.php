@@ -244,10 +244,11 @@ function do_shortcode( $content, $ignore_html = false ) {
  * 6 - An extra ] to allow for escaping shortcodes with double [[]]
  *
  * @since 2.5.0
+ * @since 4.4.0 Added the `$tagnames` parameter.
  *
  * @global array $shortcode_tags
  *
- * @param array $tagnames List of shortcodes to find. Optional. Defaults to all registered shortcodes.
+ * @param array $tagnames Optional. List of shortcodes to find. Defaults to all registered shortcodes.
  * @return string The shortcode search regular expression
  */
 function get_shortcode_regex( $tagnames = null ) {
@@ -330,9 +331,9 @@ function do_shortcode_tag( $m ) {
 	 * @since 4.7.0
 	 *
 	 * @param bool|string $return      Short-circuit return value. Either false or the value to replace the shortcode with.
-	 * @param string      $tag         Shortcode name.
-	 * @param array       $attr        Shortcode attributes array,
-	 * @param array       $m           Regular expression match array.
+	 * @param string       $tag         Shortcode name.
+	 * @param array|string $attr        Shortcode attributes array or empty string.
+	 * @param array        $m           Regular expression match array.
 	 */
 	$return = apply_filters( 'pre_do_shortcode_tag', false, $tag, $attr, $m );
 	if ( false !== $return ) {
@@ -349,9 +350,9 @@ function do_shortcode_tag( $m ) {
 	 * @since 4.7.0
 	 *
 	 * @param string $output Shortcode output.
-	 * @param string $tag    Shortcode name.
-	 * @param array  $attr   Shortcode attributes array,
-	 * @param array  $m      Regular expression match array.
+	 * @param string       $tag    Shortcode name.
+	 * @param array|string $attr   Shortcode attributes array or empty string.
+	 * @param array        $m      Regular expression match array.
 	 */
 	return apply_filters( 'do_shortcode_tag', $output, $tag, $attr, $m );
 }

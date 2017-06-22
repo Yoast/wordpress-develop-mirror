@@ -48,6 +48,12 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<type>[\w-]+)', array(
+			'args' => array(
+				'type' => array(
+					'description' => __( 'An alphanumeric identifier for the post type.' ),
+					'type'        => 'string',
+				),
+			),
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this, 'get_item' ),
@@ -76,7 +82,7 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 				}
 			}
 
-			return new WP_Error( 'rest_cannot_view', __( 'Sorry, you cannot view this resource with edit context.' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'rest_cannot_view', __( 'Sorry, you are not allowed to edit posts in this post type.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -119,15 +125,15 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 		$obj = get_post_type_object( $request['type'] );
 
 		if ( empty( $obj ) ) {
-			return new WP_Error( 'rest_type_invalid', __( 'Invalid resource.' ), array( 'status' => 404 ) );
+			return new WP_Error( 'rest_type_invalid', __( 'Invalid post type.' ), array( 'status' => 404 ) );
 		}
 
 		if ( empty( $obj->show_in_rest ) ) {
-			return new WP_Error( 'rest_cannot_read_type', __( 'Cannot view resource.' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'rest_cannot_read_type', __( 'Cannot view post type.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		if ( 'edit' === $request['context'] && ! current_user_can( $obj->cap->edit_posts ) ) {
-			return new WP_Error( 'rest_forbidden_context', __( 'Sorry, you are not allowed to manage this resource.' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'rest_forbidden_context', __( 'Sorry, you are not allowed to edit posts in this post type.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$data = $this->prepare_item_for_response( $obj, $request );
@@ -148,6 +154,9 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 	public function prepare_item_for_response( $post_type, $request ) {
 		$taxonomies = wp_list_filter( get_object_taxonomies( $post_type->name, 'objects' ), array( 'show_in_rest' => true ) );
 		$taxonomies = wp_list_pluck( $taxonomies, 'name' );
+		$base = ! empty( $post_type->rest_base ) ? $post_type->rest_base : $post_type->name;
+		$supports = get_all_post_type_supports( $post_type->name );
+
 		$data = array(
 			'capabilities' => $post_type->cap,
 			'description'  => $post_type->description,
@@ -155,7 +164,9 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 			'labels'       => $post_type->labels,
 			'name'         => $post_type->label,
 			'slug'         => $post_type->name,
+			'supports'     => $supports,
 			'taxonomies'   => array_values( $taxonomies ),
+			'rest_base'    => $base,
 		);
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -163,8 +174,6 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-
-		$base = ! empty( $post_type->rest_base ) ? $post_type->rest_base : $post_type->name;
 
 		$response->add_links( array(
 			'collection' => array(
@@ -204,51 +213,60 @@ class WP_REST_Post_Types_Controller extends WP_REST_Controller {
 			'type'                 => 'object',
 			'properties'           => array(
 				'capabilities'     => array(
-					'description'  => __( 'All capabilities used by the resource.' ),
-					'type'         => 'array',
-					'items'        => array(
-						'type' => 'string',
-					),
+					'description'  => __( 'All capabilities used by the post type.' ),
+					'type'         => 'object',
 					'context'      => array( 'edit' ),
 					'readonly'     => true,
 				),
 				'description'      => array(
-					'description'  => __( 'A human-readable description of the resource.' ),
+					'description'  => __( 'A human-readable description of the post type.' ),
 					'type'         => 'string',
 					'context'      => array( 'view', 'edit' ),
 					'readonly'     => true,
 				),
 				'hierarchical'     => array(
-					'description'  => __( 'Whether or not the resource should have children.' ),
+					'description'  => __( 'Whether or not the post type should have children.' ),
 					'type'         => 'boolean',
 					'context'      => array( 'view', 'edit' ),
 					'readonly'     => true,
 				),
 				'labels'           => array(
-					'description'  => __( 'Human-readable labels for the resource for various contexts.' ),
+					'description'  => __( 'Human-readable labels for the post type for various contexts.' ),
 					'type'         => 'object',
 					'context'      => array( 'edit' ),
 					'readonly'     => true,
 				),
 				'name'             => array(
-					'description'  => __( 'The title for the resource.' ),
+					'description'  => __( 'The title for the post type.' ),
 					'type'         => 'string',
 					'context'      => array( 'view', 'edit', 'embed' ),
 					'readonly'     => true,
 				),
 				'slug'             => array(
-					'description'  => __( 'An alphanumeric identifier for the resource.' ),
+					'description'  => __( 'An alphanumeric identifier for the post type.' ),
 					'type'         => 'string',
 					'context'      => array( 'view', 'edit', 'embed' ),
 					'readonly'     => true,
 				),
+				'supports'         => array(
+					'description'  => __( 'All features, supported by the post type.' ),
+					'type'         => 'object',
+					'context'      => array( 'edit' ),
+					'readonly'     => true,
+				),
 				'taxonomies'       => array(
-					'description'  => __( 'Taxonomies associated with resource.' ),
+					'description'  => __( 'Taxonomies associated with post type.' ),
 					'type'         => 'array',
 					'items'        => array(
 						'type' => 'string',
 					),
 					'context'      => array( 'view', 'edit' ),
+					'readonly'     => true,
+				),
+				'rest_base'            => array(
+					'description'  => __( 'REST base route for the post type.' ),
+					'type'         => 'string',
+					'context'      => array( 'view', 'edit', 'embed' ),
 					'readonly'     => true,
 				),
 			),

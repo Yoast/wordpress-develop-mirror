@@ -87,6 +87,32 @@ class Tests_Admin_includesTheme extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 38766
+	 */
+	function test_page_templates_for_post_types_with_trailing_periods() {
+		$theme = wp_get_theme( 'page-templates' );
+		$this->assertNotEmpty( $theme );
+
+		switch_theme( $theme['Template'], $theme['Stylesheet'] );
+
+		$this->assertEqualSetsWithIndex( array(
+			'No Trailing Period' => '38766/no-trailing-period-post-types.php',
+			'Trailing Period.' => '38766/trailing-period-post-types.php',
+			'Trailing Comma,' => '38766/trailing-comma-post-types.php',
+			'Trailing Period, White Space.' => '38766/trailing-period-whitespace-post-types.php',
+			'Trailing White Space, Period.' => '38766/trailing-whitespace-period-post-types.php',
+			'Tilde in Post Type.' => '38766/tilde-post-types.php',
+		), get_page_templates( null, 'period' ) );
+		$this->assertEqualSetsWithIndex( array(
+			'No Trailing Period' => '38766/no-trailing-period-post-types.php',
+			'Trailing Period.' => '38766/trailing-period-post-types.php',
+			'Trailing Comma,' => '38766/trailing-comma-post-types.php',
+			'Trailing Period, White Space.' => '38766/trailing-period-whitespace-post-types.php',
+			'Trailing White Space, Period.' => '38766/trailing-whitespace-period-post-types.php',
+		), get_page_templates( null, 'full-stop' ) );
+	}
+
+	/**
 	 * @ticket 38696
 	 */
 	function test_page_templates_child_theme() {
@@ -109,5 +135,32 @@ class Tests_Admin_includesTheme extends WP_UnitTestCase {
 			'This Template Header Is On One Line' => 'template-header.php',
 		), get_page_templates() );
 		$this->assertEquals( array(), get_page_templates( null, 'bar' ) );
+	}
+
+	/**
+	 * Test that the list of theme features pulled from the WordPress.org API returns the expected data structure.
+	 *
+	 * Differences in the structure can also trigger failure by causing PHP notices/warnings.
+	 *
+	 * @group external-http
+	 * @ticket 28121
+	 */
+	function test_get_theme_featured_list_api() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$featured_list_api = get_theme_feature_list( true );
+		$this->assertNonEmptyMultidimensionalArray( $featured_list_api );
+	}
+
+	/**
+	 * Test that the list of theme features hardcoded into Core returns the expected data structure.
+	 *
+	 * Differences in the structure can also trigger failure by causing PHP notices/warnings.
+	 *
+	 * @group external-http
+	 * @ticket 28121
+	 */
+	function test_get_theme_featured_list_hardcoded() {
+		$featured_list_hardcoded = get_theme_feature_list( false );
+		$this->assertNonEmptyMultidimensionalArray( $featured_list_hardcoded );
 	}
 }

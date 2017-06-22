@@ -37,12 +37,18 @@ class WP_Customize_Control {
 	public $instance_number;
 
 	/**
+	 * Customizer manager.
+	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var WP_Customize_Manager
 	 */
 	public $manager;
 
 	/**
+	 * Control ID.
+	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var string
 	 */
@@ -51,6 +57,7 @@ class WP_Customize_Control {
 	/**
 	 * All settings tied to the control.
 	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var array
 	 */
@@ -59,6 +66,7 @@ class WP_Customize_Control {
 	/**
 	 * The primary setting for the control (if there is one).
 	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var string
 	 */
@@ -77,38 +85,56 @@ class WP_Customize_Control {
 	public $capability;
 
 	/**
+	 * Order priority to load the control in Customizer.
+	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var int
 	 */
 	public $priority = 10;
 
 	/**
+	 * Section the control belongs to.
+	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var string
 	 */
 	public $section = '';
 
 	/**
+	 * Label for the control.
+	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var string
 	 */
 	public $label = '';
 
 	/**
+	 * Description for the control.
+	 *
+	 * @since 4.0.0
 	 * @access public
 	 * @var string
 	 */
 	public $description = '';
 
 	/**
-	 * @todo: Remove choices
+	 * List of choices for 'radio' or 'select' type controls, where values are the keys, and labels are the values.
 	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var array
 	 */
 	public $choices = array();
 
 	/**
+	 * List of custom input attributes for control output, where attribute names are the keys and values are the values.
+	 *
+	 * Not used for 'checkbox', 'radio', 'select', 'textarea', or 'dropdown-pages' control types.
+	 *
+	 * @since 4.0.0
 	 * @access public
 	 * @var array
 	 */
@@ -119,18 +145,22 @@ class WP_Customize_Control {
 	 *
 	 * @since 4.7.0
 	 * @access public
-	 * @var array
+	 * @var bool
 	 */
 	public $allow_addition = false;
 
 	/**
 	 * @deprecated It is better to just call the json() method
+	 * @since 3.4.0
 	 * @access public
 	 * @var array
 	 */
 	public $json = array();
 
 	/**
+	 * Control's Type.
+	 *
+	 * @since 3.4.0
 	 * @access public
 	 * @var string
 	 */
@@ -235,7 +265,6 @@ class WP_Customize_Control {
 	 * Check whether control is active to current Customizer preview.
 	 *
 	 * @since 4.0.0
-	 * @access public
 	 *
 	 * @return bool Whether the control is active to the current preview.
 	 */
@@ -263,7 +292,6 @@ class WP_Customize_Control {
 	 * provide an 'active_callback' argument to the constructor.
 	 *
 	 * @since 4.0.0
-	 * @access public
 	 *
 	 * @return true Always true.
 	 */
@@ -446,7 +474,6 @@ class WP_Customize_Control {
 	 * Render the custom attributes for the control's input element.
 	 *
 	 * @since 4.0.0
-	 * @access public
 	 */
 	public function input_attrs() {
 		foreach ( $this->input_attrs as $attr => $value ) {
@@ -588,7 +615,10 @@ class WP_Customize_Control {
 				?>
 				</label>
 				<?php if ( $this->allow_addition && current_user_can( 'publish_pages' ) && current_user_can( 'edit_theme_options' ) ) : // Currently tied to menus functionality. ?>
-					<button type="button" class="button add-new-toggle"><?php echo get_post_type_object( 'page' )->labels->add_new_item; ?></button>
+					<button type="button" class="button-link add-new-toggle"><?php
+						/* translators: %s: add new page label */
+						printf( __( '+ %s' ), get_post_type_object( 'page' )->labels->add_new_item );
+					?></button>
 					<div class="new-content-item">
 						<label for="create-input-<?php echo $this->id; ?>"><span class="screen-reader-text"><?php _e( 'New page title' ); ?></span></label>
 						<input type="text" id="create-input-<?php echo $this->id; ?>" class="create-item-input" placeholder="<?php esc_attr_e( 'New page title&hellip;' ); ?>">
@@ -645,56 +675,92 @@ class WP_Customize_Control {
 
 }
 
-/** WP_Customize_Color_Control class */
+/**
+ * WP_Customize_Color_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-color-control.php' );
 
-/** WP_Customize_Media_Control class */
+/**
+ * WP_Customize_Media_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-media-control.php' );
 
-/** WP_Customize_Upload_Control class */
+/**
+ * WP_Customize_Upload_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-upload-control.php' );
 
-/** WP_Customize_Image_Control class */
+/**
+ * WP_Customize_Image_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-image-control.php' );
 
-/** WP_Customize_Background_Image_Control class */
+/**
+ * WP_Customize_Background_Image_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-background-image-control.php' );
 
-/** WP_Customize_Background_Position_Control class */
+/**
+ * WP_Customize_Background_Position_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-background-position-control.php' );
 
-/** WP_Customize_Cropped_Image_Control class */
+/**
+ * WP_Customize_Cropped_Image_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-cropped-image-control.php' );
 
-/** WP_Customize_Site_Icon_Control class */
+/**
+ * WP_Customize_Site_Icon_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-site-icon-control.php' );
 
-/** WP_Customize_Header_Image_Control class */
+/**
+ * WP_Customize_Header_Image_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-header-image-control.php' );
 
-/** WP_Customize_Theme_Control class */
+/**
+ * WP_Customize_Theme_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-theme-control.php' );
 
-/** WP_Widget_Area_Customize_Control class */
+/**
+ * WP_Widget_Area_Customize_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-widget-area-customize-control.php' );
 
-/** WP_Widget_Form_Customize_Control class */
+/**
+ * WP_Widget_Form_Customize_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-widget-form-customize-control.php' );
 
-/** WP_Customize_Nav_Menu_Control class */
+/**
+ * WP_Customize_Nav_Menu_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-control.php' );
 
-/** WP_Customize_Nav_Menu_Item_Control class */
+/**
+ * WP_Customize_Nav_Menu_Item_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-item-control.php' );
 
-/** WP_Customize_Nav_Menu_Location_Control class */
+/**
+ * WP_Customize_Nav_Menu_Location_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-location-control.php' );
 
-/** WP_Customize_Nav_Menu_Name_Control class */
+/**
+ * WP_Customize_Nav_Menu_Name_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-name-control.php' );
 
-/** WP_Customize_Nav_Menu_Auto_Add_Control class */
+/**
+ * WP_Customize_Nav_Menu_Auto_Add_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-auto-add-control.php' );
 
-/** WP_Customize_New_Menu_Control class */
+/**
+ * WP_Customize_New_Menu_Control class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-new-menu-control.php' );

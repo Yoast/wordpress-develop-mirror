@@ -27,6 +27,11 @@ class WP_Test_REST_Pages_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		parent::setUp();
 		$this->has_setup_template = false;
 		add_filter( 'theme_page_templates', array( $this, 'filter_theme_page_templates' ) );
+		// reregister the route as we now have a template available.
+		$GLOBALS['wp_rest_server']->override_by_default = true;
+		$controller = new WP_REST_Posts_Controller( 'page' );
+		$controller->register_routes();
+		$GLOBALS['wp_rest_server']->override_by_default = false;
 	}
 
 	public function test_register_routes() {
@@ -369,6 +374,41 @@ class WP_Test_REST_Pages_Controller extends WP_Test_REST_Post_Type_Controller_Te
 
 		$new_data = $response->get_data();
 		$this->assertEquals( 0, $new_data['menu_order'] );
+	}
+
+	public function test_update_page_parent_non_zero() {
+		$page_id1 = $this->factory->post->create( array(
+			'post_type' => 'page',
+		) );
+		$page_id2 = $this->factory->post->create( array(
+			'post_type' => 'page',
+		) );
+		wp_set_current_user( self::$editor_id );
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wp/v2/pages/%d', $page_id2 ) );
+		$request->set_body_params( array(
+			'parent' => $page_id1,
+		) );
+		$response = $this->server->dispatch( $request );
+		$new_data = $response->get_data();
+		$this->assertEquals( $page_id1, $new_data['parent'] );
+	}
+
+	public function test_update_page_parent_zero() {
+		$page_id1 = $this->factory->post->create( array(
+			'post_type' => 'page',
+		) );
+		$page_id2 = $this->factory->post->create( array(
+			'post_type'    => 'page',
+			'post_parent'  => $page_id1,
+		) );
+		wp_set_current_user( self::$editor_id );
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wp/v2/pages/%d', $page_id2 ) );
+		$request->set_body_params( array(
+			'parent' => 0,
+		) );
+		$response = $this->server->dispatch( $request );
+		$new_data = $response->get_data();
+		$this->assertEquals( 0, $new_data['parent'] );
 	}
 
 	public function test_get_page_with_password() {

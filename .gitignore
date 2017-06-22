@@ -15,14 +15,21 @@ wp-tests-config.php
 /npm-debug.log
 /build
 /tests/phpunit/build
-/wp-cli.local.yml 
+/wp-cli.local.yml
 
 # Files and folders that get created in wp-content
 /src/wp-content/blogs.dir
 /src/wp-content/languages
 /src/wp-content/mu-plugins
 /src/wp-content/plugins
-/src/wp-content/themes
+/src/wp-content/themes/*
+!/src/wp-content/themes/twentyten
+!/src/wp-content/themes/twentyeleven
+!/src/wp-content/themes/twentytwelve
+!/src/wp-content/themes/twentythirteen
+!/src/wp-content/themes/twentyfourteen
+!/src/wp-content/themes/twentyfifteen
+!/src/wp-content/themes/twentyseventeen
 /src/wp-content/upgrade
 /src/wp-content/uploads
 /src/wp-content/advanced-cache.php
@@ -42,3 +49,10 @@ wp-tests-config.php
 
 # Ignore other .gitignore files to allow for personal customizations
 .gitignore
+
+# Files related to applying patches
+*.rej
+*.orig
+*.patch
+*.diff
+.svn

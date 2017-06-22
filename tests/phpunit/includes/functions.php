@@ -161,3 +161,7 @@ function _upload_dir_https( $uploads ) {
 
 	return $uploads;
 }
+
+// Skip `setcookie` calls in auth_cookie functions due to warning:
+// Cannot modify header information - headers already sent by ...
+tests_add_filter( 'send_auth_cookies', '__return_false' );
