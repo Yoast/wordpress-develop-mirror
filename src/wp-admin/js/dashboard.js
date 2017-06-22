@@ -5,7 +5,7 @@ window.wp = window.wp || {};
 /**
  * Dashboard widget functionality
  *
- * @since ?
+ * @since 2.7.0
  */
 
 jQuery(document).ready( function($) {
@@ -13,7 +13,13 @@ jQuery(document).ready( function($) {
 		welcomePanelHide = $('#wp_welcome_panel-hide'),
 		updateWelcomePanel;
 
-	// Save the visibility of the welcome panel.
+	/**
+	 * Save the visibility of the welcome panel.
+	 *
+	 * @param {boolean} visible Should it be visible or not.
+	 *
+	 * @return void
+	 */
 	updateWelcomePanel = function( visible ) {
 		$.post( ajaxurl, {
 			action: 'update-welcome-panel',
@@ -47,18 +53,20 @@ jQuery(document).ready( function($) {
 	/**
 	 * Trigger widget updates via AJAX
 	 *
-	 * @since ?
+	 * @since 2.7.0
 	 *
 	 * @param {string} el Optional. Widget to fetch or none to update all.
-	 * @returns void
+	 *
+	 * @return void
 	 */
 	ajaxPopulateWidgets = function(el) {
 		/**
 		 * Fetch the latest representation of the widget via Ajax and show it.
 		 *
-		 * @param {int} i Interval to use to use in the timeout.
+		 * @param {int} i Number of half-seconds to use as the timeout.
 		 * @param {string} id ID of the element which is going to be checked for changes.
-		 * @returns void
+		 *
+		 * @return void
 		 */
 		function show(i, id) {
 			var p, e = $('#' + id + ' div.inside:visible').find('.widget-loading');
@@ -100,7 +108,7 @@ jQuery(document).ready( function($) {
 	/**
 	 * Control the Quick Press (Quick Draft) widget
 	 *
-	 * @since ?
+	 * @since 2.7.0
 	 */
 	quickPressLoad = function() {
 		var act = $('#quickpost-action'), t;
@@ -129,7 +137,11 @@ jQuery(document).ready( function($) {
 				$('#title').focus();
 			});
 
-			// Mark the entry with a background for a limited amount of time.
+			/**
+			 * Highlights the latest post for one second.
+			 *
+			 * @return void
+ 			 */
 			function highlightLatestPost () {
 				var latestPost = $('.drafts ul li').first();
 				latestPost.css('background', '#fffbe5');
@@ -139,13 +151,16 @@ jQuery(document).ready( function($) {
 			}
 		} );
 
+		// Change the QuickPost action to the publish value.
 		$('#publish').click( function() { act.val( 'post-quickpress-publish' ); } );
 
 		/**
-		 * Add accessibility context to inputs
+		 * Adds accessibility context to inputs
 		 *
 		 * Use the 'screen-reader-text' class to hide the label when entering a value.
 		 * Apply it when the input is not empty or the input has focus.
+		 *
+		 * @return void
 		 */
 		$('#title, #tags-input, #content').each( function() {
 			var input = $(this), prompt = $('#' + this.id + '-prompt-text');
@@ -181,7 +196,11 @@ jQuery(document).ready( function($) {
 	// Enable the dragging functionality of the widgets.
 	$( '.meta-box-sortables' ).sortable( 'option', 'containment', '#wpwrap' );
 
-	// Adjust the height of the textarea based on the content
+	/**
+	 * Adjust the height of the textarea based on the content
+	 *
+	 * @since 3.6.0
+	 */
 	function autoResizeTextarea() {
 		// When IE8 or older is used to render this document, exit.
 		if ( document.documentMode && document.documentMode < 9 ) {
@@ -194,12 +213,16 @@ jQuery(document).ready( function($) {
 		var clone = $('.quick-draft-textarea-clone'),
 			editor = $('#content'),
 			editorHeight = editor.height(),
-			// 100px roughly accounts for browser chrome and allows the
-			// save draft button to show on-screen at the same time.
+			/*
+			 * 100px roughly accounts for browser chrome and allows the
+			 * save draft button to show on-screen at the same time.
+			 */
 			editorMaxHeight = $(window).height() - 100;
 
-		// Match up textarea and clone div as much as possible.
-		// Padding cannot be reliably retrieved using shorthand in all browsers.
+		/*
+		 * Match up textarea and clone div as much as possible.
+		 * Padding cannot be reliably retrieved using shorthand in all browsers.
+		 */
 		clone.css({
 			'font-family': editor.css('font-family'),
 			'font-size':   editor.css('font-size'),
@@ -221,16 +244,18 @@ jQuery(document).ready( function($) {
 				// Add 2px to compensate for border-top & border-bottom.
 				cloneHeight = clone.css('width', $this.css('width')).text(textareaContent).outerHeight() + 2;
 
-			// Default to having scrollbars.
+			// Default to show a vertical scrollbar, if needed.
 			editor.css('overflow-y', 'auto');
 
-			// Only change the height if it has indeed changed and both heights are below the max.
+			// Only change the height if it has changed and both heights are below the max.
 			if ( cloneHeight === editorHeight || ( cloneHeight >= editorMaxHeight && editorHeight >= editorMaxHeight ) ) {
 				return;
 			}
 
-			// Don't allow editor to exceed height of window.
-			// This is also bound in CSS to a max-height of 1300px to be extra safe.
+			/*
+			 * Don't allow editor to exceed the height of the window.
+			 * This is also bound in CSS to a max-height of 1300px to be extra safe.
+			 */
 			if ( cloneHeight > editorMaxHeight ) {
 				editorHeight = editorMaxHeight;
 			} else {
@@ -252,6 +277,14 @@ jQuery( function( $ ) {
 	var communityEventsData = window.communityEventsData || {},
 		app;
 
+	/**
+	 * @summary Global Community Events class
+	 *
+	 * @since 4.8.0
+	 *
+	 * @global
+	 * @class
+	 */
 	app = window.wp.communityEvents = {
 		initialized: false,
 		model: null,
@@ -290,6 +323,11 @@ jQuery( function( $ ) {
 
 			$container.on( 'click', '.community-events-toggle-location, .community-events-cancel', app.toggleLocationForm );
 
+			/**
+			 * @summary Filter events based on entered location.
+			 *
+			 * @return void
+			 */
 			$container.on( 'submit', '.community-events-form', function( event ) {
 				var location = $.trim( $( '#community-events-location' ).val() );
 
@@ -324,6 +362,8 @@ jQuery( function( $ ) {
 		 *
 		 * @param {event|string} action 'show' or 'hide' to specify a state;
 		 *                              or an event object to flip between states.
+		 *
+		 * @return void
 		 */
 		toggleLocationForm: function( action ) {
 			var $toggleButton = $( '.community-events-toggle-location' ),
@@ -366,7 +406,9 @@ jQuery( function( $ ) {
 		 *
 		 * @since 4.8.0
 		 *
-		 * @param {object} requestParams
+		 * @param {object} requestParams REST API Request parameters object.
+		 *
+		 * @return void
 		 */
 		getEvents: function( requestParams ) {
 			var initiatedBy,
@@ -419,6 +461,8 @@ jQuery( function( $ ) {
 		 * @param {Object} templateParams The various parameters that will get passed to wp.template.
 		 * @param {string} initiatedBy    'user' to indicate that this was triggered manually by the user;
 		 *                                'app' to indicate it was triggered automatically by the app itself.
+		 *
+		 * @return void
 		 */
 		renderEventsTemplate: function( templateParams, initiatedBy ) {
 			var template,
