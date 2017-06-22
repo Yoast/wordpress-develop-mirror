@@ -89,7 +89,7 @@ var tb_position;
 		}
 
 		/**
-		 * @summary Removes any width and height parameters from the href of any anchor with the ThickBox class and recalculates the new height and width values.
+		 * @summary Recalculates the new height and width for all links with a ThickBox class.
 		 *
 		 * @since 2.6.0
 		 */
@@ -103,7 +103,7 @@ var tb_position;
 	};
 
 	/**
-	 * Recalculates the ThickBox position on every window resize.
+	 * Recalculates the ThickBox position when the window is resized.
 	 */
 	$(window).resize(function(){ tb_position(); });
 
