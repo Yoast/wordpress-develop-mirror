@@ -382,6 +382,11 @@ class wp_xmlrpc_server extends IXR_Server {
 			if ( isset($meta['id']) ) {
 				$meta['id'] = (int) $meta['id'];
 				$pmeta = get_metadata_by_mid( 'post', $meta['id'] );
+
+				if ( ! $pmeta || $pmeta->post_id != $post_id ) {
+					continue;
+				}
+
 				if ( isset($meta['key']) ) {
 					$meta['key'] = wp_unslash( $meta['key'] );
 					if ( $meta['key'] !== $pmeta->meta_key )
@@ -394,6 +399,68 @@ class wp_xmlrpc_server extends IXR_Server {
 				}
 			} elseif ( current_user_can( 'add_post_meta', $post_id, wp_unslash( $meta['key'] ) ) ) {
 				add_post_meta( $post_id, $meta['key'], $meta['value'] );
+			}
+		}
+	}
+
+	/**
+	 * Retrieve custom fields for a term.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array Array of custom fields, if they exist.
+	 */
+	public function get_term_custom_fields( $term_id ) {
+		$term_id = (int) $term_id;
+
+		$custom_fields = array();
+
+		foreach ( (array) has_term_meta( $term_id ) as $meta ) {
+
+			if ( ! current_user_can( 'edit_term_meta', $term_id ) ) {
+				continue;
+			}
+
+			$custom_fields[] = array(
+				'id'    => $meta['meta_id'],
+				'key'   => $meta['meta_key'],
+				'value' => $meta['meta_value'],
+			);
+		}
+
+		return $custom_fields;
+	}
+
+	/**
+	 * Set custom fields for a term.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param int $post_id Post ID.
+	 * @param array $fields Custom fields.
+	 */
+	public function set_term_custom_fields( $term_id, $fields ) {
+		$term_id = (int) $term_id;
+
+		foreach ( (array) $fields as $meta ) {
+			if ( isset( $meta['id'] ) ) {
+				$meta['id'] = (int) $meta['id'];
+				$pmeta = get_metadata_by_mid( 'term', $meta['id'] );
+				if ( isset( $meta['key'] ) ) {
+					$meta['key'] = wp_unslash( $meta['key'] );
+					if ( $meta['key'] !== $pmeta->meta_key ) {
+						continue;
+					}
+					$meta['value'] = wp_unslash( $meta['value'] );
+					if ( current_user_can( 'edit_term_meta', $term_id ) ) {
+						update_metadata_by_mid( 'term', $meta['id'], $meta['value'] );
+					}
+				} elseif ( current_user_can( 'delete_term_meta', $term_id ) ) {
+					delete_metadata_by_mid( 'term', $meta['id'] );
+				}
+			} elseif ( current_user_can( 'add_term_meta', $term_id ) ) {
+				add_term_meta( $term_id, $meta['key'], $meta['value'] );
 			}
 		}
 	}
@@ -736,6 +803,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		// Count we are happy to return as an integer because people really shouldn't use terms that much.
 		$_term['count'] = intval( $_term['count'] );
+
+		// Get term meta.
+		$_term['custom_fields'] = $this->get_term_custom_fields( $_term['term_id'] );
 
 		/**
 		 * Filters XML-RPC-prepared data for the given term.
@@ -1295,10 +1365,31 @@ class wp_xmlrpc_server extends IXR_Server {
 	 * @return IXR_Error|string
 	 */
 	protected function _insert_post( $user, $content_struct ) {
-		$defaults = array( 'post_status' => 'draft', 'post_type' => 'post', 'post_author' => 0,
-			'post_password' => '', 'post_excerpt' => '', 'post_content' => '', 'post_title' => '' );
+		$defaults = array(
+			'post_status'    => 'draft',
+			'post_type'      => 'post',
+			'post_author'    => null,
+			'post_password'  => null,
+			'post_excerpt'   => null,
+			'post_content'   => null,
+			'post_title'     => null,
+			'post_date'      => null,
+			'post_date_gmt'  => null,
+			'post_format'    => null,
+			'post_name'      => null,
+			'post_thumbnail' => null,
+			'post_parent'    => null,
+			'ping_status'    => null,
+			'comment_status' => null,
+			'custom_fields'  => null,
+			'terms_names'    => null,
+			'terms'          => null,
+			'sticky'         => null,
+			'enclosure'      => null,
+			'ID'             => null,
+		);
 
-		$post_data = wp_parse_args( $content_struct, $defaults );
+		$post_data = wp_parse_args( array_intersect_key( $content_struct, $defaults ), $defaults );
 
 		$post_type = get_post_type_object( $post_data['post_type'] );
 		if ( ! $post_type )
@@ -1488,9 +1579,6 @@ class wp_xmlrpc_server extends IXR_Server {
 
 			$post_data['tax_input'] = $terms;
 			unset( $post_data['terms'], $post_data['terms_names'] );
-		} else {
-			// Do not allow direct submission of 'tax_input', clients must use 'terms' and/or 'terms_names'.
-			unset( $post_data['tax_input'], $post_data['post_category'], $post_data['tags_input'] );
 		}
 
 		if ( isset( $post_data['post_format'] ) ) {
@@ -1920,6 +2008,11 @@ class wp_xmlrpc_server extends IXR_Server {
 		if ( ! $term )
 			return new IXR_Error( 500, __( 'Sorry, your term could not be created.' ) );
 
+		// Add term meta.
+		if ( isset( $content_struct['custom_fields'] ) ) {
+			$this->set_term_custom_fields( $term['term_id'], $content_struct['custom_fields'] );
+		}
+
 		return strval( $term['term_id'] );
 	}
 
@@ -2018,6 +2111,11 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( ! $term )
 			return new IXR_Error( 500, __( 'Sorry, editing the term failed.' ) );
+
+		// Update term meta.
+		if ( isset( $content_struct['custom_fields'] ) ) {
+			$this->set_term_custom_fields( $term_id, $content_struct['custom_fields'] );
+		}
 
 		return true;
 	}

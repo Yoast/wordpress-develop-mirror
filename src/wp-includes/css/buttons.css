@@ -242,7 +242,7 @@ TABLE OF CONTENTS:
 
 .wp-core-ui .button-link-delete:hover,
 .wp-core-ui .button-link-delete:focus {
-	color: #f00;
+	color: #dc3232;
 }
 
 .ie8 .wp-core-ui .button-link:focus {
@@ -409,6 +409,11 @@ TABLE OF CONTENTS:
 		height: 28px;
 		margin: 0;
 		vertical-align: inherit;
+	}
+
+	.media-modal-content .media-toolbar-primary .media-button {
+		margin-top: 10px;
+		margin-left: 5px;
 	}
 
 	/* Reset responsive styles on Log in button on iframed login form */

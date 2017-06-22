@@ -163,7 +163,7 @@ function wp_print_media_templates() {
 
 	<script type="text/html" id="tmpl-media-modal">
 		<div class="<?php echo $class; ?>">
-			<button type="button" class="button-link media-modal-close"><span class="media-modal-icon"><span class="screen-reader-text"><?php _e( 'Close media panel' ); ?></span></span></button>
+			<button type="button" class="media-modal-close"><span class="media-modal-icon"><span class="screen-reader-text"><?php _e( 'Close media panel' ); ?></span></span></button>
 			<div class="media-modal-content"></div>
 		</div>
 		<div class="media-modal-backdrop"></div>
@@ -235,7 +235,10 @@ function wp_print_media_templates() {
 
 				<# if ( data.suggestedWidth && data.suggestedHeight ) { #>
 					<p class="suggested-dimensions">
-						<?php _e( 'Suggested image dimensions:' ); ?> {{data.suggestedWidth}} &times; {{data.suggestedHeight}}
+						<?php
+							/* translators: 1: suggested width number, 2: suggested height number. */
+							printf( __( 'Suggested image dimensions: %1$s by %2$s pixels.' ), '{{data.suggestedWidth}}', '{{data.suggestedHeight}}' );
+						?>
 					</p>
 				<# } #>
 
@@ -605,7 +608,7 @@ function wp_print_media_templates() {
 		<h2><?php _e( 'Attachment Display Settings' ); ?></h2>
 
 		<# if ( 'image' === data.type ) { #>
-			<label class="setting">
+			<label class="setting align">
 				<span><?php _e('Alignment'); ?></span>
 				<select class="alignment"
 					data-setting="align"
@@ -1084,7 +1087,7 @@ function wp_print_media_templates() {
 					</div>
 				</div>
 
-				<label class="setting checkbox-setting">
+				<label class="setting checkbox-setting autoplay">
 					<input type="checkbox" data-setting="autoplay" />
 					<span><?php _e( 'Autoplay' ); ?></span>
 				</label>
@@ -1173,7 +1176,7 @@ function wp_print_media_templates() {
 					</div>
 				</div>
 
-				<label class="setting checkbox-setting">
+				<label class="setting checkbox-setting autoplay">
 					<input type="checkbox" data-setting="autoplay" />
 					<span><?php _e( 'Autoplay' ); ?></span>
 				</label>
