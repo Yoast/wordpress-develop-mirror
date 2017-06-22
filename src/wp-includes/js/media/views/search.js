@@ -16,14 +16,12 @@ Search = wp.media.View.extend({
 
 	attributes: {
 		type:        'search',
-		placeholder: l10n.search
+		placeholder: l10n.searchMediaPlaceholder
 	},
 
 	events: {
 		'input':  'search',
-		'keyup':  'search',
-		'change': 'search',
-		'search': 'search'
+		'keyup':  'search'
 	},
 
 	/**
@@ -34,13 +32,13 @@ Search = wp.media.View.extend({
 		return this;
 	},
 
-	search: function( event ) {
+	search: _.debounce( function( event ) {
 		if ( event.target.value ) {
 			this.model.set( 'search', event.target.value );
 		} else {
 			this.model.unset('search');
 		}
-	}
+	}, 300 )
 });
 
 module.exports = Search;

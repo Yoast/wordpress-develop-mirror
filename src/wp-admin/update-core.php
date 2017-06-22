@@ -68,12 +68,16 @@ function list_core_update( $update ) {
 				$mysql_compat = version_compare( $mysql_version, $update->mysql_version, '>=' );
 
 			if ( !$mysql_compat && !$php_compat )
+				/* translators: 1: WordPress version number, 2: Minimum required PHP version number, 3: Minimum required MySQL version number, 4: Current PHP version number, 5: Current MySQL version number */
 				$message = sprintf( __('You cannot update because <a href="https://codex.wordpress.org/Version_%1$s">WordPress %1$s</a> requires PHP version %2$s or higher and MySQL version %3$s or higher. You are running PHP version %4$s and MySQL version %5$s.'), $update->current, $update->php_version, $update->mysql_version, $php_version, $mysql_version );
 			elseif ( !$php_compat )
+				/* translators: 1: WordPress version number, 2: Minimum required PHP version number, 3: Current PHP version number */
 				$message = sprintf( __('You cannot update because <a href="https://codex.wordpress.org/Version_%1$s">WordPress %1$s</a> requires PHP version %2$s or higher. You are running version %3$s.'), $update->current, $update->php_version, $php_version );
 			elseif ( !$mysql_compat )
+				/* translators: 1: WordPress version number, 2: Minimum required MySQL version number, 3: Current MySQL version number */
 				$message = sprintf( __('You cannot update because <a href="https://codex.wordpress.org/Version_%1$s">WordPress %1$s</a> requires MySQL version %2$s or higher. You are running version %3$s.'), $update->current, $update->mysql_version, $mysql_version );
 			else
+				/* translators: 1: WordPress version number, 2: WordPress version number including locale if necessary */
 				$message = 	sprintf(__('You can update to <a href="https://codex.wordpress.org/Version_%1$s">WordPress %2$s</a> automatically:'), $update->current, $version_string);
 			if ( !$mysql_compat || !$php_compat )
 				$show_buttons = false;
@@ -246,6 +250,8 @@ function list_plugin_updates() {
 	<tbody class="plugins">
 <?php
 	foreach ( (array) $plugins as $plugin_file => $plugin_data ) {
+		$plugin_data = (object) _get_plugin_data_markup_translate( $plugin_file, (array) $plugin_data, false, true );
+
 		// Get plugin compat for running version of WordPress.
 		if ( isset($plugin_data->update->tested) && version_compare($plugin_data->update->tested, $cur_wp_version, '>=') ) {
 			$compat = '<br />' . sprintf(__('Compatibility with WordPress %1$s: 100%% (according to its author)'), $cur_wp_version);
@@ -618,6 +624,11 @@ if ( 'upgrade-core' == $action ) {
 	 */
 	do_action( 'core_upgrade_preamble' );
 	echo '</div>';
+
+	wp_localize_script( 'updates', '_wpUpdatesItemCounts', array(
+		'totals'  => wp_get_update_data(),
+	) );
+
 	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-core-upgrade' == $action || 'do-core-reinstall' == $action ) {
@@ -641,6 +652,10 @@ if ( 'upgrade-core' == $action ) {
 
 	if ( isset( $_POST['upgrade'] ) )
 		do_core_upgrade($reinstall);
+
+	wp_localize_script( 'updates', '_wpUpdatesItemCounts', array(
+		'totals'  => wp_get_update_data(),
+	) );
 
 	include(ABSPATH . 'wp-admin/admin-footer.php');
 
@@ -670,6 +685,11 @@ if ( 'upgrade-core' == $action ) {
 	echo '<h1>' . __( 'Update Plugins' ) . '</h1>';
 	echo '<iframe src="', $url, '" style="width: 100%; height: 100%; min-height: 750px;" frameborder="0" title="' . esc_attr__( 'Update progress' ) . '"></iframe>';
 	echo '</div>';
+
+	wp_localize_script( 'updates', '_wpUpdatesItemCounts', array(
+		'totals'  => wp_get_update_data(),
+	) );
+
 	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-theme-upgrade' == $action ) {
@@ -700,6 +720,11 @@ if ( 'upgrade-core' == $action ) {
 		<iframe src="<?php echo $url ?>" style="width: 100%; height: 100%; min-height: 750px;" frameborder="0" title="<?php esc_attr_e( 'Update progress' ); ?>"></iframe>
 	</div>
 	<?php
+
+	wp_localize_script( 'updates', '_wpUpdatesItemCounts', array(
+		'totals'  => wp_get_update_data(),
+	) );
+
 	include(ABSPATH . 'wp-admin/admin-footer.php');
 
 } elseif ( 'do-translation-upgrade' == $action ) {
@@ -719,6 +744,10 @@ if ( 'upgrade-core' == $action ) {
 
 	$upgrader = new Language_Pack_Upgrader( new Language_Pack_Upgrader_Skin( compact( 'url', 'nonce', 'title', 'context' ) ) );
 	$result = $upgrader->bulk_upgrade();
+
+	wp_localize_script( 'updates', '_wpUpdatesItemCounts', array(
+		'totals'  => wp_get_update_data(),
+	) );
 
 	require_once( ABSPATH . 'wp-admin/admin-footer.php' );
 

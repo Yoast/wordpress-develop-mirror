@@ -518,7 +518,8 @@ if ( ! current_theme_supports( 'menus' ) && ! $num_locations )
 
 if ( ! $locations_screen ) : // Main tab
 	$overview  = '<p>' . __( 'This screen is used for managing your custom navigation menus.' ) . '</p>';
-	$overview .= '<p>' . sprintf( __( 'Menus can be displayed in locations defined by your theme, even used in sidebars by adding a &#8220;Custom Menu&#8221; widget on the <a href="%1$s">Widgets</a> screen. If your theme does not support the custom menus feature (the default themes, %2$s and %3$s, do), you can learn about adding this support by following the Documentation link to the side.' ), admin_url( 'widgets.php' ), 'Twenty Fifteen', 'Twenty Fourteen' ) . '</p>';
+	/* translators: 1: Widgets admin screen URL, 2 and 3: The name of the default themes */
+	$overview .= '<p>' . sprintf( __( 'Menus can be displayed in locations defined by your theme, even used in sidebars by adding a &#8220;Custom Menu&#8221; widget on the <a href="%1$s">Widgets</a> screen. If your theme does not support the custom menus feature (the default themes, %2$s and %3$s, do), you can learn about adding this support by following the Documentation link to the side.' ), admin_url( 'widgets.php' ), 'Twenty Sixteen', 'Twenty Seventeen' ) . '</p>';
 	$overview .= '<p>' . __( 'From this screen you can:' ) . '</p>';
 	$overview .= '<ul><li>' . __( 'Create, edit, and delete menus' ) . '</li>';
 	$overview .= '<li>' . __( 'Add, organize, and modify individual menu items' ) . '</li></ul>';
@@ -575,21 +576,23 @@ get_current_screen()->set_help_sidebar(
 require_once( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 <div class="wrap">
-	<h1><?php echo esc_html( __( 'Menus' ) ); ?>
-		<?php
-		if ( current_user_can( 'customize' ) ) :
-			$focus = $locations_screen ? array( 'section' => 'menu_locations' ) : array( 'panel' => 'nav_menus' );
-			printf(
-				' <a class="page-title-action hide-if-no-customize" href="%1$s">%2$s</a>',
-				esc_url( add_query_arg( array(
-					array( 'autofocus' => $focus ),
-					'return' => urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ),
-				), admin_url( 'customize.php' ) ) ),
-				__( 'Manage with Live Preview' )
-			);
-		endif;
-		?>
-	</h1>
+	<h1 class="wp-heading-inline"><?php echo esc_html( __( 'Menus' ) ); ?></h1>
+	<?php
+	if ( current_user_can( 'customize' ) ) :
+		$focus = $locations_screen ? array( 'section' => 'menu_locations' ) : array( 'panel' => 'nav_menus' );
+		printf(
+			' <a class="page-title-action hide-if-no-customize" href="%1$s">%2$s</a>',
+			esc_url( add_query_arg( array(
+				array( 'autofocus' => $focus ),
+				'return' => urlencode( remove_query_arg( wp_removable_query_args(), wp_unslash( $_SERVER['REQUEST_URI'] ) ) ),
+			), admin_url( 'customize.php' ) ) ),
+			__( 'Manage with Live Preview' )
+		);
+	endif;
+	?>
+
+	<hr class="wp-header-end">
+
 	<h2 class="nav-tab-wrapper wp-clearfix">
 		<a href="<?php echo admin_url( 'nav-menus.php' ); ?>" class="nav-tab<?php if ( ! isset( $_GET['action'] ) || isset( $_GET['action'] ) && 'locations' != $_GET['action'] ) echo ' nav-tab-active'; ?>"><?php esc_html_e( 'Edit Menus' ); ?></a>
 		<?php if ( $num_locations && $menu_count ) : ?>
@@ -798,17 +801,19 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 										$auto_add = false;
 								} ?>
 
-								<dl class="auto-add-pages">
-									<dt class="howto"><?php _e( 'Auto add pages' ); ?></dt>
-									<dd class="checkbox-input"><input type="checkbox"<?php checked( $auto_add ); ?> name="auto-add-pages" id="auto-add-pages" value="1" /> <label for="auto-add-pages"><?php printf( __('Automatically add new top-level pages to this menu' ), esc_url( admin_url( 'edit.php?post_type=page' ) ) ); ?></label></dd>
-								</dl>
+								<fieldset class="menu-settings-group auto-add-pages">
+									<legend class="menu-settings-group-name howto"><?php _e( 'Auto add pages' ); ?></legend>
+									<div class="menu-settings-input checkbox-input">
+										<input type="checkbox"<?php checked( $auto_add ); ?> name="auto-add-pages" id="auto-add-pages" value="1" /> <label for="auto-add-pages"><?php printf( __('Automatically add new top-level pages to this menu' ), esc_url( admin_url( 'edit.php?post_type=page' ) ) ); ?></label>
+									</div>
+								</fieldset>
 
 								<?php if ( current_theme_supports( 'menus' ) ) : ?>
 
-									<dl class="menu-theme-locations">
-										<dt class="howto"><?php _e( 'Theme locations' ); ?></dt>
+									<fieldset class="menu-settings-group menu-theme-locations">
+										<legend class="menu-settings-group-name howto"><?php _e( 'Display location' ); ?></legend>
 										<?php foreach ( $locations as $location => $description ) : ?>
-										<dd class="checkbox-input">
+										<div class="menu-settings-input checkbox-input">
 											<input type="checkbox"<?php checked( isset( $menu_locations[ $location ] ) && $menu_locations[ $location ] == $nav_menu_selected_id ); ?> name="menu-locations[<?php echo esc_attr( $location ); ?>]" id="locations-<?php echo esc_attr( $location ); ?>" value="<?php echo esc_attr( $nav_menu_selected_id ); ?>" />
 											<label for="locations-<?php echo esc_attr( $location ); ?>"><?php echo $description; ?></label>
 											<?php if ( ! empty( $menu_locations[ $location ] ) && $menu_locations[ $location ] != $nav_menu_selected_id ) : ?>
@@ -819,9 +824,9 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 													);
 												?></span>
 											<?php endif; ?>
-										</dd>
+										</div>
 										<?php endforeach; ?>
-									</dl>
+									</fieldset>
 
 								<?php endif; ?>
 

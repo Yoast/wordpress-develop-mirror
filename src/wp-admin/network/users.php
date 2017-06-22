@@ -72,7 +72,7 @@ if ( isset( $_GET['action'] ) ) {
 								$userfunction = 'all_spam';
 								$blogs = get_blogs_of_user( $user_id, true );
 								foreach ( (array) $blogs as $details ) {
-									if ( $details->userblog_id != $current_site->blog_id ) // main blog not a spam !
+									if ( $details->userblog_id != get_network()->site_id ) // main blog not a spam !
 										update_blog_status( $details->userblog_id, 'spam', '1' );
 								}
 								update_user_status( $user_id, 'spam', '1' );
@@ -94,19 +94,8 @@ if ( isset( $_GET['action'] ) ) {
 					$sendback = wp_get_referer();
 
 					$user_ids = (array) $_POST['allusers'];
-					/**
-					 * Fires when a custom bulk action should be handled.
-					 *
-					 * The sendback link should be modified with success or failure feedback
-					 * from the action to be used to display feedback to the user.
-					 *
-					 * @since 4.7.0
-					 *
-					 * @param string $sendback The redirect URL.
-					 * @param string $doaction The action being taken.
-					 * @param array  $user_ids The users to take the action on.
-					 */
-					$sendback = apply_filters( 'handle_bulk_actions-' . get_current_screen()->id, $sendback, $doaction, $user_ids );
+					/** This action is documented in wp-admin/network/site-themes.php */
+					$sendback = apply_filters( 'handle_network_bulk_actions-' . get_current_screen()->id, $sendback, $doaction, $user_ids );
 
 					wp_safe_redirect( $sendback );
 					exit();
@@ -226,7 +215,9 @@ if ( isset( $_REQUEST['updated'] ) && $_REQUEST['updated'] == 'true' && ! empty(
 }
 	?>
 <div class="wrap">
-	<h1><?php esc_html_e( 'Users' );
+	<h1 class="wp-heading-inline"><?php esc_html_e( 'Users' ); ?></h1>
+
+	<?php
 	if ( current_user_can( 'create_users') ) : ?>
 		<a href="<?php echo network_admin_url('user-new.php'); ?>" class="page-title-action"><?php echo esc_html_x( 'Add New', 'user' ); ?></a><?php
 	endif;
@@ -236,7 +227,8 @@ if ( isset( $_REQUEST['updated'] ) && $_REQUEST['updated'] == 'true' && ! empty(
 		printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( $usersearch ) );
 	}
 	?>
-	</h1>
+
+	<hr class="wp-header-end">
 
 	<?php $wp_list_table->views(); ?>
 

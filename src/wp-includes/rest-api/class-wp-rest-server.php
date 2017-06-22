@@ -114,7 +114,7 @@ class WP_REST_Server {
 	 */
 	public function check_authentication() {
 		/**
-		 * Pass an authentication error to the API
+		 * Filters REST authentication errors.
 		 *
 		 * This is used to pass a WP_Error from an authentication method back to
 		 * the API.
@@ -240,7 +240,7 @@ class WP_REST_Server {
 		 */
 		$this->send_header( 'X-Content-Type-Options', 'nosniff' );
 		$this->send_header( 'Access-Control-Expose-Headers', 'X-WP-Total, X-WP-TotalPages' );
-		$this->send_header( 'Access-Control-Allow-Headers', 'Authorization' );
+		$this->send_header( 'Access-Control-Allow-Headers', 'Authorization, Content-Type' );
 
 		/**
 		 * Send nocache headers on authenticated requests.
@@ -252,7 +252,11 @@ class WP_REST_Server {
 		$send_no_cache_headers = apply_filters( 'rest_send_nocache_headers', is_user_logged_in() );
 		if ( $send_no_cache_headers ) {
 			foreach ( wp_get_nocache_headers() as $header => $header_value ) {
-				$this->send_header( $header, $header_value );
+				if ( empty( $header_value ) ) {
+					$this->remove_header( $header );
+				} else {
+					$this->send_header( $header, $header_value );
+				}
 			}
 		}
 
@@ -260,10 +264,13 @@ class WP_REST_Server {
 		 * Filters whether the REST API is enabled.
 		 *
 		 * @since 4.4.0
+		 * @deprecated 4.7.0 Use the rest_authentication_errors filter to restrict access to the API
 		 *
 		 * @param bool $rest_enabled Whether the REST API is enabled. Default true.
 		 */
-		$enabled = apply_filters( 'rest_enabled', true );
+		apply_filters_deprecated( 'rest_enabled', array( true ), '4.7.0', 'rest_authentication_errors',
+			__( 'The REST API can no longer be completely disabled, the rest_authentication_errors filter can be used to restrict access to the API, instead.' )
+		);
 
 		/**
 		 * Filters whether jsonp is enabled.
@@ -276,10 +283,6 @@ class WP_REST_Server {
 
 		$jsonp_callback = null;
 
-		if ( ! $enabled ) {
-			echo $this->json_error( 'rest_disabled', __( 'The REST API is disabled on this site.' ), 404 );
-			return false;
-		}
 		if ( isset( $_GET['_jsonp'] ) ) {
 			if ( ! $jsonp_enabled ) {
 				echo $this->json_error( 'rest_callback_disabled', __( 'JSONP support is disabled on this site.' ), 400 );
@@ -288,7 +291,7 @@ class WP_REST_Server {
 
 			$jsonp_callback = $_GET['_jsonp'];
 			if ( ! wp_check_jsonp_callback( $jsonp_callback ) ) {
-				echo $this->json_error( 'rest_callback_invalid', __( 'The JSONP callback function is invalid.' ), 400 );
+				echo $this->json_error( 'rest_callback_invalid', __( 'Invalid JSONP callback function.' ), 400 );
 				return false;
 			}
 		}
@@ -394,7 +397,7 @@ class WP_REST_Server {
 			}
 
 			if ( $jsonp_callback ) {
-				// Prepend '/**/' to mitigate possible JSONP Flash attacks
+				// Prepend '/**/' to mitigate possible JSONP Flash attacks.
 				// https://miki.it/blog/2014/7/8/abusing-jsonp-with-rosetta-flash/
 				echo '/**/' . $jsonp_callback . '(' . $result . ')';
 			} else {
@@ -505,7 +508,7 @@ class WP_REST_Server {
 					continue;
 				}
 
-				// Relation now changes from '$uri' to '$curie:$relation'
+				// Relation now changes from '$uri' to '$curie:$relation'.
 				$rel_regex = str_replace( '\{rel\}', '(.+)', preg_quote( $curie['href'], '!' ) );
 				preg_match( '!' . $rel_regex . '!', $rel, $matches );
 				if ( $matches ) {
@@ -585,6 +588,7 @@ class WP_REST_Server {
 
 			// Determine if any real links were found.
 			$has_links = count( array_filter( $embeds ) );
+
 			if ( $has_links ) {
 				$embedded[ $rel ] = $embeds;
 			}
@@ -641,7 +645,7 @@ class WP_REST_Server {
 	 * @param string $namespace  Namespace.
 	 * @param string $route      The REST route.
 	 * @param array  $route_args Route arguments.
-	 * @param bool   $override   Optional. Whether the route should be overriden if it already exists.
+	 * @param bool   $override   Optional. Whether the route should be overridden if it already exists.
 	 *                           Default false.
 	 */
 	public function register_route( $namespace, $route, $route_args, $override = false ) {
@@ -744,7 +748,7 @@ class WP_REST_Server {
 				// Allow comma-separated HTTP methods.
 				if ( is_string( $handler['methods'] ) ) {
 					$methods = explode( ',', $handler['methods'] );
-				} else if ( is_array( $handler['methods'] ) ) {
+				} elseif ( is_array( $handler['methods'] ) ) {
 					$methods = $handler['methods'];
 				} else {
 					$methods = array();
@@ -758,6 +762,7 @@ class WP_REST_Server {
 				}
 			}
 		}
+
 		return $endpoints;
 	}
 
@@ -899,7 +904,7 @@ class WP_REST_Server {
 
 						if ( is_wp_error( $permission ) ) {
 							$response = $permission;
-						} else if ( false === $permission || null === $permission ) {
+						} elseif ( false === $permission || null === $permission ) {
 							$response = new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to do that.' ), array( 'status' => 403 ) );
 						}
 					}
@@ -1011,13 +1016,15 @@ class WP_REST_Server {
 	public function get_index( $request ) {
 		// General site data.
 		$available = array(
-			'name'           => get_option( 'blogname' ),
-			'description'    => get_option( 'blogdescription' ),
-			'url'            => get_option( 'siteurl' ),
-			'home'           => home_url(),
-			'namespaces'     => array_keys( $this->namespaces ),
-			'authentication' => array(),
-			'routes'         => $this->get_data_for_routes( $this->get_routes(), $request['context'] ),
+			'name'            => get_option( 'blogname' ),
+			'description'     => get_option( 'blogdescription' ),
+			'url'             => get_option( 'siteurl' ),
+			'home'            => home_url(),
+			'gmt_offset'      => get_option( 'gmt_offset' ),
+			'timezone_string' => get_option( 'timezone_string' ),
+			'namespaces'      => array_keys( $this->namespaces ),
+			'authentication'  => array(),
+			'routes'          => $this->get_data_for_routes( $this->get_routes(), $request['context'] ),
 		);
 
 		$response = new WP_REST_Response( $available );
@@ -1184,6 +1191,12 @@ class WP_REST_Server {
 					if ( isset( $opts['description'] ) ) {
 						$arg_data['description'] = $opts['description'];
 					}
+					if ( isset( $opts['type'] ) ) {
+						$arg_data['type'] = $opts['type'];
+					}
+					if ( isset( $opts['items'] ) ) {
+						$arg_data['items'] = $opts['items'];
+					}
 					$endpoint_data['args'][ $key ] = $arg_data;
 				}
 			}
@@ -1250,6 +1263,30 @@ class WP_REST_Server {
 	public function send_headers( $headers ) {
 		foreach ( $headers as $key => $value ) {
 			$this->send_header( $key, $value );
+		}
+	}
+
+	/**
+	 * Removes an HTTP header from the current response.
+	 *
+	 * @since 4.8.0
+	 * @access public
+	 *
+	 * @param string $key Header key.
+	 */
+	public function remove_header( $key ) {
+		if ( function_exists( 'header_remove' ) ) {
+			// In PHP 5.3+ there is a way to remove an already set header.
+			header_remove( $key );
+		} else {
+			// In PHP 5.2, send an empty header, but only as a last resort to
+			// override a header already sent.
+			foreach ( headers_list() as $header ) {
+				if ( 0 === stripos( $header, "$key:" ) ) {
+					$this->send_header( $key, '' );
+					break;
+				}
+			}
 		}
 	}
 

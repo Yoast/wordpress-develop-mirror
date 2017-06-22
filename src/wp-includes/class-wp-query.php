@@ -690,12 +690,14 @@ class WP_Query {
 	 *                                                 passed. To use 'meta_value', or 'meta_value_num',
 	 *                                                 'meta_key=keyname' must be also be defined. To sort by a
 	 *                                                 specific `$meta_query` clause, use that clause's array key.
-	 *                                                 Default 'date'. Accepts 'none', 'name', 'author', 'date',
-	 *                                                 'title', 'modified', 'menu_order', 'parent', 'ID', 'rand',
-	 *                                                 'RAND(x)' (where 'x' is an integer seed value),
+	 *                                                 Accepts 'none', 'name', 'author', 'date', 'title',
+	 *                                                 'modified', 'menu_order', 'parent', 'ID', 'rand',
+	 *                                                 'relevance', 'RAND(x)' (where 'x' is an integer seed value),
 	 *                                                 'comment_count', 'meta_value', 'meta_value_num', 'post__in',
 	 *                                                 'post_name__in', 'post_parent__in', and the array keys
-	 *                                                 of `$meta_query`.
+	 *                                                 of `$meta_query`. Default is 'date', except when a search
+	 *                                                 is being performed, when the default is 'relevance'.
+	 *
 	 *     @type int          $p                       Post ID.
 	 *     @type int          $page                    Show the number of posts that would show up on page X of a
 	 *                                                 static front page.
@@ -721,7 +723,9 @@ class WP_Query {
 	 *     @type array        $post_name__in           An array of post slugs that results must match.
 	 *     @type string       $s                       Search keyword(s). Prepending a term with a hyphen will
 	 *                                                 exclude posts matching that term. Eg, 'pillow -sofa' will
-	 *                                                 return posts containing 'pillow' but not 'sofa'.
+	 *                                                 return posts containing 'pillow' but not 'sofa'. The
+	 *                                                 character used for exclusion can be modified using the
+	 *                                                 the 'wp_query_search_exclusion_prefix' filter.
 	 *     @type int          $second                  Second of the minute. Default empty. Accepts numbers 0-60.
 	 *     @type bool         $sentence                Whether to search by phrase. Default false.
 	 *     @type bool         $suppress_filters        Whether to suppress filters. Default false.
@@ -1318,19 +1322,30 @@ class WP_Query {
 		$n = ! empty( $q['exact'] ) ? '' : '%';
 		$searchand = '';
 		$q['search_orderby_title'] = array();
+
+		/**
+		 * Filters the prefix that indicates that a search term should be excluded from results.
+		 *
+		 * @since 4.7.0
+		 *
+		 * @param string $exclusion_prefix The prefix. Default '-'. Returning
+		 *                                 an empty value disables exclusions.
+		 */
+		$exclusion_prefix = apply_filters( 'wp_query_search_exclusion_prefix', '-' );
+
 		foreach ( $q['search_terms'] as $term ) {
-			// Terms prefixed with '-' should be excluded.
-			$include = '-' !== substr( $term, 0, 1 );
-			if ( $include ) {
-				$like_op  = 'LIKE';
-				$andor_op = 'OR';
-			} else {
+			// If there is an $exclusion_prefix, terms prefixed with it should be excluded.
+			$exclude = $exclusion_prefix && ( $exclusion_prefix === substr( $term, 0, 1 ) );
+			if ( $exclude ) {
 				$like_op  = 'NOT LIKE';
 				$andor_op = 'AND';
 				$term     = substr( $term, 1 );
+			} else {
+				$like_op  = 'LIKE';
+				$andor_op = 'OR';
 			}
 
-			if ( $n && $include ) {
+			if ( $n && ! $exclude ) {
 				$like = '%' . $wpdb->esc_like( $term ) . '%';
 				$q['search_orderby_title'][] = $wpdb->prepare( "{$wpdb->posts}.post_title LIKE %s", $like );
 			}
@@ -1698,9 +1713,17 @@ class WP_Query {
 		$page = 1;
 
 		if ( isset( $q['caller_get_posts'] ) ) {
-			_deprecated_argument( 'WP_Query', '3.1.0', __( '"caller_get_posts" is deprecated. Use "ignore_sticky_posts" instead.' ) );
-			if ( !isset( $q['ignore_sticky_posts'] ) )
+			_deprecated_argument( 'WP_Query', '3.1.0',
+				/* translators: 1: caller_get_posts, 2: ignore_sticky_posts */
+				sprintf( __( '%1$s is deprecated. Use %2$s instead.' ),
+					'<code>caller_get_posts</code>',
+					'<code>ignore_sticky_posts</code>'
+				)
+			);
+
+			if ( ! isset( $q['ignore_sticky_posts'] ) ) {
 				$q['ignore_sticky_posts'] = $q['caller_get_posts'];
+			}
 		}
 
 		if ( !isset( $q['ignore_sticky_posts'] ) )
@@ -2242,12 +2265,12 @@ class WP_Query {
 			if ( empty( $in_search_post_types ) ) {
 				$where .= ' AND 1=0 ';
 			} else {
-				$where .= " AND {$wpdb->posts}.post_type IN ('" . join("', '", $in_search_post_types ) . "')";
+				$where .= " AND {$wpdb->posts}.post_type IN ('" . join( "', '", array_map( 'esc_sql', $in_search_post_types ) ) . "')";
 			}
 		} elseif ( !empty( $post_type ) && is_array( $post_type ) ) {
-			$where .= " AND {$wpdb->posts}.post_type IN ('" . join("', '", $post_type) . "')";
+			$where .= " AND {$wpdb->posts}.post_type IN ('" . join("', '", esc_sql( $post_type ) ) . "')";
 		} elseif ( ! empty( $post_type ) ) {
-			$where .= " AND {$wpdb->posts}.post_type = '$post_type'";
+			$where .= $wpdb->prepare( " AND {$wpdb->posts}.post_type = %s", $post_type );
 			$post_type_object = get_post_type_object ( $post_type );
 		} elseif ( $this->is_attachment ) {
 			$where .= " AND {$wpdb->posts}.post_type = 'attachment'";
@@ -2382,7 +2405,7 @@ class WP_Query {
 			 *
 			 * @since 1.5.0
 			 *
-			 * @param string   $where The JOIN clause of the query.
+			 * @param string   $join  The JOIN clause of the query.
 			 * @param WP_Query &$this The WP_Query instance (passed by reference).
 			 */
 			$join = apply_filters_ref_array( 'posts_join', array( $join, &$this ) );
@@ -3216,7 +3239,7 @@ class WP_Query {
 	 * @since 1.5.0
 	 * @access public
 	 *
-	 * @param string $query URL query string.
+	 * @param string|array $query URL query string or array of query arguments.
 	 * @return array List of posts.
 	 */
 	public function query( $query ) {
@@ -3803,7 +3826,7 @@ class WP_Query {
 	/**
 	 * Is the query for an existing single post?
 	 *
-	 * Works for any post type, except attachments and pages
+	 * Works for any post type excluding pages.
 	 *
 	 * If the $post parameter is specified, this function will additionally
 	 * check if the query is for one of the Posts specified.
@@ -3849,7 +3872,8 @@ class WP_Query {
 	}
 
 	/**
-	 * Is the query for an existing single post of any post type (post, attachment, page, ... )?
+	 * Is the query for an existing single post of any post type (post, attachment, page,
+	 * custom post types)?
 	 *
 	 * If the $post_types parameter is specified, this function will additionally
 	 * check if the query is for one of the Posts Types specified.

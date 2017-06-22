@@ -8,7 +8,7 @@ class Tests_XMLRPC_wp_editProfile extends WP_XMLRPC_UnitTestCase {
 
 	function test_invalid_username_password() {
 		$result = $this->myxmlrpcserver->wp_editProfile( array( 1, 'username', 'password', array() ) );
-		$this->assertInstanceOf( 'IXR_Error', $result );
+		$this->assertIXRError( $result );
 		$this->assertEquals( 403, $result->code );
 	}
 
@@ -25,7 +25,7 @@ class Tests_XMLRPC_wp_editProfile extends WP_XMLRPC_UnitTestCase {
             'bio' => rand_str(200)
         );
         $result = $this->myxmlrpcserver->wp_editProfile( array( 1, 'subscriber', 'subscriber', $new_data ) );
-        $this->assertNotInstanceOf( 'IXR_Error', $result );
+        $this->assertNotIXRError( $result );
         $this->assertTrue( $result );
 
         // verify that the new values were stored
@@ -41,26 +41,26 @@ class Tests_XMLRPC_wp_editProfile extends WP_XMLRPC_UnitTestCase {
 
     function test_ignore_password_change() {
         $this->make_user_by_role( 'author' );
-        $new_pass = rand_str();
+        $new_pass = 'newpassword';
         $new_data = array( 'password' => $new_pass );
 
         $result = $this->myxmlrpcserver->wp_editProfile( array( 1, 'author', 'author', $new_data ) );
-        $this->assertNotInstanceOf( 'IXR_Error', $result );
+        $this->assertNotIXRError( $result );
         $this->assertTrue( $result );
 
         $auth_old = wp_authenticate( 'author', 'author' );
         $auth_new = wp_authenticate( 'author', $new_pass );
         $this->assertInstanceOf( 'WP_User', $auth_old );
-        $this->assertTrue( is_wp_error( $auth_new ) );
+        $this->assertWPError( $auth_new );
     }
 
     function test_ignore_email_change() {
         $editor_id = $this->make_user_by_role( 'editor' );
-        $new_email = rand_str() . '@example.com';
+        $new_email = 'notaneditor@example.com';
         $new_data = array( 'email' => $new_email );
 
         $result = $this->myxmlrpcserver->wp_editProfile( array( 1, 'editor', 'editor', $new_data ) );
-        $this->assertNotInstanceOf( 'IXR_Error', $result );
+        $this->assertNotIXRError( $result );
         $this->assertTrue( $result );
 
         $user_data = get_userdata( $editor_id );

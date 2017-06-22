@@ -146,9 +146,9 @@ $document.ready(function(){columns.init();});
 validateForm = function( form ) {
 return !$( form )
 	.find( '.form-required' )
-	.filter( function() { return $( 'input:visible', this ).val() === ''; } )
+	.filter( function() { return $( ':input:visible', this ).val() === ''; } )
 	.addClass( 'form-invalid' )
-	.find( 'input:visible' )
+	.find( ':input:visible' )
 	.change( function() { $( this ).closest( '.form-invalid' ).removeClass( 'form-invalid' ); } )
 	.length;
 };
@@ -347,13 +347,15 @@ $document.ready( function() {
 		pinnedMenuTop = false,
 		pinnedMenuBottom = false,
 		menuTop = 0,
+		menuState,
 		menuIsPinned = false,
 		height = {
 			window: $window.height(),
 			wpwrap: $wpwrap.height(),
 			adminbar: $adminbar.height(),
 			menu: $adminMenuWrap.height()
-		};
+		},
+		$headerEnd = $( '.wp-header-end' );
 
 
 	/**
@@ -370,45 +372,36 @@ $document.ready( function() {
 	 *
 	 * @returns {void}
 	 */
-	$('#collapse-menu').on('click.collapse-menu', function() {
-		var respWidth, state;
+	$( '#collapse-button' ).on( 'click.collapse-menu', function() {
+		var viewportWidth = getViewportWidth() || 961;
 
 		// reset any compensation for submenus near the bottom of the screen
 		$('#adminmenu div.wp-submenu').css('margin-top', '');
 
-		if ( window.innerWidth ) {
-			// window.innerWidth is affected by zooming on phones
-			respWidth = Math.max( window.innerWidth, document.documentElement.clientWidth );
-		} else {
-			// IE < 9 doesn't support @media CSS rules
-			respWidth = 961;
-		}
-
-		if ( respWidth && respWidth < 960 ) {
+		if ( viewportWidth < 960 ) {
 			if ( $body.hasClass('auto-fold') ) {
 				$body.removeClass('auto-fold').removeClass('folded');
 				setUserSetting('unfold', 1);
 				setUserSetting('mfold', 'o');
-				state = 'open';
+				menuState = 'open';
 			} else {
 				$body.addClass('auto-fold');
 				setUserSetting('unfold', 0);
-				state = 'folded';
+				menuState = 'folded';
 			}
 		} else {
 			if ( $body.hasClass('folded') ) {
 				$body.removeClass('folded');
 				setUserSetting('mfold', 'o');
-				state = 'open';
+				menuState = 'open';
 			} else {
 				$body.addClass('folded');
 				setUserSetting('mfold', 'f');
-				state = 'folded';
+				menuState = 'folded';
 			}
 		}
 
-		currentMenuItemHasPopup();
-		$document.trigger( 'wp-collapse-menu', { state: state } );
+		$document.trigger( 'wp-collapse-menu', { state: menuState } );
 	});
 
 	/**
@@ -419,16 +412,9 @@ $document.ready( function() {
 	 * @returns {void}
 	 */
 	function currentMenuItemHasPopup() {
-		var respWidth,
-			$current = $( 'a.wp-has-current-submenu' );
+		var $current = $( 'a.wp-has-current-submenu' );
 
-		if ( window.innerWidth ) {
-			respWidth = Math.max( window.innerWidth, document.documentElement.clientWidth );
-		} else {
-			respWidth = 961;
-		}
-
-		if ( $body.hasClass( 'folded' ) || ( $body.hasClass( 'auto-fold' ) && respWidth && respWidth <= 960 && respWidth > 782 ) ) {
+		if ( 'folded' === menuState ) {
 			// When folded or auto-folded and not responsive view, the current menu item does have a fly-out sub-menu.
 			$current.attr( 'aria-haspopup', 'true' );
 		} else {
@@ -437,7 +423,7 @@ $document.ready( function() {
 		}
 	}
 
-	$document.on( 'wp-window-resized wp-responsive-activate wp-responsive-deactivate', currentMenuItemHasPopup );
+	$document.on( 'wp-menu-state-set wp-collapse-menu wp-responsive-activate wp-responsive-deactivate', currentMenuItemHasPopup );
 
 	/**
 	 * @summary Ensure an admin submenu is within the visual viewport.
@@ -600,8 +586,13 @@ $document.ready( function() {
 	/*
 	 * The `.below-h2` class is here just for backward compatibility with plugins
 	 * that are (incorrectly) using it. Do not use. Use `.inline` instead. See #34570.
+	 * If '.wp-header-end' is found, append the notices after it otherwise
+	 * after the first h1 or h2 heading found within the main content.
 	 */
-	$( 'div.updated, div.error, div.notice' ).not( '.inline, .below-h2' ).insertAfter( $( '.wrap h1, .wrap h2' ).first() );
+	if ( ! $headerEnd.length ) {
+		$headerEnd = $( '.wrap h1, .wrap h2' ).first();
+	}
+	$( 'div.updated, div.error, div.notice' ).not( '.inline, .below-h2' ).insertAfter( $headerEnd );
 
 	/**
 	 * @summary Make notices dismissible.
@@ -643,7 +634,7 @@ $document.ready( function() {
 	 *
 	 * @returns {boolean} Returns whether a checkbox is checked or not.
 	 */
-	$body.on( 'click', 'tbody .check-column :checkbox', function( event ) {
+	$body.on( 'click', 'tbody > tr > .check-column :checkbox', function( event ) {
 		// Shift click to select a range of checkboxes.
 		if ( 'undefined' == event.shiftKey ) { return true; }
 		if ( event.shiftKey ) {
@@ -682,7 +673,7 @@ $document.ready( function() {
 	});
 
 	/**
-	 * @summary 
+	 * @summary
 	 *
 	 * This event needs to be delegated. Ticket #37973.
 	 *
@@ -1072,17 +1063,14 @@ $document.ready( function() {
 		},
 
 		trigger: function() {
-			var width;
+			var viewportWidth = getViewportWidth();
 
-			if ( window.innerWidth ) {
-				// window.innerWidth is affected by zooming on phones
-				width = Math.max( window.innerWidth, document.documentElement.clientWidth );
-			} else {
-				// Exclude IE < 9, it doesn't support @media CSS rules
+			// Exclude IE < 9, it doesn't support @media CSS rules.
+			if ( ! viewportWidth ) {
 				return;
 			}
 
-			if ( width <= 782 ) {
+			if ( viewportWidth <= 782 ) {
 				if ( ! wpResponsiveActive ) {
 					$document.trigger( 'wp-responsive-activate' );
 					wpResponsiveActive = true;
@@ -1094,7 +1082,7 @@ $document.ready( function() {
 				}
 			}
 
-			if ( width <= 480 ) {
+			if ( viewportWidth <= 480 ) {
 				this.enableOverlay();
 			} else {
 				this.disableOverlay();
@@ -1148,8 +1136,82 @@ $document.ready( function() {
 		aria_button_if_js();
 	});
 
+	/**
+	 * @summary Get the viewport width.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @returns {number|boolean} The current viewport width or false if the
+	 *                           browser doesn't support innerWidth (IE < 9).
+	 */
+	function getViewportWidth() {
+		var viewportWidth = false;
+
+		if ( window.innerWidth ) {
+			// On phones, window.innerWidth is affected by zooming.
+			viewportWidth = Math.max( window.innerWidth, document.documentElement.clientWidth );
+		}
+
+		return viewportWidth;
+	}
+
+	/**
+	 * @summary Set the admin menu collapsed/expanded state.
+	 *
+	 * Sets the global variable `menuState` and triggers a custom event passing
+	 * the current menu state.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @returns {void}
+	 */
+	function setMenuState() {
+		var viewportWidth = getViewportWidth() || 961;
+
+		if ( viewportWidth <= 782  ) {
+			menuState = 'responsive';
+		} else if ( $body.hasClass( 'folded' ) || ( $body.hasClass( 'auto-fold' ) && viewportWidth <= 960 && viewportWidth > 782 ) ) {
+			menuState = 'folded';
+		} else {
+			menuState = 'open';
+		}
+
+		$document.trigger( 'wp-menu-state-set', { state: menuState } );
+	}
+
+	// Set the menu state when the window gets resized.
+	$document.on( 'wp-window-resized.set-menu-state', setMenuState );
+
+	/**
+	 * @summary Set ARIA attributes on the collapse/expand menu button.
+	 *
+	 * When the admin menu is open or folded, updates the `aria-expanded` and
+	 * `aria-label` attributes of the button to give feedback to assistive
+	 * technologies. In the responsive view, the button is always hidden.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @returns {void}
+	 */
+	$document.on( 'wp-menu-state-set wp-collapse-menu', function( event, eventData ) {
+		var $collapseButton = $( '#collapse-button' ),
+			ariaExpanded = 'true',
+			ariaLabelText = commonL10n.collapseMenu;
+
+		if ( 'folded' === eventData.state ) {
+			ariaExpanded = 'false';
+			ariaLabelText = commonL10n.expandMenu;
+		}
+
+		$collapseButton.attr({
+			'aria-expanded': ariaExpanded,
+			'aria-label': ariaLabelText
+		});
+	});
+
 	window.wpResponsive.init();
 	setPinMenu();
+	setMenuState();
 	currentMenuItemHasPopup();
 	makeNoticesDismissible();
 	aria_button_if_js();
@@ -1158,6 +1220,25 @@ $document.ready( function() {
 
 	// Set initial focus on a specific element.
 	$( '.wp-initial-focus' ).focus();
+
+	// Toggle update details on update-core.php.
+	$body.on( 'click', '.js-update-details-toggle', function() {
+		var $updateNotice = $( this ).closest( '.js-update-details' ),
+			$progressDiv = $( '#' + $updateNotice.data( 'update-details' ) );
+
+		/*
+		 * When clicking on "Show details" move the progress div below the update
+		 * notice. Make sure it gets moved just the first time.
+		 */
+		if ( ! $progressDiv.hasClass( 'update-details-moved' ) ) {
+			$progressDiv.insertAfter( $updateNotice ).addClass( 'update-details-moved' );
+		}
+
+		// Toggle the progress div visibility.
+		$progressDiv.toggle();
+		// Toggle the Show Details button expanded state.
+		$( this ).attr( 'aria-expanded', $progressDiv.is( ':visible' ) );
+	});
 });
 
 // Fire a custom jQuery event at the end of window resize

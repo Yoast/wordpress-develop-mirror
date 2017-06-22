@@ -887,17 +887,21 @@ var wpNavMenu;
 				inputEvent = 'keyup';
 			}
 
-			$( '.quick-search' ).on( inputEvent, function() {
-				var t = $(this);
+			$( '#nav-menu-meta' ).on( inputEvent, '.quick-search', function() {
+				var $this = $( this );
 
-				if( searchTimer ) clearTimeout(searchTimer);
+				$this.attr( 'autocomplete', 'off' );
 
-				searchTimer = setTimeout(function(){
-					api.updateQuickSearchResults( t );
-				}, 500 );
-			}).on( 'blur', function() {
+				if ( searchTimer ) {
+					clearTimeout( searchTimer );
+				}
+
+				searchTimer = setTimeout( function() {
+					api.updateQuickSearchResults( $this );
+ 				}, 500 );
+			}).on( 'blur', '.quick-search', function() {
 				api.lastSearch = '';
-			}).attr('autocomplete','off');
+			});
 		},
 
 		updateQuickSearchResults : function(input) {
@@ -999,21 +1003,33 @@ var wpNavMenu;
 		},
 
 		/**
-		 * Process the add menu item request response into menu list item.
+		 * Process the add menu item request response into menu list item. Appends to menu.
 		 *
-		 * @param string menuMarkup The text server response of menu item markup.
-		 * @param object req The request arguments.
+		 * @param {string} menuMarkup The text server response of menu item markup.
+		 *
+		 * @fires document#menu-item-added Passes menuMarkup as a jQuery object.
 		 */
 		addMenuItemToBottom : function( menuMarkup ) {
-			$(menuMarkup).hideAdvancedMenuItemFields().appendTo( api.targetList );
+			var $menuMarkup = $( menuMarkup );
+			$menuMarkup.hideAdvancedMenuItemFields().appendTo( api.targetList );
 			api.refreshKeyboardAccessibility();
 			api.refreshAdvancedAccessibility();
+			$( document ).trigger( 'menu-item-added', [ $menuMarkup ] );
 		},
 
+		/**
+		 * Process the add menu item request response into menu list item. Prepends to menu.
+		 *
+		 * @param {string} menuMarkup The text server response of menu item markup.
+		 *
+		 * @fires document#menu-item-added Passes menuMarkup as a jQuery object.
+		 */
 		addMenuItemToTop : function( menuMarkup ) {
-			$(menuMarkup).hideAdvancedMenuItemFields().prependTo( api.targetList );
+			var $menuMarkup = $( menuMarkup );
+			$menuMarkup.hideAdvancedMenuItemFields().prependTo( api.targetList );
 			api.refreshKeyboardAccessibility();
 			api.refreshAdvancedAccessibility();
+			$( document ).trigger( 'menu-item-added', [ $menuMarkup ] );
 		},
 
 		attachUnsavedChangesListener : function() {
@@ -1085,34 +1101,38 @@ var wpNavMenu;
 					else if ( e.target.id && -1 != e.target.id.indexOf('submit-') )
 						$('#' + e.target.id.replace(/submit-/, '')).addSelectedToMenu( api.addMenuItemToBottom );
 					return false;
-				} else if ( target.hasClass('page-numbers') ) {
-					$.post( ajaxurl, e.target.href.replace(/.*\?/, '').replace(/action=([^&]*)/, '') + '&action=menu-get-metabox',
-						function( resp ) {
-							if ( -1 == resp.indexOf('replace-id') )
-								return;
-
-							var metaBoxData = $.parseJSON(resp),
-							toReplace = document.getElementById(metaBoxData['replace-id']),
-							placeholder = document.createElement('div'),
-							wrap = document.createElement('div');
-
-							if ( ! metaBoxData.markup || ! toReplace )
-								return;
-
-							wrap.innerHTML = metaBoxData.markup ? metaBoxData.markup : '';
-
-							toReplace.parentNode.insertBefore( placeholder, toReplace );
-							placeholder.parentNode.removeChild( toReplace );
-
-							placeholder.parentNode.insertBefore( wrap, placeholder );
-
-							placeholder.parentNode.removeChild( placeholder );
-
-						}
-					);
-
-					return false;
 				}
+			});
+
+			/*
+			 * Delegate the `click` event and attach it just to the pagination
+			 * links thus excluding the current page `<span>`. See ticket #35577.
+			 */
+			$( '#nav-menu-meta' ).on( 'click', 'a.page-numbers', function() {
+				var $container = $( this ).closest( '.inside' );
+
+				$.post( ajaxurl, this.href.replace( /.*\?/, '' ).replace( /action=([^&]*)/, '' ) + '&action=menu-get-metabox',
+					function( resp ) {
+						var metaBoxData = $.parseJSON( resp ),
+							toReplace;
+
+						if ( -1 === resp.indexOf( 'replace-id' ) ) {
+							return;
+						}
+
+						// Get the post type menu meta box to update.
+						toReplace = document.getElementById( metaBoxData['replace-id'] );
+
+						if ( ! metaBoxData.markup || ! toReplace ) {
+							return;
+						}
+
+						// Update the post type menu meta box with new content from the response.
+						$container.html( metaBoxData.markup );
+					}
+				);
+
+				return false;
 			});
 		},
 
@@ -1235,9 +1255,16 @@ var wpNavMenu;
 			wrapper.removeClass( 'has-no-menu-item' );
 		},
 
+		/**
+		 * Remove a menu item.
+		 * @param  {object} el The element to be removed as a jQuery object.
+		 *
+		 * @fires document#menu-removing-item Passes the element to be removed.
+		 */
 		removeMenuItem : function(el) {
 			var children = el.childMenuItems();
 
+			$( document ).trigger( 'menu-removing-item', [ el ] );
 			el.addClass('deleting').animate({
 					opacity : 0,
 					height: 0

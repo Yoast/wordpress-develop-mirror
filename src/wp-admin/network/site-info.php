@@ -37,7 +37,7 @@ if ( ! $id ) {
 	wp_die( __('Invalid site ID.') );
 }
 
-$details = get_blog_details( $id );
+$details = get_site( $id );
 if ( ! $details ) {
 	wp_die( __( 'The requested site does not exist.' ) );
 }
@@ -84,7 +84,7 @@ if ( isset( $_REQUEST['action'] ) && 'update-site' == $_REQUEST['action'] ) {
 		$blog_data['path'] = $update_parsed_url['path'];
 	}
 
-	$existing_details = get_blog_details( $id, false );
+	$existing_details = get_site( $id );
 	$blog_data_checkboxes = array( 'public', 'archived', 'spam', 'mature', 'deleted' );
 	foreach ( $blog_data_checkboxes as $c ) {
 		if ( ! in_array( $existing_details->$c, array( 0, 1 ) ) ) {
@@ -97,7 +97,7 @@ if ( isset( $_REQUEST['action'] ) && 'update-site' == $_REQUEST['action'] ) {
 	update_blog_details( $id, $blog_data );
 
 	// Maybe update home and siteurl options.
-	$new_details = get_blog_details( $id, false );
+	$new_details = get_site( $id );
 
 	$old_home_url = trailingslashit( esc_url( get_option( 'home' ) ) );
 	$old_home_parsed = parse_url( $old_home_url );
@@ -162,7 +162,7 @@ if ( ! empty( $messages ) ) {
 		if ( $is_main_site ) : ?>
 		<tr class="form-field">
 			<th scope="row"><?php _e( 'Site Address (URL)' ); ?></th>
-			<td><?php echo esc_url( $details->domain . $details->path ); ?></td>
+			<td><?php echo esc_url( $parsed_scheme . '://' . $details->domain . $details->path ); ?></td>
 		</tr>
 		<?php
 		// For any other site, the scheme, domain, and path can all be changed.

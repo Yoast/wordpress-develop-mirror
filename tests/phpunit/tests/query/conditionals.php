@@ -55,7 +55,7 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 	}
 
 	function test_404() {
-		$this->go_to('/'.rand_str());
+		$this->go_to( '/notapage' );
 		$this->assertQueryTrue('is_404');
 	}
 
@@ -818,6 +818,25 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		$this->set_permalink_structure();
 	}
 
+	/**
+	 * @ticket 38225
+	 */
+	function test_is_single_with_attachment() {
+		$post_id = self::factory()->post->create();
+
+		$attachment_id = self::factory()->attachment->create_object( 'image.jpg', $post_id, array(
+			'post_mime_type' => 'image/jpeg',
+		) );
+
+		$this->go_to( get_permalink( $attachment_id ) );
+
+		$q = $GLOBALS['wp_query'];
+
+		$this->assertTrue( is_single() );
+		$this->assertTrue( $q->is_single );
+		$this->assertTrue( $q->is_attachment );
+	}
+
 	function test_is_page() {
 		$post_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
 		$this->go_to( "/?page_id=$post_id" );
@@ -1041,6 +1060,43 @@ class Tests_Query_Conditionals extends WP_UnitTestCase {
 		$this->go_to( "/?page_id=$post_id" );
 		$this->assertFalse( is_page_template( array( 'test.php' ) ) );
 		$this->assertTrue( is_page_template( array('test.php', 'example.php') ) );
+	}
+
+	/**
+	 * @ticket 18375
+	 */
+	function test_is_page_template_other_post_type() {
+		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
+		update_post_meta( $post_id, '_wp_page_template', 'example.php' );
+		$this->go_to( get_post_permalink( $post_id ) );
+		$this->assertFalse( is_page_template( array( 'test.php' ) ) );
+		$this->assertTrue( is_page_template( array( 'test.php', 'example.php' ) ) );
+	}
+
+	/**
+	 * @ticket 39211
+	 */
+	function test_is_page_template_not_singular() {
+		global $wpdb;
+
+		// We need a non-post that shares an ID with a post assigned a template.
+		$user_id = self::factory()->user->create();
+		if ( ! get_post( $user_id ) ) {
+			$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
+			$wpdb->update( $wpdb->posts, array( 'ID' => $user_id ), array( 'ID' => $post_id ), array( '%d' ) );
+		}
+
+		update_post_meta( $user_id, '_wp_page_template', 'example.php' );
+
+		// Verify that the post correctly reports having a template.
+		$this->go_to( get_post_permalink( $user_id ) );
+		$this->assertInstanceOf( 'WP_Post', get_queried_object() );
+		$this->assertTrue( is_page_template( 'example.php' ) );
+
+		// Verify that the non-post with a matching ID does not report having a template.
+		$this->go_to( get_author_posts_url( $user_id ) );
+		$this->assertInstanceOf( 'WP_User', get_queried_object() );
+		$this->assertFalse( is_page_template( 'example.php' ) );
 	}
 
 	/**

@@ -43,7 +43,7 @@ require_once ABSPATH . WPINC . '/class-walker-nav-menu.php';
  *                                               Uses printf() format with numbered placeholders.
  *     @type string             $item_spacing    Whether to preserve whitespace within the menu's HTML. Accepts 'preserve' or 'discard'. Default 'preserve'.
  * }
- * @return object|false|void Menu output if $echo is false, false if there are no items or no menu was found.
+ * @return string|false|void Menu output if $echo is false, false if there are no items or no menu was found.
  */
 function wp_nav_menu( $args = array() ) {
 	static $menu_id_slugs = array();
@@ -334,6 +334,7 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 	$possible_object_parents = array_filter( $possible_object_parents );
 
 	$front_page_url = home_url();
+	$front_page_id  = (int) get_option( 'page_on_front' );
 
 	foreach ( (array) $menu_items as $key => $menu_item ) {
 
@@ -343,6 +344,11 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 		$classes[] = 'menu-item';
 		$classes[] = 'menu-item-type-' . $menu_item->type;
 		$classes[] = 'menu-item-object-' . $menu_item->object;
+
+		// This menu item is set as the 'Front Page'.
+		if ( 'post_type' === $menu_item->type && $front_page_id === (int) $menu_item->object_id ) {
+			$classes[] = 'menu-item-home';
+		}
 
 		// if the menu item corresponds to a taxonomy term for the currently-queried non-hierarchical post object
 		if ( $wp_query->is_singular && 'taxonomy' == $menu_item->type && in_array( $menu_item->object_id, $possible_object_parents ) ) {
@@ -376,6 +382,7 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 				$classes[] = 'page-item-' . $menu_item->object_id;
 				$classes[] = 'current_page_item';
 			}
+
 			$active_parent_item_ids[] = (int) $menu_item->menu_item_parent;
 			$active_parent_object_ids[] = (int) $menu_item->post_parent;
 			$active_object = $menu_item->object;
@@ -390,6 +397,11 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 		// if the menu item corresponds to the currently-requested URL
 		} elseif ( 'custom' == $menu_item->object && isset( $_SERVER['HTTP_HOST'] ) ) {
 			$_root_relative_current = untrailingslashit( $_SERVER['REQUEST_URI'] );
+
+			//if it is the customize page then it will strips the query var off the url before entering the comparison block.
+			if ( is_customize_preview() ) {
+				$_root_relative_current = strtok( untrailingslashit( $_SERVER['REQUEST_URI'] ), '?' );
+			}
 			$current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_root_relative_current );
 			$raw_item_url = strpos( $menu_item->url, '#' ) ? substr( $menu_item->url, 0, strpos( $menu_item->url, '#' ) ) : $menu_item->url;
 			$item_url = set_url_scheme( untrailingslashit( $raw_item_url ) );

@@ -1,7 +1,5 @@
 <?php
 
-// dummy theme
+wp_head();
 
-echo dirname(__FILE__).'/'.basename(__FILE__);
-
-?>
+wp_footer();

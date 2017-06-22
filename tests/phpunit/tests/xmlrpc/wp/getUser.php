@@ -25,13 +25,13 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 
 	function test_invalid_username_password() {
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'username', 'password', 1 ) );
-		$this->assertInstanceOf( 'IXR_Error', $result );
+		$this->assertIXRError( $result );
 		$this->assertEquals( 403, $result->code );
 	}
 
 	function test_invalid_user() {
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'administrator', 'administrator', 34902348908234 ) );
-		$this->assertInstanceOf( 'IXR_Error', $result );
+		$this->assertIXRError( $result );
 		$this->assertEquals( 404, $result->code );
 	}
 
@@ -40,7 +40,7 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 		$editor_id = $this->make_user_by_role( 'editor' );
 
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'subscriber', 'subscriber', $editor_id ) );
-		$this->assertInstanceOf( 'IXR_Error', $result );
+		$this->assertIXRError( $result );
 		$this->assertEquals( 401, $result->code );
 	}
 
@@ -48,7 +48,7 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 		$subscriber_id = $this->make_user_by_role( 'subscriber' );
 
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'subscriber', 'subscriber', $subscriber_id ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 		$this->assertEquals( $subscriber_id, $result['user_id'] );
 	}
 
@@ -56,23 +56,23 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 		$registered_date = strtotime( '-1 day' );
 		$user_data = array(
 			'user_login' => 'getusertestuser',
-			'user_pass' => rand_str(),
-			'first_name' => rand_str(),
-			'last_name' => rand_str(),
-			'description' => rand_str( 100 ),
+			'user_pass' => 'password',
+			'first_name' => 'First',
+			'last_name' => 'Last',
+			'description' => 'I love WordPress',
 			'user_email' => 'getUserTestUser@example.com',
-			'nickname' => rand_str(),
-			'user_nicename' => rand_str(),
-			'display_name' => rand_str(),
+			'nickname' => 'nickname',
+			'user_nicename' => 'nicename',
+			'display_name' => 'First Last',
 			'user_url' => 'http://www.example.com/testuser',
 			'role' => 'author',
-			'aim' => rand_str(),
+			'aim' => 'wordpress',
 			'user_registered' => strftime( "%Y-%m-%d %H:%M:%S", $registered_date )
 		);
 		$user_id = wp_insert_user( $user_data );
 
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'administrator', 'administrator', $user_id ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 
 		// check data types
 		$this->assertInternalType( 'string', $result['user_id'] );
@@ -111,7 +111,7 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 		$editor_id = $this->make_user_by_role( 'editor' );
 
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'administrator', 'administrator', $editor_id, array() ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 		$this->assertEquals( $editor_id, $result['user_id'] );
 
 		$expected_fields = array( 'user_id' );
@@ -122,7 +122,7 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 		$editor_id = $this->make_user_by_role( 'editor' );
 
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'administrator', 'administrator', $editor_id, array( 'basic' ) ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 		$this->assertEquals( $editor_id, $result['user_id'] );
 
 		$expected_fields = array( 'user_id', 'username', 'email', 'registered', 'display_name', 'nicename' );
@@ -138,7 +138,7 @@ class Tests_XMLRPC_wp_getUser extends WP_XMLRPC_UnitTestCase {
 		$fields = array( 'email', 'bio', 'user_contacts' );
 
 		$result = $this->myxmlrpcserver->wp_getUser( array( 1, 'administrator', 'administrator', $editor_id, $fields ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 		$this->assertEquals( $editor_id, $result['user_id'] );
 
 		$expected_fields = array( 'user_id', 'email', 'bio' );

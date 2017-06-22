@@ -2,8 +2,6 @@
 /**
  * These functions are needed to load WordPress.
  *
- * @internal This file must be parsable by PHP4.
- *
  * @package WordPress
  */
 
@@ -130,6 +128,7 @@ function wp_check_php_mysql_versions() {
 		$protocol = wp_get_server_protocol();
 		header( sprintf( '%s 500 Internal Server Error', $protocol ), true, 500 );
 		header( 'Content-Type: text/html; charset=utf-8' );
+		/* translators: 1: Current PHP version number, 2: WordPress version number, 3: Minimum required PHP version number */
 		die( sprintf( __( 'Your server is running PHP version %1$s but WordPress %2$s requires at least %3$s.' ), $php_version, $wp_version, $required_php_version ) );
 	}
 
@@ -473,12 +472,19 @@ function wp_using_ext_object_cache( $using = null ) {
  * @access private
  */
 function wp_start_object_cache() {
+	global $wp_filter;
+
 	$first_init = false;
  	if ( ! function_exists( 'wp_cache_init' ) ) {
 		if ( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
 			require_once ( WP_CONTENT_DIR . '/object-cache.php' );
 			if ( function_exists( 'wp_cache_init' ) ) {
 				wp_using_ext_object_cache( true );
+			}
+
+			// Re-initialize any hooks added manually by object-cache.php
+			if ( $wp_filter ) {
+				$wp_filter = WP_Hook::build_preinitialized_hooks( $wp_filter );
 			}
 		}
 
@@ -509,7 +515,7 @@ function wp_start_object_cache() {
 	}
 
 	if ( function_exists( 'wp_cache_add_global_groups' ) ) {
-		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'site-lookup', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
+		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
 		wp_cache_add_non_persistent_groups( array( 'counts', 'plugins' ) );
 	}
 }
@@ -814,8 +820,6 @@ function get_current_blog_id() {
  *
  * @since 4.6.0
  *
- * @global WP_Network $current_site The current network.
- *
  * @return int The ID of the current network.
  */
 function get_current_network_id() {
@@ -823,13 +827,13 @@ function get_current_network_id() {
 		return 1;
 	}
 
-	$current_site = get_current_site();
+	$current_network = get_network();
 
-	if ( ! isset( $current_site->id ) ) {
+	if ( ! isset( $current_network->id ) ) {
 		return get_main_network_id();
 	}
 
-	return absint( $current_site->id );
+	return absint( $current_network->id );
 }
 
 /**
@@ -845,13 +849,12 @@ function get_current_network_id() {
  * @since 3.4.0
  * @access private
  *
- * @global string    $text_direction
- * @global WP_Locale $wp_locale      The WordPress date and time locale object.
+ * @global WP_Locale $wp_locale The WordPress date and time locale object.
  *
  * @staticvar bool $loaded
  */
 function wp_load_translations_early() {
-	global $text_direction, $wp_locale;
+	global $wp_locale;
 
 	static $loaded = false;
 	if ( $loaded )
@@ -868,6 +871,7 @@ function wp_load_translations_early() {
 	require_once ABSPATH . WPINC . '/pomo/mo.php';
 	require_once ABSPATH . WPINC . '/l10n.php';
 	require_once ABSPATH . WPINC . '/class-wp-locale.php';
+	require_once ABSPATH . WPINC . '/class-wp-locale-switcher.php';
 
 	// General libraries
 	require_once ABSPATH . WPINC . '/plugin.php';
@@ -1056,6 +1060,24 @@ function wp_doing_ajax() {
 }
 
 /**
+ * Determines whether the current request is a WordPress cron request.
+ *
+ * @since 4.8.0
+ *
+ * @return bool True if it's a WordPress cron request, false otherwise.
+ */
+function wp_doing_cron() {
+	/**
+	 * Filters whether the current request is a WordPress cron request.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param bool $wp_doing_cron Whether the current request is a WordPress cron request.
+	 */
+	return apply_filters( 'wp_doing_cron', defined( 'DOING_CRON' ) && DOING_CRON );
+}
+
+/**
  * Check whether variable is a WordPress Error.
  *
  * Returns true if $thing is an object of the WP_Error class.
@@ -1067,4 +1089,24 @@ function wp_doing_ajax() {
  */
 function is_wp_error( $thing ) {
 	return ( $thing instanceof WP_Error );
+}
+
+/**
+ * Determines whether file modifications are allowed.
+ *
+ * @since 4.8.0
+ *
+ * @param string $context The usage context.
+ * @return bool True if file modification is allowed, false otherwise.
+ */
+function wp_is_file_mod_allowed( $context ) {
+	/**
+	 * Filters whether file modifications are allowed.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param bool   $file_mod_allowed Whether file modifications are allowed.
+	 * @param string $context          The usage context.
+	 */
+	return apply_filters( 'file_mod_allowed', ! defined( 'DISALLOW_FILE_MODS' ) || ! DISALLOW_FILE_MODS, $context );
 }

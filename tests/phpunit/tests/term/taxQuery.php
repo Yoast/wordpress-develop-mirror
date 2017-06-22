@@ -163,7 +163,7 @@ class Tests_Term_Tax_Query extends WP_UnitTestCase {
 		) );
 		$tq->transform_query( $tq->queries[0], 'term_taxonomy_id' );
 
-		$this->assertSame( $tt_ids, $tq->queries[0]['terms'] );
+		$this->assertEqualSets( $tt_ids, $tq->queries[0]['terms'] );
 		$this->assertSame( 'term_taxonomy_id', $tq->queries[0]['field'] );
 	}
 
@@ -181,7 +181,7 @@ class Tests_Term_Tax_Query extends WP_UnitTestCase {
 		) );
 		$tq->transform_query( $tq->queries[0], 'term_taxonomy_id' );
 
-		$this->assertSame( $tt_ids, $tq->queries[0]['terms'] );
+		$this->assertEqualSets( $tt_ids, $tq->queries[0]['terms'] );
 		$this->assertSame( 'term_taxonomy_id', $tq->queries[0]['field'] );
 	}
 
@@ -231,7 +231,7 @@ class Tests_Term_Tax_Query extends WP_UnitTestCase {
 		) );
 		$tq->transform_query( $tq->queries[0], 'term_taxonomy_id' );
 
-		$this->assertTrue( is_wp_error( $tq->queries[0] ) );
+		$this->assertWPError( $tq->queries[0] );
 	}
 
 	/**

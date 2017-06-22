@@ -420,7 +420,7 @@ function count_many_users_posts( $users, $post_type = 'post', $public_only = fal
  *
  * @since MU
  *
- * @return int The current user's ID
+ * @return int The current user's ID, or 0 if no user is logged in.
  */
 function get_current_user_id() {
 	if ( ! function_exists( 'wp_get_current_user' ) )
@@ -703,7 +703,7 @@ function is_user_member_of_blog( $user_id = 0, $blog_id = 0 ) {
 		$user_id = get_current_user_id();
 	}
 
-	// Technically not needed, but does save calls to get_blog_details and get_user_meta
+	// Technically not needed, but does save calls to get_site and get_user_meta
 	// in the event that the function is called when a user isn't logged in
 	if ( empty( $user_id ) ) {
 		return false;
@@ -722,7 +722,7 @@ function is_user_member_of_blog( $user_id = 0, $blog_id = 0 ) {
 		$blog_id = get_current_blog_id();
 	}
 
-	$blog = get_blog_details( $blog_id );
+	$blog = get_site( $blog_id );
 
 	if ( ! $blog || ! isset( $blog->domain ) || $blog->archived || $blog->spam || $blog->deleted ) {
 		return false;
@@ -857,7 +857,12 @@ function count_users($strategy = 'time') {
 		$select_count = implode(', ', $select_count);
 
 		// Add the meta_value index to the selection list, then run the query.
-		$row = $wpdb->get_row( "SELECT $select_count, COUNT(*) FROM $wpdb->usermeta WHERE meta_key = '{$blog_prefix}capabilities'", ARRAY_N );
+		$row = $wpdb->get_row( "
+			SELECT {$select_count}, COUNT(*)
+			FROM {$wpdb->usermeta}
+			INNER JOIN {$wpdb->users} ON user_id = ID
+			WHERE meta_key = '{$blog_prefix}capabilities'
+		", ARRAY_N );
 
 		// Run the previous loop again to associate results with role names.
 		$col = 0;
@@ -881,7 +886,12 @@ function count_users($strategy = 'time') {
 			'none' => 0,
 		);
 
-		$users_of_blog = $wpdb->get_col( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '{$blog_prefix}capabilities'" );
+		$users_of_blog = $wpdb->get_col( "
+			SELECT meta_value
+			FROM {$wpdb->usermeta}
+			INNER JOIN {$wpdb->users} ON user_id = ID
+			WHERE meta_key = '{$blog_prefix}capabilities'
+		" );
 
 		foreach ( $users_of_blog as $caps_meta ) {
 			$b_roles = maybe_unserialize($caps_meta);
@@ -1208,7 +1218,7 @@ function sanitize_user_field($field, $value, $user_id, $context) {
 		if ( $prefixed ) {
 
 			/** This filter is documented in wp-includes/post.php */
-			$value = apply_filters( $field, $value, $user_id, $context );
+			$value = apply_filters( "{$field}", $value, $user_id, $context );
 		} else {
 
 			/**
@@ -1801,8 +1811,12 @@ function wp_update_user($userdata) {
 
 		$blog_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 
-		if ( ! empty( $send_password_change_email ) ) {
+		$switched_locale = false;
+		if ( ! empty( $send_password_change_email ) || ! empty( $send_email_change_email ) ) {
+			$switched_locale = switch_to_locale( get_user_locale( $user_id ) );
+		}
 
+		if ( ! empty( $send_password_change_email ) ) {
 			/* translators: Do not translate USERNAME, ADMIN_EMAIL, EMAIL, SITENAME, SITEURL: those are placeholders. */
 			$pass_change_text = __( 'Hi ###USERNAME###,
 
@@ -1819,6 +1833,7 @@ All at ###SITENAME###
 
 			$pass_change_email = array(
 				'to'      => $user['user_email'],
+				/* translators: User password change notification email subject. 1: Site name */
 				'subject' => __( '[%s] Notice of Password Change' ),
 				'message' => $pass_change_text,
 				'headers' => '',
@@ -1874,6 +1889,7 @@ All at ###SITENAME###
 
 			$email_change_email = array(
 				'to'      => $user['user_email'],
+				/* translators: User email change notification email subject. 1: Site name */
 				'subject' => __( '[%s] Notice of Email Change' ),
 				'message' => $email_change_text,
 				'headers' => '',
@@ -1909,6 +1925,10 @@ All at ###SITENAME###
 			$email_change_email['message'] = str_replace( '###SITEURL###', home_url(), $email_change_email['message'] );
 
 			wp_mail( $email_change_email['to'], sprintf( $email_change_email['subject'], $blog_name ), $email_change_email['message'], $email_change_email['headers'] );
+		}
+
+		if ( $switched_locale ) {
+			restore_previous_locale();
 		}
 	}
 
@@ -2111,6 +2131,7 @@ function get_password_reset_key( $user ) {
 
 	// Now insert the key, hashed, into the DB.
 	if ( empty( $wp_hasher ) ) {
+		require_once ABSPATH . WPINC . '/class-phpass.php';
 		$wp_hasher = new PasswordHash( 8, true );
 	}
 	$hashed = time() . ':' . $wp_hasher->HashPassword( $key );
@@ -2155,6 +2176,7 @@ function check_password_reset_key($key, $login) {
 		return new WP_Error('invalid_key', __('Invalid key'));
 
 	if ( empty( $wp_hasher ) ) {
+		require_once ABSPATH . WPINC . '/class-phpass.php';
 		$wp_hasher = new PasswordHash( 8, true );
 	}
 
@@ -2440,7 +2462,7 @@ function wp_get_users_with_no_role() {
 	}
 
 	$prefix = $wpdb->get_blog_prefix();
-	$regex  = implode( '|', wp_roles()->get_names() );
+	$regex  = implode( '|', array_keys( wp_roles()->get_names() ) );
 	$regex  = preg_replace( '/[^a-zA-Z_\|-]/', '', $regex );
 	$users  = $wpdb->get_col( $wpdb->prepare( "
 		SELECT user_id

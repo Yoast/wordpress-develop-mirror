@@ -9,11 +9,14 @@ class Tests_Admin_includesListTable extends WP_UnitTestCase {
 	protected static $grandchildren = array();
 	protected static $post_ids = array();
 
+	/**
+	 * @var WP_Posts_List_Table
+	 */
+	protected $table;
+
 	function setUp() {
 		parent::setUp();
-		set_current_screen( 'edit-page' );
-		$GLOBALS['hook_suffix'] = '';
-		$this->table = _get_list_table( 'WP_Posts_List_Table' );
+		$this->table = _get_list_table( 'WP_Posts_List_Table', array( 'screen' => 'edit-page' ) );
 	}
 
 	public static function wpSetUpBeforeClass( $factory ) {
@@ -191,4 +194,72 @@ class Tests_Admin_includesListTable extends WP_UnitTestCase {
 		}
 	}
 
+	/**
+	 * @ticket 37407
+	 */
+	function test_filter_button_should_not_be_shown_if_there_are_no_posts() {
+		// Set post type to a non-existent one.
+		$this->table->screen->post_type = 'foo';
+
+		ob_start();
+		$this->table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="post-query-submit"', $output );
+	}
+
+	/**
+	 * @ticket 37407
+	 */
+	function test_months_dropdown_should_not_be_shown_if_there_are_no_posts() {
+		// Set post type to a non-existent one.
+		$this->table->screen->post_type = 'foo';
+
+		ob_start();
+		$this->table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="filter-by-date"', $output );
+	}
+
+	/**
+	 * @ticket 37407
+	 */
+	function test_category_dropdown_should_not_be_shown_if_there_are_no_posts() {
+		// Set post type to a non-existent one.
+		$this->table->screen->post_type = 'foo';
+
+		ob_start();
+		$this->table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="cat"', $output );
+	}
+
+	/**
+	 * @ticket 38341
+	 */
+	public function test_empty_trash_button_should_not_be_shown_if_there_are_no_posts() {
+		// Set post type to a non-existent one.
+		$this->table->screen->post_type = 'foo';
+
+		ob_start();
+		$this->table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="delete_all"', $output );
+	}
+
+	/**
+	 * @ticket 38341
+	 */
+	public function test_empty_trash_button_should_not_be_shown_if_there_are_no_comments() {
+		$table = _get_list_table( 'WP_Comments_List_Table', array( 'screen' => 'edit-comments' ) );
+
+		ob_start();
+		$table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="delete_all"', $output );
+	}
 }

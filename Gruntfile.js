@@ -312,7 +312,9 @@ module.exports = function(grunt) {
 					'twenty*/**/*.js',
 					'!twenty{eleven,twelve,thirteen}/**',
 					// Third party scripts
-					'!twenty{fourteen,fifteen,sixteen}/js/html5.js'
+					'!twenty{fourteen,fifteen,sixteen}/js/html5.js',
+					'!twentyseventeen/assets/js/html5.js',
+					'!twentyseventeen/assets/js/jquery.scrollTo.js'
 				]
 			},
 			media: {
@@ -327,7 +329,7 @@ module.exports = function(grunt) {
 				expand: true,
 				cwd: SOURCE_DIR,
 				src: [
-					'wp-admin/js/*.js',
+					'wp-admin/js/**/*.js',
 					'wp-includes/js/*.js',
 					// Built scripts.
 					'!wp-includes/js/media-*',
@@ -424,29 +426,29 @@ module.exports = function(grunt) {
 		phpunit: {
 			'default': {
 				cmd: 'phpunit',
-				args: ['-c', 'phpunit.xml.dist']
+				args: ['--verbose', '-c', 'phpunit.xml.dist']
 			},
 			ajax: {
 				cmd: 'phpunit',
-				args: ['-c', 'phpunit.xml.dist', '--group', 'ajax']
+				args: ['--verbose', '-c', 'phpunit.xml.dist', '--group', 'ajax']
 			},
 			multisite: {
 				cmd: 'phpunit',
-				args: ['-c', 'tests/phpunit/multisite.xml']
+				args: ['--verbose', '-c', 'tests/phpunit/multisite.xml']
 			},
 			'external-http': {
 				cmd: 'phpunit',
-				args: ['-c', 'phpunit.xml.dist', '--group', 'external-http']
+				args: ['--verbose', '-c', 'phpunit.xml.dist', '--group', 'external-http']
+			},
+			'restapi-jsclient': {
+				cmd: 'phpunit',
+				args: ['--verbose', '-c', 'phpunit.xml.dist', '--group', 'restapi-jsclient']
 			}
-			//,
-			//'external-oembed': {
-			//	cmd: 'phpunit',
-			//	args: ['-c', 'phpunit.xml.dist', '--group', 'external-oembed']
-			//}
 		},
 		uglify: {
 			options: {
-				ASCIIOnly: true
+				ASCIIOnly: true,
+				screwIE8: false
 			},
 			core: {
 				expand: true,
@@ -454,7 +456,7 @@ module.exports = function(grunt) {
 				dest: BUILD_DIR,
 				ext: '.min.js',
 				src: [
-					'wp-admin/js/*.js',
+					'wp-admin/js/**/*.js',
 					'wp-includes/js/*.js',
 					'wp-includes/js/mediaelement/wp-mediaelement.js',
 					'wp-includes/js/mediaelement/wp-playlist.js',
@@ -648,6 +650,15 @@ module.exports = function(grunt) {
 		}
 	});
 
+	// Allow builds to be minimal
+	if( grunt.option( 'minimal-copy' ) ) {
+		var copyFilesOptions = grunt.config.get( 'copy.files.files' );
+		copyFilesOptions[0].src.push( '!wp-content/plugins/**' );
+		copyFilesOptions[0].src.push( '!wp-content/themes/!(twenty*)/**' );
+		grunt.config.set( 'copy.files.files', copyFilesOptions );
+	}
+
+
 	// Register tasks.
 
 	// RTL task.
@@ -663,6 +674,11 @@ module.exports = function(grunt) {
 		'jshint:themes',
 		'jshint:core',
 		'jshint:media'
+	] );
+
+	grunt.registerTask( 'restapi-jsclient', [
+		'phpunit:restapi-jsclient',
+		'qunit:compiled'
 	] );
 
 	grunt.renameTask( 'watch', '_watch' );
@@ -830,6 +846,9 @@ module.exports = function(grunt) {
 
 	// Patch task.
 	grunt.renameTask('patch_wordpress', 'patch');
+
+	// Add an alias `apply` of the `patch` task name.
+	grunt.registerTask('apply', 'patch');
 
 	// Default task.
 	grunt.registerTask('default', ['build']);

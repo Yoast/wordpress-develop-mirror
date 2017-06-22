@@ -3763,7 +3763,7 @@ function wp_embed_handler_googlevideo( $matches, $attr, $url, $rawattr ) {
  * Retrieve path of paged template in current or parent template.
  *
  * @since 1.5.0
- * @deprecated 4.7.0 The paged.php template is no longer part of the theme template heirarchy.
+ * @deprecated 4.7.0 The paged.php template is no longer part of the theme template hierarchy.
  *
  * @return string Full path to paged template file.
  */
@@ -3788,7 +3788,7 @@ function get_paged_template() {
  * input to the return.
  *
  * @since 1.0.0
- * @deprecated deprecated since 4.7
+ * @deprecated 4.7.0 Officially dropped security support for Netscape 4.
  *
  * @param string $string
  * @return string
@@ -3797,4 +3797,84 @@ function wp_kses_js_entities( $string ) {
 	_deprecated_function( __FUNCTION__, '4.7.0' );
 
 	return preg_replace( '%&\s*\{[^}]*(\}\s*;?|$)%', '', $string );
+}
+
+/**
+ * Sort categories by ID.
+ *
+ * Used by usort() as a callback, should not be used directly. Can actually be
+ * used to sort any term object.
+ *
+ * @since 2.3.0
+ * @deprecated 4.7.0 Use wp_list_sort()
+ * @access private
+ *
+ * @param object $a
+ * @param object $b
+ * @return int
+ */
+function _usort_terms_by_ID( $a, $b ) {
+	_deprecated_function( __FUNCTION__, '4.7.0', 'wp_list_sort' );
+
+	if ( $a->term_id > $b->term_id )
+		return 1;
+	elseif ( $a->term_id < $b->term_id )
+		return -1;
+	else
+		return 0;
+}
+
+/**
+ * Sort categories by name.
+ *
+ * Used by usort() as a callback, should not be used directly. Can actually be
+ * used to sort any term object.
+ *
+ * @since 2.3.0
+ * @deprecated 4.7.0 Use wp_list_sort()
+ * @access private
+ *
+ * @param object $a
+ * @param object $b
+ * @return int
+ */
+function _usort_terms_by_name( $a, $b ) {
+	_deprecated_function( __FUNCTION__, '4.7.0', 'wp_list_sort' );
+
+	return strcmp( $a->name, $b->name );
+}
+
+/**
+ * Sort menu items by the desired key.
+ *
+ * @since 3.0.0
+ * @deprecated 4.7.0 Use wp_list_sort()
+ * @access private
+ *
+ * @global string $_menu_item_sort_prop
+ *
+ * @param object $a The first object to compare
+ * @param object $b The second object to compare
+ * @return int -1, 0, or 1 if $a is considered to be respectively less than, equal to, or greater than $b.
+ */
+function _sort_nav_menu_items( $a, $b ) {
+	global $_menu_item_sort_prop;
+
+	_deprecated_function( __FUNCTION__, '4.7.0', 'wp_list_sort' );
+
+	if ( empty( $_menu_item_sort_prop ) )
+		return 0;
+
+	if ( ! isset( $a->$_menu_item_sort_prop ) || ! isset( $b->$_menu_item_sort_prop ) )
+		return 0;
+
+	$_a = (int) $a->$_menu_item_sort_prop;
+	$_b = (int) $b->$_menu_item_sort_prop;
+
+	if ( $a->$_menu_item_sort_prop == $b->$_menu_item_sort_prop )
+		return 0;
+	elseif ( $_a == $a->$_menu_item_sort_prop && $_b == $b->$_menu_item_sort_prop )
+		return $_a < $_b ? -1 : 1;
+	else
+		return strcmp( $a->$_menu_item_sort_prop, $b->$_menu_item_sort_prop );
 }

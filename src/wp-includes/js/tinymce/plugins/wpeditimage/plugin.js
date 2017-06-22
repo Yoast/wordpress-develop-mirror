@@ -181,16 +181,10 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		return content.replace( /(?:<div [^>]+mceTemp[^>]+>)?\s*(<dl [^>]+wp-caption[^>]+>[\s\S]+?<\/dl>)\s*(?:<\/div>)?/g, function( all, dl ) {
 			var out = '';
 
-			if ( dl.indexOf('<img ') === -1 ) {
-				// Broken caption. The user managed to drag the image out?
-				// Try to return the caption text as a paragraph.
-				out = dl.match( /<dd [^>]+>([\s\S]+?)<\/dd>/i );
-
-				if ( out && out[1] ) {
-					return '<p>' + out[1] + '</p>';
-				}
-
-				return '';
+			if ( dl.indexOf('<img ') === -1 || dl.indexOf('</p>') !== -1 ) {
+				// Broken caption. The user managed to drag the image out or type in the wrapper div?
+				// Remove the <dl>, <dd> and <dt> and return the remaining text.
+				return dl.replace( /<d[ldt]( [^>]+)?>/g, '' ).replace( /<\/d[ldt]>/g, '' );
 			}
 
 			out = dl.replace( /\s*<dl ([^>]+)>\s*<dt [^>]+>([\s\S]+?)<\/dt>\s*<dd [^>]+>([\s\S]*?)<\/dd>\s*<\/dl>\s*/gi, function( a, b, c, caption ) {
@@ -388,12 +382,14 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			src: imageData.url,
 			width: width || null,
 			height: height || null,
-			alt: imageData.alt,
 			title: imageData.title || null,
 			'class': classes.join( ' ' ) || null
 		};
 
 		dom.setAttribs( imageNode, attrs );
+
+		// Preserve empty alt attributes.
+		editor.$( imageNode ).attr( 'alt', imageData.alt || '' );
 
 		linkAttrs = {
 			href: imageData.linkUrl,
@@ -896,26 +892,42 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			cmd = event.command,
 			dom = editor.dom;
 
-		if ( cmd === 'mceInsertContent' ) {
+		if ( cmd === 'mceInsertContent' || cmd === 'Indent' || cmd === 'Outdent' ) {
 			node = editor.selection.getNode();
 			captionParent = dom.getParent( node, 'div.mceTemp' );
 
 			if ( captionParent ) {
-				if ( pasteInCaption ) {
-					pasteInCaption = false;
-					// We are in the caption element, and in 'paste' context,
-					// and the pasted HTML was cleaned up on 'pastePostProcess' above.
-					// Let it be pasted in the caption.
-					return;
-				}
+				if ( cmd === 'mceInsertContent' ) {
+					if ( pasteInCaption ) {
+						pasteInCaption = false;
+						// We are in the caption element, and in 'paste' context,
+						// and the pasted HTML was cleaned up on 'pastePostProcess' above.
+						// Let it be pasted in the caption.
+						return;
+					}
 
-				// The paste is somewhere else in the caption DL element.
-				// Prevent pasting in there as it will break the caption.
-				// Make new paragraph under the caption DL and move the caret there.
-				p = dom.create( 'p' );
-				dom.insertAfter( p, captionParent );
-				editor.selection.setCursorLocation( p, 0 );
-				editor.nodeChanged();
+					// The paste is somewhere else in the caption DL element.
+					// Prevent pasting in there as it will break the caption.
+					// Make new paragraph under the caption DL and move the caret there.
+					p = dom.create( 'p' );
+					dom.insertAfter( p, captionParent );
+					editor.selection.setCursorLocation( p, 0 );
+
+					// If the image is selected and the user pastes "over" it,
+					// replace both the image and the caption elements with the pasted content.
+					// This matches the behavior when pasting over non-caption images.
+					if ( node.nodeName === 'IMG' ) {
+                        editor.$( captionParent ).remove();
+                    }
+
+					editor.nodeChanged();
+				} else {
+					// Clicking Indent or Outdent while an image with a caption is selected breaks the caption.
+					// See #38313.
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return false;
+				}
 			}
 		} else if ( cmd === 'JustifyLeft' || cmd === 'JustifyRight' || cmd === 'JustifyCenter' || cmd === 'wpAlignNone' ) {
 			node = editor.selection.getNode();
@@ -1024,7 +1036,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	editor.on( 'beforeGetContent', function( event ) {
 		if ( event.format !== 'raw' ) {
 			editor.$( 'img[id="__wp-temp-img-id"]' ).attr( 'id', null );
-		}	
+		}
 	});
 
 	editor.on( 'BeforeSetContent', function( event ) {

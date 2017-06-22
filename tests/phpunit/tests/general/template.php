@@ -23,7 +23,10 @@ class Tests_General_Template extends WP_UnitTestCase {
 	}
 
 	function tearDown() {
+		global $wp_customize;
 		$this->_remove_custom_logo();
+		$this->_remove_site_icon();
+		$wp_customize = null;
 
 		parent::tearDown();
 	}
@@ -51,7 +54,6 @@ class Tests_General_Template extends WP_UnitTestCase {
 		$this->_set_site_icon();
 		$this->expectOutputString( $this->site_icon_url );
 		site_icon_url();
-		$this->_remove_site_icon();
 	}
 
 	/**
@@ -70,12 +72,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 	/**
  	 * @group site_icon
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_has_site_icon_returns_true_when_called_for_other_site_with_site_icon_set() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 		switch_to_blog( $blog_id );
 		$this->_set_site_icon();
@@ -87,12 +86,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 	/**
 	 * @group site_icon
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_has_site_icon_returns_false_when_called_for_other_site_without_site_icon_set() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 
 		$this->assertFalse( has_site_icon( $blog_id ) );
@@ -117,8 +113,6 @@ class Tests_General_Template extends WP_UnitTestCase {
 
 		$this->expectOutputString( $output );
 		wp_site_icon();
-
-		$this->_remove_site_icon();
 	}
 
 	/**
@@ -143,8 +137,51 @@ class Tests_General_Template extends WP_UnitTestCase {
 		add_filter( 'site_icon_meta_tags', array( $this, '_custom_site_icon_meta_tag' ) );
 		wp_site_icon();
 		remove_filter( 'site_icon_meta_tags', array( $this, '_custom_site_icon_meta_tag' ) );
+	}
 
-		$this->_remove_site_icon();
+	/**
+	 * @group site_icon
+	 * @ticket 38377
+	 */
+	function test_customize_preview_wp_site_icon_empty() {
+		global $wp_customize;
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->register_controls();
+		$wp_customize->start_previewing_theme();
+
+		$this->expectOutputString( '<link rel="icon" href="/favicon.ico" sizes="32x32" />' . "\n" );
+		wp_site_icon();
+	}
+
+	/**
+	 * @group site_icon
+	 * @ticket 38377
+	 */
+	function test_customize_preview_wp_site_icon_dirty() {
+		global $wp_customize;
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->register_controls();
+		$wp_customize->start_previewing_theme();
+
+		$attachment_id = $this->_insert_attachment();
+		$wp_customize->set_post_value( 'site_icon', $attachment_id );
+		$wp_customize->get_setting( 'site_icon' )->preview();
+		$output = array(
+			sprintf( '<link rel="icon" href="%s" sizes="32x32" />', esc_url( wp_get_attachment_image_url( $attachment_id, 32 ) ) ),
+			sprintf( '<link rel="icon" href="%s" sizes="192x192" />', esc_url( wp_get_attachment_image_url( $attachment_id, 192 ) ) ),
+			sprintf( '<link rel="apple-touch-icon-precomposed" href="%s" />', esc_url( wp_get_attachment_image_url( $attachment_id, 180 ) ) ),
+			sprintf( '<meta name="msapplication-TileImage" content="%s" />', esc_url( wp_get_attachment_image_url( $attachment_id, 270 ) ) ),
+			'',
+		);
+		$output = implode( "\n", $output );
+		$this->expectOutputString( $output );
+		wp_site_icon();
 	}
 
 	/**
@@ -221,12 +258,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 	/**
 	 * @group custom_logo
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_has_custom_logo_returns_true_when_called_for_other_site_with_custom_logo_set() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 		switch_to_blog( $blog_id );
 		$this->_set_custom_logo();
@@ -238,12 +272,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 	/**
 	 * @group custom_logo
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_has_custom_logo_returns_false_when_called_for_other_site_without_custom_logo_set() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 
 		$this->assertFalse( has_custom_logo( $blog_id ) );
@@ -269,21 +300,27 @@ class Tests_General_Template extends WP_UnitTestCase {
 	/**
 	 * @group custom_logo
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_get_custom_logo_returns_logo_when_called_for_other_site_with_custom_logo_set() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 		switch_to_blog( $blog_id );
 
 		$this->_set_custom_logo();
+
+		$custom_logo_attr = array(
+			'class'    => 'custom-logo',
+			'itemprop' => 'logo',
+		);
+
+		// If the logo alt attribute is empty, use the site title.
+		$image_alt = get_post_meta( $this->custom_logo_id, '_wp_attachment_image_alt', true );
+		if ( empty( $image_alt ) ) {
+			$custom_logo_attr['alt'] = get_bloginfo( 'name', 'display' );
+		}
+
 		$home_url = get_home_url( $blog_id, '/' );
-		$image    = wp_get_attachment_image( $this->custom_logo_id, 'full', false, array(
-			'class'     => 'custom-logo',
-			'itemprop'  => 'logo',
-		) );
+		$image    = wp_get_attachment_image( $this->custom_logo_id, 'full', false, $custom_logo_attr );
 		restore_current_blog();
 
 		$expected_custom_logo =  '<a href="' . $home_url . '" class="custom-logo-link" rel="home" itemprop="url">' . $image . '</a>';
@@ -300,9 +337,38 @@ class Tests_General_Template extends WP_UnitTestCase {
 		the_custom_logo();
 
 		$this->_set_custom_logo();
+
+		$custom_logo_attr = array(
+			'class'    => 'custom-logo',
+			'itemprop' => 'logo',
+		);
+
+		// If the logo alt attribute is empty, use the site title.
+		$image_alt = get_post_meta( $this->custom_logo_id, '_wp_attachment_image_alt', true );
+		if ( empty( $image_alt ) ) {
+			$custom_logo_attr['alt'] = get_bloginfo( 'name', 'display' );
+		}
+
+		$image = wp_get_attachment_image( $this->custom_logo_id, 'full', false, $custom_logo_attr );
+
+		$this->expectOutputString( '<a href="http://' . WP_TESTS_DOMAIN . '/" class="custom-logo-link" rel="home" itemprop="url">' . $image . '</a>' );
+		the_custom_logo();
+	}
+
+	/**
+	 * @group custom_logo
+	 * @ticket 38768
+	 */
+	function test_the_custom_logo_with_alt() {
+		$this->_set_custom_logo();
+
+		$image_alt = 'My alt attribute';
+
+		update_post_meta( $this->custom_logo_id, '_wp_attachment_image_alt', $image_alt );
+
 		$image = wp_get_attachment_image( $this->custom_logo_id, 'full', false, array(
-			'class'     => 'custom-logo',
-			'itemprop'  => 'logo',
+			'class'    => 'custom-logo',
+			'itemprop' => 'logo',
 		) );
 
 		$this->expectOutputString( '<a href="http://' . WP_TESTS_DOMAIN . '/" class="custom-logo-link" rel="home" itemprop="url">' . $image . '</a>' );
@@ -491,12 +557,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 38253
+	 * @group ms-required
 	 */
 	function test_get_site_icon_url_preserves_switched_state() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 		switch_to_blog( $blog_id );
 
@@ -513,12 +576,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 38253
+	 * @group ms-required
 	 */
 	function test_has_custom_logo_preserves_switched_state() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 		switch_to_blog( $blog_id );
 
@@ -535,12 +595,9 @@ class Tests_General_Template extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 38253
+	 * @group ms-required
 	 */
 	function test_get_custom_logo_preserves_switched_state() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite.' );
-		}
-
 		$blog_id = $this->factory->blog->create();
 		switch_to_blog( $blog_id );
 

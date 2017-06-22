@@ -98,11 +98,15 @@ function edit_user( $user_id = 0 ) {
 
 		if ( isset( $_POST['locale'] ) ) {
 			$locale = sanitize_text_field( $_POST['locale'] );
-			if ( ! in_array( $locale, get_available_languages(), true ) ) {
+			if ( 'site-default' === $locale ) {
+				$locale = '';
+			} elseif ( '' === $locale ) {
+				$locale = 'en_US';
+			} elseif ( ! in_array( $locale, get_available_languages(), true ) ) {
 				$locale = '';
 			}
 
-			$user->locale = ( '' === $locale ) ? 'en_US' : $locale;
+			$user->locale = $locale;
 		}
 	}
 
@@ -531,5 +535,5 @@ If you do not want to join this site please ignore
 this email. This invitation will expire in a few days.
 
 Please click the following link to activate your user account:
-%%s' ), get_bloginfo( 'name' ), home_url(), wp_specialchars_decode( translate_user_role( $role['name'] ) ) );
+%%s' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ), home_url(), wp_specialchars_decode( translate_user_role( $role['name'] ) ) );
 }

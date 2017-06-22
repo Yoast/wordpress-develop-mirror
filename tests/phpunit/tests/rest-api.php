@@ -26,6 +26,7 @@ class Tests_REST_API extends WP_UnitTestCase {
 		$this->assertTrue( class_exists( 'WP_REST_Server' ) );
 		$this->assertTrue( class_exists( 'WP_REST_Request' ) );
 		$this->assertTrue( class_exists( 'WP_REST_Response' ) );
+		$this->assertTrue( class_exists( 'WP_REST_Posts_Controller' ) );
 	}
 
 	/**
@@ -34,6 +35,35 @@ class Tests_REST_API extends WP_UnitTestCase {
 	 */
 	function test_init_action_added() {
 		$this->assertEquals( 10, has_action( 'init', 'rest_api_init' ) );
+	}
+
+	public function test_add_extra_api_taxonomy_arguments() {
+		$taxonomy = get_taxonomy( 'category' );
+		$this->assertTrue( $taxonomy->show_in_rest );
+		$this->assertEquals( 'categories', $taxonomy->rest_base );
+		$this->assertEquals( 'WP_REST_Terms_Controller', $taxonomy->rest_controller_class );
+
+		$taxonomy = get_taxonomy( 'post_tag' );
+		$this->assertTrue( $taxonomy->show_in_rest );
+		$this->assertEquals( 'tags', $taxonomy->rest_base );
+		$this->assertEquals( 'WP_REST_Terms_Controller', $taxonomy->rest_controller_class );
+	}
+
+	public function test_add_extra_api_post_type_arguments() {
+		$post_type = get_post_type_object( 'post' );
+		$this->assertTrue( $post_type->show_in_rest );
+		$this->assertEquals( 'posts', $post_type->rest_base );
+		$this->assertEquals( 'WP_REST_Posts_Controller', $post_type->rest_controller_class );
+
+		$post_type = get_post_type_object( 'page' );
+		$this->assertTrue( $post_type->show_in_rest );
+		$this->assertEquals( 'pages', $post_type->rest_base );
+		$this->assertEquals( 'WP_REST_Posts_Controller', $post_type->rest_controller_class );
+
+		$post_type = get_post_type_object( 'attachment' );
+		$this->assertTrue( $post_type->show_in_rest );
+		$this->assertEquals( 'media', $post_type->rest_base );
+		$this->assertEquals( 'WP_REST_Attachments_Controller', $post_type->rest_controller_class );
 	}
 
 	/**
@@ -275,11 +305,15 @@ class Tests_REST_API extends WP_UnitTestCase {
 	 */
 	public function test_rest_url_generation() {
 		// In pretty permalinks case, we expect a path of wp-json/ with no query.
-		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
 		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '/wp-json/', get_rest_url() );
 
-		update_option( 'permalink_structure', '' );
+		// In index permalinks case, we expect a path of index.php/wp-json/ with no query.
+		$this->set_permalink_structure( '/index.php/%year%/%monthnum%/%day%/%postname%/' );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '/index.php/wp-json/', get_rest_url() );
+
 		// In non-pretty case, we get a query string to invoke the rest router.
+		$this->set_permalink_structure( '' );
 		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '/?rest_route=/', get_rest_url() );
 
 	}
@@ -349,4 +383,67 @@ class Tests_REST_API extends WP_UnitTestCase {
 		$this->assertEquals( $valid, wp_check_jsonp_callback( $callback ) );
 	}
 
+	public function rest_date_provider() {
+		return array(
+			// Valid dates with timezones
+			array( '2017-01-16T11:30:00-05:00', gmmktime( 11, 30,  0,  1, 16, 2017 ) + 5 * HOUR_IN_SECONDS ),
+			array( '2017-01-16T11:30:00-05:30', gmmktime( 11, 30,  0,  1, 16, 2017 ) + 5.5 * HOUR_IN_SECONDS ),
+			array( '2017-01-16T11:30:00-05'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) + 5 * HOUR_IN_SECONDS ),
+			array( '2017-01-16T11:30:00+05'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) - 5 * HOUR_IN_SECONDS ),
+			array( '2017-01-16T11:30:00-00'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00+00'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00Z'     , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+
+			// Valid dates without timezones
+			array( '2017-01-16T11:30:00'      , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+
+			// Invalid dates (TODO: support parsing partial dates as ranges, see #38641)
+			array( '2017-01-16T11:30:00-5', false ),
+			array( '2017-01-16T11:30', false ),
+			array( '2017-01-16T11', false ),
+			array( '2017-01-16T', false ),
+			array( '2017-01-16', false ),
+			array( '2017-01', false ),
+			array( '2017', false ),
+		);
+	}
+
+	/**
+	 * @dataProvider rest_date_provider
+	 */
+	public function test_rest_parse_date( $string, $value ) {
+		$this->assertEquals( $value, rest_parse_date( $string ) );
+	}
+
+	public function rest_date_force_utc_provider() {
+		return array(
+			// Valid dates with timezones
+			array( '2017-01-16T11:30:00-05:00', gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00-05:30', gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00-05'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00+05'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00-00'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00+00'   , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+			array( '2017-01-16T11:30:00Z'     , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+
+			// Valid dates without timezones
+			array( '2017-01-16T11:30:00'      , gmmktime( 11, 30,  0,  1, 16, 2017 ) ),
+
+			// Invalid dates (TODO: support parsing partial dates as ranges, see #38641)
+			array( '2017-01-16T11:30:00-5', false ),
+			array( '2017-01-16T11:30', false ),
+			array( '2017-01-16T11', false ),
+			array( '2017-01-16T', false ),
+			array( '2017-01-16', false ),
+			array( '2017-01', false ),
+			array( '2017', false ),
+		);
+	}
+
+	/**
+	 * @dataProvider rest_date_force_utc_provider
+	 */
+	public function test_rest_parse_date_force_utc( $string, $value ) {
+		$this->assertEquals( $value, rest_parse_date( $string, true ) );
+	}
 }

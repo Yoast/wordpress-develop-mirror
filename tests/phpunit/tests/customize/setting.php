@@ -48,6 +48,46 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 		$this->assertEquals( false, $setting->dirty );
 	}
 
+	/**
+	 * A test validate callback function.
+	 *
+	 * @param mixed                $value   The setting value.
+	 * @param WP_Customize_Setting $setting The setting object.
+	 */
+	public function validate_callback_for_tests( $value, $setting ) {
+		return $value . ':validate_callback';
+	}
+
+	/**
+	 * A test sanitize callback function.
+	 *
+	 * @param mixed                $value   The setting value.
+	 * @param WP_Customize_Setting $setting The setting object.
+	 */
+	public function sanitize_callback_for_tests( $value, $setting ) {
+		return $value . ':sanitize_callback';
+	}
+
+	/**
+	 * A test sanitize JS callback function.
+	 *
+	 * @param mixed                $value   The setting value.
+	 * @param WP_Customize_Setting $setting The setting object.
+	 */
+	public function sanitize_js_callback_for_tests( $value, $setting ) {
+		return $value . ':sanitize_js_callback';
+	}
+
+	/**
+	 * Sanitize JS callback for base64 encoding.
+	 *
+	 * @param mixed                $value   The setting value.
+	 * @param WP_Customize_Setting $setting The setting object.
+	 */
+	function sanitize_js_callback_base64_for_testing( $value, $setting ) {
+		return base64_encode( $value );
+	}
+
 	function test_constructor_with_args() {
 		$args = array(
 			'type' => 'option',
@@ -55,9 +95,9 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 			'theme_supports' => 'widgets',
 			'default' => 'barbar',
 			'transport' => 'postMessage',
-			'validate_callback' => create_function( '$value', 'return $value . ":validate_callback";' ),
-			'sanitize_callback' => create_function( '$value', 'return $value . ":sanitize_callback";' ),
-			'sanitize_js_callback' => create_function( '$value', 'return $value . ":sanitize_js_callback";' ),
+			'validate_callback' => array( $this, 'validate_callback_for_tests' ),
+			'sanitize_callback' => array( $this, 'sanitize_callback_for_tests' ),
+			'sanitize_js_callback' => array( $this, 'sanitize_js_callback_for_tests' ),
 		);
 		$setting = new WP_Customize_Setting( $this->manager, 'bar', $args );
 		$this->assertEquals( 'bar', $setting->id );
@@ -97,6 +137,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 	 * @see WP_Customize_Setting::value()
 	 */
 	function test_preview_standard_types_non_multidimensional() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$_POST['customized'] = wp_slash( wp_json_encode( $this->post_data_overrides ) );
 
 		// Try non-multidimensional settings.
@@ -175,6 +216,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 	 * @see WP_Customize_Setting::value()
 	 */
 	function test_preview_standard_types_multidimensional() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$_POST['customized'] = wp_slash( wp_json_encode( $this->post_data_overrides ) );
 
 		foreach ( $this->standard_type_configs as $type => $type_options ) {
@@ -314,6 +356,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 	 * @see WP_Customize_Setting::preview()
 	 */
 	function test_preview_custom_type() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$type = 'custom_type';
 		$post_data_overrides = array(
 			"unset_{$type}_with_post_value" => "unset_{$type}_without_post_value\\o/",
@@ -392,7 +435,28 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 		$this->assertEquals( $post_data_overrides[ $name ], $this->custom_type_getter( $name, $this->undefined ) );
 		$this->assertEquals( $post_data_overrides[ $name ], $setting->value() );
 
+		// Custom type that does not handle supplying the post value from the customize_value_{$id_base} filter.
+		$setting_id = 'custom_without_previewing_value_filter';
+		$setting = $this->manager->add_setting( $setting_id, array(
+			'type' => 'custom_preview_test',
+			'default' => 123,
+			'sanitize_callback' => array( $this->manager->nav_menus, 'intval_base10' ),
+		) );
+
+		/*
+		 * In #36952 the conditions were such that get_theme_mod() be erroneously used
+		 * to source the root value for a custom multidimensional type.
+		 * Add a theme mod with the same name as the custom setting to test fix.
+		 */
+		set_theme_mod( $setting_id, 999 );
+		$this->assertSame( 123, $setting->value() );
+
+		$this->manager->set_post_value( $setting_id, '456' );
+		$setting->preview();
+		$this->assertSame( 456, $setting->value() );
+
 		unset( $this->custom_type_data_previewed, $this->custom_type_data_saved );
+		remove_theme_mod( $setting_id );
 	}
 
 	/**
@@ -441,7 +505,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 
 		// Satisfy all requirements for save to happen.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$this->assertTrue( false !== $setting->save() );
+		$this->assertNotFalse( $setting->save() );
 		$this->assertTrue( 1 === did_action( 'customize_update_custom' ) );
 		$this->assertTrue( 1 === did_action( 'customize_save_foo' ) );
 	}
@@ -478,6 +542,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 	 * @ticket 31428
 	 */
 	function test_is_current_blog_previewed() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$type = 'option';
 		$name = 'blogname';
 		$post_value = __FUNCTION__;
@@ -496,12 +561,10 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 	 *
 	 * @ticket 31428
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_previewing_with_switch_to_blog() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Cannot test WP_Customize_Setting::is_current_blog_previewed() with switch_to_blog() if not on multisite.' );
-		}
-
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$type = 'option';
 		$name = 'blogdescription';
 		$post_value = __FUNCTION__;
@@ -589,7 +652,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 			'default' => $default,
 			'transport' => 'postMessage',
 			'dirty' => true,
-			'sanitize_js_callback' => create_function( '$value', 'return base64_encode( $value );' ),
+			'sanitize_js_callback' => array( $this, 'sanitize_js_callback_base64_for_testing' ),
 		);
 		$setting = new WP_Customize_Setting( $this->manager, 'name', $args );
 
@@ -647,6 +710,7 @@ class Tests_WP_Customize_Setting extends WP_UnitTestCase {
 	 * @ticket 37294
 	 */
 	public function test_multidimensional_value_when_previewed() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		WP_Customize_Setting::reset_aggregated_multidimensionals();
 
 		$initial_value = 456;

@@ -51,7 +51,7 @@ $id = isset( $_REQUEST['id'] ) ? intval( $_REQUEST['id'] ) : 0;
 if ( ! $id )
 	wp_die( __('Invalid site ID.') );
 
-$details = get_blog_details( $id );
+$details = get_site( $id );
 if ( ! $details ) {
 	wp_die( __( 'The requested site does not exist.' ) );
 }
@@ -138,7 +138,14 @@ if ( $action ) {
 		case 'promote':
 			check_admin_referer( 'bulk-users' );
 			$editable_roles = get_editable_roles();
-			if ( empty( $editable_roles[ $_REQUEST['new_role'] ] ) ) {
+			$role = false;
+			if ( ! empty( $_REQUEST['new_role2'] ) ) {
+				$role = $_REQUEST['new_role2'];
+			} elseif ( ! empty( $_REQUEST['new_role'] ) ) {
+				$role = $_REQUEST['new_role'];
+			}
+
+			if ( empty( $editable_roles[ $role ] ) ) {
 				wp_die( __( 'Sorry, you are not allowed to give users that role.' ) );
 			}
 
@@ -158,7 +165,7 @@ if ( $action ) {
 					}
 
 					$user = get_userdata( $user_id );
-					$user->set_role( $_REQUEST['new_role'] );
+					$user->set_role( $role );
 				}
 			} else {
 				$update = 'err_promote';
@@ -170,20 +177,8 @@ if ( $action ) {
 			}
 			check_admin_referer( 'bulk-users' );
 			$userids = $_REQUEST['users'];
-			/**
-			 * Fires when a custom bulk action should be handled.
-			 *
-			 * The redirect link should be modified with success or failure feedback
-			 * from the action to be used to display feedback to the user.
-			 *
-			 * @since 4.7.0
-			 *
-			 * @param string $referer The redirect URL.
-			 * @param string $action  The action being taken.
-			 * @param array  $userids The users to take the action on.
-			 * @param int    $id      The id of the current site
-			 */
-			$referer = apply_filters( 'handle_bulk_actions-' . get_current_screen()->id, $referer, $action, $userids, $id );
+			/** This action is documented in wp-admin/network/site-themes.php */
+			$referer = apply_filters( 'handle_network_bulk_actions-' . get_current_screen()->id, $referer, $action, $userids, $id );
 			$update = $action;
 			break;
 	}

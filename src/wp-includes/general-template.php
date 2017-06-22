@@ -808,7 +808,7 @@ function get_site_icon_url( $size = 512, $url = '', $blog_id = 0 ) {
 	/**
 	 * Filters the site icon URL.
 	 *
-	 * @site 4.4.0
+	 * @since 4.4.0
 	 *
 	 * @param string $url     Site icon URL.
 	 * @param int    $size    Size of the site icon.
@@ -888,12 +888,27 @@ function get_custom_logo( $blog_id = 0 ) {
 
 	// We have a logo. Logo is go.
 	if ( $custom_logo_id ) {
+		$custom_logo_attr = array(
+			'class'    => 'custom-logo',
+			'itemprop' => 'logo',
+		);
+
+		/*
+		 * If the logo alt attribute is empty, get the site title and explicitly
+		 * pass it to the attributes used by wp_get_attachment_image().
+		 */
+		$image_alt = get_post_meta( $custom_logo_id, '_wp_attachment_image_alt', true );
+		if ( empty( $image_alt ) ) {
+			$custom_logo_attr['alt'] = get_bloginfo( 'name', 'display' );
+		}
+
+		/*
+		 * If the alt attribute is not empty, there's no need to explicitly pass
+		 * it because wp_get_attachment_image() already adds the alt attribute.
+		 */
 		$html = sprintf( '<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
 			esc_url( home_url( '/' ) ),
-			wp_get_attachment_image( $custom_logo_id, 'full', false, array(
-				'class'    => 'custom-logo',
-				'itemprop' => 'logo',
-			) )
+			wp_get_attachment_image( $custom_logo_id, 'full', false, $custom_logo_attr )
 		);
 	}
 
@@ -1461,16 +1476,22 @@ function the_archive_title( $before = '', $after = '' ) {
  */
 function get_the_archive_title() {
 	if ( is_category() ) {
+		/* translators: Category archive title. 1: Category name */
 		$title = sprintf( __( 'Category: %s' ), single_cat_title( '', false ) );
 	} elseif ( is_tag() ) {
+		/* translators: Tag archive title. 1: Tag name */
 		$title = sprintf( __( 'Tag: %s' ), single_tag_title( '', false ) );
 	} elseif ( is_author() ) {
+		/* translators: Author archive title. 1: Author name */
 		$title = sprintf( __( 'Author: %s' ), '<span class="vcard">' . get_the_author() . '</span>' );
 	} elseif ( is_year() ) {
+		/* translators: Yearly archive title. 1: Year */
 		$title = sprintf( __( 'Year: %s' ), get_the_date( _x( 'Y', 'yearly archives date format' ) ) );
 	} elseif ( is_month() ) {
+		/* translators: Monthly archive title. 1: Month name and year */
 		$title = sprintf( __( 'Month: %s' ), get_the_date( _x( 'F Y', 'monthly archives date format' ) ) );
 	} elseif ( is_day() ) {
+		/* translators: Daily archive title. 1: Date */
 		$title = sprintf( __( 'Day: %s' ), get_the_date( _x( 'F j, Y', 'daily archives date format' ) ) );
 	} elseif ( is_tax( 'post_format' ) ) {
 		if ( is_tax( 'post_format', 'post-format-aside' ) ) {
@@ -1493,10 +1514,11 @@ function get_the_archive_title() {
 			$title = _x( 'Chats', 'post format archive title' );
 		}
 	} elseif ( is_post_type_archive() ) {
+		/* translators: Post type archive title. 1: Post type name */
 		$title = sprintf( __( 'Archives: %s' ), post_type_archive_title( '', false ) );
 	} elseif ( is_tax() ) {
 		$tax = get_taxonomy( get_queried_object()->taxonomy );
-		/* translators: 1: Taxonomy singular name, 2: Current taxonomy term */
+		/* translators: Taxonomy term archive title. 1: Taxonomy singular name, 2: Current taxonomy term */
 		$title = sprintf( __( '%1$s: %2$s' ), $tax->labels->singular_name, single_term_title( '', false ) );
 	} else {
 		$title = __( 'Archives' );
@@ -1713,11 +1735,7 @@ function wp_get_archives( $args = '' ) {
 
 	$output = '';
 
-	$last_changed = wp_cache_get( 'last_changed', 'posts' );
-	if ( ! $last_changed ) {
-		$last_changed = microtime();
-		wp_cache_set( 'last_changed', $last_changed, 'posts' );
-	}
+	$last_changed = wp_cache_get_last_changed( 'posts' );
 
 	$limit = $r['limit'];
 
@@ -1857,7 +1875,7 @@ function wp_get_archives( $args = '' ) {
  * @since 1.5.0
  *
  * @param int $num Number of day.
- * @return int Days since the start of the week.
+ * @return float Days since the start of the week.
  */
 function calendar_week_mod($num) {
 	$base = 7;
@@ -2055,6 +2073,7 @@ function get_calendar( $initial = true, $echo = true ) {
 		if ( in_array( $day, $daywithpost ) ) {
 			// any posts today?
 			$date_format = date( _x( 'F j, Y', 'daily archives date format' ), strtotime( "{$thisyear}-{$thismonth}-{$day}" ) );
+			/* translators: Post calendar label. 1: Date */
 			$label = sprintf( __( 'Posts published on %s' ), $date_format );
 			$calendar_output .= sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
@@ -2780,12 +2799,26 @@ function wp_site_icon() {
 		return;
 	}
 
-	$meta_tags = array(
-		sprintf( '<link rel="icon" href="%s" sizes="32x32" />', esc_url( get_site_icon_url( 32 ) ) ),
-		sprintf( '<link rel="icon" href="%s" sizes="192x192" />', esc_url( get_site_icon_url( 192 ) ) ),
-		sprintf( '<link rel="apple-touch-icon-precomposed" href="%s" />', esc_url( get_site_icon_url( 180 ) ) ),
-		sprintf( '<meta name="msapplication-TileImage" content="%s" />', esc_url( get_site_icon_url( 270 ) ) ),
-	);
+	$meta_tags = array();
+	$icon_32 = get_site_icon_url( 32 );
+	if ( empty( $icon_32 ) && is_customize_preview() ) {
+		$icon_32 = '/favicon.ico'; // Serve default favicon URL in customizer so element can be updated for preview.
+	}
+	if ( $icon_32 ) {
+		$meta_tags[] = sprintf( '<link rel="icon" href="%s" sizes="32x32" />', esc_url( $icon_32 ) );
+	}
+	$icon_192 = get_site_icon_url( 192 );
+	if ( $icon_192 ) {
+		$meta_tags[] = sprintf( '<link rel="icon" href="%s" sizes="192x192" />', esc_url( $icon_192 ) );
+	}
+	$icon_180 = get_site_icon_url( 180 );
+	if ( $icon_180 ) {
+		$meta_tags[] = sprintf( '<link rel="apple-touch-icon-precomposed" href="%s" />', esc_url( $icon_180 ) );
+	}
+	$icon_270 = get_site_icon_url( 270 );
+	if ( $icon_270 ) {
+		$meta_tags[] = sprintf( '<meta name="msapplication-TileImage" content="%s" />', esc_url( $icon_270 ) );
+	}
 
 	/**
 	 * Filters the site icon meta tags, so Plugins can add their own.
@@ -2827,9 +2860,11 @@ function wp_resource_hints() {
 	 * The path is removed in the foreach loop below.
 	 */
 	/** This filter is documented in wp-includes/formatting.php */
-	$hints['dns-prefetch'][] = apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2.2.1/svg/' );
+	$hints['dns-prefetch'][] = apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2.3/svg/' );
 
 	foreach ( $hints as $relation_type => $urls ) {
+		$unique_urls = array();
+
 		/**
 		 * Filters domains and URLs for resource hints of relation type.
 		 *
@@ -2841,16 +2876,31 @@ function wp_resource_hints() {
 		$urls = apply_filters( 'wp_resource_hints', $urls, $relation_type );
 
 		foreach ( $urls as $key => $url ) {
+			$atts = array();
+
+			if ( is_array( $url ) ) {
+				if ( isset( $url['href'] ) ) {
+					$atts = $url;
+					$url  = $url['href'];
+				} else {
+					continue;
+				}
+			}
+
 			$url = esc_url( $url, array( 'http', 'https' ) );
+
 			if ( ! $url ) {
-				unset( $urls[ $key ] );
+				continue;
+			}
+
+			if ( isset( $unique_urls[ $url ] ) ) {
 				continue;
 			}
 
 			if ( in_array( $relation_type, array( 'preconnect', 'dns-prefetch' ) ) ) {
 				$parsed = wp_parse_url( $url );
+
 				if ( empty( $parsed['host'] ) ) {
-					unset( $urls[ $key ] );
 					continue;
 				}
 
@@ -2862,13 +2912,34 @@ function wp_resource_hints() {
 				}
 			}
 
-			$urls[ $key ] = $url;
+			$atts['rel'] = $relation_type;
+			$atts['href'] = $url;
+
+			$unique_urls[ $url ] = $atts;
 		}
 
-		$urls = array_unique( $urls );
+		foreach ( $unique_urls as $atts ) {
+			$html = '';
 
-		foreach ( $urls as $url ) {
-			printf( "<link rel='%s' href='%s' />\n", $relation_type, $url );
+			foreach ( $atts as $attr => $value ) {
+				if ( ! is_scalar( $value ) ||
+				     ( ! in_array( $attr, array( 'as', 'crossorigin', 'href', 'pr', 'rel', 'type' ), true ) && ! is_numeric( $attr ))
+				) {
+					continue;
+				}
+
+				$value = ( 'href' === $attr ) ? esc_url( $value ) : esc_attr( $value );
+
+				if ( ! is_string( $attr ) ) {
+					$html .= " $value";
+				} else {
+					$html .= " $attr='$value'";
+				}
+			}
+
+			$html = trim( $html );
+
+			echo "<link $html />\n";
 		}
 	}
 }
@@ -2932,7 +3003,9 @@ function user_can_richedit() {
 		if ( get_user_option( 'rich_editing' ) == 'true' || ! is_user_logged_in() ) { // default to 'true' for logged out users
 			if ( $is_safari ) {
 				$wp_rich_edit = ! wp_is_mobile() || ( preg_match( '!AppleWebKit/(\d+)!', $_SERVER['HTTP_USER_AGENT'], $match ) && intval( $match[1] ) >= 534 );
-			} elseif ( $is_gecko || $is_chrome || $is_IE || $is_edge || ( $is_opera && !wp_is_mobile() ) ) {
+			} elseif ( $is_IE ) {
+				$wp_rich_edit = ( strpos( $_SERVER['HTTP_USER_AGENT'], 'MSIE ' ) === false );
+			} elseif ( $is_gecko || $is_chrome || $is_edge || ( $is_opera && !wp_is_mobile() ) ) {
 				$wp_rich_edit = true;
 			}
 		}
@@ -2970,7 +3043,7 @@ function wp_default_editor() {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param array $r An array of editors. Accepts 'tinymce', 'html', 'test'.
+	 * @param string $r Which editor should be displayed by default. Either 'tinymce', 'html', or 'test'.
 	 */
 	return apply_filters( 'wp_default_editor', $r );
 }
@@ -2998,6 +3071,23 @@ function wp_editor( $content, $editor_id, $settings = array() ) {
 	if ( ! class_exists( '_WP_Editors', false ) )
 		require( ABSPATH . WPINC . '/class-wp-editor.php' );
 	_WP_Editors::editor($content, $editor_id, $settings);
+}
+
+/**
+ * Outputs the editor scripts, stylesheets, and default settings.
+ *
+ * The editor can be initialized when needed after page load.
+ * See wp.editor.initialize() in wp-admin/js/editor.js for initialization options.
+ *
+ * @uses _WP_Editors
+ * @since 4.8.0
+ */
+function wp_enqueue_editor() {
+	if ( ! class_exists( '_WP_Editors', false ) ) {
+		require( ABSPATH . WPINC . '/class-wp-editor.php' );
+	}
+
+	_WP_Editors::enqueue_default_editor();
 }
 
 /**
@@ -3290,7 +3380,7 @@ function paginate_links( $args = '' ) {
 			endif;
 		endif;
 	endfor;
-	if ( $args['prev_next'] && $current && ( $current < $total || -1 == $total ) ) :
+	if ( $args['prev_next'] && $current && $current < $total ) :
 		$link = str_replace( '%_%', $args['format'], $args['base'] );
 		$link = str_replace( '%#%', $current + 1, $link );
 		if ( $add_args )
@@ -3489,9 +3579,9 @@ function wp_admin_css( $file = 'wp-admin', $force_echo = false ) {
 	 * will be used instead.
 	 *
 	 * @since 2.3.0
-	 *
-	 * @param string $file Style handle name or filename (without ".css" extension)
-	 *                     relative to wp-admin/. Defaults to 'wp-admin'.
+	 * @param string $stylesheet_link HTML link element for the stylesheet.
+	 * @param string $file            Style handle name or filename (without ".css" extension)
+	 *                                relative to wp-admin/. Defaults to 'wp-admin'.
 	 */
 	echo apply_filters( 'wp_admin_css', "<link rel='stylesheet' href='" . esc_url( wp_admin_css_uri( $file ) ) . "' type='text/css' />\n", $file );
 

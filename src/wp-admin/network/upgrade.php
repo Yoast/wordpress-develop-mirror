@@ -32,8 +32,9 @@ get_current_screen()->set_help_sidebar(
 
 require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
-if ( ! current_user_can( 'manage_network' ) )
+if ( ! current_user_can( 'upgrade_network' ) ) {
 	wp_die( __( 'Sorry, you are not allowed to access this page.' ), 403 );
+}
 
 echo '<div class="wrap">';
 echo '<h1>' . __( 'Upgrade Network' ) . '</h1>';
@@ -53,9 +54,9 @@ switch ( $action ) {
 		}
 
 		$site_ids = get_sites( array(
-			'spam'       => '0',
-			'deleted'    => '0',
-			'archived'   => '0',
+			'spam'       => 0,
+			'deleted'    => 0,
+			'archived'   => 0,
 			'network_id' => get_current_network_id(),
 			'number'     => 5,
 			'offset'     => $n,

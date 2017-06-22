@@ -25,7 +25,13 @@ elseif ( ! get_userdata( $user_id ) )
 
 wp_enqueue_script('user-profile');
 
-$title = IS_PROFILE_PAGE ? __('Profile') : __('Edit User');
+if ( IS_PROFILE_PAGE ) {
+	$title = __( 'Profile' );
+} else {
+	/* translators: %s: user's display name */
+	$title = __( 'Edit User %s' );
+}
+
 if ( current_user_can('edit_users') && !IS_PROFILE_PAGE )
 	$submenu_file = 'users.php';
 else
@@ -38,6 +44,7 @@ else
 
 $profile_help = '<p>' . __('Your profile contains information about you (your &#8220;account&#8221;) as well as some personal options related to using WordPress.') . '</p>' .
 	'<p>' . __('You can change your password, turn on keyboard shortcuts, change the color scheme of your WordPress administration screens, and turn off the WYSIWYG (Visual) editor, among other things. You can hide the Toolbar (formerly called the Admin Bar) from the front end of your site, however it cannot be disabled on the admin screens.') . '</p>' .
+	'<p>' . __( 'You can select the language you wish to use while using the WordPress administration screen without affecting the language site visitors see.' ) . '</p>' .
 	'<p>' . __('Your username cannot be changed, but you can use other fields to enter your real name or a nickname, and change which name to display on your posts.') . '</p>' .
 	'<p>' . __( 'You can log out of other devices, such as your phone or a public computer, by clicking the Log Out Everywhere Else button.' ) . '</p>' .
 	'<p>' . __('Required fields are indicated; the rest are optional. Profile information will only be displayed if your theme is set up to do so.') . '</p>' .
@@ -165,13 +172,14 @@ $profileuser = get_user_to_edit($user_id);
 if ( !current_user_can('edit_user', $user_id) )
 	wp_die(__('Sorry, you are not allowed to edit this user.'));
 
+$title = sprintf( $title, $profileuser->display_name );
 $sessions = WP_Session_Tokens::get_instance( $profileuser->ID );
 
 include(ABSPATH . 'wp-admin/admin-header.php');
 ?>
 
 <?php if ( !IS_PROFILE_PAGE && is_super_admin( $profileuser->ID ) && current_user_can( 'manage_network_options' ) ) { ?>
-	<div class="updated"><p><strong><?php _e('Important:'); ?></strong> <?php _e('This user has super admin privileges.'); ?></p></div>
+	<div class="notice notice-info"><p><strong><?php _e('Important:'); ?></strong> <?php _e('This user has super admin privileges.'); ?></p></div>
 <?php } ?>
 <?php if ( isset($_GET['updated']) ) : ?>
 <div id="message" class="updated notice is-dismissible">
@@ -197,17 +205,22 @@ include(ABSPATH . 'wp-admin/admin-header.php');
 <?php endif; ?>
 
 <div class="wrap" id="profile-page">
-<h1>
-<?php
+<h1 class="wp-heading-inline"><?php
 echo esc_html( $title );
+?></h1>
+
+<?php
 if ( ! IS_PROFILE_PAGE ) {
 	if ( current_user_can( 'create_users' ) ) { ?>
 		<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add New', 'user' ); ?></a>
 	<?php } elseif ( is_multisite() && current_user_can( 'promote_users' ) ) { ?>
 		<a href="user-new.php" class="page-title-action"><?php echo esc_html_x( 'Add Existing', 'user' ); ?></a>
 	<?php }
-} ?>
-</h1>
+}
+?>
+
+<hr class="wp-header-end">
+
 <form id="your-profile" action="<?php echo esc_url( self_admin_url( IS_PROFILE_PAGE ? 'profile.php' : 'user-edit.php' ) ); ?>" method="post" novalidate="novalidate"<?php
 	/**
 	 * Fires inside the your-profile form tag on the user editing screen.
@@ -275,16 +288,17 @@ $languages = get_available_languages();
 if ( $languages ) : ?>
 <tr class="user-language-wrap">
 	<th scope="row">
-		<label for="site_language"><?php _e( 'Site Language' ); ?></label>
+		<?php /* translators: The user language selection field label */ ?>
+		<label for="locale"><?php _e( 'Language' ); ?></label>
 	</th>
 	<td>
 		<?php
-		$user_locale = get_user_option( 'locale', $profileuser->ID );
+		$user_locale = $profileuser->locale;
 
-		if ( 'en_US' === $user_locale ) { // en_US
-			$user_locale = false;
-		} elseif ( ! in_array( $user_locale, $languages, true ) ) {
-			$user_locale = get_locale();
+		if ( 'en_US' === $user_locale ) {
+			$user_locale = '';
+		} elseif ( '' === $user_locale || ! in_array( $user_locale, $languages, true ) ) {
+			$user_locale = 'site-default';
 		}
 
 		wp_dropdown_languages( array(
@@ -292,7 +306,8 @@ if ( $languages ) : ?>
 			'id'                          => 'locale',
 			'selected'                    => $user_locale,
 			'languages'                   => $languages,
-			'show_available_translations' => false
+			'show_available_translations' => false,
+			'show_option_site_default'    => true
 		) );
 		?>
 	</td>

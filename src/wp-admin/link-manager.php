@@ -31,18 +31,7 @@ if ( $doaction && isset( $_REQUEST['linkcheck'] ) ) {
 
 		$redirect_to = add_query_arg( 'deleted', count( $bulklinks ), $redirect_to );
 	} else {
-		/**
-		 * Fires when a custom bulk action should be handled.
-		 *
-		 * The redirect link should be modified with success or failure feedback
-		 * from the action to be used to display feedback to the user.
-		 *
-		 * @since 4.7.0
-		 *
-		 * @param string $redirect_to The redirect URL.
-		 * @param string $doaction    The action being taken.
-		 * @param array  $bulklinks   The links to take the action on.
-		 */
+		/** This action is documented in wp-admin/edit-comments.php */
 		$redirect_to = apply_filters( 'handle_bulk_actions-' . get_current_screen()->id, $redirect_to, $doaction, $bulklinks );
 	}
 	wp_redirect( $redirect_to );
@@ -90,13 +79,20 @@ if ( ! current_user_can('manage_links') )
 ?>
 
 <div class="wrap nosubsub">
-<h1><?php echo esc_html( $title ); ?> <a href="link-add.php" class="page-title-action"><?php echo esc_html_x('Add New', 'link'); ?></a> <?php
+<h1 class="wp-heading-inline"><?php
+echo esc_html( $title );
+?></h1>
+
+<a href="link-add.php" class="page-title-action"><?php echo esc_html_x( 'Add New', 'link' ); ?></a>
+
+<?php
 if ( isset( $_REQUEST['s'] ) && strlen( $_REQUEST['s'] ) ) {
 	/* translators: %s: search keywords */
 	printf( '<span class="subtitle">' . __( 'Search results for &#8220;%s&#8221;' ) . '</span>', esc_html( wp_unslash( $_REQUEST['s'] ) ) );
 }
 ?>
-</h1>
+
+<hr class="wp-header-end">
 
 <?php
 if ( isset($_REQUEST['deleted']) ) {

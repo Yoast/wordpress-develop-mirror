@@ -169,7 +169,9 @@ function get_permalink( $post = 0, $leavename = false ) {
 		if ( strpos($permalink, '%category%') !== false ) {
 			$cats = get_the_category($post->ID);
 			if ( $cats ) {
-				usort($cats, '_usort_terms_by_ID'); // order by ID
+				$cats = wp_list_sort( $cats, array(
+					'term_id' => 'ASC',
+				) );
 
 				/**
 				 * Filters the category that gets used in the %category% permalink token.
@@ -844,7 +846,7 @@ function get_term_feed_link( $term_id, $taxonomy = 'category', $feed = '' ) {
 		 *
 		 * @param string $link The taxonomy feed link.
 		 * @param string $feed Feed type.
-		 * @param string $feed The taxonomy name.
+		 * @param string $taxonomy The taxonomy name.
 		 */
 		$link = apply_filters( 'taxonomy_feed_link', $link, $feed, $taxonomy );
 	}
@@ -2952,9 +2954,9 @@ function get_shortcut_link() {
 /**
  * Retrieves the URL for the current site where the front end is accessible.
  *
- * Returns the 'home' option with the appropriate protocol, 'https' if
- * is_ssl() and 'http' otherwise. If `$scheme` is 'http' or 'https',
- * `is_ssl()` is overridden.
+ * Returns the 'home' option with the appropriate protocol. The protocol will be 'https'
+ * if is_ssl() evaluates to true; otherwise, it will be the same as the 'home' option.
+ * If `$scheme` is 'http' or 'https', is_ssl() is overridden.
  *
  * @since 3.0.0
  *
@@ -2970,9 +2972,9 @@ function home_url( $path = '', $scheme = null ) {
 /**
  * Retrieves the URL for a given site where the front end is accessible.
  *
- * Returns the 'home' option with the appropriate protocol, 'https' if
- * is_ssl() and 'http' otherwise. If `$scheme` is 'http' or 'https',
- * `is_ssl()` is overridden.
+ * Returns the 'home' option with the appropriate protocol. The protocol will be 'https'
+ * if is_ssl() evaluates to true; otherwise, it will be the same as the 'home' option.
+ * If `$scheme` is 'http' or 'https', is_ssl() is overridden.
  *
  * @since 3.0.0
  *
@@ -3255,12 +3257,12 @@ function network_site_url( $path = '', $scheme = null ) {
 	if ( ! is_multisite() )
 		return site_url($path, $scheme);
 
-	$current_site = get_current_site();
+	$current_network = get_network();
 
 	if ( 'relative' == $scheme )
-		$url = $current_site->path;
+		$url = $current_network->path;
 	else
-		$url = set_url_scheme( 'http://' . $current_site->domain . $current_site->path, $scheme );
+		$url = set_url_scheme( 'http://' . $current_network->domain . $current_network->path, $scheme );
 
 	if ( $path && is_string( $path ) )
 		$url .= ltrim( $path, '/' );
@@ -3297,16 +3299,16 @@ function network_home_url( $path = '', $scheme = null ) {
 	if ( ! is_multisite() )
 		return home_url($path, $scheme);
 
-	$current_site = get_current_site();
+	$current_network = get_network();
 	$orig_scheme = $scheme;
 
 	if ( ! in_array( $scheme, array( 'http', 'https', 'relative' ) ) )
 		$scheme = is_ssl() && ! is_admin() ? 'https' : 'http';
 
 	if ( 'relative' == $scheme )
-		$url = $current_site->path;
+		$url = $current_network->path;
 	else
-		$url = set_url_scheme( 'http://' . $current_site->domain . $current_site->path, $scheme );
+		$url = set_url_scheme( 'http://' . $current_network->domain . $current_network->path, $scheme );
 
 	if ( $path && is_string( $path ) )
 		$url .= ltrim( $path, '/' );
@@ -3470,13 +3472,13 @@ function get_dashboard_url( $user_id = 0, $path = '', $scheme = 'admin' ) {
 	$user_id = $user_id ? (int) $user_id : get_current_user_id();
 
 	$blogs = get_blogs_of_user( $user_id );
-	if ( ! is_super_admin() && empty($blogs) ) {
+	if ( is_multisite() && ! user_can( $user_id, 'manage_network' ) && empty($blogs) ) {
 		$url = user_admin_url( $path, $scheme );
 	} elseif ( ! is_multisite() ) {
 		$url = admin_url( $path, $scheme );
 	} else {
 		$current_blog = get_current_blog_id();
-		if ( $current_blog  && ( is_super_admin( $user_id ) || in_array( $current_blog, array_keys( $blogs ) ) ) ) {
+		if ( $current_blog  && ( user_can( $user_id, 'manage_network' ) || in_array( $current_blog, array_keys( $blogs ) ) ) ) {
 			$url = admin_url( $path, $scheme );
 		} else {
 			$active = get_active_blog_for_user( $user_id );
@@ -3581,8 +3583,8 @@ function wp_get_canonical_url( $post = null ) {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param string  $string The post's canonical URL.
-	 * @param WP_Post $post   Post object.
+	 * @param string  $canonical_url The post's canonical URL.
+	 * @param WP_Post $post          Post object.
 	 */
 	return apply_filters( 'get_canonical_url', $canonical_url, $post );
 }
