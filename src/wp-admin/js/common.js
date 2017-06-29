@@ -1,12 +1,21 @@
 /* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
 var showNotice, adminMenu, columns, validateForm, screenMeta;
+/**
+ *  @summary
+ *
+ *  @param {jQuery} $ jQuery object.
+ *  @param {Object} window The window object.
+ *  @param undefined
+ *
+ *  @since
+ */
 ( function( $, window, undefined ) {
 	var $document = $( document ),
 		$window = $( window ),
 		$body = $( document.body );
 
 /**
- * @summary Removed in 3.3. (perhaps) needed for back-compatiblity
+ * @summary Removed in 3.3.0, needed for back-compatiblity
  *
  * @since 2.7.0
  * @deprecated 3.3.0
@@ -19,7 +28,7 @@ adminMenu = {
 	favorites : function() {}
 };
 
-// show/hide/save table columns
+// Show/hide/save table columns
 columns = {
 	/**
 	 * @summary Initializes the column toggles in the screen options.
@@ -1139,7 +1148,7 @@ $document.ready( function() {
 	/**
 	 * @summary Get the viewport width.
 	 *
-	 * @since 4.7.0.0
+	 * @since 4.7.0
 	 *
 	 * @return {number|boolean} The current viewport width or false if the
 	 *                           browser doesn't support innerWidth (IE < 9).
@@ -1161,7 +1170,7 @@ $document.ready( function() {
 	 * Sets the global variable `menuState` and triggers a custom event passing
 	 * the current menu state.
 	 *
-	 * @since 4.7.0.0
+	 * @since 4.7.0
 	 *
 	 * @return {void}
 	 */
@@ -1189,7 +1198,7 @@ $document.ready( function() {
 	 * `aria-label` attributes of the button to give feedback to assistive
 	 * technologies. In the responsive view, the button is always hidden.
 	 *
-	 * @since 4.7.0.0
+	 * @since 4.7.0
 	 *
 	 * @return {void}
 	 */
