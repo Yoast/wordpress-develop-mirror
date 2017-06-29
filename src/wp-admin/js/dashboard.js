@@ -3,22 +3,21 @@ var ajaxWidgets, ajaxPopulateWidgets, quickPressLoad;
 window.wp = window.wp || {};
 
 /**
- * Dashboard widget functionality
+ * @summary Dashboard widget functionality.
  *
  * @since 2.7.0
  */
-
 jQuery(document).ready( function($) {
 	var welcomePanel = $( '#welcome-panel' ),
 		welcomePanelHide = $('#wp_welcome_panel-hide'),
 		updateWelcomePanel;
 
 	/**
-	 * Save the visibility of the welcome panel.
+	 * @summary Save the visibility of the welcome panel.
 	 *
 	 * @param {boolean} visible Should it be visible or not.
 	 *
-	 * @return void
+	 * @returns {void}
 	 */
 	updateWelcomePanel = function( visible ) {
 		$.post( ajaxurl, {
@@ -51,22 +50,22 @@ jQuery(document).ready( function($) {
 	ajaxWidgets = ['dashboard_primary'];
 
 	/**
-	 * Trigger widget updates via AJAX
+	 * @summary Trigger widget updates via AJAX.
 	 *
 	 * @since 2.7.0
 	 *
 	 * @param {string} el Optional. Widget to fetch or none to update all.
 	 *
-	 * @return void
+	 * @returns {void}
 	 */
 	ajaxPopulateWidgets = function(el) {
 		/**
-		 * Fetch the latest representation of the widget via Ajax and show it.
+		 * @summary Fetch the latest representation of the widget via Ajax and show it.
 		 *
 		 * @param {int} i Number of half-seconds to use as the timeout.
 		 * @param {string} id ID of the element which is going to be checked for changes.
 		 *
-		 * @return void
+		 * @returns {void}
 		 */
 		function show(i, id) {
 			var p, e = $('#' + id + ' div.inside:visible').find('.widget-loading');
@@ -106,9 +105,11 @@ jQuery(document).ready( function($) {
 	postboxes.add_postbox_toggles(pagenow, { pbshow: ajaxPopulateWidgets } );
 
 	/**
-	 * Control the Quick Press (Quick Draft) widget
+	 * @summary Control the Quick Press (Quick Draft) widget.
 	 *
 	 * @since 2.7.0
+	 *
+	 * @returns {void}
 	 */
 	quickPressLoad = function() {
 		var act = $('#quickpost-action'), t;
@@ -138,9 +139,9 @@ jQuery(document).ready( function($) {
 			});
 
 			/**
-			 * Highlights the latest post for one second.
+			 * @summary Highlights the latest post for one second.
 			 *
-			 * @return void
+			 * @returns {void}
  			 */
 			function highlightLatestPost () {
 				var latestPost = $('.drafts ul li').first();
@@ -155,12 +156,12 @@ jQuery(document).ready( function($) {
 		$('#publish').click( function() { act.val( 'post-quickpress-publish' ); } );
 
 		/**
-		 * Adds accessibility context to inputs
+		 * Adds accessibility context to inputs.
 		 *
 		 * Use the 'screen-reader-text' class to hide the label when entering a value.
 		 * Apply it when the input is not empty or the input has focus.
 		 *
-		 * @return void
+		 * @returns {void}
 		 */
 		$('#title, #tags-input, #content').each( function() {
 			var input = $(this), prompt = $('#' + this.id + '-prompt-text');
@@ -197,9 +198,11 @@ jQuery(document).ready( function($) {
 	$( '.meta-box-sortables' ).sortable( 'option', 'containment', '#wpwrap' );
 
 	/**
-	 * Adjust the height of the textarea based on the content
+	 * @summary Adjust the height of the textarea based on the content.
 	 *
 	 * @since 3.6.0
+	 *
+	 * @returns {void}
 	 */
 	function autoResizeTextarea() {
 		// When IE8 or older is used to render this document, exit.
@@ -278,7 +281,7 @@ jQuery( function( $ ) {
 		app;
 
 	/**
-	 * @summary Global Community Events class
+	 * @summary Global Community Events class.
 	 *
 	 * @since 4.8.0
 	 *
@@ -290,9 +293,11 @@ jQuery( function( $ ) {
 		model: null,
 
 		/**
-		 * Initializes the wp.communityEvents object.
+		 * @summary Initializes the wp.communityEvents object.
 		 *
 		 * @since 4.8.0
+		 *
+		 * @returns {void}
 		 */
 		init: function() {
 			if ( app.initialized ) {
@@ -326,7 +331,7 @@ jQuery( function( $ ) {
 			/**
 			 * @summary Filter events based on entered location.
 			 *
-			 * @return void
+			 * @returns {void}
 			 */
 			$container.on( 'submit', '.community-events-form', function( event ) {
 				var location = $.trim( $( '#community-events-location' ).val() );
@@ -356,14 +361,14 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Toggles the visibility of the Edit Location form.
+		 * @summary Toggles the visibility of the Edit Location form.
 		 *
 		 * @since 4.8.0
 		 *
 		 * @param {event|string} action 'show' or 'hide' to specify a state;
 		 *                              or an event object to flip between states.
 		 *
-		 * @return void
+		 * @returns {void}
 		 */
 		toggleLocationForm: function( action ) {
 			var $toggleButton = $( '.community-events-toggle-location' ),
@@ -402,13 +407,13 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Sends REST API requests to fetch events for the widget.
+		 * @summary Sends REST API requests to fetch events for the widget.
 		 *
 		 * @since 4.8.0
 		 *
 		 * @param {object} requestParams REST API Request parameters object.
 		 *
-		 * @return void
+		 * @returns {void}
 		 */
 		getEvents: function( requestParams ) {
 			var initiatedBy,
@@ -454,7 +459,7 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * Renders the template for the Events section of the Events & News widget.
+		 * @summary Renders the template for the Events section of the Events & News widget.
 		 *
 		 * @since 4.8.0
 		 *
@@ -462,7 +467,7 @@ jQuery( function( $ ) {
 		 * @param {string} initiatedBy    'user' to indicate that this was triggered manually by the user;
 		 *                                'app' to indicate it was triggered automatically by the app itself.
 		 *
-		 * @return void
+		 * @returns {void}
 		 */
 		renderEventsTemplate: function( templateParams, initiatedBy ) {
 			var template,
