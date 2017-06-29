@@ -4,6 +4,15 @@ window.autosave = function() {
 	return true;
 };
 
+/**
+ * @summary Adds autosave to the window object on dom ready.
+ *
+ * @since 3.9.0
+ *
+ * @param {jQuery} $ jQuery object.
+ * @param {window} The window object.
+ *
+ */
 ( function( $, window ) {
 	/**
 	 * @summary Auto saves the post.
@@ -249,11 +258,11 @@ window.autosave = function() {
 			/**
 			 * @summary Sets (save or delete) post data in the storage.
 			 *
-			 * If stored_data evaluates to 'false' the storage key for the current post will be removed
+			 * If stored_data evaluates to 'false' the storage key for the current post will be removed.
 			 *
 			 * @since 3.9.0
 			 *
-			 * @param {Object|boolean|null}stored_data The post data to store or null/false/empty to delete the key
+			 * @param {Object|boolean|null} stored_data The post data to store or null/false/empty to delete the key.
 			 *
 			 * @returns {boolean} True if data is stored, false if data was removed.
 			 */
@@ -307,7 +316,7 @@ window.autosave = function() {
 			 *
 			 * @param {Object} data The post data for saving, minimum 'post_title' and 'content'.
 			 *
-			 * @returns {boolean}
+			 * @returns {boolean} Returns true when data has been saved, otherwise it returns false.
 			 */
 			function save( data ) {
 				var postData, compareString,
@@ -407,7 +416,7 @@ window.autosave = function() {
 			/**
 			 * @summary Compares 2 strings.
 			 *
-			 * Removes whitespaces in the strings before comparing then.
+			 * Removes whitespaces in the strings before comparing them.
 			 *
 			 * @since 3.9.0
 			 *
@@ -592,6 +601,7 @@ window.autosave = function() {
 					_blockSave = false;
 				}, 10000 );
 			}
+
 			/**
 			 * @summary Sets isSuspended to true.
 			 *
@@ -604,7 +614,7 @@ window.autosave = function() {
 			}
 
 			/**
-			 * @summary Sets isSuspended to false..
+			 * @summary Sets isSuspended to false.
 			 *
 			 * @since 3.9.0
 			 *
@@ -660,7 +670,7 @@ window.autosave = function() {
 			 *
 			 * @since 3.9.0
 			 *
-			 * @return {boolean} True if the post has changed.
+			 * @return {boolean} True if the post has been changed.
 			 */
 			function postChanged() {
 				return getCompareString() !== initialCompareString;
@@ -669,8 +679,8 @@ window.autosave = function() {
 			/**
 			 * @summary Checks if the post can be saved or not.
 			 *
-			 * If the post hasn't changed or it cannot be updated because
-			 * the autosave is blocked or suspended.
+			 * If the post hasn't changed or it cannot be updated,
+			 * because the autosave is blocked or suspended, the function returns false.
 			 *
 			 * @since 3.9.0
 			 *
@@ -714,7 +724,7 @@ window.autosave = function() {
 			}
 
 			/**
-			 * @summary Sets the next run based on the autosave interval.
+			 * @summary Sets the next run, based on the autosave interval.
 			 *
 			 * @private
 			 *
@@ -748,7 +758,6 @@ window.autosave = function() {
 				 *
 				 * @returns {void}
 				 */
-
 			}).on( 'heartbeat-tick.autosave', function( event, data ) {
 				if ( data.wp_autosave ) {
 					response( data.wp_autosave );
@@ -760,7 +769,6 @@ window.autosave = function() {
 				 *
 				 * @returns {void}
 				 */
-
 			}).on( 'heartbeat-connection-lost.autosave', function( event, error, status ) {
 
 				// When connection is lost, keep user from submitting changes.
