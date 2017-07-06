@@ -437,7 +437,7 @@ $document.ready( function() {
 	/**
 	 * @summary Ensure an admin submenu is within the visual viewport.
 	 *
-	 * @since 4.1.0.0
+	 * @since 4.1.0
 	 *
 	 * @param {jQuery} $menuItem The parent menu item containing the submenu.
 	 *
@@ -478,7 +478,7 @@ $document.ready( function() {
 		/**
 		 * @summary Close any open submenus when touch/click is not on the menu.
 		 *
-		 * @return {null|void}
+		 * @return {void}
 		 */
 		$body.on( mobileEvent+'.wp-mobile-hover', function(e) {
 			if ( $adminmenu.data('wp-responsive') ) {
@@ -493,7 +493,7 @@ $document.ready( function() {
 		/**
 		 * @summary Handles the opening or closing the submenu based on the mobile click|touch event.
 		 *
-		 * @return {null|void}
+		 * @return {void}
 		 */
 		$adminmenu.find( 'a.wp-has-submenu' ).on( mobileEvent + '.wp-mobile-hover', function( event ) {
 			var $menuItem = $(this).parent();
@@ -520,7 +520,7 @@ $document.ready( function() {
 			/**
 			 * @summary Opens the submenu when hovered over the menu item for desktops.
 			 *
-			 * @return {null|void}
+			 * @return {void}
 			 */
 			over: function() {
 				var $menuItem = $( this ),
@@ -544,7 +544,7 @@ $document.ready( function() {
 			/**
 			 * @summary Closes the submenu when no loger hovering the menu item.
 			 *
-			 * @return {null|void}
+			 * @return {void}
 			 */
 			out: function(){
 				if ( $adminmenu.data( 'wp-responsive' ) ) {
@@ -562,7 +562,7 @@ $document.ready( function() {
 		/**
 		 * @summary Opens the submenu on when focussed on the menu item.
 		 *
-		 * @return {null|void}
+		 * @return {void}
 		 */
 		$adminmenu.on( 'focus.adminmenu', '.wp-submenu a', function( event ) {
 			if ( $adminmenu.data( 'wp-responsive' ) ) {
@@ -682,7 +682,10 @@ $document.ready( function() {
 	});
 
 	/**
-	 * @summary 
+	 * @summary Controls all the toggles on bulk toggle change.
+	 *
+	 * When the bulk checkbox is changed, all the checkboxes in the tables are changed accordingly.
+	 * When the shift-button is pressed while changing the bulk checkbox the checkboxes in the table are inverted.
 	 *
 	 * This event needs to be delegated. Ticket #37973.
 	 *
@@ -696,6 +699,11 @@ $document.ready( function() {
 
 		$table.children( 'tbody' ).filter(':visible')
 			.children().children('.check-column').find(':checkbox')
+			/**
+			 * @summary Updates the checked state on the checkbox in the table.
+			 *
+			 * @return {boolean} True checks the checkbox, False unchecks the checkbox.
+			 */
 			.prop('checked', function() {
 				if ( $(this).is(':hidden,:disabled') ) {
 					return false;
@@ -712,6 +720,11 @@ $document.ready( function() {
 
 		$table.children('thead,  tfoot').filter(':visible')
 			.children().children('.check-column').find(':checkbox')
+			/**
+			 * @summary Sync the bulk checkboxes on the top and bottom of the table.
+			 *
+			 * @return {boolean} True checks the checkbox, False unchecks the checkbox.
+			 */
 			.prop('checked', function() {
 				if ( toggle ) {
 					return false;
@@ -723,7 +736,11 @@ $document.ready( function() {
 			});
 	});
 
-	// Show row actions on keyboard focus of its parent container element or any other elements contained within
+	/**
+	 * @summary Show row actions on focus of its parent container element or any other elements contained within.
+	 *
+	 * @return {void}
+	 */
 	$( '#wpbody-content' ).on({
 		focusin: function() {
 			clearTimeout( transitionTimeout );
@@ -752,20 +769,27 @@ $document.ready( function() {
 		return false;
 	});
 
-	// tab in textareas
+	/**
+	 * @summary Handles tab keypresses in theme and plugin editor textareas.
+	 *
+	 * @return {void}
+	 */
 	$('#newcontent').bind('keydown.wpevent_InsertTab', function(e) {
 		var el = e.target, selStart, selEnd, val, scroll, sel;
 
-		if ( e.keyCode == 27 ) { // escape key
+		// After pressing escape key (keyCode: 27), the tab key should tab out of the textarea.
+		if ( e.keyCode == 27 ) {
 			// when pressing Escape: Opera 12 and 27 blur form fields, IE 8 clears them
 			e.preventDefault();
 			$(el).data('tab-out', true);
 			return;
 		}
 
-		if ( e.keyCode != 9 || e.ctrlKey || e.altKey || e.shiftKey ) // tab key
+		// Only listen for plain tab key (keyCode: 9) without any modifiers.
+		if ( e.keyCode != 9 || e.ctrlKey || e.altKey || e.shiftKey )
 			return;
 
+		// After tabbing out, reset it so next time the tab key can be used again.
 		if ( $(el).data('tab-out') ) {
 			$(el).data('tab-out', false);
 			return;
@@ -775,6 +799,7 @@ $document.ready( function() {
 		selEnd = el.selectionEnd;
 		val = el.value;
 
+		// If any text is selected, replace the selection with a tab character.
 		if ( document.selection ) {
 			el.focus();
 			sel = document.selection.createRange();
@@ -786,53 +811,95 @@ $document.ready( function() {
 			this.scrollTop = scroll;
 		}
 
+		// Cancel the regular tab functionality, to prevent losing focus of the textarea.
 		if ( e.stopPropagation )
 			e.stopPropagation();
 		if ( e.preventDefault )
 			e.preventDefault();
 	});
 
+	// Reset page number variable for new filters/searches but not for bulk actions. See #17685.
 	if ( pageInput.length ) {
+		/**
+		 * @summary Handles pagination variable when filtering the list table.
+		 *
+		 * Set the pagination argument to the first page when the post-filter form is submitted.
+		 * This happens when pressing the 'filter' button on the list table page.
+		 *
+		 * The pagination argument should not be touched when the bulk action dropdowns are set to do anything.
+		 *
+		 * The form closest to the pageInput is the post-filter form.
+		 *
+		 * @return {void}
+		 */
 		pageInput.closest('form').submit( function() {
-
-			// Reset paging var for new filters/searches but not for bulk actions. See #17685.
+			/*
+			 * action = bulk action dropdown at the top of the table
+			 * action2 = bulk action dropdow at the bottom of the table
+			 */
 			if ( $('select[name="action"]').val() == -1 && $('select[name="action2"]').val() == -1 && pageInput.val() == currentPage )
 				pageInput.val('1');
 		});
 	}
 
+	/**
+	 * @summary Resets the bulk actions when the search button is clicked.
+	 */
 	$('.search-box input[type="search"], .search-box input[type="submit"]').mousedown(function () {
 		$('select[name^="action"]').val('-1');
 	});
 
-	// Scroll into view when focused
+	/**
+	 * @summary Scroll into view when focus.scroll-into-view is triggered.
+	 *
+	 * @return {void}
+ 	 */
 	$('#contextual-help-link, #show-settings-link').on( 'focus.scroll-into-view', function(e){
 		if ( e.target.scrollIntoView )
 			e.target.scrollIntoView(false);
 	});
 
-	// Disable upload buttons until files are selected
+	/**
+	 * @summary Disable submit upload buttons when no data is entered.
+	 *
+	 * @return {void}
+	 */
 	(function(){
 		var button, input, form = $('form.wp-upload-form');
+
+		// Exit when no upload form is found.
 		if ( ! form.length )
 			return;
+
 		button = form.find('input[type="submit"]');
 		input = form.find('input[type="file"]');
 
+		/**
+		 * @summary Determine if any data is entered in any file upload input.
+		 *
+		 * @return {void}
+		 */
 		function toggleUploadButton() {
+			// When no inputs have a value, disable the upload buttons.
 			button.prop('disabled', '' === input.map( function() {
 				return $(this).val();
 			}).get().join(''));
 		}
+
+		// Update the status initially.
 		toggleUploadButton();
+		// Update the status when any file input changes.
 		input.on('change', toggleUploadButton);
 	})();
 
 	/**
+	 * @summary Pins the menu while distraction-free writing is enabled.
 	 *
-	 * @param event
+	 * @param {Object} event Event data.
 	 *
 	 * @since 4.1.0
+	 *
+	 * @return {void}
 	 */
 	function pinMenu( event ) {
 		var windowPos = $window.scrollTop(),
@@ -842,6 +909,12 @@ $document.ready( function() {
 			return;
 		}
 
+		/*
+		 * When the menu is higher than the window and smaller than the entire page.
+		 * It should be adjusted to be able to see the entire menu.
+		 *
+		 * Otherwise it can be accessed normally.
+		 */
 		if ( height.menu + height.adminbar < height.window ||
 			height.menu + height.adminbar + 20 > height.wpwrap ) {
 			unpinMenu();
@@ -850,9 +923,11 @@ $document.ready( function() {
 
 		menuIsPinned = true;
 
+		// If the menu is higher than the window, compensate on scroll.
 		if ( height.menu + height.adminbar > height.window ) {
-			// Check for overscrolling
+			// Check for overscrolling, this happens when swiping up at the top of the document in modern browsers.
 			if ( windowPos < 0 ) {
+				// Stick the menu to the top.
 				if ( ! pinnedMenuTop ) {
 					pinnedMenuTop = true;
 					pinnedMenuBottom = false;
@@ -866,6 +941,7 @@ $document.ready( function() {
 
 				return;
 			} else if ( windowPos + height.window > $document.height() - 1 ) {
+				// When overscrolling at the bottom, stick the menu to the bottom.
 				if ( ! pinnedMenuBottom ) {
 					pinnedMenuBottom = true;
 					pinnedMenuTop = false;
@@ -881,10 +957,12 @@ $document.ready( function() {
 			}
 
 			if ( windowPos > lastScrollPosition ) {
-				// Scrolling down
+				// When a down scroll has been deteceted.
+
+				// If it was pinned to the top, unpin and calculate relative scroll.
 				if ( pinnedMenuTop ) {
-					// let it scroll
 					pinnedMenuTop = false;
+					// Caculate new offset position.
 					menuTop = $adminMenuWrap.offset().top - height.adminbar - ( windowPos - lastScrollPosition );
 
 					if ( menuTop + height.menu + height.adminbar < windowPos + height.window ) {
@@ -897,7 +975,7 @@ $document.ready( function() {
 						bottom: ''
 					});
 				} else if ( ! pinnedMenuBottom && $adminMenuWrap.offset().top + height.menu < windowPos + height.window ) {
-					// pin the bottom
+					// Pin it to the bottom.
 					pinnedMenuBottom = true;
 
 					$adminMenuWrap.css({
@@ -907,10 +985,12 @@ $document.ready( function() {
 					});
 				}
 			} else if ( windowPos < lastScrollPosition ) {
-				// Scrolling up
+				// When a scroll up is detected.
+
+				// If it was pinned to the bottom, unpin and calculate relative scroll.
 				if ( pinnedMenuBottom ) {
-					// let it scroll
 					pinnedMenuBottom = false;
+					// Calculate new offset position.
 					menuTop = $adminMenuWrap.offset().top - height.adminbar + ( lastScrollPosition - windowPos );
 
 					if ( menuTop + height.menu > windowPos + height.window ) {
@@ -923,7 +1003,7 @@ $document.ready( function() {
 						bottom: ''
 					});
 				} else if ( ! pinnedMenuTop && $adminMenuWrap.offset().top >= windowPos + height.adminbar ) {
-					// pin the top
+					// Pin it to the top.
 					pinnedMenuTop = true;
 
 					$adminMenuWrap.css({
@@ -933,8 +1013,11 @@ $document.ready( function() {
 					});
 				}
 			} else if ( resizing ) {
-				// Resizing
+				// Window is being resized.
+
 				pinnedMenuTop = pinnedMenuBottom = false;
+
+				// Calculate the new offset.
 				menuTop = windowPos + height.window - height.menu - height.adminbar - 1;
 
 				if ( menuTop > 0 ) {
@@ -953,7 +1036,11 @@ $document.ready( function() {
 	}
 
 	/**
+	 * Determines the height of certain elements.
+	 *
 	 * @since 4.1.0
+	 *
+	 * @return {void}
 	 */
 	function resetHeights() {
 		height = {
@@ -965,7 +1052,11 @@ $document.ready( function() {
 	}
 
 	/**
+	 * @summary Unpins the menu.
+	 *
 	 * @since 4.1.0
+	 *
+	 * @return {void}
 	 */
 	function unpinMenu() {
 		if ( isIOS || ! menuIsPinned ) {
@@ -980,6 +1071,13 @@ $document.ready( function() {
 		});
 	}
 
+	/**
+	 * @summary Pins and unpins the menu when applicable.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @return {void}
+	 */
 	function setPinMenu() {
 		resetHeights();
 
