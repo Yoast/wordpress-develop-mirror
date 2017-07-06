@@ -33,8 +33,7 @@
 	wp.api.utils = wp.api.utils || {};
 
 	/**
-	 * ECMAScript 5 shim, adapted from MDN.
-	 * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+	 * ECMAScript 5 shim, adapted from {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString|MDN}.
 	 */
 	if ( ! Date.prototype.toISOString ) {
 		pad = function( number ) {
@@ -193,7 +192,7 @@
 	/**
 	 * Add args and options to a model prototype from a route's endpoints.
 	 *
-	 * @param {array}  routeEndpoints Array of route endpoints.
+	 * @param {Array}  routeEndpoints Array of route endpoints.
 	 * @param {Object} modelInstance  An instance of the model (or collection)
 	 *                                to add the args to.
 	 */
@@ -507,7 +506,7 @@
 				 *
 				 * Accepts an array of tag slugs, or a Tags collection.
 				 *
-				 * @param {array|Backbone.Collection} tags The tags to set on the post.
+				 * @param {Array|Backbone.Collection} tags The tags to set on the post.
 				 *
 				 */
 				setTags: function( tags ) {
@@ -553,7 +552,7 @@
 				 *
 				 * Accepts a Tags collection.
 				 *
-				 * @param {array|Backbone.Collection} tags The tags to set on the post.
+				 * @param {Array|Backbone.Collection} tags The tags to set on the post.
 				 *
 				 */
 				setTagsWithCollection: function( tags ) {
@@ -591,7 +590,7 @@
 				 *
 				 * Accepts an array of category slugs, or a Categories collection.
 				 *
-				 * @param {array|Backbone.Collection} categories The categories to set on the post.
+				 * @param {Array|Backbone.Collection} categories The categories to set on the post.
 				 *
 				 */
 				setCategories: function( categories ) {
@@ -638,7 +637,7 @@
 				 *
 				 * Accepts Categories collection.
 				 *
-				 * @param {array|Backbone.Collection} categories The categories to set on the post.
+				 * @param {Array|Backbone.Collection} categories The categories to set on the post.
 				 *
 				 */
 				setCategoriesWithCollection: function( categories ) {
