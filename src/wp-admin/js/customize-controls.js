@@ -16,6 +16,7 @@
 	 *
 	 * @param {object} id                The Setting ID.
 	 * @param {object} value             The initial value of the setting.
+	 * @param {object} options 		     Options.
 	 * @param {object} options.previewer The Previewer instance to sync with.
 	 * @param {object} options.transport The transport to use for previewing. Supports 'refresh' and 'postMessage'.
 	 * @param {object} options.dirty
@@ -1815,6 +1816,7 @@
 	 * @param {string} options.params.priority         Order of priority to show the control within the section.
 	 * @param {string} options.params.active
 	 * @param {string} options.params.section          The ID of the section the control belongs to.
+	 * @param {string} options.params.settings
 	 * @param {string} options.params.settings.default The ID of the setting the control relates to.
 	 * @param {string} options.params.settings.data
 	 * @param {string} options.params.label
@@ -3401,6 +3403,7 @@
 		/**
 		 * Initialize the PreviewFrame.
 		 *
+		 * @param {object} params
 		 * @param {object} params.container
 		 * @param {object} params.previewUrl
 		 * @param {object} params.query
@@ -3636,6 +3639,7 @@
 		refreshBuffer: null, // Will get set to api.settings.timeouts.windowRefresh.
 
 		/**
+		 * @param {object} params
 		 * @param {array}  params.allowedUrls
 		 * @param {string} params.container   A selector or jQuery element for the preview
 		 *                                    frame to be placed.
