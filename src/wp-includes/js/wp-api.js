@@ -61,7 +61,7 @@
 	/**
 	 * Parse date into ISO8601 format.
 	 *
-	 * @param {Date} date.
+	 * @param {Date} date
 	 */
 	wp.api.utils.parseISO8601 = function( date ) {
 		var timestamp, struct, i, k,
@@ -320,7 +320,7 @@
 			 * Build a helper function to retrieve related model.
 			 *
 			 * @param  {string} parentModel      The parent model.
-			 * @param  {int}    modelId          The model ID if the object to request
+			 * @param  {int}    modelId          The model ID if the object to request.
 			 * @param  {string} modelName        The model name to use when constructing the model.
 			 * @param  {string} embedSourcePoint Where to check the embedds object for _embed data.
 			 * @param  {string} embedCheckField  Which model field to check to see if the model has data.
@@ -738,9 +738,9 @@
 			/**
 			 * Set nonce header before every Backbone sync.
 			 *
-			 * @param {string} method.
-			 * @param {Backbone.Model} model.
-			 * @param {{beforeSend}, *} options.
+			 * @param {string} method
+			 * @param {Backbone.Model} model
+			 * @param {{beforeSend}, *} options
 			 * @returns {*}.
 			 */
 			sync: function( method, model, options ) {
@@ -881,9 +881,9 @@
 			 *
 			 * Set nonce header before every Backbone sync.
 			 *
-			 * @param {string} method.
-			 * @param {Backbone.Model} model.
-			 * @param {{success}, *} options.
+			 * @param {string} method
+			 * @param {Backbone.Model} model
+			 * @param {{success}, *} options
 			 * @returns {*}.
 			 */
 			sync: function( method, model, options ) {
@@ -948,8 +948,8 @@
 			/**
 			 * Fetches the next page of objects if a new page exists.
 			 *
-			 * @param {data: {page}} options.
-			 * @returns {*}.
+			 * @param {data: {page}} options
+			 * @returns {*}
 			 */
 			more: function( options ) {
 				options = options || {};
