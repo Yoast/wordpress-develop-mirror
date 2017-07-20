@@ -1036,7 +1036,7 @@ $document.ready( function() {
 	}
 
 	/**
-	 * Determines the height of certain elements.
+	 * @summary Determines the height of certain elements.
 	 *
 	 * @since 4.1.0
 	 *
@@ -1100,6 +1100,13 @@ $document.ready( function() {
 		});
 	}
 
+    /**
+	 * @summary Changes properties of metaboxes and body.
+	 *
+	 * Changes the sortables and responsiveness of metaboxes.
+	 *
+	 * @return {void}
+	 */
 	window.wpResponsive = {
 		init: function() {
 			var self = this;
@@ -1152,6 +1159,14 @@ $document.ready( function() {
 			});
 		},
 
+        /**
+		 * @summary Changes properties of body and admin menu.
+		 *
+		 * Pins and unpins the menu and adds the auto-fold class to the body.
+		 * Makes the admin menu responsive and disables the metabox sortables.
+		 *
+		 * @return {void}
+         */
 		activate: function() {
 			setPinMenu();
 
@@ -1163,12 +1178,25 @@ $document.ready( function() {
 			this.disableSortables();
 		},
 
+        /**
+         * @summary Changes properties of admin menu and enables metabox sortables.
+		 *
+		 * Pin and unpin the menu.
+		 * Removes the responsiveness of the admin menu and enables the metabox sortables.
+         *
+         * @return {void}
+         */
 		deactivate: function() {
 			setPinMenu();
 			$adminmenu.removeData('wp-responsive');
 			this.enableSortables();
 		},
 
+        /**
+		 * @summary Sets the responsiveness and enables the overlay based on the viewport width.
+		 *
+		 * @return {void}
+         */
 		trigger: function() {
 			var viewportWidth = getViewportWidth();
 
@@ -1196,6 +1224,11 @@ $document.ready( function() {
 			}
 		},
 
+		/**
+		 * @summary Inserts a responsive overlay and toggles the window.
+		 *
+		 * @return {void}
+		 */
 		enableOverlay: function() {
 			if ( $overlay.length === 0 ) {
 				$overlay = $( '<div id="wp-responsive-overlay"></div>' )
@@ -1212,11 +1245,21 @@ $document.ready( function() {
 			});
 		},
 
+        /**
+         * @summary Disables the responsive overlay and removes the overlay.
+         *
+         * @return {void}
+         */
 		disableOverlay: function() {
 			$toolbarPopups.off( 'click.wp-responsive' );
 			$overlay.hide();
 		},
 
+        /**
+		 * @summary Disables sortables.
+		 *
+		 * @return {void}
+         */
 		disableSortables: function() {
 			if ( $sortables.length ) {
 				try {
@@ -1225,6 +1268,11 @@ $document.ready( function() {
 			}
 		},
 
+        /**
+         * @summary Enables sortables.
+         *
+         * @return {void}
+         */
 		enableSortables: function() {
 			if ( $sortables.length ) {
 				try {
@@ -1234,7 +1282,11 @@ $document.ready( function() {
 		}
 	};
 
-	// Add an ARIA role `button` to elements that behave like UI controls when JavaScript is on.
+    /**
+	 * @summary Add an ARIA role `button` to elements that behave like UI controls when JavaScript is on.
+	 *
+	 * @return {void}
+     */
 	function aria_button_if_js() {
 		$( '.aria-button-if-js' ).attr( 'role', 'button' );
 	}
