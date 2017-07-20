@@ -14,7 +14,11 @@
 			});
 		});
 
-		// Build the choose from library frame.
+        /**
+		 * @summary Opens the 'choose from library' frame and creates it if it doesn't exist.
+		 *
+		 * @returns {void}
+         */
 		$('#choose-from-library-link').click( function( event ) {
 			var $el = $(this);
 			event.preventDefault();
@@ -45,7 +49,11 @@
 				}
 			});
 
-			// When an image is selected, run a callback.
+            /**
+			 * @summary Updates the window location to include the selected attachment.
+			 *
+			 * @returns {void}
+             */
 			frame.on( 'select', function() {
 				// Grab the selected attachment.
 				var attachment = frame.state().get('selection').first(),
