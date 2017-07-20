@@ -7,6 +7,12 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	isDashboard = $('#dashboard_right_now').length,
 	titleDiv, titleRegEx;
 
+	/**
+	 * @summary Extracts a number from a jQuery element.
+	 *
+	 * @param el jQuery element.
+	 * @returns {int}
+	 */
 	getCount = function(el) {
 		var n = parseInt( el.html().replace(/[^0-9]+/g, ''), 10 );
 		if ( isNaN(n) ) {
@@ -15,6 +21,13 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		return n;
 	};
 
+	/**
+	 * @summary Injects a html element with a localized number string.
+	 *
+	 * @param el jQuery element.
+	 * @param n Number to be injected.
+	 * @returns {void}
+	 */
 	updateCount = function(el, n) {
 		var n1 = '';
 		if ( isNaN(n) ) {
@@ -31,6 +44,13 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		el.html(n);
 	};
 
+	/**
+	 * @summary Updates the number of approved comments on a specific post and the filter bar.
+	 *
+	 * @param diff The amount to lower or raise the approved count with.
+	 * @param commentPostId The ID of the post to be updated.
+	 * @returns {void}
+	 */
 	updateApproved = function( diff, commentPostId ) {
 		var postSelector = '.post-com-count-' + commentPostId,
 			noClass = 'comment-count-no-comments',
@@ -44,7 +64,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 			return;
 		}
 
-		// cache selectors to not get dupes
+		// cache selectors to not get duplicates
 		approved = $( 'span.' + approvedClass, postSelector );
 		noComments = $( 'span.' + noClass, postSelector );
 
@@ -71,7 +91,11 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 			updateCount( a, diff );
 		});
 	};
-
+	/**
+	 * @summary Updates the number of comments in the filter bar.
+	 * @param selector The jQuery selector for the element(s) to update.
+	 * @param diff The amount to lower or raise the count with.
+	 */
 	updateCountText = function( selector, diff ) {
 		$( selector ).each(function() {
 			var a = $(this), n = getCount(a) + diff;
