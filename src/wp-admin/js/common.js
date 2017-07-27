@@ -670,8 +670,6 @@ $document.ready( function() {
 		/**
 		 * @summary Determine if all checkboxes are checked.
 		 *
-		 * @since
-		 *
 		 * @return {boolean} Returns true if there are no unchecked checkboxes.
 		 */
 		$(this).closest('table').children('thead, tfoot').find(':checkbox').prop('checked', function() {
@@ -877,6 +875,8 @@ $document.ready( function() {
 		/**
 		 * @summary Determine if any data is entered in any file upload input.
 		 *
+		 * @since 3.5.0
+		 *
 		 * @return {void}
 		 */
 		function toggleUploadButton() {
@@ -962,7 +962,7 @@ $document.ready( function() {
 				// If it was pinned to the top, unpin and calculate relative scroll.
 				if ( pinnedMenuTop ) {
 					pinnedMenuTop = false;
-					// Caculate new offset position.
+					// Calculate new offset position.
 					menuTop = $adminMenuWrap.offset().top - height.adminbar - ( windowPos - lastScrollPosition );
 
 					if ( menuTop + height.menu + height.adminbar < windowPos + height.window ) {
@@ -1105,9 +1105,19 @@ $document.ready( function() {
 	 *
 	 * Changes the sortables and responsiveness of metaboxes.
 	 *
+     * @since 3.8.0
+	 *
 	 * @return {void}
 	 */
 	window.wpResponsive = {
+
+        /**
+		 * @summary Initializes the wpResponsive object.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @return {void}
+         */
 		init: function() {
 			var self = this;
 
@@ -1165,6 +1175,8 @@ $document.ready( function() {
 		 * Pins and unpins the menu and adds the auto-fold class to the body.
 		 * Makes the admin menu responsive and disables the metabox sortables.
 		 *
+		 * @since 3.8.0
+		 *
 		 * @return {void}
          */
 		activate: function() {
@@ -1184,6 +1196,8 @@ $document.ready( function() {
 		 * Pin and unpin the menu.
 		 * Removes the responsiveness of the admin menu and enables the metabox sortables.
          *
+		 * @since 3.8.0
+		 *
          * @return {void}
          */
 		deactivate: function() {
@@ -1194,6 +1208,8 @@ $document.ready( function() {
 
         /**
 		 * @summary Sets the responsiveness and enables the overlay based on the viewport width.
+		 *
+		 * @since 3.8.0
 		 *
 		 * @return {void}
          */
@@ -1227,6 +1243,8 @@ $document.ready( function() {
 		/**
 		 * @summary Inserts a responsive overlay and toggles the window.
 		 *
+		 * @since 3.8.0
+		 *
 		 * @return {void}
 		 */
 		enableOverlay: function() {
@@ -1248,6 +1266,8 @@ $document.ready( function() {
         /**
          * @summary Disables the responsive overlay and removes the overlay.
          *
+		 * @since 3.8.0
+		 *
          * @return {void}
          */
 		disableOverlay: function() {
@@ -1257,6 +1277,8 @@ $document.ready( function() {
 
         /**
 		 * @summary Disables sortables.
+		 *
+		 * @since 3.8.0
 		 *
 		 * @return {void}
          */
@@ -1270,6 +1292,8 @@ $document.ready( function() {
 
         /**
          * @summary Enables sortables.
+		 *
+		 * @since 3.8.0
          *
          * @return {void}
          */
@@ -1284,6 +1308,8 @@ $document.ready( function() {
 
     /**
 	 * @summary Add an ARIA role `button` to elements that behave like UI controls when JavaScript is on.
+	 *
+	 * @since 4.5.0
 	 *
 	 * @return {void}
      */
@@ -1404,10 +1430,25 @@ $document.ready( function() {
 ( function() {
 	var timeout;
 
+    /**
+	 * @summary Triggers the WP window-resize event.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return {void}
+     */
+
 	function triggerEvent() {
 		$document.trigger( 'wp-window-resized' );
 	}
 
+    /**
+     * @summary Fires the trigger event again after 200 ms.
+     *
+     * @since 3.8.0
+     *
+     * @return {void}
+     */
 	function fireOnce() {
 		window.clearTimeout( timeout );
 		timeout = window.setTimeout( triggerEvent, 200 );
