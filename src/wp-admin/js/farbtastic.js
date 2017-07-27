@@ -137,6 +137,7 @@
 		 * Changes the display's color based on the passed HSL color code.
 		 *
 		 * @param {Array} hsl The HSL color code to apply.
+		 *
 		 * @returns {jQuery._farbtastic} The Farbtastic instance.
 		 */
 		fb.setHSL = function (hsl) {
@@ -208,7 +209,9 @@
 	  };
 
 	  /**
-	   * Mouseup handler
+	   * Stops dragging upon releasing the left mouse button.
+	   *
+	   * @returns {void}
 	   */
 	  fb.mouseup = function () {
 		// Uncapture mouse
