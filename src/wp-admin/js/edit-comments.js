@@ -49,6 +49,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 *
 	 * @param diff The amount to lower or raise the approved count with.
 	 * @param commentPostId The ID of the post to be updated.
+	 *
 	 * @returns {void}
 	 */
 	updateApproved = function( diff, commentPostId ) {
@@ -91,10 +92,14 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 			updateCount( a, diff );
 		});
 	};
+
 	/**
 	 * @summary Updates the number of comments in the filter bar.
+	 *
 	 * @param selector The jQuery selector for the element(s) to update.
 	 * @param diff The amount to lower or raise the count with.
+	 *
+	 * @returns {void}
 	 */
 	updateCountText = function( selector, diff ) {
 		$( selector ).each(function() {
@@ -106,6 +111,13 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		});
 	};
 
+	/**
+	 * @summary Updates the comment count and the count of the comments that need moderation on the Dashboard.
+	 *
+	 * @param response Converts the internationalized comment to text.
+	 *
+	 * @returns {void}
+	 */
 	updateDashboardText = function ( response ) {
 		if ( ! isDashboard || ! response || ! response.i18n_comments_text ) {
 			return;
@@ -119,6 +131,13 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 			[ response.in_moderation > 0 ? 'removeClass' : 'addClass' ]( 'hidden' );
 	};
 
+	/**
+	 * @summary Updates the title of the document with the number of to be approved comments.
+	 *
+	 * @param diff The amount to lower or raise the number of to be approved comments with.
+	 *
+	 * @returns {void}
+	 */
 	updateHtmlTitle = function ( diff ) {
 		var newTitle, regExMatch, titleCount, commentFrag;
 
@@ -152,6 +171,14 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		document.title = newTitle;
 	};
 
+	/**
+	 * @summary Updates the number of pending comments on a specific post and the filter bar.
+	 *
+	 * @param diff The amount to lower or raise the pending count with.
+	 * @param commentPostId The ID of the post to be updated.
+	 *
+	 * @returns {void}
+	 */
 	updatePending = function( diff, commentPostId ) {
 		var postSelector = '.post-com-count-' + commentPostId,
 			noClass = 'comment-count-no-pending',
@@ -208,7 +235,12 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		});
 	};
 
-setCommentsList = function() {
+	/**
+	 * @summary
+	 *
+	 *
+	 */
+	setCommentsList = function() {
 	var totalInput, perPageInput, pageInput, dimAfter, delBefore, updateTotalCount, delAfter, refillTheExtraList, diff,
 		lastConfidentTime = 0;
 
