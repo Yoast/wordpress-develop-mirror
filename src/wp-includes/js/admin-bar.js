@@ -10,12 +10,30 @@ if ( typeof(jQuery) != 'undefined' ) {
 	jQuery(document).ready(function($){
 		var adminbar = $('#wpadminbar'), refresh, touchOpen, touchClose, disableHoverIntent = false;
 
+        /**
+		 * @summary Forces the browser to refresh the tabbing index.
+		 *
+		 * @since
+		 *
+		 * @param  {integer} i The index of the element.
+		 * @param {HTMLelement} el  The HTML element to remove the tab index from.
+		 * @returns {void}
+		 */
 		refresh = function(i, el){ // force the browser to refresh the tabbing index
 			var node = $(el), tab = node.attr('tabindex');
 			if ( tab )
 				node.attr('tabindex', '0').attr('tabindex', tab);
 		};
 
+        /**
+		 * @summary Adds or removes the hover class on touch.
+		 *
+		 * @since
+		 *
+         * @param {bool} unbind if true removes the wp-mobile-hover class.
+		 *
+		 * @returns {void}
+         */
 		touchOpen = function(unbind) {
 			adminbar.find('li.menupop').on('click.wp-mobile-hover', function(e) {
 				var el = $(this);
@@ -43,6 +61,13 @@ if ( typeof(jQuery) != 'undefined' ) {
 			});
 		};
 
+        /**
+		 * @summary Removes the hover class if clicked or touched outside the adminbar.
+		 *
+		 * @since
+		 *
+		 * @returns {void}
+         */
 		touchClose = function() {
 			var mobileEvent = /Mobile\/.+Safari/.test(navigator.userAgent) ? 'touchstart' : 'click';
 			// close any open drop-downs when the click/touch is not on the toolbar
@@ -54,6 +79,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 
 		adminbar.removeClass('nojq').removeClass('nojs');
 
+		// If clicked on the adminbar add the hoverclass, if clicked outside it remove it.
 		if ( 'ontouchstart' in window ) {
 			adminbar.on('touchstart', function(){
 				touchOpen(true);
@@ -65,6 +91,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 			touchClose();
 		}
 
+		//Adds or remove the hover class based on the hover intent.
 		adminbar.find('li.menupop').hoverIntent({
 			over: function() {
 				if ( disableHoverIntent )
