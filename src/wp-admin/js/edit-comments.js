@@ -236,9 +236,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary
+	 * @summary Initializes the comments list.
 	 *
-	 *
+	 * @returns {void}
 	 */
 	setCommentsList = function() {
 	var totalInput, perPageInput, pageInput, dimAfter, delBefore, updateTotalCount, delAfter, refillTheExtraList, diff,
@@ -248,7 +248,15 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	perPageInput = $('input[name="_per_page"]', '#comments-form');
 	pageInput = $('input[name="_page"]', '#comments-form');
 
-	// Updates the current total (stored in the _total input)
+	/**
+	 * @summary Updates the current total (stored in the _total hidden input).
+	 *
+	 * @param {int} total Total number of comments.
+	 * @param {int} time Unix timestamp of response.
+ 	 * @param {boolean} setConfidentTime Update confident time if time exceeds it.
+	 *
+	 * @returns {void}
+	 */
 	updateTotalCount = function( total, time, setConfidentTime ) {
 		if ( time < lastConfidentTime )
 			return;
@@ -259,7 +267,14 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		totalInput.val( total.toString() );
 	};
 
-	// this fires when viewing "All"
+	/**
+	 * @summary Called after dimming a list item.
+	 *
+	 * @param {object} r Response object
+	 * @param {object} settings Setting object
+	 *
+	 * @return {void}
+	 */
 	dimAfter = function( r, settings ) {
 		var editRow, replyID, replyButton, response,
 			c = $( '#' + settings.element );
@@ -299,6 +314,14 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	// Send current total, page, per_page and url
+	/**
+	 * @summary Executed before a list item is removed from the comments list.
+	 *
+	 * @param {object} settings Setting object.
+	 * @param {element} list Comments table element.
+	 *
+	 * @returns {void}
+	 */
 	delBefore = function( settings, list ) {
 		var note, id, el, n, h, a, author,
 			action = false,
@@ -358,6 +381,14 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	// In admin-ajax.php, we send back the unix time stamp instead of 1 on success
+	/**
+	 * @summary Executed after a list item is removed from the comments list
+	 *
+	 * @param {object} r Response object
+	 * @param {object} settings Setting object
+	 *
+	 * @returns {void}
+	 */
 	delAfter = function( r, settings ) {
 		var total_items_i18n, total, animated, animatedCallback,
 			response = true === settings.parsed ? {} : settings.parsed.responses[0],
@@ -572,6 +603,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 			animatedCallback();
 		}
 	};
+
 
 	refillTheExtraList = function(ev) {
 		var args = $.query.get(), total_pages = $('.total-pages').text(), per_page = $('input[name="_per_page"]', '#comments-form').val();
