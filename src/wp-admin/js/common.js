@@ -1100,24 +1100,24 @@ $document.ready( function() {
 		});
 	}
 
-    /**
+	/**
 	 * @summary Changes properties of metaboxes and body.
 	 *
 	 * Changes the sortables and responsiveness of metaboxes.
 	 *
-     * @since 3.8.0
+	 * @since 3.8.0
 	 *
 	 * @return {void}
 	 */
 	window.wpResponsive = {
 
-        /**
+		/**
 		 * @summary Initializes the wpResponsive object.
 		 *
 		 * @since 3.8.0
 		 *
 		 * @return {void}
-         */
+		 */
 		init: function() {
 			var self = this;
 
@@ -1169,7 +1169,7 @@ $document.ready( function() {
 			});
 		},
 
-        /**
+		/**
 		 * @summary Changes properties of body and admin menu.
 		 *
 		 * Pins and unpins the menu and adds the auto-fold class to the body.
@@ -1178,41 +1178,41 @@ $document.ready( function() {
 		 * @since 3.8.0
 		 *
 		 * @return {void}
-         */
+		 */
 		activate: function() {
 			setPinMenu();
 
-			if ( ! $body.hasClass( 'auto-fold' ) ) {
-				$body.addClass( 'auto-fold' );
+			if ( ! $body.hasClass( "auto-fold" ) ) {
+				$body.addClass( "auto-fold" );
 			}
 
-			$adminmenu.data( 'wp-responsive', 1 );
+			$adminmenu.data( "wp-responsive", 1 );
 			this.disableSortables();
 		},
 
-        /**
-         * @summary Changes properties of admin menu and enables metabox sortables.
+		/**
+		 * @summary Changes properties of admin menu and enables metabox sortables.
 		 *
 		 * Pin and unpin the menu.
 		 * Removes the responsiveness of the admin menu and enables the metabox sortables.
-         *
+		 *
 		 * @since 3.8.0
 		 *
-         * @return {void}
-         */
+		 * @return {void}
+		 */
 		deactivate: function() {
 			setPinMenu();
 			$adminmenu.removeData('wp-responsive');
 			this.enableSortables();
 		},
 
-        /**
+		/**
 		 * @summary Sets the responsiveness and enables the overlay based on the viewport width.
 		 *
 		 * @since 3.8.0
 		 *
 		 * @return {void}
-         */
+		 */
 		trigger: function() {
 			var viewportWidth = getViewportWidth();
 
@@ -1223,12 +1223,12 @@ $document.ready( function() {
 
 			if ( viewportWidth <= 782 ) {
 				if ( ! wpResponsiveActive ) {
-					$document.trigger( 'wp-responsive-activate' );
+					$document.trigger( "wp-responsive-activate" );
 					wpResponsiveActive = true;
 				}
 			} else {
 				if ( wpResponsiveActive ) {
-					$document.trigger( 'wp-responsive-deactivate' );
+					$document.trigger( "wp-responsive-deactivate" );
 					wpResponsiveActive = false;
 				}
 			}
@@ -1263,58 +1263,58 @@ $document.ready( function() {
 			});
 		},
 
-        /**
-         * @summary Disables the responsive overlay and removes the overlay.
-         *
+		/**
+		 * @summary Disables the responsive overlay and removes the overlay.
+		 *
 		 * @since 3.8.0
 		 *
-         * @return {void}
-         */
+		 * @return {void}
+		 */
 		disableOverlay: function() {
-			$toolbarPopups.off( 'click.wp-responsive' );
+			$toolbarPopups.off( "click.wp-responsive" );
 			$overlay.hide();
 		},
 
-        /**
+		/**
 		 * @summary Disables sortables.
 		 *
 		 * @since 3.8.0
 		 *
 		 * @return {void}
-         */
+		 */
 		disableSortables: function() {
 			if ( $sortables.length ) {
 				try {
-					$sortables.sortable('disable');
-				} catch(e) {}
+					$sortables.sortable( "disable" );
+				} catch ( e ) {}
 			}
 		},
 
-        /**
-         * @summary Enables sortables.
+		/**
+		 * @summary Enables sortables.
 		 *
 		 * @since 3.8.0
-         *
-         * @return {void}
-         */
+		 *
+		 * @return {void}
+		 */
 		enableSortables: function() {
 			if ( $sortables.length ) {
 				try {
-					$sortables.sortable('enable');
-				} catch(e) {}
+					$sortables.sortable( "enable" );
+				} catch ( e ) {}
 			}
 		}
 	};
 
-    /**
+	/**
 	 * @summary Add an ARIA role `button` to elements that behave like UI controls when JavaScript is on.
 	 *
 	 * @since 4.5.0
 	 *
 	 * @return {void}
-     */
+	 */
 	function aria_button_if_js() {
-		$( '.aria-button-if-js' ).attr( 'role', 'button' );
+		$( ".aria-button-if-js" ).attr( "role", "button" );
 	}
 
 	$( document ).ajaxComplete( function() {
@@ -1430,25 +1430,25 @@ $document.ready( function() {
 ( function() {
 	var timeout;
 
-    /**
+	/**
 	 * @summary Triggers the WP window-resize event.
 	 *
 	 * @since 3.8.0
 	 *
 	 * @return {void}
-     */
+	 */
 
 	function triggerEvent() {
-		$document.trigger( 'wp-window-resized' );
+		$document.trigger( "wp-window-resized" );
 	}
 
-    /**
-     * @summary Fires the trigger event again after 200 ms.
-     *
-     * @since 3.8.0
-     *
-     * @return {void}
-     */
+	/**
+	 * @summary Fires the trigger event again after 200 ms.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @return {void}
+	 */
 	function fireOnce() {
 		window.clearTimeout( timeout );
 		timeout = window.setTimeout( triggerEvent, 200 );
