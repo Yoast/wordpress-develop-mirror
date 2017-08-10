@@ -13,13 +13,13 @@ var media = wp.media,
 wp.media.mixin = {
 	mejsSettings: baseSettings,
 
-    /**
+	/**
 	 * @summary Pauses and removes all players.
 	 *
 	 * @since 4.2.0
 	 *
 	 * @return {void}
-     */
+	 */
 	removeAllPlayers: function() {
 		var p;
 
@@ -137,14 +137,14 @@ wp.media.audio = {
 		width : 400
 	},
 
-    /**
+	/**
 	 * @summary Instantiates a new media object with the next matching shortcode.
 	 *
-     * @since 4.2.0
+	 * @since 4.2.0
 	 *
-     * @param {string} data The text to apply the shortcode on.
-     * @returns {wp.media} The media object.
-     */
+	 * @param {string} data The text to apply the shortcode on.
+	 * @returns {wp.media} The media object.
+	 */
 	edit : function( data ) {
 		var frame, shortcode = wp.shortcode.next( 'audio', data ).shortcode;
 
@@ -157,14 +157,14 @@ wp.media.audio = {
 		return frame;
 	},
 
-    /**
+	/**
 	 * @summary Generates an audio shortcode.
 	 *
 	 * @since 4.2.0
 	 *
-     * @param {Array} model Array with attributes for the shortcode.
-     * @returns {wp.shortcode} The audio shortcode object.
-     */
+	 * @param {Array} model Array with attributes for the shortcode.
+	 * @returns {wp.shortcode} The audio shortcode object.
+	 */
 	shortcode : function( model ) {
 		var content;
 
@@ -211,14 +211,14 @@ wp.media.video = {
 		width : 640,
 		height : 360
 	},
-    /**
-     * @summary Instantiates a new media object with the next matching shortcode.
-     *
-     * @since 4.2.0
-     *
-     * @param {string} data The text to apply the shortcode on.
-     * @returns {wp.media} The media object.
-     */
+	/**
+	 * @summary Instantiates a new media object with the next matching shortcode.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @param {string} data The text to apply the shortcode on.
+	 * @returns {wp.media} The media object.
+	 */
 	edit : function( data ) {
 		var frame,
 			shortcode = wp.shortcode.next( 'video', data ).shortcode,
@@ -236,15 +236,14 @@ wp.media.video = {
 		return frame;
 	},
 
-
-    /**
-     * @summary Generates an video shortcode.
-     *
-     * @since 4.2.0
-     *
-     * @param {Array} model Array with attributes for the shortcode.
-     * @returns {wp.shortcode} The video shortcode object.
-     */
+	/**
+	 * @summary Generates an video shortcode.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @param {Array} model Array with attributes for the shortcode.
+	 * @returns {wp.shortcode} The video shortcode object.
+	 */
 	shortcode : function( model ) {
 		var content;
 
