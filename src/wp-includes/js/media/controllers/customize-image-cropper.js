@@ -1,12 +1,18 @@
 /**
  * wp.media.controller.CustomizeImageCropper
  *
- * A state for cropping an image.
+ * @summary Prepares the image to get cropped.
+ *
+ * Checks whether the image needs to be cropped according to a ratio.
+ *
+ * @since 4.3
  *
  * @class
  * @augments wp.media.controller.Cropper
  * @augments wp.media.controller.State
  * @augments Backbone.Model
+ *
+ * @returns ajax post Call to Ajax to crop the image according to the crop details.
  */
 var Controller = wp.media.controller,
 	CustomizeImageCropper;
