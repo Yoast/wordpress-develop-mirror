@@ -24,12 +24,22 @@ Cropper = wp.media.controller.State.extend({
 		doCropArgs: {}
 	},
 
+	/**
+	 * @summary Toggles a crop selection.
+	 *
+	 * @since 4.3
+	 *
+	 * @returns void
+	 */
 	activate: function() {
 		this.frame.on( 'content:create:crop', this.createCropContent, this );
 		this.frame.on( 'close', this.removeCropper, this );
 		this.set('selection', new Backbone.Collection(this.frame._selection.single));
 	},
 
+	/**
+	 * @summary
+	 */
 	deactivate: function() {
 		this.frame.toolbar.mode('browse');
 	},
