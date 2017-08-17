@@ -3,7 +3,7 @@ var Attachment = wp.media.view.Attachment,
 	Details;
 
 /**
- * wp.media.view.Attachment.Details
+ * Shows details of attachments.
  *
  * @memberOf wp.media.view.Attachment
  *
@@ -37,6 +37,11 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		'keydown':                        'toggleSelectionHandler'
 	},
 
+	/**
+	 * @constructs
+	 *
+	 * @augments wp.media.Attachment
+	 */
 	initialize: function() {
 		this.options = _.defaults( this.options, {
 			rerenderOnModelChange: false
