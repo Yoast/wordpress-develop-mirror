@@ -2,17 +2,16 @@
  * wp.media.view.Attachments
  *
  * Represents the overview of attachments in the Media Library.
- *
- * @class
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
+ */
+
+/**
+ * @access private
  */
 var View = wp.media.View,
 	$ = jQuery,
 	Attachments;
 
-Attachments = View.extend({
+Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 	tagName:   'ul',
 	className: 'attachments',
 
@@ -23,6 +22,13 @@ Attachments = View.extend({
 	/**
 	 * Binds events to the collection this view represents when adding or removing attachments or resetting the entire collection.
 	 * Binds events to scrolling to trigger the scroll function.
+	 *
+	 * @constructs
+	 * @memberOf wp.media.view
+	 *
+	 * @augments wp.media.View
+	 * @augments wp.Backbone.View
+	 * @augments Backbone.View
 	 *
 	 * @listens collection:add
 	 * @listens collection:remove
