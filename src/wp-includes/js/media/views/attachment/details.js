@@ -1,17 +1,18 @@
 /**
  * wp.media.view.Attachment.Details
  *
- * @class
- * @augments wp.media.view.Attachment
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
+ * Shows details of attachments.
+ */
+
+/**
+ * @access private
  */
 var Attachment = wp.media.view.Attachment,
 	l10n = wp.media.view.l10n,
 	Details;
 
-Details = Attachment.extend({
+
+Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototype */{
 	tagName:   'div',
 	className: 'attachment-details',
 	template:  wp.template('attachment-details'),
@@ -35,6 +36,11 @@ Details = Attachment.extend({
 		'keydown':                        'toggleSelectionHandler'
 	},
 
+	/**
+	 * @constructs
+	 *
+	 * @augments wp.media.Attachment
+	 */
 	initialize: function() {
 		this.options = _.defaults( this.options, {
 			rerenderOnModelChange: false
