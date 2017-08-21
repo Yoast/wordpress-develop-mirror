@@ -420,6 +420,14 @@ module.exports = function(grunt) {
 				}
 			}
 		},
+		jsdoc : {
+			dist : {
+				dest: "jsdoc",
+				options: {
+					configure : "jsdoc.conf.json"
+				}
+			}
+		},
 		qunit: {
 			files: [
 				'tests/qunit/**/*.html',

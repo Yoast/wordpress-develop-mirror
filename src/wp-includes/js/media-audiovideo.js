@@ -216,20 +216,22 @@ media.view.AudioDetails = require( './views/audio-details.js' );
 media.view.VideoDetails = require( './views/video-details.js' );
 
 },{"./controllers/audio-details.js":2,"./controllers/video-details.js":3,"./models/post-media.js":4,"./views/audio-details.js":5,"./views/frame/audio-details.js":6,"./views/frame/media-details.js":7,"./views/frame/video-details.js":8,"./views/media-details.js":9,"./views/video-details.js":10}],2:[function(require,module,exports){
+var State = wp.media.controller.State,
+	l10n = wp.media.view.l10n,
+	AudioDetails;
+
 /**
  * wp.media.controller.AudioDetails
  *
  * The controller for the Audio Details state
  *
+ * @memberOf wp.media.controller
+ *
  * @class
  * @augments wp.media.controller.State
  * @augments Backbone.Model
  */
-var State = wp.media.controller.State,
-	l10n = wp.media.view.l10n,
-	AudioDetails;
-
-AudioDetails = State.extend({
+AudioDetails = State.extend(/** @lends wp.media.controller.AudioDetails.prototype */{
 	defaults: {
 		id: 'audio-details',
 		toolbar: 'audio-details',
@@ -254,6 +256,8 @@ module.exports = AudioDetails;
  *
  * The controller for the Video Details state
  *
+ * @memberOf wp.media.controller
+ *
  * @class
  * @augments wp.media.controller.State
  * @augments Backbone.Model
@@ -262,7 +266,7 @@ var State = wp.media.controller.State,
 	l10n = wp.media.view.l10n,
 	VideoDetails;
 
-VideoDetails = State.extend({
+VideoDetails = State.extend(/** @lends wp.media.controller.VideoDetails.prototype */{
 	defaults: {
 		id: 'video-details',
 		toolbar: 'video-details',
@@ -288,10 +292,12 @@ module.exports = VideoDetails;
  * Shared model class for audio and video. Updates the model after
  *   "Add Audio|Video Source" and "Replace Audio|Video" states return
  *
+ * @memberOf wp.media.model
+ *
  * @class
  * @augments Backbone.Model
  */
-var PostMedia = Backbone.Model.extend({
+var PostMedia = Backbone.Model.extend(/** @lends wp.media.model.PostMedia.prototype */{
 	initialize: function() {
 		this.attachment = false;
 	},
@@ -324,8 +330,13 @@ var PostMedia = Backbone.Model.extend({
 module.exports = PostMedia;
 
 },{}],5:[function(require,module,exports){
+var MediaDetails = wp.media.view.MediaDetails,
+	AudioDetails;
+
 /**
  * wp.media.view.AudioDetails
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.MediaDetails
@@ -335,10 +346,7 @@ module.exports = PostMedia;
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var MediaDetails = wp.media.view.MediaDetails,
-	AudioDetails;
-
-AudioDetails = MediaDetails.extend({
+AudioDetails = MediaDetails.extend(/** @lends wp.media.view.AudioDetails.prototype */{
 	className: 'audio-details',
 	template:  wp.template('audio-details'),
 
@@ -362,8 +370,16 @@ AudioDetails = MediaDetails.extend({
 module.exports = AudioDetails;
 
 },{}],6:[function(require,module,exports){
+var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
+	MediaLibrary = wp.media.controller.MediaLibrary,
+
+	l10n = wp.media.view.l10n,
+	AudioDetails;
+
 /**
  * wp.media.view.MediaFrame.AudioDetails
+ *
+ * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame.MediaDetails
@@ -375,13 +391,7 @@ module.exports = AudioDetails;
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
-	MediaLibrary = wp.media.controller.MediaLibrary,
-
-	l10n = wp.media.view.l10n,
-	AudioDetails;
-
-AudioDetails = MediaDetails.extend({
+AudioDetails = MediaDetails.extend(/** @lends wp.media.view.MediaFrame.AudioDetails.prototype */{
 	defaults: {
 		id:      'audio',
 		url:     '',
@@ -438,8 +448,14 @@ AudioDetails = MediaDetails.extend({
 module.exports = AudioDetails;
 
 },{}],7:[function(require,module,exports){
+var Select = wp.media.view.MediaFrame.Select,
+	l10n = wp.media.view.l10n,
+	MediaDetails;
+
 /**
  * wp.media.view.MediaFrame.MediaDetails
+ *
+ * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame.Select
@@ -450,11 +466,7 @@ module.exports = AudioDetails;
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-var Select = wp.media.view.MediaFrame.Select,
-	l10n = wp.media.view.l10n,
-	MediaDetails;
-
-MediaDetails = Select.extend({
+MediaDetails = Select.extend(/** @lends wp.media.view.MediaFrame.MediaDetails.prototype */{
 	defaults: {
 		id:      'media',
 		url:     '',
@@ -568,8 +580,15 @@ MediaDetails = Select.extend({
 module.exports = MediaDetails;
 
 },{}],8:[function(require,module,exports){
+var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
+	MediaLibrary = wp.media.controller.MediaLibrary,
+	l10n = wp.media.view.l10n,
+	VideoDetails;
+
 /**
  * wp.media.view.MediaFrame.VideoDetails
+ *
+ * @memberOf wp.media.view.MediaFrame
  *
  * @class
  * @augments wp.media.view.MediaFrame.MediaDetails
@@ -581,12 +600,7 @@ module.exports = MediaDetails;
  * @augments Backbone.View
  * @mixes wp.media.controller.StateMachine
  */
-var MediaDetails = wp.media.view.MediaFrame.MediaDetails,
-	MediaLibrary = wp.media.controller.MediaLibrary,
-	l10n = wp.media.view.l10n,
-	VideoDetails;
-
-VideoDetails = MediaDetails.extend({
+VideoDetails = MediaDetails.extend(/** @lends wp.media.view.MediaFrame.VideoDetails.prototype */{
 	defaults: {
 		id:      'video',
 		url:     '',
@@ -704,9 +718,14 @@ module.exports = VideoDetails;
 
 },{}],9:[function(require,module,exports){
 /* global MediaElementPlayer */
+var AttachmentDisplay = wp.media.view.Settings.AttachmentDisplay,
+	$ = jQuery,
+	MediaDetails;
 
 /**
  * wp.media.view.MediaDetails
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.Settings.AttachmentDisplay
@@ -715,11 +734,7 @@ module.exports = VideoDetails;
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var AttachmentDisplay = wp.media.view.Settings.AttachmentDisplay,
-	$ = jQuery,
-	MediaDetails;
-
-MediaDetails = AttachmentDisplay.extend({
+MediaDetails = AttachmentDisplay.extend(/** @lends wp.media.view.MediaDetails.prototype */{
 	initialize: function() {
 		_.bindAll(this, 'success');
 		this.players = [];
@@ -791,9 +806,6 @@ MediaDetails = AttachmentDisplay.extend({
 		this.scriptXhr = false;
 	},
 
-	/**
-	 * @global MediaElementPlayer
-	 */
 	setPlayer : function() {
 		var src;
 
@@ -849,7 +861,7 @@ MediaDetails = AttachmentDisplay.extend({
 	resetFocus: function() {
 		this.$( '.embed-media-settings' ).scrollTop( 0 );
 	}
-}, {
+},/** @lends wp.media.view.MediaDetails */{
 	instances : 0,
 	/**
 	 * When multiple players in the DOM contain the same src, things get weird.
@@ -875,8 +887,13 @@ MediaDetails = AttachmentDisplay.extend({
 module.exports = MediaDetails;
 
 },{}],10:[function(require,module,exports){
+var MediaDetails = wp.media.view.MediaDetails,
+	VideoDetails;
+
 /**
  * wp.media.view.VideoDetails
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.MediaDetails
@@ -886,10 +903,7 @@ module.exports = MediaDetails;
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var MediaDetails = wp.media.view.MediaDetails,
-	VideoDetails;
-
-VideoDetails = MediaDetails.extend({
+VideoDetails = MediaDetails.extend(/** @lends wp.media.view.VideoDetails.prototype */{
 	className: 'video-details',
 	template:  wp.template('video-details'),
 

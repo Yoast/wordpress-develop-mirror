@@ -11,6 +11,9 @@
 	 *
 	 * Instantiate with model wp.customize.HeaderTool.currentHeader.
 	 *
+	 * @memberOf wp.customize.HeaderTool
+	 * @alias wp.customize.CurrentView
+	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
 	 */
@@ -49,6 +52,9 @@
 	 *
 	 * Manually changes model wp.customize.HeaderTool.currentHeader via the
 	 * `select` method.
+	 *
+	 * @memberOf wp.customize.HeaderTool
+	 * @alias wp.customize.ChoiceView
 	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
@@ -125,6 +131,9 @@
 	 *
 	 * Takes a wp.customize.HeaderTool.ChoiceList.
 	 *
+	 * @memberOf wp.customize.HeaderTool
+	 * @alias wp.customize.ChoiceListView
+	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
 	 */
@@ -167,6 +176,9 @@
 	 *
 	 * Aggregates wp.customize.HeaderTool.ChoiceList collections (or any
 	 * Backbone object, really) and acts as a bus to feed them events.
+	 *
+	 * @memberOf wp.customize.HeaderTool
+	 * @alias wp.customize.CombinedList
 	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
