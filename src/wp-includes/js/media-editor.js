@@ -328,7 +328,7 @@
 	};
 
 	/**
-	 * @class wp.media.collectio
+	 * @class wp.media.collection
 	 *
 	 * @param attributes
 	 */
