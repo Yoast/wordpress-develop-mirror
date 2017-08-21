@@ -12,12 +12,12 @@
 	 * Instantiate with model wp.customize.HeaderTool.currentHeader.
 	 *
 	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.CurrentView
+	 * @alias wp.customize.HeaderTool.CurrentView
 	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
 	 */
-	api.HeaderTool.CurrentView = wp.Backbone.View.extend({
+	api.HeaderTool.CurrentView = wp.Backbone.View.extend(/** @lends wp.customize.HeaderTool.CurrentView.prototype */{
 		template: wp.template('header-current'),
 
 		initialize: function() {
@@ -54,12 +54,12 @@
 	 * `select` method.
 	 *
 	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.ChoiceView
+	 * @alias wp.customize.HeaderTool.ChoiceView
 	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
 	 */
-	api.HeaderTool.ChoiceView = wp.Backbone.View.extend({
+	api.HeaderTool.ChoiceView = wp.Backbone.View.extend(/** @lends wp.customize.HeaderTool.ChoiceView.prototype */{
 		template: wp.template('header-choice'),
 
 		className: 'header-view',
@@ -132,12 +132,12 @@
 	 * Takes a wp.customize.HeaderTool.ChoiceList.
 	 *
 	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.ChoiceListView
+	 * @alias wp.customize.HeaderTool.ChoiceListView
 	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
 	 */
-	api.HeaderTool.ChoiceListView = wp.Backbone.View.extend({
+	api.HeaderTool.ChoiceListView = wp.Backbone.View.extend(/** @lends wp.customize.HeaderTool.ChoiceListView.prototype */{
 		initialize: function() {
 			this.listenTo(this.collection, 'add', this.addOne);
 			this.listenTo(this.collection, 'remove', this.render);
@@ -178,12 +178,12 @@
 	 * Backbone object, really) and acts as a bus to feed them events.
 	 *
 	 * @memberOf wp.customize.HeaderTool
-	 * @alias wp.customize.CombinedList
+	 * @alias wp.customize.HeaderTool.CombinedList
 	 *
 	 * @constructor
 	 * @augments wp.Backbone.View
 	 */
-	api.HeaderTool.CombinedList = wp.Backbone.View.extend({
+	api.HeaderTool.CombinedList = wp.Backbone.View.extend(/** @lends wp.customize.HeaderTool.CombinedList.prototype */{
 		initialize: function(collections) {
 			this.collections = collections;
 			this.on('all', this.propagate, this);
