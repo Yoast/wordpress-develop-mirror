@@ -18,6 +18,9 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	className: 'attachment-details',
 	template:  wp.template('attachment-details'),
 
+	/**
+	 * Overrides the attributes method in the Attachment prototype.
+	 */
 	attributes: function() {
 		return {
 			'tabIndex':     0,
