@@ -27,7 +27,7 @@ Cropper = wp.media.controller.State.extend({
 	/**
 	 * @summary Toggles a crop selection.
 	 *
-	 * @since 4.3
+	 * @since 4.2.0
 	 *
 	 * @returns void
 	 */
@@ -38,12 +38,23 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary
+	 * @summary Sets toolbar to browse mode.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns void
 	 */
 	deactivate: function() {
 		this.frame.toolbar.mode('browse');
 	},
 
+	/**
+	 * @summary
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns void
+	 */
 	createCropContent: function() {
 		this.cropperView = new wp.media.view.Cropper({
 			controller: this,
@@ -53,12 +64,28 @@ Cropper = wp.media.controller.State.extend({
 		this.frame.content.set(this.cropperView);
 
 	},
+
+	/**
+	 * @summary
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns void
+	 */
 	removeCropper: function() {
 		this.imgSelect.cancelSelection();
 		this.imgSelect.setOptions({remove: true});
 		this.imgSelect.update();
 		this.cropperView.remove();
 	},
+
+	/**
+	 * @summary
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns void
+	 */
 	createCropToolbar: function() {
 		var canSkipCrop, toolbarOptions;
 
@@ -114,6 +141,13 @@ Cropper = wp.media.controller.State.extend({
 		this.frame.toolbar.set( new wp.media.view.Toolbar(toolbarOptions) );
 	},
 
+	/**
+	 * @summary
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns void
+	 */
 	doCrop: function( attachment ) {
 		return wp.ajax.post( 'custom-header-crop', _.extend(
 			{},
