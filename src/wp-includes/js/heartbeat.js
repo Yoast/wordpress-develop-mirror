@@ -81,7 +81,7 @@
 				// Used to track non-critical errors.
 				errorcount: 0,
 
-				// Whether at least one connection has completed successfully.
+				// Whether at least one connection has been completed successfully.
 				hasConnected: false,
 
 				// Whether the current browser window is in focus and the user is active.
@@ -90,7 +90,7 @@
 				// Timestamp, last time the user was active. Checked every 30 sec.
 				userActivity: 0,
 
-				// Flags whether events tracking user activity were set.
+				// Flag whether events tracking user activity were set.
 				userActivityEvents: false,
 
 				// Timer that keeps track of how long a user has focus.
@@ -103,13 +103,13 @@
 		/**
 		 * Sets the necessary variables and events before starting the actual heartbeat.
 		 *
-		 * @summary Sets local variables and events, then starts itself.
+		 * @summary Sets local variables and events, then starts the heartbeat.
 		 *
 		 * @access private
 		 *
 		 * @since 3.8.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function initialize() {
 			var options, hidden, visibilityState, visibilitychange;
@@ -133,7 +133,7 @@
 
 				/**
 				 * The interval can be from 15 to 120 sec. and can be set temporarily to 5 sec.
-				 * It can be set in the initial options or changed later from JS and/or from PHP.
+				 * It can be set in the initial options or changed later through JS and/or through PHP.
 				 */
 				if ( options.interval ) {
 					settings.mainInterval = options.interval;
@@ -218,7 +218,7 @@
 			}
 
 			$(window).on( 'unload.wp-heartbeat', function() {
-				// Don't connect any more.
+				// Don't connect anymore.
 				settings.suspend = true;
 
 				// Abort the last request if not completed.
@@ -290,7 +290,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function checkFocus() {
 			if ( settings.hasFocus && ! document.hasFocus() ) {
@@ -310,7 +310,7 @@
 		 * @param string error The error type passed from the XHR.
 		 * @param int status The HTTP status code passed from jqXHR (200, 404, 500, etc.).
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function setErrorState( error, status ) {
 			var trigger;
@@ -318,10 +318,10 @@
 			if ( error ) {
 				switch ( error ) {
 					case 'abort':
-						// do nothing.
+						// Do nothing.
 						break;
 					case 'timeout':
-						// no response for 30 sec.
+						// No response for 30 sec.
 						trigger = true;
 						break;
 					case 'error':
@@ -329,7 +329,7 @@
 							trigger = true;
 							break;
 						}
-						/* falls through */
+						// Falls through.
 					case 'parsererror':
 					case 'empty':
 					case 'unknown':
@@ -350,13 +350,13 @@
 		}
 
 		/**
-		 * Clears the error state and fires an event if there was a connection error.
+		 * Clears the error state and fires an event if there is a connection error.
 		 *
 		 * @access private
 		 *
 		 * @since 3.8.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function clearErrorState() {
 			// Has connected successfully.
@@ -376,7 +376,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function connect() {
 			var ajaxData, heartbeatData;
@@ -390,7 +390,7 @@
 			settings.lastTick = time();
 
 			heartbeatData = $.extend( {}, settings.queue );
-			// Clear the data queue, anything added after this point will be send on the next tick.
+			// Clear the data queue. Anything added after this point will be sent on the next tick.
 			settings.queue = {};
 
 			$document.trigger( 'heartbeat-send', [ heartbeatData ] );
@@ -436,7 +436,7 @@
 
 				$document.trigger( 'heartbeat-tick', [response, textStatus, jqXHR] );
 
-				// Do this last, can trigger the next XHR if connection time > 5 sec. and newInterval == 'fast'.
+				// Do this last. Can trigger the next XHR if connection time > 5 sec. and newInterval == 'fast'.
 				if ( newInterval ) {
 					interval( newInterval );
 				}
@@ -455,7 +455,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function scheduleNextTick() {
 			var delta = time() - settings.lastTick,
@@ -501,7 +501,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function blurred() {
 			settings.hasFocus = false;
@@ -514,7 +514,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function focused() {
 			settings.userActivity = time();
@@ -535,7 +535,7 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function userIsActive() {
 			settings.userActivityEvents = false;
@@ -562,7 +562,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function checkUserActivity() {
 			var lastActive = settings.userActivity ? time() - settings.userActivity : 0;
@@ -627,7 +627,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function connectNow() {
 			settings.lastTick = 0;
@@ -643,7 +643,7 @@
 		 *
 		 * @since 3.8.0
 		 *
-		 * @returns void
+		 * @returns { void }
 		 */
 		function disableSuspend() {
 			settings.suspendEnabled = false;
@@ -659,7 +659,7 @@
 		 * @since 3.6.0
 		 *
 		 * @param mixed speed Interval: 'fast' or 5, 15, 30, 60, 120.
-		 * @param string ticks Used with speed = 'fast' or 5, how many ticks before the interval reverts back.
+		 * @param string ticks Used with speed = 'fast' or 5. Tells how many ticks before the interval reverts back.
 		 *
 		 * @returns int Current interval in seconds.
 		 */
@@ -733,11 +733,11 @@
 		 *
 		 * @since 3.6.0
 		 *
-		 * @param string handle Unique handle for the data. The handle is used in PHP to receive the data.
+		 * @param string handle Unique handle for the data, used in PHP to receive the data.
 		 * @param mixed data The data to send.
 		 * @param boolean noOverwrite Whether to overwrite existing data in the queue.
 		 *
-		 * @returns boolean Whether the data was queued or not.
+		 * @returns boolean True if the data was queued.
 		 */
 		function enqueue( handle, data, noOverwrite ) {
 			if ( handle ) {
@@ -758,7 +758,7 @@
 		 *
 		 * @param string handle The handle for the data.
 		 *
-		 * @returns boolean Whether some data is queued with this handle.
+		 * @returns boolean True if the data is queued with this handle.
 		 */
 		function isQueued( handle ) {
 			if ( handle ) {
