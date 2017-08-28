@@ -742,7 +742,11 @@
 		};
 	};
 
-	/** @namespace wp */
+	/**
+	 * Ensure the global `wp` object exists.
+	 *
+	 * @namespace wp
+	 */
 	window.wp = window.wp || {};
 	window.wp.heartbeat = new Heartbeat();
 

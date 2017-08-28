@@ -330,7 +330,7 @@
 	/**
 	 * @class wp.media.collection
 	 *
-	 * @param attributes
+	 * @param {Object} attributes
 	 */
 	wp.media.collection = function(attributes) {
 		var collections = {};
@@ -591,6 +591,10 @@
 		}
 	});
 
+	/**
+	 * @namespace wp.media.featuredImage
+	 * @memberOf wp.media
+	 */
 	wp.media.featuredImage = {
 		/**
 		 * Get the featured image post ID

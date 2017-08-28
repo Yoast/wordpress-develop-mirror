@@ -828,7 +828,11 @@ window.wp = window.wp || {};
 		return result;
 	};
 
-	/** @namespace wp.customize.utils */
+	/**
+	 * Utility function namespace
+	 *
+	 * @namespace wp.customize.utils
+	 */
 	api.utils = {};
 
 	/**
@@ -861,6 +865,10 @@ window.wp = window.wp || {};
 		return queryParams;
 	};
 
-	/** @namespace wp.customize */
+	/**
+	 * Expose the API publicly on window.wp.customize
+	 *
+	 * @namespace wp.customize
+	 */
 	exports.customize = api;
 })( wp, jQuery );

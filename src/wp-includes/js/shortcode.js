@@ -1,6 +1,10 @@
 // Utility functions for parsing and handling shortcodes in JavaScript.
 
-/** @namespace wp */
+/**
+ * Ensure the global `wp` object exists.
+ *
+ * @namespace wp
+ */
 window.wp = window.wp || {};
 
 (function(){

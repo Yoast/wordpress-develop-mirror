@@ -1,5 +1,10 @@
 /* global _wpCustomizeLoaderSettings, confirm */
-/** @namespace wp */
+/**
+ * Expose a public API that allows the customizer to be
+ * loaded on any page.
+ *
+ * @namespace wp
+ */
 window.wp = window.wp || {};
 
 (function( exports, $ ){
