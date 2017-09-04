@@ -33,8 +33,7 @@
 	wp.api.utils = wp.api.utils || {};
 
 	/**
-	 * ECMAScript 5 shim, adapted from MDN.
-	 * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+	 * ECMAScript 5 shim, adapted from {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString|MDN}.
 	 */
 	if ( ! Date.prototype.toISOString ) {
 		pad = function( number ) {
@@ -61,7 +60,7 @@
 	/**
 	 * Parse date into ISO8601 format.
 	 *
-	 * @param {Date} date.
+	 * @param {Date} date
 	 */
 	wp.api.utils.parseISO8601 = function( date ) {
 		var timestamp, struct, i, k,
@@ -193,7 +192,7 @@
 	/**
 	 * Add args and options to a model prototype from a route's endpoints.
 	 *
-	 * @param {array}  routeEndpoints Array of route endpoints.
+	 * @param {Array}  routeEndpoints Array of route endpoints.
 	 * @param {Object} modelInstance  An instance of the model (or collection)
 	 *                                to add the args to.
 	 */
@@ -320,7 +319,7 @@
 			 * Build a helper function to retrieve related model.
 			 *
 			 * @param  {string} parentModel      The parent model.
-			 * @param  {int}    modelId          The model ID if the object to request
+			 * @param  {int}    modelId          The model ID if the object to request.
 			 * @param  {string} modelName        The model name to use when constructing the model.
 			 * @param  {string} embedSourcePoint Where to check the embedds object for _embed data.
 			 * @param  {string} embedCheckField  Which model field to check to see if the model has data.
@@ -507,7 +506,7 @@
 				 *
 				 * Accepts an array of tag slugs, or a Tags collection.
 				 *
-				 * @param {array|Backbone.Collection} tags The tags to set on the post.
+				 * @param {Array|Backbone.Collection} tags The tags to set on the post.
 				 *
 				 */
 				setTags: function( tags ) {
@@ -553,7 +552,7 @@
 				 *
 				 * Accepts a Tags collection.
 				 *
-				 * @param {array|Backbone.Collection} tags The tags to set on the post.
+				 * @param {Array|Backbone.Collection} tags The tags to set on the post.
 				 *
 				 */
 				setTagsWithCollection: function( tags ) {
@@ -591,7 +590,7 @@
 				 *
 				 * Accepts an array of category slugs, or a Categories collection.
 				 *
-				 * @param {array|Backbone.Collection} categories The categories to set on the post.
+				 * @param {Array|Backbone.Collection} categories The categories to set on the post.
 				 *
 				 */
 				setCategories: function( categories ) {
@@ -638,7 +637,7 @@
 				 *
 				 * Accepts Categories collection.
 				 *
-				 * @param {array|Backbone.Collection} categories The categories to set on the post.
+				 * @param {Array|Backbone.Collection} categories The categories to set on the post.
 				 *
 				 */
 				setCategoriesWithCollection: function( categories ) {
@@ -738,9 +737,9 @@
 			/**
 			 * Set nonce header before every Backbone sync.
 			 *
-			 * @param {string} method.
-			 * @param {Backbone.Model} model.
-			 * @param {{beforeSend}, *} options.
+			 * @param {string} method
+			 * @param {Backbone.Model} model
+			 * @param {{beforeSend}, *} options
 			 * @returns {*}.
 			 */
 			sync: function( method, model, options ) {
@@ -881,9 +880,9 @@
 			 *
 			 * Set nonce header before every Backbone sync.
 			 *
-			 * @param {string} method.
-			 * @param {Backbone.Model} model.
-			 * @param {{success}, *} options.
+			 * @param {string} method
+			 * @param {Backbone.Model} model
+			 * @param {{success}, *} options
 			 * @returns {*}.
 			 */
 			sync: function( method, model, options ) {
@@ -948,8 +947,8 @@
 			/**
 			 * Fetches the next page of objects if a new page exists.
 			 *
-			 * @param {data: {page}} options.
-			 * @returns {*}.
+			 * @param {data: {page}} options
+			 * @returns {*}
 			 */
 			more: function( options ) {
 				options = options || {};
