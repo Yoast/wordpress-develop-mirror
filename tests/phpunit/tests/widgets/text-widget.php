@@ -64,7 +64,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$widget->_register();
 
 		$this->assertEquals( 10, has_action( 'admin_print_scripts-widgets.php', array( $widget, 'enqueue_admin_scripts' ) ) );
-		$this->assertEquals( 10, has_action( 'admin_footer-widgets.php', array( $widget, 'render_control_template_scripts' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_footer-widgets.php', array( 'WP_Widget_Text', 'render_control_template_scripts' ) ) );
+		$this->assertContains( 'wp.textWidgets.idBases.push( "text" );', wp_scripts()->registered['text-widgets']->extra['after'] );
 	}
 
 	/**
@@ -396,6 +397,7 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		// Check text examples that will not migrate to TinyMCE.
 		$legacy_text_examples = array(
 			'<span class="hello"></span>',
+			'<blockquote>Quote <footer>Citation</footer></blockquote>',
 			'<span></span>',
 			"<ul>\n<li><a href=\"#\" class=\"location\"></a>List Item 1</li>\n<li><a href=\"#\" class=\"location\"></a>List Item 2</li>\n</ul>",
 			'<a href="#" class="map"></a>',
@@ -445,7 +447,9 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 	 * @covers WP_Widget_Text::form
 	 */
 	function test_form() {
+		add_filter( 'user_can_richedit', '__return_true' );
 		$widget = new WP_Widget_Text();
+		$widget->_set( 2 );
 		$instance = array(
 			'title' => 'Title',
 			'text' => 'Text',
@@ -457,7 +461,7 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$widget->form( $instance );
 		$form = ob_get_clean();
 		$this->assertContains( 'class="visual" type="hidden" value=""', $form );
-		$this->assertNotContains( 'class="visual" type="hidden" value="on"', $form );
+		$this->assertNotContains( 'class="visual sync-input" type="hidden" value="on"', $form );
 
 		$instance = array(
 			'title' => 'Title',
@@ -468,8 +472,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		ob_start();
 		$widget->form( $instance );
 		$form = ob_get_clean();
-		$this->assertContains( 'class="visual" type="hidden" value="on"', $form );
-		$this->assertNotContains( 'class="visual" type="hidden" value=""', $form );
+		$this->assertContains( 'class="visual sync-input" type="hidden" value="on"', $form );
+		$this->assertNotContains( 'class="visual sync-input" type="hidden" value=""', $form );
 
 		$instance = array(
 			'title' => 'Title',
@@ -480,12 +484,12 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		ob_start();
 		$widget->form( $instance );
 		$form = ob_get_clean();
-		$this->assertContains( 'class="visual" type="hidden" value="on"', $form );
-		$this->assertNotContains( 'class="visual" type="hidden" value=""', $form );
+		$this->assertContains( 'class="visual sync-input" type="hidden" value="on"', $form );
+		$this->assertNotContains( 'class="visual sync-input" type="hidden" value=""', $form );
 
 		$instance = array(
 			'title' => 'Title',
-			'text' => 'Text',
+			'text' => 'This is some HTML Code: <code>&lt;strong&gt;BOLD!&lt;/strong&gt;</code>',
 			'filter' => true,
 			'visual' => true,
 		);
@@ -493,8 +497,24 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		ob_start();
 		$widget->form( $instance );
 		$form = ob_get_clean();
-		$this->assertContains( 'class="visual" type="hidden" value="on"', $form );
-		$this->assertNotContains( 'class="visual" type="hidden" value=""', $form );
+		$this->assertContains( 'class="visual sync-input" type="hidden" value="on"', $form );
+		$this->assertContains( '&lt;code&gt;&amp;lt;strong&amp;gt;BOLD!', $form );
+		$this->assertNotContains( 'class="visual sync-input" type="hidden" value=""', $form );
+
+		remove_filter( 'user_can_richedit', '__return_true' );
+		add_filter( 'user_can_richedit', '__return_false' );
+		$instance = array(
+			'title' => 'Title',
+			'text' => 'Evil:</textarea><script>alert("XSS")</script>',
+			'filter' => true,
+			'visual' => true,
+		);
+		$this->assertFalse( $widget->is_legacy_instance( $instance ) );
+		ob_start();
+		$widget->form( $instance );
+		$form = ob_get_clean();
+		$this->assertNotContains( 'Evil:</textarea>', $form );
+		$this->assertContains( 'Evil:&lt;/textarea>', $form );
 	}
 
 	/**
@@ -745,10 +765,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 	 * @covers WP_Widget_Text::render_control_template_scripts
 	 */
 	function test_render_control_template_scripts() {
-		$widget = new WP_Widget_Text();
-
 		ob_start();
-		$widget->render_control_template_scripts();
+		WP_Widget_Text::render_control_template_scripts();
 		$output = ob_get_clean();
 
 		$this->assertContains( '<script type="text/html" id="tmpl-widget-text-control-fields">', $output );

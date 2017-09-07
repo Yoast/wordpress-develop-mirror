@@ -55,11 +55,13 @@ class WP_Widget_Text extends WP_Widget {
 		}
 		$this->registered = true;
 
+		wp_add_inline_script( 'text-widgets', sprintf( 'wp.textWidgets.idBases.push( %s );', wp_json_encode( $this->id_base ) ) );
+
 		// Note that the widgets component in the customizer will also do the 'admin_print_scripts-widgets.php' action in WP_Customize_Widgets::print_scripts().
 		add_action( 'admin_print_scripts-widgets.php', array( $this, 'enqueue_admin_scripts' ) );
 
 		// Note that the widgets component in the customizer will also do the 'admin_footer-widgets.php' action in WP_Customize_Widgets::print_footer_scripts().
-		add_action( 'admin_footer-widgets.php', array( $this, 'render_control_template_scripts' ) );
+		add_action( 'admin_footer-widgets.php', array( 'WP_Widget_Text', 'render_control_template_scripts' ) );
 	}
 
 	/**
@@ -114,8 +116,8 @@ class WP_Widget_Text extends WP_Widget {
 		}
 
 		$doc = new DOMDocument();
-		$doc->loadHTML( sprintf(
-			'<html><head><meta charset="%s"></head><body>%s</body></html>',
+		@$doc->loadHTML( sprintf(
+			'<!DOCTYPE html><html><head><meta charset="%s"></head><body>%s</body></html>',
 			esc_attr( get_bloginfo( 'charset' ) ),
 			$instance['text']
 		) );
@@ -330,6 +332,7 @@ class WP_Widget_Text extends WP_Widget {
 	 * @since 4.8.0 Form only contains hidden inputs which are synced with JS template.
 	 * @since 4.8.1 Restored original form to be displayed when in legacy mode.
 	 * @see WP_Widget_Visual_Text::render_control_template_scripts()
+	 * @see _WP_Editors::editor()
 	 *
 	 * @param array $instance Current settings.
 	 * @return void
@@ -344,10 +347,31 @@ class WP_Widget_Text extends WP_Widget {
 		);
 		?>
 		<?php if ( ! $this->is_legacy_instance( $instance ) ) : ?>
-			<input id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" class="title" type="hidden" value="<?php echo esc_attr( $instance['title'] ); ?>">
-			<input id="<?php echo $this->get_field_id( 'text' ); ?>" name="<?php echo $this->get_field_name( 'text' ); ?>" class="text" type="hidden" value="<?php echo esc_attr( $instance['text'] ); ?>">
-			<input id="<?php echo $this->get_field_id( 'filter' ); ?>" name="<?php echo $this->get_field_name( 'filter' ); ?>" class="filter" type="hidden" value="on">
-			<input id="<?php echo $this->get_field_id( 'visual' ); ?>" name="<?php echo $this->get_field_name( 'visual' ); ?>" class="visual" type="hidden" value="on">
+			<?php
+
+			if ( user_can_richedit() ) {
+				add_filter( 'the_editor_content', 'format_for_editor', 10, 2 );
+				$default_editor = 'tinymce';
+			} else {
+				$default_editor = 'html';
+			}
+
+			/** This filter is documented in wp-includes/class-wp-editor.php */
+			$text = apply_filters( 'the_editor_content', $instance['text'], $default_editor );
+
+			// Reset filter addition.
+			if ( user_can_richedit() ) {
+				remove_filter( 'the_editor_content', 'format_for_editor' );
+			}
+
+			// Prevent premature closing of textarea in case format_for_editor() didn't apply or the_editor_content filter did a wrong thing.
+			$escaped_text = preg_replace( '#</textarea#i', '&lt;/textarea', $text );
+
+			?>
+			<input id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" class="title sync-input" type="hidden" value="<?php echo esc_attr( $instance['title'] ); ?>">
+			<textarea id="<?php echo $this->get_field_id( 'text' ); ?>" name="<?php echo $this->get_field_name( 'text' ); ?>" class="text sync-input" hidden><?php echo $escaped_text; ?></textarea>
+			<input id="<?php echo $this->get_field_id( 'filter' ); ?>" name="<?php echo $this->get_field_name( 'filter' ); ?>" class="filter sync-input" type="hidden" value="on">
+			<input id="<?php echo $this->get_field_id( 'visual' ); ?>" name="<?php echo $this->get_field_name( 'visual' ); ?>" class="visual sync-input" type="hidden" value="on">
 		<?php else : ?>
 			<input id="<?php echo $this->get_field_id( 'visual' ); ?>" name="<?php echo $this->get_field_name( 'visual' ); ?>" class="visual" type="hidden" value="">
 			<p>
@@ -376,8 +400,9 @@ class WP_Widget_Text extends WP_Widget {
 	 * Render form template scripts.
 	 *
 	 * @since 4.8.0
+	 * @since 4.9.0 The method is now static.
 	 */
-	public function render_control_template_scripts() {
+	public static function render_control_template_scripts() {
 		$dismissed_pointers = explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) );
 		?>
 		<script type="text/html" id="tmpl-widget-text-control-fields">

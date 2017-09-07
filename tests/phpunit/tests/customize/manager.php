@@ -170,15 +170,39 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'WPDieException', $exception );
 		$this->assertContains( 'Invalid changeset UUID', $exception->getMessage() );
 
-		update_option( 'fresh_site', 0 );
+		update_option( 'fresh_site', '0' );
 		$wp_customize = new WP_Customize_Manager();
 		$wp_customize->setup_theme();
 		$this->assertFalse( has_action( 'after_setup_theme', array( $wp_customize, 'import_theme_starter_content' ) ) );
 
 		// Make sure that starter content import gets queued on a fresh site.
-		update_option( 'fresh_site', 1 );
+		update_option( 'fresh_site', '1' );
 		$wp_customize->setup_theme();
 		$this->assertEquals( 100, has_action( 'after_setup_theme', array( $wp_customize, 'import_theme_starter_content' ) ) );
+	}
+
+	/**
+	 * Test that clearing a fresh site is a no-op if the site is already fresh.
+	 *
+	 * @see _delete_option_fresh_site()
+	 * @ticket 41039
+	 */
+	function test_fresh_site_flag_clearing() {
+		global $wp_customize, $wpdb;
+
+		// Make sure fresh site flag is cleared when publishing a changeset.
+		update_option( 'fresh_site', '1' );
+		do_action( 'customize_save_after', $wp_customize );
+		$this->assertEquals( '0', get_option( 'fresh_site' ) );
+
+		// Simulate a new, uncached request.
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_load_alloptions();
+
+		// Make sure no DB write is done when publishing and a site is already non-fresh.
+		$query_count = $wpdb->num_queries;
+		do_action( 'customize_save_after', $wp_customize );
+		$this->assertSame( $query_count, $wpdb->num_queries );
 	}
 
 	/**
@@ -279,6 +303,9 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$wp_customize = new WP_Customize_Manager();
 		$this->assertNull( $wp_customize->find_changeset_post_id( wp_generate_uuid4() ) );
 		$this->assertEquals( $post_id, $wp_customize->find_changeset_post_id( $uuid ) );
+
+		// Verify that the found post ID was cached under the given UUID, not the manager's UUID.
+		$this->assertNotEquals( $post_id, $wp_customize->find_changeset_post_id( $wp_customize->changeset_uuid() ) );
 	}
 
 	/**
@@ -1246,6 +1273,38 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test passing `null` for a setting ID to remove it from the changeset.
+	 *
+	 * @ticket 41621
+	 * @covers WP_Customize_Manager::save_changeset_post()
+	 */
+	function test_remove_setting_from_changeset_post() {
+		$uuid = wp_generate_uuid4();
+
+		$manager = $this->create_test_manager( $uuid );
+		$manager->save_changeset_post( array(
+			'data' => array(
+				'scratchpad' => array(
+					'value' => 'foo',
+				),
+			),
+		) );
+
+		// Create a new manager so post values are unset.
+		$manager = $this->create_test_manager( $uuid );
+
+		$this->assertArrayHasKey( 'scratchpad', $manager->changeset_data() );
+
+		$manager->save_changeset_post( array(
+			'data' => array(
+				'scratchpad' => null,
+			),
+		) );
+
+		$this->assertArrayNotHasKey( 'scratchpad', $manager->changeset_data() );
+	}
+
+	/**
 	 * Test writing changesets and publishing with users who can unfiltered_html and those who cannot.
 	 *
 	 * @ticket 38705
@@ -1488,9 +1547,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 	 * @group ajax
 	 */
 	function test_doing_ajax() {
-		if ( ! defined( 'DOING_AJAX' ) ) {
-			define( 'DOING_AJAX', true );
-		}
+		add_filter( 'wp_doing_ajax', '__return_true' );
 
 		$manager = $this->manager;
 		$this->assertTrue( $manager->doing_ajax() );
@@ -1504,9 +1561,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 	 * Test ! WP_Customize_Manager::doing_ajax().
 	 */
 	function test_not_doing_ajax() {
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			$this->markTestSkipped( 'Cannot test when DOING_AJAX' );
-		}
+		add_filter( 'wp_doing_ajax', '__return_false' );
 
 		$manager = $this->manager;
 		$this->assertFalse( $manager->doing_ajax() );

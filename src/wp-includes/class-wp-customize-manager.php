@@ -535,7 +535,7 @@ final class WP_Customize_Manager {
 		}
 
 		/*
-		 * Import theme starter content for fresh installs when landing in the customizer.
+		 * Import theme starter content for fresh installations when landing in the customizer.
 		 * Import starter content at after_setup_theme:100 so that any
 		 * add_theme_support( 'starter-content' ) calls will have been made.
 		 */
@@ -816,7 +816,7 @@ final class WP_Customize_Manager {
 		if ( ! empty( $changeset_post_query->posts ) ) {
 			// Note: 'fields'=>'ids' is not being used in order to cache the post object as it will be needed.
 			$changeset_post_id = $changeset_post_query->posts[0]->ID;
-			wp_cache_set( $this->_changeset_uuid, $changeset_post_id, $cache_group );
+			wp_cache_set( $uuid, $changeset_post_id, $cache_group );
 			return $changeset_post_id;
 		}
 
@@ -1760,7 +1760,7 @@ final class WP_Customize_Manager {
 		$setting_validities = $this->validate_setting_values( $post_values );
 		$exported_setting_validities = array_map( array( $this, 'prepare_setting_validity_for_js' ), $setting_validities );
 
-		// Note that the REQUEST_URI is not passed into home_url() since this breaks subdirectory installs.
+		// Note that the REQUEST_URI is not passed into home_url() since this breaks subdirectory installations.
 		$self_url = empty( $_SERVER['REQUEST_URI'] ) ? home_url( '/' ) : esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		$state_query_params = array(
 			'customize_theme',
@@ -2278,7 +2278,7 @@ final class WP_Customize_Manager {
 
 		// Amend post values with any supplied data.
 		foreach ( $args['data'] as $setting_id => $setting_params ) {
-			if ( array_key_exists( 'value', $setting_params ) ) {
+			if ( is_array( $setting_params ) && array_key_exists( 'value', $setting_params ) ) {
 				$this->set_post_value( $setting_id, $setting_params['value'] ); // Add to post values so that they can be validated and sanitized.
 			}
 		}

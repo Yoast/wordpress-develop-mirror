@@ -72,7 +72,7 @@ function get_active_blog_for_user( $user_id ) {
 		$ret = false;
 		if ( is_array( $blogs ) && count( $blogs ) > 0 ) {
 			foreach ( (array) $blogs as $blog_id => $blog ) {
-				if ( $blog->site_id != $wpdb->siteid )
+				if ( $blog->site_id != get_current_network_id() )
 					continue;
 				$details = get_site( $blog_id );
 				if ( is_object( $details ) && $details->archived == 0 && $details->spam == 0 && $details->deleted == 0 ) {
@@ -586,7 +586,7 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	}
 
 	/*
-	 * On sub dir installs, some names are so illegal, only a filter can
+	 * On sub dir installations, some names are so illegal, only a filter can
 	 * spring them from jail.
 	 */
 	if ( ! is_subdomain_install() ) {
@@ -680,7 +680,7 @@ function wpmu_validate_blog_signup( $blogname, $blog_title, $user = '' ) {
 	 *     Array of domain, path, blog name, blog title, user and error messages.
 	 *
 	 *     @type string         $domain     Domain for the site.
-	 *     @type string         $path       Path for the site. Used in subdirectory installs.
+	 *     @type string         $path       Path for the site. Used in subdirectory installations.
 	 *     @type string         $blogname   The unique site name (slug).
 	 *     @type string         $blog_title Blog title.
 	 *     @type string|WP_User $user       By default, an empty string. A user object if provided.
@@ -1089,7 +1089,7 @@ function wpmu_activate_signup($key) {
 		return array( 'user_id' => $user_id, 'password' => $password, 'meta' => $meta );
 	}
 
-	$blog_id = wpmu_create_blog( $signup->domain, $signup->path, $signup->title, $user_id, $meta, $wpdb->siteid );
+	$blog_id = wpmu_create_blog( $signup->domain, $signup->path, $signup->title, $user_id, $meta, get_current_network_id() );
 
 	// TODO: What to do if we create a user but cannot create a blog?
 	if ( is_wp_error($blog_id) ) {
@@ -1164,29 +1164,29 @@ function wpmu_create_user( $user_name, $password, $email ) {
  * as when a Super Admin creates a new site. Hook to {@see 'wpmu_new_blog'}
  * for events that should affect all new sites.
  *
- * On subdirectory installs, $domain is the same as the main site's
+ * On subdirectory installations, $domain is the same as the main site's
  * domain, and the path is the subdirectory name (eg 'example.com'
- * and '/blog1/'). On subdomain installs, $domain is the new subdomain +
+ * and '/blog1/'). On subdomain installations, $domain is the new subdomain +
  * root domain (eg 'blog1.example.com'), and $path is '/'.
  *
  * @since MU (3.0.0)
  *
- * @param string $domain  The new site's domain.
- * @param string $path    The new site's path.
- * @param string $title   The new site's title.
- * @param int    $user_id The user ID of the new site's admin.
- * @param array  $meta    Optional. Array of key=>value pairs used to set initial site options.
- *                        If valid status keys are included ('public', 'archived', 'mature',
- *                        'spam', 'deleted', or 'lang_id') the given site status(es) will be
- *                        updated. Otherwise, keys and values will be used to set options for
- *                        the new site. Default empty array.
- * @param int    $site_id Optional. Network ID. Only relevant on multi-network installs.
+ * @param string $domain     The new site's domain.
+ * @param string $path       The new site's path.
+ * @param string $title      The new site's title.
+ * @param int    $user_id    The user ID of the new site's admin.
+ * @param array  $meta       Optional. Array of key=>value pairs used to set initial site options.
+ *                           If valid status keys are included ('public', 'archived', 'mature',
+ *                           'spam', 'deleted', or 'lang_id') the given site status(es) will be
+ *                           updated. Otherwise, keys and values will be used to set options for
+ *                           the new site. Default empty array.
+ * @param int    $network_id Optional. Network ID. Only relevant on multi-network installations.
  * @return int|WP_Error Returns WP_Error object on failure, the new site ID on success.
  */
-function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $site_id = 1 ) {
+function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $network_id = 1 ) {
 	$defaults = array(
 		'public' => 0,
-		'WPLANG' => get_network_option( $site_id, 'WPLANG' ),
+		'WPLANG' => get_network_option( $network_id, 'WPLANG' ),
 	);
 	$meta = wp_parse_args( $meta, $defaults );
 
@@ -1202,14 +1202,14 @@ function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $s
 		$path = '/';
 
 	// Check if the domain has been used already. We should return an error message.
-	if ( domain_exists($domain, $path, $site_id) )
+	if ( domain_exists($domain, $path, $network_id) )
 		return new WP_Error( 'blog_taken', __( 'Sorry, that site already exists!' ) );
 
 	if ( ! wp_installing() ) {
 		wp_installing( true );
 	}
 
-	if ( ! $blog_id = insert_blog($domain, $path, $site_id) )
+	if ( ! $blog_id = insert_blog($domain, $path, $network_id) )
 		return new WP_Error('insert_blog', __('Could not create site.'));
 
 	switch_to_blog($blog_id);
@@ -1236,14 +1236,14 @@ function wpmu_create_blog( $domain, $path, $title, $user_id, $meta = array(), $s
 	 *
 	 * @since MU (3.0.0)
 	 *
-	 * @param int    $blog_id Site ID.
-	 * @param int    $user_id User ID.
-	 * @param string $domain  Site domain.
-	 * @param string $path    Site path.
-	 * @param int    $site_id Network ID. Only relevant on multi-network installs.
-	 * @param array  $meta    Meta data. Used to set initial site options.
+	 * @param int    $blog_id    Site ID.
+	 * @param int    $user_id    User ID.
+	 * @param string $domain     Site domain.
+	 * @param string $path       Site path.
+	 * @param int    $network_id Network ID. Only relevant on multi-network installations.
+	 * @param array  $meta       Meta data. Used to set initial site options.
 	 */
-	do_action( 'wpmu_new_blog', $blog_id, $user_id, $domain, $path, $site_id, $meta );
+	do_action( 'wpmu_new_blog', $blog_id, $user_id, $domain, $path, $network_id, $meta );
 
 	wp_cache_set( 'last_changed', microtime(), 'sites' );
 
@@ -1350,18 +1350,18 @@ Disable these notifications: %3$s'), $user->user_login, wp_unslash( $_SERVER['RE
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @param string $domain  The domain to be checked.
- * @param string $path    The path to be checked.
- * @param int    $site_id Optional. Relevant only on multi-network installs.
+ * @param string $domain     The domain to be checked.
+ * @param string $path       The path to be checked.
+ * @param int    $network_id Optional. Network ID. Relevant only on multi-network installations.
  * @return int
  */
-function domain_exists($domain, $path, $site_id = 1) {
+function domain_exists( $domain, $path, $network_id = 1 ) {
 	$path = trailingslashit( $path );
 	$args = array(
-		'network_id' => $site_id,
-		'domain' => $domain,
-		'path' => $path,
-		'fields' => 'ids',
+		'network_id' => $network_id,
+		'domain'     => $domain,
+		'path'       => $path,
+		'fields'     => 'ids',
 	);
 	$result = get_sites( $args );
 	$result = array_shift( $result );
@@ -1371,12 +1371,12 @@ function domain_exists($domain, $path, $site_id = 1) {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @param int|null $result  The blog_id if the blogname exists, null otherwise.
-	 * @param string   $domain  Domain to be checked.
-	 * @param string   $path    Path to be checked.
-	 * @param int      $site_id Site ID. Relevant only on multi-network installs.
+	 * @param int|null $result     The blog_id if the blogname exists, null otherwise.
+	 * @param string   $domain     Domain to be checked.
+	 * @param string   $path       Path to be checked.
+	 * @param int      $network_id Network ID. Relevant only on multi-network installations.
 	 */
-	return apply_filters( 'domain_exists', $result, $domain, $path, $site_id );
+	return apply_filters( 'domain_exists', $result, $domain, $path, $network_id );
 }
 
 /**
@@ -1389,25 +1389,25 @@ function domain_exists($domain, $path, $site_id = 1) {
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @param string $domain  The domain of the new site.
- * @param string $path    The path of the new site.
- * @param int    $site_id Unless you're running a multi-network install, be sure to set this value to 1.
+ * @param string $domain     The domain of the new site.
+ * @param string $path       The path of the new site.
+ * @param int    $network_id Unless you're running a multi-network installation, be sure to set this value to 1.
  * @return int|false The ID of the new row
  */
-function insert_blog($domain, $path, $site_id) {
+function insert_blog($domain, $path, $network_id) {
 	global $wpdb;
 
 	$path = trailingslashit($path);
-	$site_id = (int) $site_id;
+	$network_id = (int) $network_id;
 
-	$result = $wpdb->insert( $wpdb->blogs, array('site_id' => $site_id, 'domain' => $domain, 'path' => $path, 'registered' => current_time('mysql')) );
+	$result = $wpdb->insert( $wpdb->blogs, array('site_id' => $network_id, 'domain' => $domain, 'path' => $path, 'registered' => current_time('mysql')) );
 	if ( ! $result )
 		return false;
 
 	$blog_id = $wpdb->insert_id;
 	refresh_blog_details( $blog_id );
 
-	wp_maybe_update_network_site_counts( $site_id );
+	wp_maybe_update_network_site_counts( $network_id );
 
 	return $blog_id;
 }
@@ -2110,17 +2110,16 @@ function add_existing_user_to_blog( $details = false ) {
 		$blog_id = get_current_blog_id();
 		$result = add_user_to_blog( $blog_id, $details[ 'user_id' ], $details[ 'role' ] );
 
-		if ( ! is_wp_error( $result ) ) {
-			/**
-			 * Fires immediately after an existing user is added to a site.
-			 *
-			 * @since MU (3.0.0)
-			 *
-			 * @param int   $user_id User ID.
-			 * @param mixed $result  True on success or a WP_Error object if the user doesn't exist.
-			 */
-			do_action( 'added_existing_user', $details['user_id'], $result );
-		}
+		/**
+		 * Fires immediately after an existing user is added to a site.
+		 *
+		 * @since MU (3.0.0)
+		 *
+		 * @param int   $user_id User ID.
+		 * @param mixed $result  True on success or a WP_Error object if the user doesn't exist
+		 *                       or could not be added.
+		 */
+		do_action( 'added_existing_user', $details['user_id'], $result );
 
 		return $result;
 	}
@@ -2570,7 +2569,7 @@ function wp_is_large_network( $using = 'sites', $network_id = null ) {
 }
 
 /**
- * Retrieves a list of reserved site on a sub-directory Multisite install.
+ * Retrieves a list of reserved site on a sub-directory Multisite installation.
  *
  * @since 4.4.0
  *
@@ -2583,7 +2582,7 @@ function get_subdirectory_reserved_names() {
 	);
 
 	/**
-	 * Filters reserved site names on a sub-directory Multisite install.
+	 * Filters reserved site names on a sub-directory Multisite installation.
 	 *
 	 * @since 3.0.0
 	 * @since 4.4.0 'wp-admin', 'wp-content', 'wp-includes', 'wp-json', and 'embed' were added

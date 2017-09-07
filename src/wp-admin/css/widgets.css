@@ -92,6 +92,7 @@
 }
 
 .media-widget-control .media-widget-preview {
+	background: #f1f1f1;
 	text-align: center;
 }
 .media-widget-control .media-widget-preview .notice {
@@ -106,6 +107,7 @@
 }
 .media-widget-control .media-widget-preview img {
 	max-width: 100%;
+	vertical-align: middle;
 }
 .media-widget-control .media-widget-preview .wp-video-shortcode {
 	background: #000;
@@ -150,6 +152,10 @@
 
 .media-frame #embed-url-field.invalid {
 	border: 1px solid #f00;
+}
+
+.media-widget-image-link {
+	margin: 1em 0;
 }
 
 /* Widget Dragging Helpers */
@@ -281,6 +287,13 @@ div#widgets-left .widget-holder {
 	display: block;
 	padding: 10px 15px;
 	font-size: 12px;
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	-ms-word-break: break-all;
+	word-break: break-word;
+	-ms-hyphens: auto;
+	-webkit-hyphens: auto;
+	hyphens: auto;
 }
 
 #available-widgets #widget-list {

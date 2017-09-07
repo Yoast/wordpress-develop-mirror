@@ -354,7 +354,7 @@ function wp_default_scripts( &$scripts ) {
 
 	$scripts->add( 'imgareaselect', "/wp-includes/js/imgareaselect/jquery.imgareaselect$suffix.js", array('jquery'), false, 1 );
 
-	$scripts->add( 'mediaelement', "/wp-includes/js/mediaelement/mediaelement-and-player.min.js", array('jquery'), '4.2.3', 1 );
+	$scripts->add( 'mediaelement', "/wp-includes/js/mediaelement/mediaelement-and-player.min.js", array('jquery'), '4.2.5-74e01a40', 1 );
 	did_action( 'init' ) && $scripts->localize( 'mediaelement', 'mejsL10n', array(
 		'language' => get_bloginfo( 'language' ),
 		'strings'  => array(
@@ -446,7 +446,7 @@ function wp_default_scripts( &$scripts ) {
 		) );
 
 
-	$scripts->add( 'mediaelement-vimeo', "/wp-includes/js/mediaelement/renderers/vimeo.min.js", array('mediaelement'), '4.2.3', 1 );
+	$scripts->add( 'mediaelement-vimeo', "/wp-includes/js/mediaelement/renderers/vimeo.min.js", array('mediaelement'), '4.2.5-74e01a40', 1 );
 	$scripts->add( 'wp-mediaelement', "/wp-includes/js/mediaelement/wp-mediaelement$suffix.js", array('mediaelement'), false, 1 );
 	$mejs_settings = array(
 		'pluginPath'    => includes_url( 'js/mediaelement/', 'relative' ),
@@ -743,7 +743,7 @@ function wp_default_scripts( &$scripts ) {
 				'installing'                 => __( 'Installing...' ),
 				'pluginInstalled'            => _x( 'Installed!', 'plugin' ),
 				'themeInstalled'             => _x( 'Installed!', 'theme' ),
-				'installFailedShort'         => __( 'Install Failed!' ),
+				'installFailedShort'         => __( 'Installation Failed!' ),
 				/* translators: %s: Error string for a failed installation */
 				'installFailed'              => __( 'Installation failed: %s' ),
 				/* translators: %s: Plugin name and version */
@@ -796,10 +796,12 @@ function wp_default_scripts( &$scripts ) {
 		$scripts->add( 'iris', '/wp-admin/js/iris.min.js', array( 'jquery-ui-draggable', 'jquery-ui-slider', 'jquery-touch-punch' ), '1.0.7', 1 );
 		$scripts->add( 'wp-color-picker', "/wp-admin/js/color-picker$suffix.js", array( 'iris' ), false, 1 );
 		did_action( 'init' ) && $scripts->localize( 'wp-color-picker', 'wpColorPickerL10n', array(
-			'clear' => __( 'Clear' ),
-			'defaultString' => __( 'Default' ),
-			'pick' => __( 'Select Color' ),
-			'current' => __( 'Current Color' ),
+			'clear'            => __( 'Clear' ),
+			'clearAriaLabel'   => __( 'Clear color' ),
+			'defaultString'    => __( 'Default' ),
+			'defaultAriaLabel' => __( 'Select default color' ),
+			'pick'             => __( 'Select Color' ),
+			'defaultLabel'     => __( 'Color value' ),
 		) );
 
 		$scripts->add( 'dashboard', "/wp-admin/js/dashboard$suffix.js", array( 'jquery', 'admin-comments', 'postbox', 'wp-util', 'wp-a11y' ), false, 1 );
@@ -949,7 +951,7 @@ function wp_default_styles( &$styles ) {
 	// External libraries and friends
 	$styles->add( 'imgareaselect',       '/wp-includes/js/imgareaselect/imgareaselect.css', array(), '0.9.8' );
 	$styles->add( 'wp-jquery-ui-dialog', "/wp-includes/css/jquery-ui-dialog$suffix.css", array( 'dashicons' ) );
-	$styles->add( 'mediaelement',        "/wp-includes/js/mediaelement/mediaelementplayer-legacy.min.css", array(), '4.2.3' );
+	$styles->add( 'mediaelement',        "/wp-includes/js/mediaelement/mediaelementplayer-legacy.min.css", array(), '4.2.5-74e01a40' );
 	$styles->add( 'wp-mediaelement',     "/wp-includes/js/mediaelement/wp-mediaelement$suffix.css", array( 'mediaelement' ) );
 	$styles->add( 'thickbox',            '/wp-includes/js/thickbox/thickbox.css', array( 'dashicons' ) );
 

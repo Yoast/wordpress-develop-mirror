@@ -512,6 +512,26 @@ wp.mediaWidgets = ( function( $ ) {
 				});
 			});
 
+			// Update link_url attribute.
+			control.$el.on( 'input change', '.link', function updateLinkUrl() {
+				var linkUrl = $.trim( $( this ).val() ), linkType = 'custom';
+				if ( control.selectedAttachment.get( 'linkUrl' ) === linkUrl || control.selectedAttachment.get( 'link' ) === linkUrl ) {
+					linkType = 'post';
+				} else if ( control.selectedAttachment.get( 'url' ) === linkUrl ) {
+					linkType = 'file';
+				}
+				control.model.set( {
+					link_url: linkUrl,
+					link_type: linkType
+				});
+
+				// Update display settings for the next time the user opens to select from the media library.
+				control.displaySettings.set( {
+					link: linkType,
+					linkUrl: linkUrl
+				});
+			});
+
 			/*
 			 * Copy current display settings from the widget model to serve as basis
 			 * of customized display settings for the current media frame session.
@@ -708,10 +728,14 @@ wp.mediaWidgets = ( function( $ ) {
 				control.model.set( control.getModelPropsFromMediaFrame( mediaFrame ) );
 			});
 
-			// Disable syncing of attachment changes back to server. See <https://core.trac.wordpress.org/ticket/40403>.
+			// Disable syncing of attachment changes back to server (except for deletions). See <https://core.trac.wordpress.org/ticket/40403>.
 			defaultSync = wp.media.model.Attachment.prototype.sync;
-			wp.media.model.Attachment.prototype.sync = function rejectedSync() {
-				return $.Deferred().rejectWith( this ).promise();
+			wp.media.model.Attachment.prototype.sync = function( method ) {
+				if ( 'delete' === method ) {
+					return defaultSync.apply( this, arguments );
+				} else {
+					return $.Deferred().rejectWith( this ).promise();
+				}
 			};
 			mediaFrame.on( 'close', function onClose() {
 				wp.media.model.Attachment.prototype.sync = defaultSync;
@@ -818,7 +842,7 @@ wp.mediaWidgets = ( function( $ ) {
 			}
 
 			if ( 'post' === mediaFrameProps.link ) {
-				modelProps.link_url = mediaFrameProps.postUrl;
+				modelProps.link_url = mediaFrameProps.postUrl || mediaFrameProps.linkUrl;
 			} else if ( 'file' === mediaFrameProps.link ) {
 				modelProps.link_url = mediaFrameProps.url;
 			}
@@ -1026,7 +1050,7 @@ wp.mediaWidgets = ( function( $ ) {
 	 * @returns {void}
 	 */
 	component.handleWidgetAdded = function handleWidgetAdded( event, widgetContainer ) {
-		var fieldContainer, syncContainer, widgetForm, idBase, ControlConstructor, ModelConstructor, modelAttributes, widgetControl, widgetModel, widgetId, widgetInside, animatedCheckDelay = 50, renderWhenAnimationDone;
+		var fieldContainer, syncContainer, widgetForm, idBase, ControlConstructor, ModelConstructor, modelAttributes, widgetControl, widgetModel, widgetId, animatedCheckDelay = 50, renderWhenAnimationDone;
 		widgetForm = widgetContainer.find( '> .widget-inside > .form, > .widget-inside > form' ); // Note: '.form' appears in the customizer, whereas 'form' on the widgets admin screen.
 		idBase = widgetForm.find( '> .id_base' ).val();
 		widgetId = widgetForm.find( '> .widget-id' ).val();
@@ -1084,9 +1108,8 @@ wp.mediaWidgets = ( function( $ ) {
 		 * This ensures that the container's dimensions are fixed so that ME.js
 		 * can initialize with the proper dimensions.
 		 */
-		widgetInside = widgetContainer.parent();
 		renderWhenAnimationDone = function() {
-			if ( widgetInside.is( ':animated' ) ) {
+			if ( ! widgetContainer.hasClass( 'open' ) ) {
 				setTimeout( renderWhenAnimationDone, animatedCheckDelay );
 			} else {
 				widgetControl.render();

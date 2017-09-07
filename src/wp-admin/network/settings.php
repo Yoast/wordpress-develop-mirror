@@ -10,7 +10,7 @@
 /** Load WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
-/** WordPress Translation Install API */
+/** WordPress Translation Installation API */
 require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
 
 if ( ! current_user_can( 'manage_network_options' ) )
@@ -62,8 +62,8 @@ if ( $_POST ) {
 		'first_comment_email',
 	);
 
-	// Handle translation install.
-	if ( ! empty( $_POST['WPLANG'] ) && wp_can_install_language_pack() ) {  // @todo: Skip if already installed
+	// Handle translation installation.
+	if ( ! empty( $_POST['WPLANG'] ) && current_user_can( 'install_languages' ) ) {
 		$language = wp_download_language_pack( $_POST['WPLANG'] );
 		if ( $language ) {
 			$_POST['WPLANG'] = $language;
@@ -342,7 +342,7 @@ if ( isset( $_GET['updated'] ) ) {
 							'selected'     => $lang,
 							'languages'    => $languages,
 							'translations' => $translations,
-							'show_available_translations' => wp_can_install_language_pack(),
+							'show_available_translations' => current_user_can( 'install_languages' ),
 						) );
 						?>
 					</td>
