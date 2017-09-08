@@ -1,21 +1,27 @@
-/**
- * wp.media.view.AudioDetails
- *
- * @class
- * @augments wp.media.view.MediaDetails
- * @augments wp.media.view.Settings.AttachmentDisplay
- * @augments wp.media.view.Settings
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
- */
 var MediaDetails = wp.media.view.MediaDetails,
 	AudioDetails;
 
-AudioDetails = MediaDetails.extend({
+/**
+ * This view represents the details of an audio attachment.
+ * It allows previewing the audio file, managing multiple sources and setting preload, autoplay and loop settings.
+ *
+ * @memberOf wp.media.view
+ *
+ * @class
+ * @augments wp.media.view.MediaDetails
+ */
+AudioDetails = MediaDetails.extend(/** @lends wp.media.view.AudioDetails.prototype */{
 	className: 'audio-details',
 	template:  wp.template('audio-details'),
 
+	/**
+	 * If the audio element in this view has a source then show it and prepare it's source.
+	 * If the audio element does not have a source then hide it.
+	 *
+	 * @see wp.media.view.MediaDetails.prepareSrc
+	 *
+	 * @returns {wp.media.view.AudioDetails} This view to allow method chaining.
+	 */
 	setMedia: function() {
 		var audio = this.$('.wp-audio-shortcode');
 
