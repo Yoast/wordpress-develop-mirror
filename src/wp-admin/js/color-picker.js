@@ -14,9 +14,11 @@
 	 *
 	 * Creates a jQuery UI color picker that is used in the theme customizer.
 	 *
+	 * @class $.widget.wp.wpColorPicker
+	 *
 	 * @since 3.5.0
 	 */
-	ColorPicker = {
+	ColorPicker = /** @lends $.widget.wp.wpColorPicker.prototype */{
 		options: {
 			defaultColor: false,
 			change: false,

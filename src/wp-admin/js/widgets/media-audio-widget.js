@@ -9,6 +9,8 @@
 	 *
 	 * @class AudioDetailsMediaFrame
 	 * @constructor
+	 *
+	 * @private
 	 */
 	AudioDetailsMediaFrame = wp.media.view.MediaFrame.AudioDetails.extend({
 
@@ -40,8 +42,8 @@
 	 *
 	 * See WP_Widget_Audio::enqueue_admin_scripts() for amending prototype from PHP exports.
 	 *
-	 * @class AudioWidgetModel
-	 * @constructor
+	 * @class    wp.mediaWidgets.modelConstructors.media_audio
+	 * @augments wp.mediaWidgets.MediaWidgetModel
 	 */
 	AudioWidgetModel = component.MediaWidgetModel.extend({});
 
@@ -50,10 +52,10 @@
 	 *
 	 * See WP_Widget_Audio::enqueue_admin_scripts() for amending prototype from PHP exports.
 	 *
-	 * @class AudioWidgetModel
-	 * @constructor
+	 * @class    wp.mediaWidgets.controlConstructors.media_audio
+	 * @augments wp.mediaWidgets.MediaWidgetControl
 	 */
-	AudioWidgetControl = component.MediaWidgetControl.extend({
+	AudioWidgetControl = component.MediaWidgetControl.extend(/** @lends wp.mediaWidgets.controlConstructors.media_audio.prototype */{
 
 		/**
 		 * Show display settings.

@@ -9,6 +9,8 @@
 	 *
 	 * @class VideoDetailsMediaFrame
 	 * @constructor
+	 *
+	 * @private
 	 */
 	VideoDetailsMediaFrame = wp.media.view.MediaFrame.VideoDetails.extend({
 
@@ -49,8 +51,8 @@
 	 *
 	 * See WP_Widget_Video::enqueue_admin_scripts() for amending prototype from PHP exports.
 	 *
-	 * @class VideoWidgetModel
-	 * @constructor
+	 * @class    wp.mediaWidgets.modelConstructors.media_video
+	 * @augments wp.mediaWidgets.MediaWidgetModel
 	 */
 	VideoWidgetModel = component.MediaWidgetModel.extend({});
 
@@ -59,8 +61,8 @@
 	 *
 	 * See WP_Widget_Video::enqueue_admin_scripts() for amending prototype from PHP exports.
 	 *
-	 * @class VideoWidgetControl
-	 * @constructor
+	 * @class    wp.mediaWidgets.controlConstructors.media_video
+	 * @augments wp.mediaWidgets.MediaWidgetControl
 	 */
 	VideoWidgetControl = component.MediaWidgetControl.extend({
 
