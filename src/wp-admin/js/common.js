@@ -1150,11 +1150,11 @@ $document.ready( function() {
 
 			$( '#wp-admin-bar-menu-toggle a' ).attr( 'aria-expanded', 'false' );
 
-			// Toggle sidebar when toggle is clicked
+			// Toggle sidebar when toggle is clicked.
 			$( '#wp-admin-bar-menu-toggle' ).on( 'click.wp-responsive', function( event ) {
 				event.preventDefault();
 
-				// close any open toolbar submenus
+				// close any open toolbar submenus.
 				$adminbar.find( '.hover' ).removeClass( 'hover' );
 
 				$wpwrap.toggleClass( 'wp-responsive-open' );
@@ -1166,7 +1166,7 @@ $document.ready( function() {
 				}
 			} );
 
-			// Add menu events
+			// Add menu events.
 			$adminmenu.on( 'click.wp-responsive', 'li.wp-has-submenu > a', function( event ) {
 				if ( ! $adminmenu.data('wp-responsive') ) {
 					return;
@@ -1179,7 +1179,7 @@ $document.ready( function() {
 			self.trigger();
 			$document.on( 'wp-window-resized.wp-responsive', $.proxy( this.trigger, this ) );
 
-			// This needs to run later as UI Sortable may be initialized later on $(document).ready()
+			// This needs to run later as UI Sortable may be initialized later on $(document).ready().
 			$window.on( 'load.wp-responsive', function() {
 				var width = navigator.userAgent.indexOf('AppleWebKit/') > -1 ? $window.width() : window.innerWidth;
 
@@ -1446,7 +1446,7 @@ $document.ready( function() {
 	});
 });
 
-// Fire a custom jQuery event at the end of window resize
+// Fire a custom jQuery event at the end of window resize.
 ( function() {
 	var timeout;
 
