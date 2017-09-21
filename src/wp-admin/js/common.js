@@ -583,7 +583,7 @@ $document.ready( function() {
 			/**
 			 * @summary Closes the submenu on blur from the menu item.
 			 *
-			 * @param {Event} e The event object.
+			 * @param {Event} event The event object.
 			 *
 			 * @returns {void}
 			 */
