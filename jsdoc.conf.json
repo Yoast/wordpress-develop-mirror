@@ -44,6 +44,7 @@
 	},
 	"opts": {
 		"template": "./node_modules/ink-docstrap/template",
-		"recurse": true
+		"recurse": true,
+		"private": true
 	}
 }
