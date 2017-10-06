@@ -1,7 +1,7 @@
 /**
  * wp.media.controller.Cropper
  *
- * A state for cropping an image.
+ * A state for cropping an image when called from the header media customization panel.
  *
  * @class
  * @augments wp.media.controller.State
@@ -25,7 +25,10 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary Toggles a crop selection.
+	 * @summary Opens crop image window.
+	 *
+	 * Shows the crop image window when called from the Add
+	 * new image button.
 	 *
 	 * @since 4.2.0
 	 *
@@ -49,7 +52,9 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary
+	 * @summary Creates crop image window.
+	 *
+	 * Initialized when clicking on the Select and Crop button.
 	 *
 	 * @since 4.2.0
 	 *
@@ -66,7 +71,7 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary
+	 * @summary Removes the image selection and closes the cropping window.
 	 *
 	 * @since 4.2.0
 	 *
@@ -80,7 +85,7 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary
+	 * @summary Checks if cropping is skipped or not and sets options accordingly.
 	 *
 	 * @since 4.2.0
 	 *
@@ -142,11 +147,11 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary
+	 * @summary Creates an object with the image attachment and crop properties.
 	 *
 	 * @since 4.2.0
 	 *
-	 * @returns void
+	 * @returns object Ajax post with the custom header crop details.
 	 */
 	doCrop: function( attachment ) {
 		return wp.ajax.post( 'custom-header-crop', _.extend(
