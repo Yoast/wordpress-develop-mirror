@@ -893,12 +893,13 @@ class wpdb {
 	 * @since 3.0.0
 	 *
 	 * @param int $blog_id
-	 * @param int $site_id Optional.
+	 * @param int $network_id Optional.
 	 * @return int previous blog id
 	 */
-	public function set_blog_id( $blog_id, $site_id = 0 ) {
-		if ( ! empty( $site_id ) )
-			$this->siteid = $site_id;
+	public function set_blog_id( $blog_id, $network_id = 0 ) {
+		if ( ! empty( $network_id ) ) {
+			$this->siteid = $network_id;
+		}
 
 		$old_blog_id  = $this->blogid;
 		$this->blogid = $blog_id;
@@ -1193,35 +1194,34 @@ class wpdb {
 	/**
 	 * Prepares a SQL query for safe execution. Uses sprintf()-like syntax.
 	 *
-	 * The following directives can be used in the query format string:
+	 * The following placeholders can be used in the query string:
 	 *   %d (integer)
 	 *   %f (float)
 	 *   %s (string)
-	 *   %% (literal percentage sign - no argument needed)
 	 *
-	 * All of %d, %f, and %s are to be left unquoted in the query string and they need an argument passed for them.
-	 * Literals (%) as parts of the query must be properly written as %%.
+	 * All placeholders MUST be left unquoted in the query string. A corresponding argument MUST be passed for each placeholder.
 	 *
-	 * This function only supports a small subset of the sprintf syntax; it only supports %d (integer), %f (float), and %s (string).
-	 * Does not support sign, padding, alignment, width or precision specifiers.
-	 * Does not support argument numbering/swapping.
+	 * Literal percentage signs (%) in the query string must be written as %%. Percentage wildcards (for example,
+	 * to use in LIKE syntax) must be passed via a substitution argument containing the complete LIKE string, these
+	 * cannot be inserted directly in the query string. Also see {@see esc_like()}.
 	 *
-	 * May be called like {@link https://secure.php.net/sprintf sprintf()} or like {@link https://secure.php.net/vsprintf vsprintf()}.
+	 * This method DOES NOT support sign, padding, alignment, width or precision specifiers.
+	 * This method DOES NOT support argument numbering or swapping.
 	 *
-	 * Both %d and %s should be left unquoted in the query string.
+	 * Arguments may be passed as individual arguments to the method, or as a single array containing all arguments. A combination 
+	 * of the two is not supported.
 	 *
-	 *     $wpdb->prepare( "SELECT * FROM `table` WHERE `column` = %s AND `field` = %d", 'foo', 1337 );
+	 * Examples:
+	 *     $wpdb->prepare( "SELECT * FROM `table` WHERE `column` = %s AND `field` = %d OR `other_field` LIKE %s", array( 'foo', 1337, '%bar' ) );
 	 *     $wpdb->prepare( "SELECT DATE_FORMAT(`field`, '%%c') FROM `table` WHERE `column` = %s", 'foo' );
 	 *
 	 * @link https://secure.php.net/sprintf Description of syntax.
 	 * @since 2.3.0
 	 *
 	 * @param string      $query    Query statement with sprintf()-like placeholders
-	 * @param array|mixed $args     The array of variables to substitute into the query's placeholders if being called like
-	 *                              {@link https://secure.php.net/vsprintf vsprintf()}, or the first variable to substitute into the query's placeholders if
-	 *                              being called like {@link https://secure.php.net/sprintf sprintf()}.
-	 * @param mixed       $args,... further variables to substitute into the query's placeholders if being called like
-	 *                              {@link https://secure.php.net/sprintf sprintf()}.
+	 * @param array|mixed $args     The array of variables to substitute into the query's placeholders if being called with an array of arguments,
+	 *                              or the first variable to substitute into the query's placeholders if being called with individual arguments.
+	 * @param mixed       $args,... further variables to substitute into the query's placeholders if being called wih individual arguments.
 	 * @return string|void Sanitized query string, if there is a query to prepare.
 	 */
 	public function prepare( $query, $args ) {
@@ -1230,18 +1230,45 @@ class wpdb {
 
 		// This is not meant to be foolproof -- but it will catch obviously incorrect usage.
 		if ( strpos( $query, '%' ) === false ) {
+			wp_load_translations_early();
 			_doing_it_wrong( 'wpdb::prepare', sprintf( __( 'The query argument of %s must have a placeholder.' ), 'wpdb::prepare()' ), '3.9.0' );
 		}
 
 		$args = func_get_args();
 		array_shift( $args );
+
 		// If args were passed as an array (as in vsprintf), move them up
-		if ( isset( $args[0] ) && is_array($args[0]) )
+		if ( is_array( $args[0] ) && count( $args ) == 1 ) {
 			$args = $args[0];
+		}
+
+		foreach ( $args as $arg ) {
+			if ( ! is_scalar( $arg ) && ! is_null( $arg ) ) {
+				wp_load_translations_early();
+				_doing_it_wrong( 'wpdb::prepare', sprintf( __( 'Unsupported value type (%s).' ), gettype( $arg ) ), '4.8.2' );
+			}
+		}
+
 		$query = str_replace( "'%s'", '%s', $query ); // in case someone mistakenly already singlequoted it
 		$query = str_replace( '"%s"', '%s', $query ); // doublequote unquoting
 		$query = preg_replace( '|(?<!%)%f|' , '%F', $query ); // Force floats to be locale unaware
 		$query = preg_replace( '|(?<!%)%s|', "'%s'", $query ); // quote the strings, avoiding escaped strings like %%s
+		$query = preg_replace( '/%(?:%|$|([^dsF]))/', '%%\\1', $query ); // escape any unescaped percents
+
+		// Count the number of valid placeholders in the query
+		$placeholders = preg_match_all( '/(^|[^%]|(%%)+)%[sdF]/', $query, $matches );
+
+		if ( count ( $args ) !== $placeholders ) {
+			wp_load_translations_early();
+			_doing_it_wrong( 'wpdb::prepare',
+				/* translators: 1: number of placeholders, 2: number of arguments passed */
+				sprintf( __( 'The query does not contain the correct number of placeholders (%1$d) for the number of arguments passed (%2$d).' ),
+					$placeholders,
+					count( $args ) ),
+				'4.9.0'
+			);
+		}
+
 		array_walk( $args, array( $this, 'escape_by_ref' ) );
 		return @vsprintf( $query, $args );
 	}
@@ -1256,7 +1283,7 @@ class wpdb {
 	 *     $wild = '%';
 	 *     $find = 'only 43% of planets';
 	 *     $like = $wild . $wpdb->esc_like( $find ) . $wild;
-	 *     $sql  = $wpdb->prepare( "SELECT * FROM $wpdb->posts WHERE post_content LIKE '%s'", $like );
+	 *     $sql  = $wpdb->prepare( "SELECT * FROM $wpdb->posts WHERE post_content LIKE %s", $like );
 	 *
 	 * Example Escape Chain:
 	 *
@@ -1449,24 +1476,23 @@ class wpdb {
 		if ( $this->use_mysqli ) {
 			$this->dbh = mysqli_init();
 
-			// mysqli_real_connect doesn't support the host param including a port or socket
-			// like mysql_connect does. This duplicates how mysql_connect detects a port and/or socket file.
-			$port = null;
-			$socket = null;
-			$host = $this->dbhost;
-			$port_or_socket = strstr( $host, ':' );
-			if ( ! empty( $port_or_socket ) ) {
-				$host = substr( $host, 0, strpos( $host, ':' ) );
-				$port_or_socket = substr( $port_or_socket, 1 );
-				if ( 0 !== strpos( $port_or_socket, '/' ) ) {
-					$port = intval( $port_or_socket );
-					$maybe_socket = strstr( $port_or_socket, ':' );
-					if ( ! empty( $maybe_socket ) ) {
-						$socket = substr( $maybe_socket, 1 );
-					}
-				} else {
-					$socket = $port_or_socket;
-				}
+			$host    = $this->dbhost;
+			$port    = null;
+			$socket  = null;
+			$is_ipv6 = false;
+
+			if ( $host_data = $this->parse_db_host( $this->dbhost ) ) {
+				list( $host, $port, $socket, $is_ipv6 ) = $host_data;
+			}
+
+			/*
+			 * If using the `mysqlnd` library, the IPv6 address needs to be
+			 * enclosed in square brackets, whereas it doesn't while using the
+			 * `libmysqlclient` library.
+			 * @see https://bugs.php.net/bug.php?id=67563
+			 */
+			if ( $is_ipv6 && extension_loaded( 'mysqlnd' ) ) {
+				$host = "[$host]";
 			}
 
 			if ( WP_DEBUG ) {
@@ -1478,7 +1504,8 @@ class wpdb {
 			if ( $this->dbh->connect_errno ) {
 				$this->dbh = null;
 
-				/* It's possible ext/mysqli is misconfigured. Fall back to ext/mysql if:
+				/*
+				 * It's possible ext/mysqli is misconfigured. Fall back to ext/mysql if:
 		 		 *  - We haven't previously connected, and
 		 		 *  - WP_USE_EXT_MYSQL isn't set to false, and
 		 		 *  - ext/mysql is loaded.
@@ -1556,6 +1583,53 @@ class wpdb {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Parse the DB_HOST setting to interpret it for mysqli_real_connect.
+	 *
+	 * mysqli_real_connect doesn't support the host param including a port or
+	 * socket like mysql_connect does. This duplicates how mysql_connect detects
+	 * a port and/or socket file.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param string $host The DB_HOST setting to parse.
+	 * @return array|bool Array containing the host, the port, the socket and whether
+	 *                    it is an IPv6 address, in that order. If $host couldn't be parsed,
+	 *                    returns false.
+	 */
+	public function parse_db_host( $host ) {
+		$port    = null;
+		$socket  = null;
+		$is_ipv6 = false;
+
+		// We need to check for an IPv6 address first.
+		// An IPv6 address will always contain at least two colons.
+		if ( substr_count( $host, ':' ) > 1 ) {
+			$pattern = '#^(?:\[)?(?<host>[0-9a-fA-F:]+)(?:\]:(?<port>[\d]+))?(?:/(?<socket>.+))?#';
+			$is_ipv6 = true;
+		} else {
+			// We seem to be dealing with an IPv4 address.
+			$pattern = '#^(?<host>[^:/]*)(?::(?<port>[\d]+))?(?::(?<socket>.+))?#';
+		}
+
+		$matches = array();
+		$result = preg_match( $pattern, $host, $matches );
+
+		if ( 1 !== $result ) {
+			// Couldn't parse the address, bail.
+			return false;
+		}
+
+		$host = '';
+		foreach ( array( 'host', 'port', 'socket' ) as $component ) {
+			if ( ! empty( $matches[ $component ] ) ) {
+				$$component = $matches[ $component ];
+			}
+		}
+
+		return array( $host, $port, $socket, $is_ipv6 );
 	}
 
 	/**
@@ -1990,7 +2064,7 @@ class wpdb {
 		$conditions = implode( ' AND ', $conditions );
 
 		$sql = "UPDATE `$table` SET $fields WHERE $conditions";
-
+		
 		$this->check_current_query = false;
 		return $this->query( $this->prepare( $sql, $values ) );
 	}
@@ -2811,7 +2885,8 @@ class wpdb {
 					}
 
 					if ( is_array( $value['length'] ) ) {
-						$queries[ $col ] = $this->prepare( "CONVERT( LEFT( CONVERT( %s USING $charset ), %.0f ) USING $connection_charset )", $value['value'], $value['length']['length'] );
+						$length = sprintf( '%.0f', $value['length']['length'] );
+						$queries[ $col ] = $this->prepare( "CONVERT( LEFT( CONVERT( %s USING $charset ), $length ) USING $connection_charset )", $value['value'] );
 					} else if ( 'binary' !== $charset ) {
 						// If we don't have a length, there's no need to convert binary - it will always return the same result.
 						$queries[ $col ] = $this->prepare( "CONVERT( CONVERT( %s USING $charset ) USING $connection_charset )", $value['value'] );

@@ -159,7 +159,7 @@ class WP_Network_Query {
 		 *
 		 * @since 4.6.0
 		 *
-		 * @param WP_Network_Query &$this The WP_Network_Query instance (passed by reference).
+		 * @param WP_Network_Query $this The WP_Network_Query instance (passed by reference).
 		 */
 		do_action_ref_array( 'parse_network_query', array( &$this ) );
 	}
@@ -170,7 +170,8 @@ class WP_Network_Query {
 	 * @since 4.6.0
 	 *
 	 * @param string|array $query Array or URL query string of parameters.
-	 * @return array|int List of networks, or number of networks when 'count' is passed as a query var.
+	 * @return array|int List of WP_Network objects, a list of network ids when 'fields' is set to 'ids',
+	 *                   or the number of networks when 'count' is passed as a query var.
 	 */
 	public function query( $query ) {
 		$this->query_vars = wp_parse_args( $query );
@@ -182,7 +183,8 @@ class WP_Network_Query {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @return int|array The list of networks.
+	 * @return array|int List of WP_Network objects, a list of network ids when 'fields' is set to 'ids',
+	 *                   or the number of networks when 'count' is passed as a query var.
 	 */
 	public function get_networks() {
 		$this->parse_query();
@@ -192,7 +194,7 @@ class WP_Network_Query {
 		 *
 		 * @since 4.6.0
 		 *
-		 * @param WP_Network_Query &$this Current instance of WP_Network_Query, passed by reference.
+		 * @param WP_Network_Query $this Current instance of WP_Network_Query (passed by reference).
 		 */
 		do_action_ref_array( 'pre_get_networks', array( &$this ) );
 
@@ -259,7 +261,7 @@ class WP_Network_Query {
 		 * @since 4.6.0
 		 *
 		 * @param array            $_networks An array of WP_Network objects.
-		 * @param WP_Network_Query &$this     Current instance of WP_Network_Query, passed by reference.
+		 * @param WP_Network_Query $this      Current instance of WP_Network_Query (passed by reference).
 		 */
 		$_networks = apply_filters_ref_array( 'the_networks', array( $_networks, &$this ) );
 
@@ -399,7 +401,7 @@ class WP_Network_Query {
 		 * @since 4.6.0
 		 *
 		 * @param array            $pieces A compacted array of network query clauses.
-		 * @param WP_Network_Query &$this  Current instance of WP_Network_Query, passed by reference.
+		 * @param WP_Network_Query $this   Current instance of WP_Network_Query (passed by reference).
 		 */
 		$clauses = apply_filters_ref_array( 'networks_clauses', array( compact( $pieces ), &$this ) );
 

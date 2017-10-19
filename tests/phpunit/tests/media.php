@@ -20,9 +20,15 @@ class Tests_Media extends WP_UnitTestCase {
 		$GLOBALS['_wp_additional_image_sizes'] = self::$_sizes;
 	}
 
+	public static function tearDownAfterClass() {
+		wp_delete_post( self::$large_id, true );
+		parent::tearDownAfterClass();
+	}
+
 	function setUp() {
 		parent::setUp();
 		$this->caption = 'A simple caption.';
+		$this->alternate_caption = 'Alternate caption.';
 		$this->html_content = <<<CAP
 A <strong class='classy'>bolded</strong> <em>caption</em> with a <a href="#">link</a>.
 CAP;
@@ -46,9 +52,67 @@ CAP;
 		$this->assertNull( $result );
 	}
 
-	function test_img_caption_shortcode_with_bad_attr() {
-		$result = img_caption_shortcode( array(), 'content' );
-		$this->assertEquals( 'content', 'content' );
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_with_empty_params_but_content() {
+		$result = img_caption_shortcode( array(), $this->caption );
+		$this->assertEquals( $this->caption, $result );
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_short_circuit_filter() {
+		add_filter( 'img_caption_shortcode', array( $this, '_return_alt_caption' ) );
+
+		$result = img_caption_shortcode( array(), $this->caption );
+		$this->assertEquals( $this->alternate_caption, $result );
+	}
+
+	/**
+	 * Filter used in test_img_caption_shortcode_short_circuit_filter()
+	 */
+	function _return_alt_caption() {
+		return $this->alternate_caption;
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_empty_width() {
+		$result = img_caption_shortcode(
+			array(
+				'width' => 0,
+			),
+			$this->caption
+		);
+		$this->assertEquals( $this->caption, $result );
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_empty_caption() {
+		$result = img_caption_shortcode(
+			array(
+				'caption' => '',
+			)
+		);
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_empty_caption_and_content() {
+		$result = img_caption_shortcode(
+			array(
+				'caption' => '',
+			),
+			$this->caption
+		);
+		$this->assertEquals( $this->caption, $result );
 	}
 
 	function test_img_caption_shortcode_with_old_format() {
@@ -61,9 +125,9 @@ CAP;
 		$this->assertEquals( 1, preg_match_all( "/{$this->caption}/", $result, $_r ) );
 
 		if ( current_theme_supports( 'html5', 'caption' ) ) {
-			$this->assertEquals( 1, preg_match_all( "/width: 20/", $result, $_r ) );
+			$this->assertEquals( 1, preg_match_all( "/max-width: 20/", $result, $_r ) );
 		} else {
-			$this->assertEquals( 1, preg_match_all( "/width: 30/", $result, $_r ) );
+			$this->assertEquals( 1, preg_match_all( "/max-width: 30/", $result, $_r ) );
 		}
 	}
 
@@ -79,6 +143,18 @@ CAP;
 		$this->assertEquals( 1, preg_match_all( '/wp-caption &amp;myAlignment/', $result, $_r ) );
 		$this->assertEquals( 1, preg_match_all( '/id="myId"/', $result, $_r ) );
 		$this->assertEquals( 1, preg_match_all( "/{$this->caption}/", $result, $_r ) );
+	}
+
+	function test_img_caption_shortcode_with_old_format_and_class() {
+		$result = img_caption_shortcode(
+			array(
+				'width' => 20,
+				'class' => 'some-class another-class',
+				'caption' => $this->caption,
+			)
+		);
+		$this->assertEquals( 1, preg_match_all( '/wp-caption alignnone some-class another-class/', $result, $_r ) );
+
 	}
 
 	function test_new_img_caption_shortcode_with_html_caption() {
@@ -2061,6 +2137,118 @@ EOF;
 
 		$attachment_id = wp_insert_attachment( $data, '', 0 );
 		$this->assertSame( 0, $attachment_id );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_asf() {
+		$metadata = array(
+			'fileformat' => 'asf',
+			'asf'        => array(
+				'file_properties_object' => array(
+					'creation_date_unix' => 123,
+				),
+			),
+		);
+
+		$this->assertEquals( 123, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_matroska() {
+		$metadata = array(
+			'fileformat' => 'matroska',
+			'matroska'   => array(
+				'comments' => array(
+					'creation_time' => array(
+						'2015-12-24T17:40:09Z'
+					),
+				),
+			),
+		);
+
+		$this->assertEquals( 1450978809, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_quicktime() {
+		$metadata = array(
+			'fileformat' => 'quicktime',
+			'quicktime'  => array(
+				'moov' => array(
+					'subatoms' => array(
+						array(
+							'creation_time_unix' => 1450978805,
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertEquals( 1450978805, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_webm() {
+		$metadata = array(
+			'fileformat' => 'webm',
+			'matroska'   => array(
+				'info' => array(
+					array(
+						'DateUTC_unix' => 1265680539,
+					),
+				),
+			),
+		);
+
+		$this->assertEquals( 1265680539, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_quicktime() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mov';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_mp4() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mp4';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_mkv() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mkv';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_webm() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.webm';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
 	}
 }
 

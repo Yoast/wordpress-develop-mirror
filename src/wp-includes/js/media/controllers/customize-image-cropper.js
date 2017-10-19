@@ -1,3 +1,6 @@
+var Controller = wp.media.controller,
+	CustomizeImageCropper;
+
 /**
  * wp.media.controller.CustomizeImageCropper
  *
@@ -7,6 +10,8 @@
  *
  * @since 4.3
  *
+ * @memberOf wp.media.controller
+ *
  * @class
  * @augments wp.media.controller.Cropper
  * @augments wp.media.controller.State
@@ -14,10 +19,7 @@
  *
  * @returns ajax post Call to Ajax to crop the image according to the crop details.
  */
-var Controller = wp.media.controller,
-	CustomizeImageCropper;
-
-CustomizeImageCropper = Controller.Cropper.extend({
+CustomizeImageCropper = Controller.Cropper.extend(/** @lends wp.media.controller.CustomizeImageCropper.prototype */{
 	doCrop: function( attachment ) {
 		var cropDetails = attachment.get( 'cropDetails' ),
 			control = this.get( 'control' ),

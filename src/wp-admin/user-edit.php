@@ -189,7 +189,7 @@ include(ABSPATH . 'wp-admin/admin-header.php');
 	<p><strong><?php _e('User updated.') ?></strong></p>
 	<?php endif; ?>
 	<?php if ( $wp_http_referer && false === strpos( $wp_http_referer, 'user-new.php' ) && ! IS_PROFILE_PAGE ) : ?>
-	<p><a href="<?php echo esc_url( $wp_http_referer ); ?>"><?php _e('&larr; Back to Users'); ?></a></p>
+	<p><a href="<?php echo esc_url( wp_validate_redirect( esc_url_raw( $wp_http_referer ), self_admin_url( 'users.php' ) ) ); ?>"><?php _e('&larr; Back to Users'); ?></a></p>
 	<?php endif; ?>
 </div>
 <?php endif; ?>
@@ -245,6 +245,26 @@ if ( ! IS_PROFILE_PAGE ) {
 	<tr class="user-rich-editing-wrap">
 		<th scope="row"><?php _e( 'Visual Editor' ); ?></th>
 		<td><label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="false" <?php if ( ! empty( $profileuser->rich_editing ) ) checked( 'false', $profileuser->rich_editing ); ?> /> <?php _e( 'Disable the visual editor when writing' ); ?></label></td>
+	</tr>
+<?php endif; ?>
+<?php
+$show_syntax_highlighting_preference = (
+	// For Custom HTML widget and Additional CSS in Customizer.
+	user_can( $profileuser, 'edit_theme_options' )
+	||
+	// Edit plugins.
+	user_can( $profileuser, 'edit_plugins' )
+	||
+	// Edit themes.
+	user_can( $profileuser, 'edit_themes' )
+);
+?>
+<?php if ( $show_syntax_highlighting_preference ) : ?>
+	<tr class="user-syntax-highlighting-wrap">
+		<th scope="row"><?php _e( 'Syntax Highlighting' ); ?></th>
+		<td>
+			<label for="syntax_highlighting"><input name="syntax_highlighting" type="checkbox" id="syntax_highlighting" value="false" <?php if ( ! empty( $profileuser->syntax_highlighting ) ) checked( 'false', $profileuser->syntax_highlighting ); ?> /> <?php _e( 'Disable syntax highlighting when editing code' ); ?></label>
+		</td>
 	</tr>
 <?php endif; ?>
 <?php if ( count($_wp_admin_css_colors) > 1 && has_action('admin_color_scheme_picker') ) : ?>

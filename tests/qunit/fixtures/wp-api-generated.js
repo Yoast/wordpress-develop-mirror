@@ -284,6 +284,7 @@ mockedApiResponse.Schema = {
                                 "parent",
                                 "relevance",
                                 "slug",
+                                "include_slugs",
                                 "title"
                             ],
                             "description": "Sort collection by object attribute.",
@@ -905,6 +906,7 @@ mockedApiResponse.Schema = {
                                 "parent",
                                 "relevance",
                                 "slug",
+                                "include_slugs",
                                 "title",
                                 "menu_order"
                             ],
@@ -1443,6 +1445,7 @@ mockedApiResponse.Schema = {
                                 "parent",
                                 "relevance",
                                 "slug",
+                                "include_slugs",
                                 "title"
                             ],
                             "description": "Sort collection by object attribute.",
@@ -2023,6 +2026,7 @@ mockedApiResponse.Schema = {
                                 "include",
                                 "name",
                                 "slug",
+                                "include_slugs",
                                 "term_group",
                                 "description",
                                 "count"
@@ -2266,6 +2270,7 @@ mockedApiResponse.Schema = {
                                 "include",
                                 "name",
                                 "slug",
+                                "include_slugs",
                                 "term_group",
                                 "description",
                                 "count"
@@ -2495,6 +2500,7 @@ mockedApiResponse.Schema = {
                                 "name",
                                 "registered_date",
                                 "slug",
+                                "include_slugs",
                                 "email",
                                 "url"
                             ],
@@ -3560,7 +3566,9 @@ mockedApiResponse.PostsCollection = [
         "sticky": false,
         "template": "",
         "format": "standard",
-        "meta": [],
+        "meta": {
+            "meta_key": "meta_value"
+        },
         "categories": [
             1
         ],
@@ -3651,7 +3659,9 @@ mockedApiResponse.PostModel = {
     "sticky": false,
     "template": "",
     "format": "standard",
-    "meta": [],
+    "meta": {
+        "meta_key": "meta_value"
+    },
     "categories": [
         1
     ],
@@ -3745,7 +3755,9 @@ mockedApiResponse.PagesCollection = [
         "comment_status": "closed",
         "ping_status": "closed",
         "template": "",
-        "meta": [],
+        "meta": {
+            "meta_key": ""
+        },
         "_links": {
             "self": [
                 {
@@ -3820,7 +3832,9 @@ mockedApiResponse.PageModel = {
     "comment_status": "closed",
     "ping_status": "closed",
     "template": "",
-    "meta": []
+    "meta": {
+        "meta_key": ""
+    }
 };
 
 mockedApiResponse.pageRevisions = [
@@ -3899,7 +3913,9 @@ mockedApiResponse.MediaCollection = [
         "comment_status": "open",
         "ping_status": "closed",
         "template": "",
-        "meta": [],
+        "meta": {
+            "meta_key": ""
+        },
         "description": {
             "rendered": "<p class=\"attachment\"><!-- <a...><img.../></a> --></p>"
         },
@@ -3958,7 +3974,9 @@ mockedApiResponse.MediaModel = {
     "comment_status": "open",
     "ping_status": "closed",
     "template": "",
-    "meta": [],
+    "meta": {
+        "meta_key": ""
+    },
     "description": {
         "rendered": "<p class=\"attachment\"><!-- <a...><img.../></a> --></p>"
     },
@@ -4242,7 +4260,9 @@ mockedApiResponse.CategoriesCollection = [
         "slug": "uncategorized",
         "taxonomy": "category",
         "parent": 0,
-        "meta": [],
+        "meta": {
+            "meta_key": ""
+        },
         "_links": {
             "self": [
                 {
@@ -4284,7 +4304,9 @@ mockedApiResponse.CategoryModel = {
     "slug": "uncategorized",
     "taxonomy": "category",
     "parent": 0,
-    "meta": []
+    "meta": {
+        "meta_key": ""
+    }
 };
 
 mockedApiResponse.TagsCollection = [
@@ -4296,7 +4318,9 @@ mockedApiResponse.TagsCollection = [
         "name": "REST API Client Fixture: Tag",
         "slug": "restapi-client-fixture-tag",
         "taxonomy": "post_tag",
-        "meta": [],
+        "meta": {
+            "meta_key": "meta_value"
+        },
         "_links": {
             "self": [
                 {
@@ -4337,7 +4361,9 @@ mockedApiResponse.TagModel = {
     "name": "REST API Client Fixture: Tag",
     "slug": "restapi-client-fixture-tag",
     "taxonomy": "post_tag",
-    "meta": []
+    "meta": {
+        "meta_key": "meta_value"
+    }
 };
 
 mockedApiResponse.UsersCollection = [
@@ -4353,7 +4379,9 @@ mockedApiResponse.UsersCollection = [
             "48": "http://0.gravatar.com/avatar/96614ec98aa0c0d2ee75796dced6df54?s=48&d=mm&r=g",
             "96": "http://0.gravatar.com/avatar/96614ec98aa0c0d2ee75796dced6df54?s=96&d=mm&r=g"
         },
-        "meta": [],
+        "meta": {
+            "meta_key": "meta_value"
+        },
         "_links": {
             "self": [
                 {
@@ -4379,7 +4407,9 @@ mockedApiResponse.UsersCollection = [
             "48": "http://2.gravatar.com/avatar/57cbd982c963c7eb2294e2eee1b4448e?s=48&d=mm&r=g",
             "96": "http://2.gravatar.com/avatar/57cbd982c963c7eb2294e2eee1b4448e?s=96&d=mm&r=g"
         },
-        "meta": [],
+        "meta": {
+            "meta_key": ""
+        },
         "_links": {
             "self": [
                 {
@@ -4407,7 +4437,9 @@ mockedApiResponse.UserModel = {
         "48": "http://2.gravatar.com/avatar/57cbd982c963c7eb2294e2eee1b4448e?s=48&d=mm&r=g",
         "96": "http://2.gravatar.com/avatar/57cbd982c963c7eb2294e2eee1b4448e?s=96&d=mm&r=g"
     },
-    "meta": []
+    "meta": {
+        "meta_key": ""
+    }
 };
 
 mockedApiResponse.me = {
@@ -4422,7 +4454,9 @@ mockedApiResponse.me = {
         "48": "http://2.gravatar.com/avatar/57cbd982c963c7eb2294e2eee1b4448e?s=48&d=mm&r=g",
         "96": "http://2.gravatar.com/avatar/57cbd982c963c7eb2294e2eee1b4448e?s=96&d=mm&r=g"
     },
-    "meta": []
+    "meta": {
+        "meta_key": ""
+    }
 };
 
 mockedApiResponse.CommentsCollection = [
@@ -4446,7 +4480,9 @@ mockedApiResponse.CommentsCollection = [
             "48": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=48&d=mm&r=g",
             "96": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=96&d=mm&r=g"
         },
-        "meta": [],
+        "meta": {
+            "meta_key": "meta_value"
+        },
         "_links": {
             "self": [
                 {
@@ -4489,7 +4525,9 @@ mockedApiResponse.CommentModel = {
         "48": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=48&d=mm&r=g",
         "96": "http://2.gravatar.com/avatar/bd7c2b505bcf39cc71cfee564c614956?s=96&d=mm&r=g"
     },
-    "meta": []
+    "meta": {
+        "meta_key": "meta_value"
+    }
 };
 
 mockedApiResponse.settings = {

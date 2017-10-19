@@ -361,6 +361,8 @@ class WP_Customize_Section {
 								{{{ data.description }}}
 							</div>
 						<# } #>
+
+						<div class="customize-control-notifications-container"></div>
 					</div>
 
 					<# if ( data.description && ! data.description_hidden ) { #>
@@ -383,6 +385,3 @@ require_once( ABSPATH . WPINC . '/customize/class-wp-customize-sidebar-section.p
 
 /** WP_Customize_Nav_Menu_Section class */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-section.php' );
-
-/** WP_Customize_New_Menu_Section class */
-require_once( ABSPATH . WPINC . '/customize/class-wp-customize-new-menu-section.php' );

@@ -1164,7 +1164,8 @@ wp_nonce_field( 'custom-header-options', '_wpnonce-custom-header-options' ); ?>
 			'post_title' => basename($cropped),
 			'post_mime_type' => $image_type,
 			'guid' => $url,
-			'context' => 'custom-header'
+			'context' => 'custom-header',
+			'post_parent' => $parent_attachment_id,
 		);
 
 		return $object;
@@ -1180,8 +1181,17 @@ wp_nonce_field( 'custom-header-options', '_wpnonce-custom-header-options' ); ?>
 	 * @return int Attachment ID.
 	 */
 	final public function insert_attachment( $object, $cropped ) {
+		$parent_id = isset( $object['post_parent'] ) ? $object['post_parent'] : null;
+		unset( $object['post_parent'] );
+
 		$attachment_id = wp_insert_attachment( $object, $cropped );
 		$metadata = wp_generate_attachment_metadata( $attachment_id, $cropped );
+
+		// If this is a crop, save the original attachment ID as metadata.
+		if ( $parent_id ) {
+			$metadata['attachment_parent'] = $parent_id;
+		}
+
 		/**
 		 * Filters the header image attachment metadata.
 		 *
@@ -1192,7 +1202,9 @@ wp_nonce_field( 'custom-header-options', '_wpnonce-custom-header-options' ); ?>
 		 * @param array $metadata Attachment metadata.
 		 */
 		$metadata = apply_filters( 'wp_header_image_attachment_metadata', $metadata );
+
 		wp_update_attachment_metadata( $attachment_id, $metadata );
+
 		return $attachment_id;
 	}
 
@@ -1241,7 +1253,13 @@ wp_nonce_field( 'custom-header-options', '_wpnonce-custom-header-options' ); ?>
 
 		$object = $this->create_attachment_object( $cropped, $attachment_id );
 
-		unset( $object['ID'] );
+		$previous = $this->get_previous_crop( $object );
+
+		if ( $previous ) {
+			$object['ID'] = $previous;
+		} else {
+			unset( $object['ID'] );
+		}
 
 		$new_attachment_id = $this->insert_attachment( $object, $cropped );
 
@@ -1395,5 +1413,33 @@ wp_nonce_field( 'custom-header-options', '_wpnonce-custom-header-options' ); ?>
 		}
 
 		return $header_images;
+	}
+
+	/**
+	 * Get the ID of a previous crop from the same base image.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param  array $object A crop attachment object.
+	 * @return int|false An attachment ID if one exists. False if none.
+	 */
+	public function get_previous_crop( $object ) {
+		$header_images = $this->get_uploaded_header_images();
+
+		// Bail early if there are no header images.
+		if ( empty( $header_images ) ) {
+			return false;
+		}
+
+		$previous = false;
+
+		foreach ( $header_images as $image ) {
+			if ( $image['attachment_parent'] === $object['post_parent'] ) {
+				$previous = $image['attachment_id'];
+				break;
+			}
+		}
+
+		return $previous;
 	}
 }

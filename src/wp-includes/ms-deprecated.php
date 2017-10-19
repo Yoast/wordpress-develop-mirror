@@ -187,7 +187,7 @@ function get_blog_list( $start = 0, $num = 10, $deprecated = '' ) {
 	_deprecated_function( __FUNCTION__, '3.0.0', 'wp_get_sites()' );
 
 	global $wpdb;
-	$blogs = $wpdb->get_results( $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0' ORDER BY registered DESC", $wpdb->siteid), ARRAY_A );
+	$blogs = $wpdb->get_results( $wpdb->prepare( "SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0' ORDER BY registered DESC", get_current_network_id() ), ARRAY_A );
 
 	$blog_list = array();
 	foreach ( (array) $blogs as $details ) {
@@ -379,7 +379,7 @@ function get_blogaddress_by_domain( $domain, $path ) {
 /**
  * Create an empty blog.
  *
- * @since MU (3.0.0) 1.0
+ * @since MU (3.0.0)
  * @deprecated 4.4.0
  *
  * @param string $domain       The new blog's domain.
@@ -415,27 +415,34 @@ function create_empty_blog( $domain, $path, $weblog_title, $site_id = 1 ) {
 /**
  * Get the admin for a domain/path combination.
  *
- * @since MU (3.0.0) 1.0
+ * @since MU (3.0.0)
  * @deprecated 4.4.0
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @param string $sitedomain Optional. Site domain.
- * @param string $path       Optional. Site path.
- * @return array|false The network admins
+ * @param string $domain Optional. Network domain.
+ * @param string $path   Optional. Network path.
+ * @return array|false The network admins.
  */
-function get_admin_users_for_domain( $sitedomain = '', $path = '' ) {
+function get_admin_users_for_domain( $domain = '', $path = '' ) {
 	_deprecated_function( __FUNCTION__, '4.4.0' );
 
 	global $wpdb;
 
-	if ( ! $sitedomain )
-		$site_id = $wpdb->siteid;
-	else
-		$site_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->site WHERE domain = %s AND path = %s", $sitedomain, $path ) );
+	if ( ! $domain ) {
+		$network_id = get_current_network_id();
+	} else {
+		$_networks  = get_networks( array(
+			'fields' => 'ids',
+			'number' => 1,
+			'domain' => $domain,
+			'path'   => $path,
+		) );
+		$network_id = ! empty( $_networks ) ? array_shift( $_networks ) : 0;
+	}
 
-	if ( $site_id )
-		return $wpdb->get_results( $wpdb->prepare( "SELECT u.ID, u.user_login, u.user_pass FROM $wpdb->users AS u, $wpdb->sitemeta AS sm WHERE sm.meta_key = 'admin_user_id' AND u.ID = sm.meta_value AND sm.site_id = %d", $site_id ), ARRAY_A );
+	if ( $network_id )
+		return $wpdb->get_results( $wpdb->prepare( "SELECT u.ID, u.user_login, u.user_pass FROM $wpdb->users AS u, $wpdb->sitemeta AS sm WHERE sm.meta_key = 'admin_user_id' AND u.ID = sm.meta_value AND sm.site_id = %d", $network_id ), ARRAY_A );
 
 	return false;
 }
@@ -446,8 +453,6 @@ function get_admin_users_for_domain( $sitedomain = '', $path = '' ) {
  * @since 3.7.0
  * @deprecated 4.6.0 Use get_sites()
  * @see get_sites()
- *
- * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @param array $args {
  *     Array of default arguments. Optional.
@@ -462,21 +467,19 @@ function get_admin_users_for_domain( $sitedomain = '', $path = '' ) {
  *     @type int       $limit      Number of sites to limit the query to. Default 100.
  *     @type int       $offset     Exclude the first x sites. Used in combination with the $limit parameter. Default 0.
  * }
- * @return array An empty array if the install is considered "large" via wp_is_large_network(). Otherwise,
+ * @return array An empty array if the installation is considered "large" via wp_is_large_network(). Otherwise,
  *               an associative array of site data arrays, each containing the site (network) ID, blog ID,
  *               site domain and path, dates registered and modified, and the language ID. Also, boolean
  *               values for whether the site is public, archived, mature, spam, and/or deleted.
  */
 function wp_get_sites( $args = array() ) {
-	global $wpdb;
-
 	_deprecated_function( __FUNCTION__, '4.6.0', 'get_sites()' );
 
 	if ( wp_is_large_network() )
 		return array();
 
 	$defaults = array(
-		'network_id' => $wpdb->siteid,
+		'network_id' => get_current_network_id(),
 		'public'     => null,
 		'archived'   => null,
 		'mature'     => null,
@@ -515,4 +518,31 @@ function wp_get_sites( $args = array() ) {
 	}
 
 	return $results;
+}
+
+/**
+ * Check whether a usermeta key has to do with the current blog.
+ *
+ * @since MU (3.0.0)
+ * @deprecated 4.9.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $key
+ * @param int    $user_id Optional. Defaults to current user.
+ * @param int    $blog_id Optional. Defaults to current blog.
+ * @return bool
+ */
+function is_user_option_local( $key, $user_id = 0, $blog_id = 0 ) {
+	global $wpdb;
+
+	_deprecated_function( __FUNCTION__, '4.9.0' );
+
+	$current_user = wp_get_current_user();
+	if ( $blog_id == 0 ) {
+		$blog_id = get_current_blog_id();
+	}
+	$local_key = $wpdb->get_blog_prefix( $blog_id ) . $key;
+
+	return isset( $current_user->$local_key );
 }

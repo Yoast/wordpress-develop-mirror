@@ -12,13 +12,11 @@
  * Update the last_updated field for the current site.
  *
  * @since MU (3.0.0)
- *
- * @global wpdb $wpdb WordPress database abstraction object.
  */
 function wpmu_update_blogs_date() {
-	global $wpdb;
+	$site_id = get_current_blog_id();
 
-	update_blog_details( $wpdb->blogid, array('last_updated' => current_time('mysql', true)) );
+	update_blog_details( $site_id, array( 'last_updated' => current_time( 'mysql', true ) ) );
 	/**
 	 * Fires after the blog details are updated.
 	 *
@@ -26,7 +24,7 @@ function wpmu_update_blogs_date() {
 	 *
 	 * @param int $blog_id Site ID.
 	 */
-	do_action( 'wpmu_blog_updated', $wpdb->blogid );
+	do_action( 'wpmu_blog_updated', $site_id );
 }
 
 /**
@@ -267,28 +265,7 @@ function refresh_blog_details( $blog_id = 0 ) {
 		$blog_id = get_current_blog_id();
 	}
 
-	$details = get_site( $blog_id );
-	if ( ! $details ) {
-		// Make sure clean_blog_cache() gets the blog ID
-		// when the blog has been previously cached as
-		// non-existent.
-		$details = (object) array(
-			'blog_id' => $blog_id,
-			'domain' => null,
-			'path' => null
-		);
-	}
-
-	clean_blog_cache( $details );
-
-	/**
-	 * Fires after the blog details cache is cleared.
-	 *
-	 * @since 3.4.0
-	 *
-	 * @param int $blog_id Blog ID.
-	 */
-	do_action( 'refresh_blog_details', $blog_id );
+	clean_blog_cache( $blog_id );
 }
 
 /**
@@ -433,7 +410,7 @@ function update_blog_details( $blog_id, $details = array() ) {
 		restore_current_blog();
 	}
 
-	refresh_blog_details($blog_id);
+	clean_blog_cache( $blog_id );
 
 	return true;
 }
@@ -445,13 +422,32 @@ function update_blog_details( $blog_id, $details = array() ) {
  *
  * @global bool $_wp_suspend_cache_invalidation
  *
- * @param WP_Site $blog The site object to be cleared from cache.
+ * @param WP_Site|int $blog The site object or ID to be cleared from cache.
  */
 function clean_blog_cache( $blog ) {
 	global $_wp_suspend_cache_invalidation;
 
 	if ( ! empty( $_wp_suspend_cache_invalidation ) ) {
 		return;
+	}
+
+	if ( empty( $blog ) ) {
+		return;
+	}
+
+	$blog_id = $blog;
+	$blog = get_site( $blog_id );
+	if ( ! $blog ) {
+		if ( ! is_numeric( $blog_id ) ) {
+			return;
+		}
+
+		// Make sure a WP_Site object exists even when the site has been deleted.
+		$blog = new WP_Site( (object) array(
+			'blog_id' => $blog_id,
+			'domain'  => null,
+			'path'    => null,
+		) );
 	}
 
 	$blog_id = $blog->blog_id;
@@ -478,6 +474,16 @@ function clean_blog_cache( $blog ) {
 	do_action( 'clean_site_cache', $blog_id, $blog, $domain_path_key );
 
 	wp_cache_set( 'last_changed', microtime(), 'sites' );
+
+	/**
+	 * Fires after the blog details cache is cleared.
+	 *
+	 * @since 3.4.0
+	 * @deprecated 4.9.0 Use clean_site_cache
+	 *
+	 * @param int $blog_id Blog ID.
+	 */
+	do_action_deprecated( 'refresh_blog_details', array( $blog_id ), '4.9.0', 'clean_site_cache' );
 }
 
 /**
@@ -628,9 +634,10 @@ function update_site_cache( $sites ) {
  *     @type string       $search            Search term(s) to retrieve matching sites for. Default empty.
  *     @type array        $search_columns    Array of column names to be searched. Accepts 'domain' and 'path'.
  *                                           Default empty array.
- *     @type bool         $update_site_cache Whether to prime the cache for found sites. Default false.
+ *     @type bool         $update_site_cache Whether to prime the cache for found sites. Default true.
  * }
- * @return array List of sites.
+ * @return array|int List of WP_Site objects, a list of site ids when 'fields' is set to 'ids',
+ *                   or the number of sites when 'count' is passed as a query var.
  */
 function get_sites( $args = array() ) {
 	$query = new WP_Site_Query();
@@ -775,7 +782,6 @@ function update_blog_option( $id, $option, $value, $deprecated = null ) {
  * from other blogs. You can switch back afterwards using restore_current_blog().
  *
  * Things that aren't switched:
- *  - autoloaded options. See #14992
  *  - plugins. See #14941
  *
  * @see restore_current_blog()
@@ -793,7 +799,7 @@ function update_blog_option( $id, $option, $value, $deprecated = null ) {
  * @return true Always returns True.
  */
 function switch_to_blog( $new_blog, $deprecated = null ) {
-	global $wpdb, $wp_roles;
+	global $wpdb;
 
 	$blog_id = get_current_blog_id();
 	if ( empty( $new_blog ) ) {
@@ -848,12 +854,6 @@ function switch_to_blog( $new_blog, $deprecated = null ) {
 		}
 	}
 
-	if ( did_action( 'init' ) ) {
-		$wp_roles = new WP_Roles();
-		$current_user = wp_get_current_user();
-		$current_user->for_blog( $new_blog );
-	}
-
 	/** This filter is documented in wp-includes/ms-blogs.php */
 	do_action( 'switch_blog', $new_blog, $prev_blog_id );
 	$GLOBALS['switched'] = true;
@@ -877,7 +877,7 @@ function switch_to_blog( $new_blog, $deprecated = null ) {
  * @return bool True on success, false if we're already on the current blog
  */
 function restore_current_blog() {
-	global $wpdb, $wp_roles;
+	global $wpdb;
 
 	if ( empty( $GLOBALS['_wp_switched_stack'] ) ) {
 		return false;
@@ -922,12 +922,6 @@ function restore_current_blog() {
 		}
 	}
 
-	if ( did_action( 'init' ) ) {
-		$wp_roles = new WP_Roles();
-		$current_user = wp_get_current_user();
-		$current_user->for_blog( $blog );
-	}
-
 	/** This filter is documented in wp-includes/ms-blogs.php */
 	do_action( 'switch_blog', $blog, $prev_blog_id );
 
@@ -935,6 +929,27 @@ function restore_current_blog() {
 	$GLOBALS['switched'] = ! empty( $GLOBALS['_wp_switched_stack'] );
 
 	return true;
+}
+
+/**
+ * Switches the initialized roles and current user capabilities to another site.
+ *
+ * @since 4.9.0
+ *
+ * @param int $new_site_id New site ID.
+ * @param int $old_site_id Old site ID.
+ */
+function wp_switch_roles_and_user( $new_site_id, $old_site_id ) {
+	if ( $new_site_id == $old_site_id ) {
+		return;
+	}
+
+	if ( ! did_action( 'init' ) ) {
+		return;
+	}
+
+	wp_roles()->for_site( $new_site_id );
+	wp_get_current_user()->for_site( $new_site_id );
 }
 
 /**
@@ -1003,7 +1018,7 @@ function update_blog_status( $blog_id, $pref, $value, $deprecated = null ) {
 	if ( false === $result )
 		return false;
 
-	refresh_blog_details( $blog_id );
+	clean_blog_cache( $blog_id );
 
 	if ( 'spam' == $pref ) {
 		if ( $value == 1 ) {
@@ -1091,7 +1106,7 @@ function get_last_updated( $deprecated = '', $start = 0, $quantity = 40 ) {
 	if ( ! empty( $deprecated ) )
 		_deprecated_argument( __FUNCTION__, 'MU' ); // never used
 
-	return $wpdb->get_results( $wpdb->prepare("SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0' AND last_updated != '0000-00-00 00:00:00' ORDER BY last_updated DESC limit %d, %d", $wpdb->siteid, $start, $quantity ) , ARRAY_A );
+	return $wpdb->get_results( $wpdb->prepare( "SELECT blog_id, domain, path FROM $wpdb->blogs WHERE site_id = %d AND public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0' AND last_updated != '0000-00-00 00:00:00' ORDER BY last_updated DESC limit %d, %d", get_current_network_id(), $start, $quantity ), ARRAY_A );
 }
 
 /**
@@ -1101,7 +1116,8 @@ function get_last_updated( $deprecated = '', $start = 0, $quantity = 40 ) {
  *
  * @param string|array $args Optional. Array or string of arguments. See WP_Network_Query::parse_query()
  *                           for information on accepted arguments. Default empty array.
- * @return int|array List of networks or number of found networks if `$count` argument is true.
+ * @return array|int List of WP_Network objects, a list of network ids when 'fields' is set to 'ids',
+ *                   or the number of networks when 'count' is passed as a query var.
  */
 function get_networks( $args = array() ) {
 	$query = new WP_Network_Query();
@@ -1224,7 +1240,8 @@ function _prime_network_caches( $network_ids ) {
 }
 
 /**
- * Handler for updating the blog date when a post is published or an already published post is changed.
+ * Handler for updating the site's last updated date when a post is published or
+ * an already published post is changed.
  *
  * @since 3.3.0
  *
@@ -1248,7 +1265,8 @@ function _update_blog_date_on_post_publish( $new_status, $old_status, $post ) {
 }
 
 /**
- * Handler for updating the blog date when a published post is deleted.
+ * Handler for updating the current site's last updated date when a published
+ * post is deleted.
  *
  * @since 3.4.0
  *
@@ -1270,7 +1288,7 @@ function _update_blog_date_on_post_delete( $post_id ) {
 }
 
 /**
- * Handler for updating the blog posts count date when a post is deleted.
+ * Handler for updating the current site's posts count when a post is deleted.
  *
  * @since 4.0.0
  *
@@ -1279,7 +1297,7 @@ function _update_blog_date_on_post_delete( $post_id ) {
 function _update_posts_count_on_delete( $post_id ) {
 	$post = get_post( $post_id );
 
-	if ( ! $post || 'publish' !== $post->post_status ) {
+	if ( ! $post || 'publish' !== $post->post_status || 'post' !== $post->post_type ) {
 		return;
 	}
 
@@ -1287,15 +1305,21 @@ function _update_posts_count_on_delete( $post_id ) {
 }
 
 /**
- * Handler for updating the blog posts count date when a post status changes.
+ * Handler for updating the current site's posts count when a post status changes.
  *
  * @since 4.0.0
+ * @since 4.9.0 Added the `$post` parameter.
  *
- * @param string $new_status The status the post is changing to.
- * @param string $old_status The status the post is changing from.
+ * @param string  $new_status The status the post is changing to.
+ * @param string  $old_status The status the post is changing from.
+ * @param WP_Post $post       Post object
  */
-function _update_posts_count_on_transition_post_status( $new_status, $old_status ) {
+function _update_posts_count_on_transition_post_status( $new_status, $old_status, $post = null ) {
 	if ( $new_status === $old_status ) {
+		return;
+	}
+
+	if ( 'post' !== get_post_type( $post ) ) {
 		return;
 	}
 

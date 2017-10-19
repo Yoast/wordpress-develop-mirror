@@ -96,7 +96,7 @@
 	border-top-color: #0073aa;
 }
 
-/* comments bubble pending */
+/* @todo: consider to use a single rule for these counters and the admin menu counters. */
 .column-response .post-com-count-pending,
 .column-comments .post-com-count-pending {
 	position: relative;
@@ -150,17 +150,10 @@
 	margin: 0;
 	padding: 5px 7px 10px;
 	overflow: hidden;
-	text-align: center;
 }
 
 #replysubmit .button {
 	margin-right: 5px;
-}
-
-#replysubmit .error {
-	color: red;
-	line-height: 21px;
-	text-align: center;
 }
 
 #replyrow.inline-edit-row fieldset.comment-reply {
@@ -957,16 +950,19 @@ tr.inline-edit-row td,
 	line-height: 2.5;
 }
 
-.inline-edit-row p.submit {
+.inline-edit-row .submit {
 	clear: both;
 	padding: 0.5em;
 	margin: 0.5em 0 0;
 }
 
-.inline-edit-row span.error {
-	line-height: 22px;
-	margin: 0 15px;
-	padding: 3px 5px;
+.inline-edit-row .notice-error {
+	margin-top: 1em;
+}
+
+.inline-edit-row .notice-error .error {
+	margin: 0.5em 0;
+	padding: 2px;
 }
 
 /*	Positioning */
@@ -1290,15 +1286,31 @@ ul.cat-checklist {
 	border-left: 4px solid #00a0d2;
 }
 
-#wpbody-content .plugins .plugin-title,
-#wpbody-content .plugins .theme-title {
+.wp-list-table.plugins .plugin-title,
+.wp-list-table.plugins .theme-title {
 	padding-right: 12px;
-	white-space:nowrap;
+	white-space: nowrap;
 }
 
-.updates-table-screenshot {
-	float:left;
-	padding: 0 10px 5px 0;
+.plugins .plugin-title img,
+.plugins .plugin-title .dashicons {
+	float: left;
+	padding: 0 10px 0 0;
+	width: 64px;
+	height: 64px;
+}
+
+.plugins .plugin-title .dashicons:before {
+	padding: 2px;
+	background-color: #eee;
+	box-shadow: inset 0 0 10px rgba(160,165,170,.15);
+	font-size: 60px;
+	color: #B4B9BE;
+}
+
+#update-themes-table .plugin-title img,
+#update-themes-table .plugin-title .dashicons {
+	width: 85px;
 }
 
 .plugins .inactive .plugin-title strong {
@@ -1821,6 +1833,8 @@ div.action-links,
 	/* Show comment bubble as text instead */
 	.post-com-count .screen-reader-text {
 		position: static;
+		-webkit-clip-path: none;
+		clip-path: none;
 		width: auto;
 		height: auto;
 		margin: 0;

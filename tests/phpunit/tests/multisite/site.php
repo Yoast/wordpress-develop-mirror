@@ -11,6 +11,7 @@ if ( is_multisite() ) :
 class Tests_Multisite_Site extends WP_UnitTestCase {
 	protected $suppress = false;
 	protected static $network_ids;
+	protected static $site_ids;
 
 	function setUp() {
 		global $wpdb;
@@ -33,10 +34,24 @@ class Tests_Multisite_Site extends WP_UnitTestCase {
 			$id = $factory->network->create( $id );
 		}
 		unset( $id );
+
+		self::$site_ids = array(
+			'make.wordpress.org/'     => array( 'domain' => 'make.wordpress.org', 'path' => '/',         'site_id' => self::$network_ids['make.wordpress.org/'] ),
+			'make.wordpress.org/foo/' => array( 'domain' => 'make.wordpress.org', 'path' => '/foo/',     'site_id' => self::$network_ids['make.wordpress.org/'] ),
+		);
+
+		foreach ( self::$site_ids as &$id ) {
+			$id = $factory->blog->create( $id );
+		}
+		unset( $id );
 	}
 
 	public static function wpTearDownAfterClass() {
 		global $wpdb;
+
+		foreach( self::$site_ids as $id ) {
+			wpmu_delete_blog( $id, true );
+		}
 
 		foreach( self::$network_ids as $id ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->sitemeta} WHERE site_id = %d", $id ) );
@@ -348,7 +363,7 @@ class Tests_Multisite_Site extends WP_UnitTestCase {
 		wpmu_update_blogs_date();
 
 		// compare the update time with the current time, allow delta < 2
-		$blog = get_site( $wpdb->blogid );
+		$blog = get_site( get_current_blog_id() );
 		$current_time = time();
 		$time_difference = $current_time - strtotime( $blog->last_updated );
 		$this->assertLessThan( 2, $time_difference );
@@ -1027,6 +1042,205 @@ class Tests_Multisite_Site extends WP_UnitTestCase {
 	 */
 	function filter_allow_unavailable_languages( $value, $option, $original_value ) {
 		return $original_value;
+	}
+
+	/**
+	 * @ticket 29684
+	 */
+	public function test_is_main_site_different_network() {
+		$this->assertTrue( is_main_site( self::$site_ids['make.wordpress.org/'], self::$network_ids['make.wordpress.org/'] ) );
+	}
+
+	/**
+	 * @ticket 29684
+	 */
+	public function test_is_main_site_different_network_random_site() {
+		$this->assertFalse( is_main_site( self::$site_ids['make.wordpress.org/foo/'], self::$network_ids['make.wordpress.org/'] ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 * @dataProvider data_get_site_caches
+	 */
+	public function test_clean_blog_cache( $key, $group ) {
+		$site = get_site( self::$site_ids['make.wordpress.org/'] );
+
+		$replacements = array(
+			'%blog_id%'         => $site->blog_id,
+			'%domain%'          => $site->domain,
+			'%path%'            => $site->path,
+			'%domain_path_key%' => md5( $site->domain . $site->path ),
+		);
+
+		$key = str_replace( array_keys( $replacements ), array_values( $replacements ), $key );
+
+		if ( 'sites' === $group ) { // This needs to be actual data for get_site() lookups.
+			wp_cache_set( $key, (object) $site->to_array(), $group );
+		} else {
+			wp_cache_set( $key, 'something', $group );
+		}
+
+		clean_blog_cache( $site );
+		$this->assertFalse( wp_cache_get( $key, $group ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 * @dataProvider data_get_site_caches
+	 */
+	public function test_clean_blog_cache_with_id( $key, $group ) {
+		$site = get_site( self::$site_ids['make.wordpress.org/'] );
+
+		$replacements = array(
+			'%blog_id%'         => $site->blog_id,
+			'%domain%'          => $site->domain,
+			'%path%'            => $site->path,
+			'%domain_path_key%' => md5( $site->domain . $site->path ),
+		);
+
+		$key = str_replace( array_keys( $replacements ), array_values( $replacements ), $key );
+
+		if ( 'sites' === $group ) { // This needs to be actual data for get_site() lookups.
+			wp_cache_set( $key, (object) $site->to_array(), $group );
+		} else {
+			wp_cache_set( $key, 'something', $group );
+		}
+
+		clean_blog_cache( $site->blog_id );
+		$this->assertFalse( wp_cache_get( $key, $group ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_clean_blog_cache_resets_last_changed() {
+		$site = get_site( self::$site_ids['make.wordpress.org/'] );
+
+		wp_cache_delete( 'last_changed', 'sites' );
+
+		clean_blog_cache( $site );
+		$this->assertNotFalse( wp_cache_get( 'last_changed', 'sites' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_clean_blog_cache_fires_action() {
+		$site = get_site( self::$site_ids['make.wordpress.org/'] );
+
+		$old_count = did_action( 'clean_site_cache' );
+
+		clean_blog_cache( $site );
+		$this->assertEquals( $old_count + 1, did_action( 'clean_site_cache' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_clean_blog_cache_bails_on_suspend_cache_invalidation() {
+		$site = get_site( self::$site_ids['make.wordpress.org/'] );
+
+		$old_count = did_action( 'clean_site_cache' );
+
+		$suspend = wp_suspend_cache_invalidation();
+		clean_blog_cache( $site );
+		wp_suspend_cache_invalidation( $suspend );
+		$this->assertEquals( $old_count, did_action( 'clean_site_cache' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_clean_blog_cache_bails_on_empty_input() {
+		$old_count = did_action( 'clean_site_cache' );
+
+		clean_blog_cache( null );
+		$this->assertEquals( $old_count, did_action( 'clean_site_cache' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_clean_blog_cache_bails_on_non_numeric_input() {
+		$old_count = did_action( 'clean_site_cache' );
+
+		clean_blog_cache( 'something' );
+		$this->assertEquals( $old_count, did_action( 'clean_site_cache' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_clean_blog_cache_works_with_deleted_site() {
+		$site_id = 12345;
+
+		wp_cache_set( $site_id, 'something', 'site-details' );
+
+		clean_blog_cache( $site_id );
+		$this->assertFalse( wp_cache_get( $site_id, 'site-details' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 * @dataProvider data_get_site_caches
+	 */
+	public function test_refresh_blog_details( $key, $group ) {
+		$site = get_site( self::$site_ids['make.wordpress.org/'] );
+
+		$replacements = array(
+			'%blog_id%'         => $site->blog_id,
+			'%domain%'          => $site->domain,
+			'%path%'            => $site->path,
+			'%domain_path_key%' => md5( $site->domain . $site->path ),
+		);
+
+		$key = str_replace( array_keys( $replacements ), array_values( $replacements ), $key );
+
+		if ( 'sites' === $group ) { // This needs to be actual data for get_site() lookups.
+			wp_cache_set( $key, (object) $site->to_array(), $group );
+		} else {
+			wp_cache_set( $key, 'something', $group );
+		}
+
+		refresh_blog_details( $site->blog_id );
+		$this->assertFalse( wp_cache_get( $key, $group ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_refresh_blog_details_works_with_deleted_site() {
+		$site_id = 12345;
+
+		wp_cache_set( $site_id, 'something', 'site-details' );
+
+		refresh_blog_details( $site_id );
+		$this->assertFalse( wp_cache_get( $site_id, 'site-details' ) );
+	}
+
+	/**
+	 * @ticket 40201
+	 */
+	public function test_refresh_blog_details_uses_current_site_as_default() {
+		$site_id = get_current_blog_id();
+
+		wp_cache_set( $site_id, 'something', 'site-details' );
+
+		refresh_blog_details();
+		$this->assertFalse( wp_cache_get( $site_id, 'site-details' ) );
+	}
+
+	public function data_get_site_caches() {
+		return array(
+			array( '%blog_id%', 'sites' ),
+			array( '%blog_id%', 'site-details' ),
+			array( '%blog_id%', 'blog-details' ),
+			array( '%blog_id%' . 'short' , 'blog-details' ),
+			array( '%domain_path_key%', 'blog-lookup' ),
+			array( '%domain_path_key%', 'blog-id-cache' ),
+			array( 'current_blog_%domain%', 'site-options' ),
+			array( 'current_blog_%domain%%path%', 'site-options' ),
+		);
 	}
 }
 

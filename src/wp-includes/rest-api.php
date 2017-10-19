@@ -165,6 +165,7 @@ function rest_api_default_filters() {
 	// Default serving.
 	add_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 	add_filter( 'rest_post_dispatch', 'rest_send_allow_header', 10, 3 );
+	add_filter( 'rest_post_dispatch', 'rest_filter_response_fields', 10, 3 );
 
 	add_filter( 'rest_pre_dispatch', 'rest_handle_options_request', 10, 3 );
 }
@@ -633,6 +634,49 @@ function rest_send_allow_header( $response, $server, $request ) {
 }
 
 /**
+ * Filter the API response to include only a white-listed set of response object fields.
+ *
+ * @since 4.8.0
+ *
+ * @param WP_REST_Response $response Current response being served.
+ * @param WP_REST_Server   $server   ResponseHandler instance (usually WP_REST_Server).
+ * @param WP_REST_Request  $request  The request that was used to make current response.
+ *
+ * @return WP_REST_Response Response to be served, trimmed down to contain a subset of fields.
+ */
+function rest_filter_response_fields( $response, $server, $request ) {
+	if ( ! isset( $request['_fields'] ) || $response->is_error() ) {
+		return $response;
+	}
+
+	$data = $response->get_data();
+
+	$fields = is_array( $request['_fields']  ) ? $request['_fields'] : preg_split( '/[\s,]+/', $request['_fields'] );
+
+	if ( 0 === count( $fields ) ) {
+		return $response;
+	}
+
+	// Trim off outside whitespace from the comma delimited list.
+	$fields = array_map( 'trim', $fields );
+
+	$fields_as_keyed = array_combine( $fields, array_fill( 0, count( $fields ), true ) );
+
+	if ( wp_is_numeric_array( $data ) ) {
+		$new_data = array();
+		foreach ( $data as $item ) {
+			$new_data[] = array_intersect_key( $item, $fields_as_keyed );
+		}
+	} else {
+		$new_data = array_intersect_key( $data, $fields_as_keyed );
+	}
+
+	$response->set_data( $new_data );
+
+	return $response;
+}
+
+/**
  * Adds the REST API URL to the WP RSD endpoint.
  *
  * @since 4.4.0
@@ -1051,6 +1095,28 @@ function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 			}
 		}
 	}
+
+	if ( 'object' === $args['type'] ) {
+		if ( $value instanceof stdClass ) {
+			$value = (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			/* translators: 1: parameter, 2: type name */
+			return new WP_Error( 'rest_invalid_param', sprintf( __( '%1$s is not of type %2$s.' ), $param, 'object' ) );
+		}
+
+		foreach ( $value as $property => $v ) {
+			if ( ! isset( $args['properties'][ $property ] ) ) {
+				continue;
+			}
+			$is_valid = rest_validate_value_from_schema( $v, $args['properties'][ $property ], $param . '[' . $property . ']' );
+
+			if ( is_wp_error( $is_valid ) ) {
+				return $is_valid;
+			}
+		}
+	}
+
 	if ( ! empty( $args['enum'] ) ) {
 		if ( ! in_array( $value, $args['enum'], true ) ) {
 			/* translators: 1: parameter, 2: list of valid values */
@@ -1170,6 +1236,26 @@ function rest_sanitize_value_from_schema( $value, $args ) {
 		$value = array_values( $value );
 		return $value;
 	}
+
+	if ( 'object' === $args['type'] ) {
+		if ( $value instanceof stdClass ) {
+			$value = (array) $value;
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		foreach ( $value as $property => $v ) {
+			if ( ! isset( $args['properties'][ $property ] ) ) {
+				unset( $value[ $property ] );
+				continue;
+			}
+			$value[ $property ] = rest_sanitize_value_from_schema( $v, $args['properties'][ $property ] );
+		}
+
+		return $value;
+	}
+
 	if ( 'integer' === $args['type'] ) {
 		return (int) $value;
 	}
