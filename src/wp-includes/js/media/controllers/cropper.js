@@ -1,7 +1,7 @@
 /**
  * wp.media.controller.Cropper
  *
- * A state for cropping an image when called from the header media customization panel.
+ * A class for cropping an image when called from the header media customization panel.
  *
  * @class
  * @augments wp.media.controller.State
@@ -27,8 +27,7 @@ Cropper = wp.media.controller.State.extend({
 	/**
 	 * @summary Opens crop image window.
 	 *
-	 * Shows the crop image window when called from the Add
-	 * new image button.
+	 * Shows the crop image window when called from the Add new image button.
 	 *
 	 * @since 4.2.0
 	 *
@@ -41,7 +40,7 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary Sets toolbar to browse mode.
+	 * @summary Changes the state of the toolbar window to browse mode.
 	 *
 	 * @since 4.2.0
 	 *
@@ -85,7 +84,7 @@ Cropper = wp.media.controller.State.extend({
 	},
 
 	/**
-	 * @summary Checks if cropping is skipped or not and sets options accordingly.
+	 * @summary Checks if cropping can be skipped and creates crop toolbar accordingly.
 	 *
 	 * @since 4.2.0
 	 *
