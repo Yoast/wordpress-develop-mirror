@@ -5,8 +5,7 @@
  *
  * @since 2.7.0
  *
- * @global
- * @namespace
+ * @ignore
  *
  * @requires jQuery
  */

@@ -508,8 +508,9 @@ window.wp = window.wp || {};
 	}
 
 	/**
-	 * @namespace {SwitchEditors} switchEditors
 	 * Expose the switch editors to be used globally.
+	 *
+	 * @namespace switchEditors
 	 */
 	window.switchEditors = new SwitchEditors();
 
