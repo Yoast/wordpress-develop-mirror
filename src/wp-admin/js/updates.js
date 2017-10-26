@@ -130,6 +130,8 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `ajaxLocked`.
 	 *
+	 * @memberOf WP.Updates
+	 *
 	 * @type {bool}
 	 */
 	wp.updates.ajaxLocked = false;
@@ -138,6 +140,8 @@
 	 * Admin notice template.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @memberOf WP.Updates
 	 *
 	 * @type {function} A function that lazily-compiles the template requested.
 	 */
@@ -152,6 +156,8 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `queue`.
 	 *
+	 * @memberOf WP.Updates
+	 *
 	 * @type {Array.object}
 	 */
 	wp.updates.queue = [];
@@ -160,6 +166,8 @@
 	 * Holds a jQuery reference to return focus to when exiting the request credentials modal.
 	 *
 	 * @since 4.2.0
+	 *
+	 * @memberOf WP.Updates
 	 *
 	 * @type {jQuery}
 	 */
@@ -212,6 +220,9 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method ajax
+	 * @memberOf WP.Updates
+	 *
 	 * @param {string} action The type of Ajax request ('update-plugin', 'install-theme', etc).
 	 * @param {object} data   Data that needs to be passed to the ajax callback.
 	 * @return {$.promise}    A jQuery promise that represents the request,
@@ -261,6 +272,9 @@
 	 * Actions performed after every Ajax request.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @method ajaxAlways
+	 * @memberOf WP.Updates
 	 *
 	 * @param {object}  response
 	 * @param {array}  [response.debug]		Debug information.
