@@ -174,13 +174,13 @@
 	 * @memberOf WP.Updates
 	 *
 	 * @param {object}  data
-	 * @param {*}      [data.selector]      Optional. Selector of an element to be replaced with the admin notice.
-	 * @param {string} [data.id]            Optional. Unique id that will be used as the notice's id attribute.
-	 * @param {string} [data.className]     Optional. Class names that will be used in the admin notice.
-	 * @param {string} [data.message]       Optional. The message displayed in the notice.
-	 * @param {number} [data.successes]     Optional. The amount of successful operations.
-	 * @param {number} [data.errors]        Optional. The amount of failed operations.
-	 * @param {Array}  [data.errorMessages] Optional. Error messages of failed operations.
+	 * @param {*}      [data.selector]      Selector of an element to be replaced with the admin notice.
+	 * @param {string} [data.id]            Unique id that will be used as the notice's id attribute.
+	 * @param {string} [data.className]     Class names that will be used in the admin notice.
+	 * @param {string} [data.message]       The message displayed in the notice.
+	 * @param {number} [data.successes]     The amount of successful operations.
+	 * @param {number} [data.errors]        The amount of failed operations.
+	 * @param {Array}  [data.errorMessages] Error messages of failed operations.
 	 *
 	 */
 	wp.updates.addAdminNotice = function( data ) {
@@ -263,8 +263,10 @@
 	 * @since 4.6.0
 	 *
 	 * @param {object}  response
-	 * @param {array=}  response.debug     Optional. Debug information.
-	 * @param {string=} response.errorCode Optional. Error code for an error that occurred.
+	 * @param {array}  [response.debug]		Debug information.
+	 * @param {string} [response.errorCode]	Error code for an error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.ajaxAlways = function( response ) {
 		if ( ! response.errorCode || 'unable_to_connect_to_filesystem' !== response.errorCode ) {
@@ -283,6 +285,8 @@
 	 * Refreshes update counts everywhere on the screen.
 	 *
 	 * @since 4.7.0
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.refreshCount = function() {
 		var $adminBarUpdates              = $( '#wp-admin-bar-updates' ),
@@ -352,8 +356,9 @@
 	 *
 	 * @since 3.9.0
 	 *
-	 * @param {string} type The type of item that was updated or deleted.
-	 *                      Can be 'plugin', 'theme'.
+	 * @param {string} type The type of item that was updated or deleted. Can be 'plugin', 'theme'.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.decrementCount = function( type ) {
 		settings.totals.counts.total = Math.max( --settings.totals.counts.total, 0 );
@@ -373,13 +378,13 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePlugin`.
 	 *
-	 * @param {object}               args         Arguments.
-	 * @param {string}               args.plugin  Plugin basename.
-	 * @param {string}               args.slug    Plugin slug.
-	 * @param {updatePluginSuccess=} args.success Optional. Success callback. Default: wp.updates.updatePluginSuccess
-	 * @param {updatePluginError=}   args.error   Optional. Error callback. Default: wp.updates.updatePluginError
-	 * @return {$.promise} A jQuery promise that represents the request,
-	 *                     decorated with an abort() method.
+	 * @param {object}               args 			Arguments.
+	 * @param {string}               args.plugin	Plugin basename.
+	 * @param {string}               args.slug 		Plugin slug.
+	 * @param {updatePluginSuccess} [args.success]	Success callback. Default: wp.updates.updatePluginSuccess.
+	 * @param {updatePluginError}   [args.error]	Error callback. Default: wp.updates.updatePluginError.
+	 *
+	 * @returns {$.promise} A jQuery promise that represents the request, decorated with an abort() method.
 	 */
 	wp.updates.updatePlugin = function( args ) {
 		var $updateRow, $card, $message, message;
@@ -421,13 +426,14 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginSuccess`.
 	 *
-	 * @typedef {object} updatePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin to be updated.
 	 * @param {string} response.plugin     Basename of the plugin to be updated.
 	 * @param {string} response.pluginName Name of the plugin to be updated.
 	 * @param {string} response.oldVersion Old version of the plugin.
 	 * @param {string} response.newVersion New version of the plugin.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.updatePluginSuccess = function( response ) {
 		var $pluginRow, $updateMessage, newText;
@@ -466,13 +472,14 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginError`.
 	 *
-	 * @typedef {object} updatePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be updated.
 	 * @param {string}  response.plugin       Basename of the plugin to be updated.
-	 * @param {string=} response.pluginName   Optional. Name of the plugin to be updated.
+	 * @param {string} [response.pluginName]  Name of the plugin to be updated.
 	 * @param {string}  response.errorCode    Error code for the error that occurred.
 	 * @param {string}  response.errorMessage The error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.updatePluginError = function( response ) {
 		var $card, $message, errorMessage;
@@ -546,10 +553,10 @@
 	 *
 	 * @param {object}                args         Arguments.
 	 * @param {string}                args.slug    Plugin identifier in the WordPress.org Plugin repository.
-	 * @param {installPluginSuccess=} args.success Optional. Success callback. Default: wp.updates.installPluginSuccess
-	 * @param {installPluginError=}   args.error   Optional. Error callback. Default: wp.updates.installPluginError
-	 * @return {$.promise} A jQuery promise that represents the request,
-	 *                     decorated with an abort() method.
+	 * @param {installPluginSuccess} [args.success] Success callback. Default: wp.updates.installPluginSuccess.
+	 * @param {installPluginError}   [args.error]   Error callback. Default: wp.updates.installPluginError.
+	 *
+	 * @returns {$.promise} A jQuery promise that represents the request, decorated with an abort() method.
 	 */
 	wp.updates.installPlugin = function( args ) {
 		var $card    = $( '.plugin-card-' + args.slug ),
@@ -588,11 +595,12 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installPluginSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
 	 * @param {string} response.activateUrl URL to activate the just installed plugin.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.installPluginSuccess = function( response ) {
 		var $message = $( '.plugin-card-' + response.slug ).find( '.install-now' );
@@ -624,12 +632,13 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installPluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
-	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
+	 * @param {string} [response.pluginName]   Name of the plugin to be installed.
 	 * @param {string}  response.errorCode    Error code for the error that occurred.
 	 * @param {string}  response.errorMessage The error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.installPluginError = function( response ) {
 		var $card   = $( '.plugin-card-' + response.slug ),
@@ -675,11 +684,12 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installImporterSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
 	 * @param {string} response.activateUrl URL to activate the just installed plugin.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.installImporterSuccess = function( response ) {
 		wp.updates.addAdminNotice( {
@@ -707,12 +717,13 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installImporterError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
-	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
+	 * @param {string} [response.pluginName]  Name of the plugin to be installed.
 	 * @param {string}  response.errorCode    Error code for the error that occurred.
 	 * @param {string}  response.errorMessage The error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.installImporterError = function( response ) {
 		var errorMessage = wp.updates.l10n.installFailed.replace( '%s', response.errorMessage ),
@@ -751,10 +762,10 @@
 	 * @param {object}               args         Arguments.
 	 * @param {string}               args.plugin  Basename of the plugin to be deleted.
 	 * @param {string}               args.slug    Slug of the plugin to be deleted.
-	 * @param {deletePluginSuccess=} args.success Optional. Success callback. Default: wp.updates.deletePluginSuccess
-	 * @param {deletePluginError=}   args.error   Optional. Error callback. Default: wp.updates.deletePluginError
-	 * @return {$.promise} A jQuery promise that represents the request,
-	 *                     decorated with an abort() method.
+	 * @param {deletePluginSuccess} [args.success] Success callback. Default: wp.updates.deletePluginSuccess.
+	 * @param {deletePluginError}   [args.error]   Error callback. Default: wp.updates.deletePluginError.
+	 *
+	 * @returns {$.promise} A jQuery promise that represents the request, decorated with an abort() method.
 	 */
 	wp.updates.deletePlugin = function( args ) {
 		var $link = $( '[data-plugin="' + args.plugin + '"]' ).find( '.row-actions a.delete' );
@@ -782,11 +793,12 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deletePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin that was deleted.
 	 * @param {string} response.plugin     Base name of the plugin that was deleted.
 	 * @param {string} response.pluginName Name of the plugin that was deleted.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.deletePluginSuccess = function( response ) {
 
@@ -2339,14 +2351,14 @@
 			$( 'input.wp-filter-search' ).trigger( 'input' );
 		} );
 
-		/** 
-		 * Trigger a search event when the "Try Again" button is clicked. 
-		 * 
+		/**
+		 * Trigger a search event when the "Try Again" button is clicked.
+		 *
 		 * @since 4.9.0
-		 */ 
-		$document.on( 'click', '.try-again', function( event ) { 
-			event.preventDefault(); 
-			$pluginInstallSearch.trigger( 'input' ); 
+		 */
+		$document.on( 'click', '.try-again', function( event ) {
+			event.preventDefault();
+			$pluginInstallSearch.trigger( 'input' );
 		} );
 
 		/**
