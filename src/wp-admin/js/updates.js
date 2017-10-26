@@ -300,6 +300,9 @@
 	 *
 	 * @since 4.7.0
 	 *
+	 * @method refreshCount
+	 * @memberOf WP.Updates
+	 *
 	 * @returns {void}
 	 */
 	wp.updates.refreshCount = function() {
@@ -370,6 +373,9 @@
 	 *
 	 * @since 3.9.0
 	 *
+	 * @method decrementCount
+	 * @memberOf WP.Updates
+	 *
 	 * @param {string} type The type of item that was updated or deleted. Can be 'plugin', 'theme'.
 	 *
 	 * @returns {void}
@@ -391,6 +397,9 @@
 	 *
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePlugin`.
+	 *
+	 * @method updatePlugin
+	 * @memberOf WP.Updates
 	 *
 	 * @param {object}               args 			Arguments.
 	 * @param {string}               args.plugin	Plugin basename.
@@ -440,6 +449,9 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginSuccess`.
 	 *
+	 * @method updatePluginSuccess
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin to be updated.
 	 * @param {string} response.plugin     Basename of the plugin to be updated.
@@ -485,6 +497,9 @@
 	 *
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginError`.
+	 *
+	 * @method updatePluginError
+	 * @memberOf WP.Updates
 	 *
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be updated.
@@ -565,6 +580,9 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method installPlugin
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object}                args         Arguments.
 	 * @param {string}                args.slug    Plugin identifier in the WordPress.org Plugin repository.
 	 * @param {installPluginSuccess} [args.success] Success callback. Default: wp.updates.installPluginSuccess.
@@ -609,6 +627,9 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method installPluginSuccess
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -646,9 +667,12 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method installPluginError
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
-	 * @param {string} [response.pluginName]   Name of the plugin to be installed.
+	 * @param {string}  [response.pluginName] Name of the plugin to be installed.
 	 * @param {string}  response.errorCode    Error code for the error that occurred.
 	 * @param {string}  response.errorMessage The error that occurred.
 	 *
@@ -698,6 +722,9 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method installImporterSuccess
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -730,6 +757,9 @@
 	 * Updates the UI appropriately after a failed importer install.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @method installImporterError
+	 * @memberOf WP.Updates
 	 *
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
@@ -773,6 +803,9 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method deletePlugin
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object}               args         Arguments.
 	 * @param {string}               args.plugin  Basename of the plugin to be deleted.
 	 * @param {string}               args.slug    Slug of the plugin to be deleted.
@@ -806,6 +839,9 @@
 	 * Updates the UI appropriately after a successful plugin deletion.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @method deletePluginSucess
+	 * @memberOf WP.Updates
 	 *
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin that was deleted.
@@ -898,6 +934,9 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method deletePluginError
+	 * @memberOf WP.Updates
+	 *
 	 * @typedef {object} deletePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be deleted.
@@ -956,12 +995,16 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param {object}              args         Arguments.
-	 * @param {string}              args.slug    Theme stylesheet.
-	 * @param {updateThemeSuccess=} args.success Optional. Success callback. Default: wp.updates.updateThemeSuccess
-	 * @param {updateThemeError=}   args.error   Optional. Error callback. Default: wp.updates.updateThemeError
-	 * @return {$.promise} A jQuery promise that represents the request,
-	 *                     decorated with an abort() method.
+	 * @method updateTheme
+	 * @memberOf WP.Updates
+	 *
+	 * @param   {object}             args         Arguments.
+	 * @param   {string}             args.slug    Theme stylesheet.
+	 * @param   {updateThemeSuccess} [args.success] Success callback. Default: wp.updates.updateThemeSuccess
+	 * @param   {updateThemeError}   [args.error]   Error callback. Default: wp.updates.updateThemeError
+	 *
+	 * @returns {$.promise}                         A jQuery promise that represents the request,
+	 *                                              decorated with an abort() method.
 	 */
 	wp.updates.updateTheme = function( args ) {
 		var $notice;
@@ -1011,12 +1054,16 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} updateThemeSuccess
+	 * @method updateThemeSuccess
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response
 	 * @param {string} response.slug       Slug of the theme to be updated.
 	 * @param {object} response.theme      Updated theme.
 	 * @param {string} response.oldVersion Old version of the theme.
 	 * @param {string} response.newVersion New version of the theme.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.updateThemeSuccess = function( response ) {
 		var isModalOpen    = $( 'body.modal-open' ).length,
@@ -1066,11 +1113,15 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} updateThemeError
+	 * @method updateThemeError
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be updated.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.updateThemeError = function( response ) {
 		var $theme       = $( '[data-slug="' + response.slug + '"]' ),
@@ -1113,12 +1164,15 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param {object}               args
-	 * @param {string}               args.slug    Theme stylesheet.
-	 * @param {installThemeSuccess=} args.success Optional. Success callback. Default: wp.updates.installThemeSuccess
-	 * @param {installThemeError=}   args.error   Optional. Error callback. Default: wp.updates.installThemeError
-	 * @return {$.promise} A jQuery promise that represents the request,
-	 *                     decorated with an abort() method.
+	 * @method installTheme
+	 * @memberOf WP.Updates
+	 *
+	 * @param   {object}               args           The arguments to use in the request.
+	 * @param   {string}               args.slug      Theme stylesheet.
+	 * @param   {installThemeSuccess}  [args.success] Success callback. Default: wp.updates.installThemeSuccess
+	 * @param   {installThemeError}    [args.error]   Error callback. Default: wp.updates.installThemeError
+	 * @returns {$.promise}                           A jQuery promise that represents the request,
+	 *                                                decorated with an abort() method.
 	 */
 	wp.updates.installTheme = function( args ) {
 		var $message = $( '.theme-install[data-slug="' + args.slug + '"]' );
@@ -1152,11 +1206,15 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installThemeSuccess
+	 * @method installThemeSuccess
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.customizeUrl URL to the Customizer for the just installed theme.
 	 * @param {string} response.activateUrl  URL to activate the just installed theme.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.installThemeSuccess = function( response ) {
 		var $card = $( '.wp-full-overlay-header, [data-slug=' + response.slug + ']' ),
@@ -1203,11 +1261,15 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installThemeError
+	 * @method installThemeError
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.installThemeError = function( response ) {
 		var $card, $button,
@@ -1259,12 +1321,15 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param {object}              args
-	 * @param {string}              args.slug    Theme stylesheet.
-	 * @param {deleteThemeSuccess=} args.success Optional. Success callback. Default: wp.updates.deleteThemeSuccess
-	 * @param {deleteThemeError=}   args.error   Optional. Error callback. Default: wp.updates.deleteThemeError
-	 * @return {$.promise} A jQuery promise that represents the request,
-	 *                     decorated with an abort() method.
+	 * @method deleteTheme
+	 * @memberOf WP.Updates
+	 *
+	 * @param   {object}             args           The arguments to use in the request.
+	 * @param   {string}             args.slug      Theme stylesheet.
+	 * @param   {deleteThemeSuccess} [args.success] Success callback. Default: wp.updates.deleteThemeSuccess
+	 * @param   {deleteThemeError}   [args.error]   Error callback. Default: wp.updates.deleteThemeError
+	 * @returns {$.promise}                         A jQuery promise that represents the request,
+	 *                                              decorated with an abort() method.
 	 */
 	wp.updates.deleteTheme = function( args ) {
 		var $button;
@@ -1301,9 +1366,13 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deleteThemeSuccess
+	 * @method deleteThemeSuccess
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response      Response from the server.
 	 * @param {string} response.slug Slug of the theme that was deleted.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.deleteThemeSuccess = function( response ) {
 		var $themeRows = $( '[data-slug="' + response.slug + '"]' );
@@ -1360,11 +1429,15 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deleteThemeError
+	 * @method deleteThemeError
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be deleted.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.deleteThemeError = function( response ) {
 		var $themeRow    = $( 'tr.inactive[data-slug="' + response.slug + '"]' ),
@@ -1410,11 +1483,16 @@
 	 * Adds the appropriate callback based on the type of action and the current page.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @method _addCallbacks
+	 * @memberOf WP.Updates
+	 *
 	 * @private
 	 *
 	 * @param {object} data   AJAX payload.
 	 * @param {string} action The type of request to perform.
-	 * @return {object} The AJAX payload with the appropriate callbacks.
+	 *
+	 * @returns {object} The AJAX payload with the appropriate callbacks.
 	 */
 	wp.updates._addCallbacks = function( data, action ) {
 		if ( 'import' === pagenow && 'install-plugin' === action ) {
@@ -1430,6 +1508,11 @@
 	 *
 	 * @since 4.2.0
 	 * @since 4.6.0 Can handle multiple job types.
+	 *
+	 * @method queueChecker
+	 * @memberOf WP.Updates
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.queueChecker = function() {
 		var job;
@@ -1476,7 +1559,12 @@
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param {Event=} event Optional. Event interface.
+	 * @method requestFilesystemCredentials
+	 * @memberOf WP.Updates
+	 *
+	 * @param {Event} [event] Event interface.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.requestFilesystemCredentials = function( event ) {
 		if ( false === wp.updates.filesystemCredentials.available ) {
@@ -1498,7 +1586,12 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param {Event=} event Optional. Event interface.
+	 * @method maybeRequestFilesystemCredentials
+	 * @memberOf WP.Updates
+	 *
+	 * @param {Event} [event] Event interface.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.maybeRequestFilesystemCredentials = function( event ) {
 		if ( wp.updates.shouldRequestFilesystemCredentials && ! wp.updates.ajaxLocked ) {
@@ -1514,7 +1607,12 @@
 	 *
 	 * @since 4.2.0
 	 *
+	 * @method keydown
+	 * @memberOf WP.Updates
+	 *
 	 * @param {Event} event Event interface.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.keydown = function( event ) {
 		if ( 27 === event.keyCode ) {
@@ -1538,6 +1636,11 @@
 	 * Opens the request for credentials modal.
 	 *
 	 * @since 4.2.0
+	 *
+	 * @method requestForCredentialsModalOpen
+	 * @memberOf WP.Updates
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.requestForCredentialsModalOpen = function() {
 		var $modal = $( '#request-filesystem-credentials-dialog' );
@@ -1567,6 +1670,11 @@
 	 *
 	 * @since 4.2.0
 	 * @since 4.6.0 Triggers an event for callbacks to listen to and add their actions.
+	 *
+	 * @method requestForCredentialsModalCancel
+	 * @memberOf WP.Updates
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.requestForCredentialsModalCancel = function() {
 
@@ -1591,7 +1699,12 @@
 	 *
 	 * @since 4.2.0
 	 *
+	 * @method showErrorInCredentialsForm
+	 * @memberOf WP.Updates
+	 *
 	 * @param {string} message Error message.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.showErrorInCredentialsForm = function( message ) {
 		var $filesystemForm = $( '#request-filesystem-credentials-form' );
@@ -1606,8 +1719,13 @@
 	 *
 	 * @since 4.2.0
 	 *
+	 * @method credentialError
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object} response Ajax response.
 	 * @param {string} action   The type of request to perform.
+	 *
+	 * @returns {void}
 	 */
 	wp.updates.credentialError = function( response, action ) {
 
@@ -1634,11 +1752,15 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method maybeHandleCredentialError
+	 * @memberOf WP.Updates
+	 *
 	 * @typedef {object} maybeHandleCredentialError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
 	 * @param {string} action                The type of request to perform.
+	 *
 	 * @returns {boolean} Whether there is an error that needs to be handled or not.
 	 */
 	wp.updates.maybeHandleCredentialError = function( response, action ) {
