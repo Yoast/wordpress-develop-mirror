@@ -134,7 +134,7 @@
 	});
 	api.Widgets.registeredSidebars = new api.Widgets.SidebarCollection( api.Widgets.data.registeredSidebars );
 
-	api.Widgets.AvailableWidgetsPanelView = wp.Backbone.View.extend(/** wp.customize.Widgets.AvailableWidgetsPanelView.prototype */{
+	api.Widgets.AvailableWidgetsPanelView = wp.Backbone.View.extend(/** @lends wp.customize.Widgets.AvailableWidgetsPanelView.prototype */{
 
 		el: '#available-widgets',
 
@@ -1745,10 +1745,10 @@
 	 *
 	 * @since 3.9.0
 	 *
-	 * @constructor
+	 * @class    wp.customize.Widgets.SidebarControl
 	 * @augments wp.customize.Control
 	 */
-	api.Widgets.SidebarControl = api.Control.extend({
+	api.Widgets.SidebarControl = api.Control.extend(/** @lends wp.customize.Widgets.SidebarControl.prototype */{
 
 		/**
 		 * Set up the control

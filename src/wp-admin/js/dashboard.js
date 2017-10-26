@@ -195,7 +195,10 @@ jQuery( function( $ ) {
 	var communityEventsData = window.communityEventsData || {},
 		app;
 
-	app = window.wp.communityEvents = {
+	/**
+	 * @namespace wp.communityEvents
+	 */
+	app = window.wp.communityEvents = /** @lends wp.communityEvents */{
 		initialized: false,
 		model: null,
 

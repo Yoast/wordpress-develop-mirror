@@ -31,7 +31,7 @@ wp.mediaWidgets = ( function( $ ) {
 	 */
 	component.modelConstructors = {};
 
-	component.PersistentDisplaySettingsLibrary = wp.media.controller.Library.extend(/** @lend wp.mediaWidgets.PersistentDisplaySettingsLibrary.prototype */{
+	component.PersistentDisplaySettingsLibrary = wp.media.controller.Library.extend(/** @lends wp.mediaWidgets.PersistentDisplaySettingsLibrary.prototype */{
 
 		/**
 		 * Library which persists the customized display settings across selections.
@@ -89,7 +89,7 @@ wp.mediaWidgets = ( function( $ ) {
 	 * @class    wp.mediaWidgets.MediaEmbedView
 	 * @augments wp.media.view.Embed
 	 */
-	component.MediaEmbedView = wp.media.view.Embed.extend({
+	component.MediaEmbedView = wp.media.view.Embed.extend(/** @lends wp.mediaWidgets.MediaEmbedView.prototype */{
 
 		/**
 		 * Refresh embed view.
@@ -99,6 +99,9 @@ wp.mediaWidgets = ( function( $ ) {
 		 * @returns {void}
 		 */
 		refresh: function refresh() {
+			/**
+			 * @class wp.mediaWidgets~Constructor
+			 */
 			var Constructor;
 
 			if ( 'image' === this.controller.options.mimeType ) {
@@ -106,7 +109,7 @@ wp.mediaWidgets = ( function( $ ) {
 			} else {
 
 				// This should be eliminated once #40450 lands of when this is merged into core.
-				Constructor = wp.media.view.EmbedLink.extend({
+				Constructor = wp.media.view.EmbedLink.extend(/** @lends wp.mediaWidgets~Constructor.prototype */{
 
 					/**
 					 * Set the disabled state on the Add to Widget button.
@@ -259,8 +262,7 @@ wp.mediaWidgets = ( function( $ ) {
 	/**
 	 * Custom media frame for selecting uploaded media or providing media by URL.
 	 *
-	 * @class
-	 * @alias    wp.mediaWidgets.MediaFrameSelect
+	 * @class    wp.mediaWidgets.MediaFrameSelect
 	 * @augments wp.media.view.MediaFrame.Post
 	 */
 	component.MediaFrameSelect = wp.media.view.MediaFrame.Post.extend(/** @lends wp.mediaWidgets.MediaFrameSelect.prototype */{
@@ -332,6 +334,8 @@ wp.mediaWidgets = ( function( $ ) {
 
 				/**
 				 * Handle click.
+				 *
+				 * @ignore
 				 *
 				 * @fires wp.media.controller.State#insert()
 				 * @returns {void}

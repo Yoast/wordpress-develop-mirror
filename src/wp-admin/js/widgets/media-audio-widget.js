@@ -7,12 +7,10 @@
 	/**
 	 * Custom audio details frame that removes the replace-audio state.
 	 *
-	 * @class AudioDetailsMediaFrame
-	 * @constructor
-	 *
-	 * @private
+	 * @class    wp.mediaWidgets.controlConstructors~AudioDetailsMediaFrame
+	 * @augments wp.media.view.MediaFrame.AudioDetails
 	 */
-	AudioDetailsMediaFrame = wp.media.view.MediaFrame.AudioDetails.extend({
+	AudioDetailsMediaFrame = wp.media.view.MediaFrame.AudioDetails.extend(/** @lends wp.mediaWidgets.controlConstructors~AudioDetailsMediaFrame.prototype */{
 
 		/**
 		 * Create the default states.

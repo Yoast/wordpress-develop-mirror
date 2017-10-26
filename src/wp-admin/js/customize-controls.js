@@ -2596,11 +2596,10 @@
 	/**
 	 * A colorpicker control.
 	 *
-	 * @class
+	 * @class    wp.customize.ColorControl
 	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
 	 */
-	api.ColorControl = api.Control.extend({
+	api.ColorControl = api.Control.extend(/** @lends wp.customize.ColorControl.prototype */{
 		ready: function() {
 			var control = this,
 				isHueSlider = this.params.mode === 'hue',
@@ -2660,11 +2659,11 @@
 	/**
 	 * A control that implements the media modal.
 	 *
-	 * @class
+	 * @class    wp.customize.MediaControl
 	 * @augments wp.customize.Control
 	 * @augments wp.customize.Class
 	 */
-	api.MediaControl = api.Control.extend({
+	api.MediaControl = api.Control.extend(/** @lends wp.customize.MediaControl.prototype */{
 
 		/**
 		 * When the control's DOM structure is ready,
@@ -3176,13 +3175,12 @@
 	/**
 	 * A control for selecting and cropping Site Icons.
 	 *
-	 * @class
+	 * @class    wp.customize.SiteIconControl
 	 * @augments wp.customize.CroppedImageControl
-	 * @augments wp.customize.MediaControl
-	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
+	 *
+	 * @inheritDoc
 	 */
-	api.SiteIconControl = api.CroppedImageControl.extend({
+	api.SiteIconControl = api.CroppedImageControl.extend(/** @lends wp.customize.SiteIconControl.prototype */{
 
 		/**
 		 * Create a media modal select frame, and store it so the instance can be reused when needed.
@@ -3297,11 +3295,12 @@
 	});
 
 	/**
-	 * @class
+	 * @class    wp.customize.HeaderControl
 	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
+	 *
+	 * @inheritDoc
 	 */
-	api.HeaderControl = api.Control.extend({
+	api.HeaderControl = api.Control.extend(/** @lends wp.customize.HeaderControl.prototype */{
 		ready: function() {
 			this.btnRemove = $('#customize-control-header_image .actions .remove');
 			this.btnNew    = $('#customize-control-header_image .actions .new');
@@ -3567,11 +3566,12 @@
 	/**
 	 * wp.customize.ThemeControl
 	 *
-	 * @constructor
+	 * @class    wp.customize.ThemeControl
 	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
+	 *
+	 * @inheritDoc
 	 */
-	api.ThemeControl = api.Control.extend({
+	api.ThemeControl = api.Control.extend(/** @lends wp.customize.ThemeControl.prototype */{
 
 		touchDrag: false,
 		isRendered: false,
@@ -3680,21 +3680,18 @@
 	// Create the collection for global Notifications.
 	api.notifications = new api.Notifications();
 
-	/**
-	 * An object that fetches a preview in the background of the document, which
-	 * allows for seamless replacement of an existing preview.
-	 *
-	 * @class
-	 * @augments wp.customize.Messenger
-	 * @augments wp.customize.Class
-	 * @mixes wp.customize.Events
-	 */
-	api.PreviewFrame = api.Messenger.extend({
+	api.PreviewFrame = api.Messenger.extend(/** @lends wp.customize.PreviewFrame.prototype */{
 		sensitivity: null, // Will get set to api.settings.timeouts.previewFrameSensitivity.
 
 		/**
-		 * Initialize the PreviewFrame.
+		 * An object that fetches a preview in the background of the document, which
+		 * allows for seamless replacement of an existing preview.
 		 *
+		 * @constructs wp.customize.PreviewFrame
+		 * @augments   wp.customize.Messenger
+		 * @mixes      wp.customize.Events
+		 *
+		 * @param {object} params
 		 * @param {object} params.container
 		 * @param {object} params.previewUrl
 		 * @param {object} params.query
@@ -3911,6 +3908,8 @@
 	 * @since 4.1.0
 	 *
 	 * @param {string} documentTitle
+	 *
+	 * @alias wp.customize.setDocumentTitle
 	 */
 	api.setDocumentTitle = function ( documentTitle ) {
 		var tmpl, title;
@@ -3920,16 +3919,14 @@
 		api.trigger( 'title', title );
 	};
 
-	/**
-	 * @class
-	 * @augments wp.customize.Messenger
-	 * @augments wp.customize.Class
-	 * @mixes wp.customize.Events
-	 */
-	api.Previewer = api.Messenger.extend({
+	api.Previewer = api.Messenger.extend(/** @lends wp.customize.Previewer.prototype */{
 		refreshBuffer: null, // Will get set to api.settings.timeouts.windowRefresh.
 
 		/**
+		 * @constructs wp.customize.Previewer
+		 * @augments   wp.customize.Messenger
+		 * @mixes      wp.customize.Events
+		 *
 		 * @param {array}  params.allowedUrls
 		 * @param {string} params.container   A selector or jQuery element for the preview
 		 *                                    frame to be placed.
@@ -4377,6 +4374,8 @@
 	 * Add notifications to the settings and focus on the first control that has an invalid setting.
 	 *
 	 * @since 4.6.0
+	 * @alias wp.customize._handleSettingValidities
+	 *
 	 * @private
 	 *
 	 * @param {object}  args
@@ -4452,6 +4451,8 @@
 	 * Find all controls associated with the given settings.
 	 *
 	 * @since 4.6.0
+	 * @alias wp.customize.findControlsForSettings
+	 *
 	 * @param {string[]} settingIds Setting IDs.
 	 * @returns {object<string, wp.customize.Control>} Mapping setting ids to arrays of controls.
 	 */
@@ -4473,6 +4474,7 @@
 	 * Sort panels, sections, controls by priorities. Hide empty sections and panels.
 	 *
 	 * @since 4.1.0
+	 * @alias wp.customize.reflowPaneContents
 	 */
 	api.reflowPaneContents = _.bind( function () {
 
@@ -4599,13 +4601,18 @@
 			}
 		});
 
-		// Initialize Previewer
+		/**
+		 * Initialize Previewer
+		 *
+		 * @type  wp.customize.Previewer
+		 * @alias wp.customize.previewer
+ 		 */
 		api.previewer = new api.Previewer({
 			container:   '#customize-preview',
 			form:        '#customize-controls',
 			previewUrl:  api.settings.url.preview,
 			allowedUrls: api.settings.url.allowed
-		}, {
+		},/** @lends wp.customize.previewer */{
 
 			nonce: api.settings.nonce,
 
@@ -5776,6 +5783,8 @@
 						/**
 						 * Handle tabbing to the field after the editor.
 						 *
+						 * @ignore
+						 *
 						 * @returns {void}
 						 */
 						onTabNext: function onTabNext() {
@@ -5792,6 +5801,8 @@
 						/**
 						 * Handle tabbing to the field before the editor.
 						 *
+						 * @ignore
+						 *
 						 * @returns {void}
 						 */
 						onTabPrevious: function onTabPrevious() {
@@ -5807,6 +5818,8 @@
 
 						/**
 						 * Update error notice.
+						 *
+						 * @ignore
 						 *
 						 * @param {Array} errorAnnotations - Error annotations.
 						 * @returns {void}

@@ -58,6 +58,8 @@
 				/**
 				 * @summary Handles the onChange event if one has been defined in the options.
 				 *
+				 * @ignore
+				 *
 				 * @param {Event} event    The event that's being called.
 				 * @param {HTMLElement} ui The HTMLElement containing the color picker.
 				 *
@@ -180,6 +182,8 @@
 				 * sets the background color for the toggler element.
 				 *
 				 * @since 3.5.0
+				 *
+				 * @ignore
 				 *
 				 * @param {Event} event    The event that's being called.
 				 * @param {HTMLElement} ui The HTMLElement containing the color picker.

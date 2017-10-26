@@ -173,6 +173,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 				/**
 				 * Handle tabbing to the field before the editor.
 				 *
+				 * @ignore
+				 *
 				 * @returns {void}
 				 */
 				onTabPrevious: function onTabPrevious() {
@@ -181,6 +183,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 
 				/**
 				 * Handle tabbing to the field after the editor.
+				 *
+				 * @ignore
 				 *
 				 * @returns {void}
 				 */
@@ -192,6 +196,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 				/**
 				 * Disable save button and store linting errors for use in updateFields.
 				 *
+				 * @ignore
+				 *
 				 * @param {Array} errorAnnotations - Error notifications.
 				 * @returns {void}
 				 */
@@ -201,6 +207,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 
 				/**
 				 * Update error notice.
+				 *
+				 * @ignore
 				 *
 				 * @param {Array} errorAnnotations - Error annotations.
 				 * @returns {void}

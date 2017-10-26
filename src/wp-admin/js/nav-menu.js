@@ -167,6 +167,8 @@ var wpNavMenu;
 				/**
 				 * Adds selected menu items to the menu.
 				 *
+				 * @ignore
+				 *
 				 * @param jQuery metabox The metabox jQuery object.
 				 */
 				addSelectedToMenu : function(processMethod) {

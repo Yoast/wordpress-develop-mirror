@@ -22,7 +22,7 @@
 	 * @class    wp.mediaWidgets.controlConstructors.media_audio
 	 * @augments wp.mediaWidgets.MediaWidgetControl
 	 */
-	ImageWidgetControl = component.MediaWidgetControl.extend(/** @lends wp.mediaWidgets.controlConstructors.media_image.prototepe */{
+	ImageWidgetControl = component.MediaWidgetControl.extend(/** @lends wp.mediaWidgets.controlConstructors.media_image.prototype */{
 
 		/**
 		 * Render preview.
