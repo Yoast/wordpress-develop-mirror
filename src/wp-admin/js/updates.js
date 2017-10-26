@@ -2,9 +2,6 @@
  * Functions for ajaxified updates, deletions and installs inside the WordPress admin.
  *
  * @version 4.2.0
- *
- * @package WordPress
- * @subpackage Administration
  */
 
 /* global pagenow */

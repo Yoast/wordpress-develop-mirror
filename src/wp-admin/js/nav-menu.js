@@ -3,9 +3,6 @@
  * Interface JS functions
  *
  * @version 2.0.0
- *
- * @package WordPress
- * @subpackage Administration
  */
 
 /* global menus, postboxes, columns, isRtl, navMenuL10n, ajaxurl */
