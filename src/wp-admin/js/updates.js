@@ -12,28 +12,37 @@
  * @param {object}  settings                            WP Updates settings.
  * @param {string}  settings.ajax_nonce                 AJAX nonce.
  * @param {object}  settings.l10n                       Translation strings.
- * @param {object=} settings.plugins                    Base names of plugins in their different states.
+ * @param {object}  [settings.plugins]                  Base names of plugins in their different states.
  * @param {Array}   settings.plugins.all                Base names of all plugins.
  * @param {Array}   settings.plugins.active             Base names of active plugins.
  * @param {Array}   settings.plugins.inactive           Base names of inactive plugins.
  * @param {Array}   settings.plugins.upgrade            Base names of plugins with updates available.
  * @param {Array}   settings.plugins.recently_activated Base names of recently activated plugins.
- * @param {object=} settings.themes                     Plugin/theme status information or null.
+ * @param {object}  [settings.themes]                   Plugin/theme status information or null.
  * @param {number}  settings.themes.all                 Amount of all themes.
  * @param {number}  settings.themes.upgrade             Amount of themes with updates available.
  * @param {number}  settings.themes.disabled            Amount of disabled themes.
- * @param {object=} settings.totals                     Combined information for available update counts.
+ * @param {object}  [settings.totals]                   Combined information for available update counts.
  * @param {number}  settings.totals.count               Holds the amount of available updates.
  */
 (function( $, wp, settings ) {
 	var $document = $( document );
 
+	/**
+	 * The WP object.
+	 *
+	 * @namespace WP
+	 * @type {object}
+	 */
 	wp = wp || {};
 
 	/**
 	 * The WP Updates object.
 	 *
 	 * @since 4.2.0
+	 *
+	 * @memberOf WP
+	 * @namespace Updates
 	 *
 	 * @type {object}
 	 */
@@ -43,6 +52,7 @@
 	 * User nonce for ajax calls.
 	 *
 	 * @since 4.2.0
+	 * @memberOf WP.Updates
 	 *
 	 * @type {string}
 	 */
@@ -52,6 +62,7 @@
 	 * Localized strings.
 	 *
 	 * @since 4.2.0
+	 * @memberOf WP.Updates
 	 *
 	 * @type {object}
 	 */
@@ -61,6 +72,7 @@
 	 * Current search term.
 	 *
 	 * @since 4.6.0
+	 * @memberOf WP.Updates
 	 *
 	 * @type {string}
 	 */
@@ -70,6 +82,7 @@
 	 * Whether filesystem credentials need to be requested from the user.
 	 *
 	 * @since 4.2.0
+	 * @memberOf WP.Updates
 	 *
 	 * @type {bool}
 	 */
@@ -81,19 +94,20 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 Added `available` property to indicate whether credentials have been provided.
 	 *
-	 * @type {object} filesystemCredentials                    Holds filesystem credentials.
-	 * @type {object} filesystemCredentials.ftp                Holds FTP credentials.
-	 * @type {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
-	 *                                                         Default empty string.
-	 * @type {object} filesystemCredentials.ssh                Holds SSH credentials.
-	 * @type {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
-	 * @type {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
-	 * @type {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
-	 * @type {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
-	 *                                                         Default 'false'.
+	 * @property {object} filesystemCredentials                    Holds filesystem credentials.
+	 * @property {object} filesystemCredentials.ftp                Holds FTP credentials.
+	 * @property {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
+	 *                                                             Default empty string.
+	 * @property {object} filesystemCredentials.ssh                Holds SSH credentials.
+	 * @property {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
+	 * @property {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
+	 * @property {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
+	 * @property {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
+	 *                                                             Default 'false'.
+	 * @memberOf WP.Updates
 	 */
 	wp.updates.filesystemCredentials = {
 		ftp:       {
@@ -156,14 +170,17 @@
 	 *
 	 * @since 4.6.0
 	 *
+	 * @method addAdminNotice
+	 * @memberOf WP.Updates
+	 *
 	 * @param {object}  data
-	 * @param {*=}      data.selector      Optional. Selector of an element to be replaced with the admin notice.
-	 * @param {string=} data.id            Optional. Unique id that will be used as the notice's id attribute.
-	 * @param {string=} data.className     Optional. Class names that will be used in the admin notice.
-	 * @param {string=} data.message       Optional. The message displayed in the notice.
-	 * @param {number=} data.successes     Optional. The amount of successful operations.
-	 * @param {number=} data.errors        Optional. The amount of failed operations.
-	 * @param {Array=}  data.errorMessages Optional. Error messages of failed operations.
+	 * @param {*}      [data.selector]      Optional. Selector of an element to be replaced with the admin notice.
+	 * @param {string} [data.id]            Optional. Unique id that will be used as the notice's id attribute.
+	 * @param {string} [data.className]     Optional. Class names that will be used in the admin notice.
+	 * @param {string} [data.message]       Optional. The message displayed in the notice.
+	 * @param {number} [data.successes]     Optional. The amount of successful operations.
+	 * @param {number} [data.errors]        Optional. The amount of failed operations.
+	 * @param {Array}  [data.errorMessages] Optional. Error messages of failed operations.
 	 *
 	 */
 	wp.updates.addAdminNotice = function( data ) {
