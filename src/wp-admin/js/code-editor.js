@@ -218,7 +218,7 @@ if ( 'undefined' === typeof window.wp.codeEditor ) {
 	}
 
 	/**
-	 * @typedef {object} CodeEditorInstance
+	 * @typedef {object} wp.codeEditor~CodeEditorInstance
 	 * @property {object} settings - The code editor settings.
 	 * @property {CodeMirror} codemirror - The CodeMirror instance.
 	 */

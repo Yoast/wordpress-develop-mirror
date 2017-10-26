@@ -3,6 +3,8 @@
  *
  * @since 2.7.0
  *
+ * @ignore
+ *
  * @type {Object}
  */
 var addComment = {

@@ -2,9 +2,6 @@
  * Functions for ajaxified updates, deletions and installs inside the WordPress admin.
  *
  * @version 4.2.0
- *
- * @package WordPress
- * @subpackage Administration
  */
 
 /* global pagenow */
@@ -38,7 +35,7 @@
 	 *
 	 * @since 4.2.0
 	 *
-	 * @type {object}
+	 * @namespace wp.updates
 	 */
 	wp.updates = {};
 
@@ -84,18 +81,18 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 Added `available` property to indicate whether credentials have been provided.
 	 *
-	 * @type {object} filesystemCredentials                    Holds filesystem credentials.
-	 * @type {object} filesystemCredentials.ftp                Holds FTP credentials.
-	 * @type {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
+	 * @type {object}
+	 * @property {object} filesystemCredentials.ftp                Holds FTP credentials.
+	 * @property {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
 	 *                                                         Default empty string.
-	 * @type {object} filesystemCredentials.ssh                Holds SSH credentials.
-	 * @type {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
-	 * @type {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
-	 * @type {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
-	 * @type {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
+	 * @property {object} filesystemCredentials.ssh                Holds SSH credentials.
+	 * @property {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
+	 * @property {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
+	 * @property {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
+	 * @property {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
 	 *                                                         Default 'false'.
 	 */
 	wp.updates.filesystemCredentials = {
@@ -128,7 +125,7 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @type {function} A function that lazily-compiles the template requested.
+	 * @type {function}
 	 */
 	wp.updates.adminNotice = wp.template( 'wp-updates-admin-notice' );
 
@@ -403,7 +400,6 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginSuccess`.
 	 *
-	 * @typedef {object} updatePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin to be updated.
 	 * @param {string} response.plugin     Basename of the plugin to be updated.
@@ -448,7 +444,6 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginError`.
 	 *
-	 * @typedef {object} updatePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be updated.
 	 * @param {string}  response.plugin       Basename of the plugin to be updated.
@@ -570,7 +565,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installPluginSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -606,7 +600,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installPluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -657,7 +650,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installImporterSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -689,7 +681,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installImporterError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -764,7 +755,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deletePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin that was deleted.
 	 * @param {string} response.plugin     Base name of the plugin that was deleted.
@@ -779,7 +769,11 @@
 				$pluginRow       = $( this ),
 				columnCount      = $form.find( 'thead th:not(.hidden), thead td' ).length,
 				pluginDeletedRow = wp.template( 'item-deleted-row' ),
-				/** @type {object} plugins Base names of plugins in their different states. */
+				/**
+				 * Plugins Base names of plugins in their different states.
+				 *
+				 * @type {object}
+				 */
 				plugins          = settings.plugins;
 
 			// Add a success message after deleting a plugin.
@@ -854,7 +848,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deletePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be deleted.
 	 * @param {string}  response.plugin       Base name of the plugin to be deleted
@@ -956,7 +949,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} updateThemeSuccess
 	 * @param {object} response
 	 * @param {string} response.slug       Slug of the theme to be updated.
 	 * @param {object} response.theme      Updated theme.
@@ -1007,7 +999,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} updateThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be updated.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1089,7 +1080,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installThemeSuccess
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.customizeUrl URL to the Customizer for the just installed theme.
@@ -1140,7 +1130,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1227,7 +1216,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deleteThemeSuccess
 	 * @param {object} response      Response from the server.
 	 * @param {string} response.slug Slug of the theme that was deleted.
 	 */
@@ -1286,7 +1274,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deleteThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be deleted.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1560,7 +1547,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} maybeHandleCredentialError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.
