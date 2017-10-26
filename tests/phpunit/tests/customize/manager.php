@@ -197,6 +197,15 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		) );
 		$this->assertNotContains( $wp_customize->changeset_uuid(), array( $uuid1, $uuid2 ) );
 		$this->assertEmpty( $wp_customize->changeset_post_id() );
+
+		// Make sure existing changeset is not autoloaded in the case of previewing a theme switch.
+		switch_theme( 'twentyseventeen' );
+		$wp_customize = new WP_Customize_Manager( array(
+			'changeset_uuid' => false, // Cause UUID to be deferred.
+			'branching' => false,
+			'theme' => 'twentyfifteen',
+		) );
+		$this->assertEmpty( $wp_customize->changeset_post_id() );
 	}
 
 	/**
@@ -1446,7 +1455,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 			),
 			'autosave' => true,
 		) );
-		$this->assertFalse( wp_get_post_autosave( $changeset_post_id ) );
+		$this->assertFalse( wp_get_post_autosave( $changeset_post_id, get_current_user_id() ) );
 		$this->assertContains( 'Autosaved Auto-draft Title', get_post( $changeset_post_id )->post_content );
 
 		// Update status to draft for subsequent tests.
@@ -1484,7 +1493,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 'illegal_autosave_with_non_current_user', $r->get_error_code() );
 
 		// Try autosave.
-		$this->assertFalse( wp_get_post_autosave( $changeset_post_id ) );
+		$this->assertFalse( wp_get_post_autosave( $changeset_post_id, get_current_user_id() ) );
 		$r = $wp_customize->save_changeset_post( array(
 			'data' => array(
 				'blogname' => array(
@@ -1496,7 +1505,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'array', $r );
 
 		// Verify that autosave happened.
-		$autosave_revision = wp_get_post_autosave( $changeset_post_id );
+		$autosave_revision = wp_get_post_autosave( $changeset_post_id, get_current_user_id() );
 		$this->assertInstanceOf( 'WP_Post', $autosave_revision );
 		$this->assertContains( 'Draft Title', get_post( $changeset_post_id )->post_content );
 		$this->assertContains( 'Autosave Title', $autosave_revision->post_content );
@@ -1698,6 +1707,35 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 		$r = $manager->save_changeset_post( $args );
 		$this->assertInstanceOf( 'WP_Error', $r );
 		$this->assertEquals( 'expected_array', $r->get_error_code() );
+	}
+
+	/**
+	 * Test that trash_changeset_post() trashes a changeset post with its name and content preserved.
+	 *
+	 * @covers WP_Customize_Manager::trash_changeset_post
+	 */
+	public function test_trash_changeset_post_preserves_properties() {
+		$args = array(
+			'post_type' => 'customize_changeset',
+			'post_content' => wp_json_encode( array(
+				'blogname' => array(
+					'value' => 'Test',
+				),
+			) ),
+			'post_name' => wp_generate_uuid4(),
+			'post_status' => 'draft',
+		);
+
+		$post_id = wp_insert_post( $args );
+
+		$manager = $this->create_test_manager( $args['post_name'] );
+		$manager->trash_changeset_post( $post_id );
+
+		$post = get_post( $post_id );
+
+		$this->assertSame( 'trash', get_post_status( $post_id ) );
+		$this->assertSame( $args['post_name'], $post->post_name );
+		$this->assertSame( $args['post_content'], $post->post_content );
 	}
 
 	/**
@@ -2597,6 +2635,7 @@ class Tests_WP_Customize_Manager extends WP_UnitTestCase {
 				'currentUserCanPublish',
 				'publishDate',
 				'statusChoices',
+				'lockUser',
 			),
 			array_keys( $data['changeset'] )
 		);

@@ -964,6 +964,11 @@ th.action-links {
 	text-align: right;
 }
 
+#misc-publishing-actions .notice {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
 /* Filter bar */
 .wp-filter {
 	display: inline-block;
@@ -1466,17 +1471,17 @@ div.error {
 .wrap #templateside .notice {
 	display: block;
 	margin: 0;
-	padding: 5px 12px;
+	padding: 5px 8px;
 	font-weight: 600;
 	text-decoration: none;
 }
 
 .wrap #templateside span.notice {
-  margin-left: -12px;
+	margin-left: -12px;
 }
 
 #templateside li.notice a {
-  padding: 0;
+	padding: 0;
 }
 
 /* Update icon. */
@@ -2215,7 +2220,7 @@ h1.nav-tab-wrapper, /* Back-compat for pre-4.4 */
 }
 
 #template > div {
-	margin-right: 190px;
+	margin-right: 16em;
 }
 #template .notice {
 	margin-top: 1em;
@@ -3033,13 +3038,146 @@ img {
 
 #template textarea,
 #template .CodeMirror {
-	width: 97%;
-	height: calc( 100vh - 280px );
+	width: 100%;
+	min-height: 60vh;
+	height: calc( 100vh - 295px );
+	border: 1px solid #ddd;
 }
-#templateside {
-	margin-top: 31px;
-	overflow: scroll;
+
+#templateside > h2 {
+	padding-top: 6px;
+	padding-bottom: 7px;
+	margin: 0;
 }
+
+#templateside ol,
+#templateside ul {
+	margin: 0;
+	padding: 0;
+}
+#templateside > ul {
+	box-sizing: border-box;
+	margin-top: 0;
+	overflow: auto;
+	padding: 0;
+	min-height: calc(60vh + 2px);
+	height: calc(100vh - 293px);
+	background-color: #f7f7f7;
+	border: 1px solid #ddd;
+	border-left: none;
+}
+#templateside ul ul {
+	padding-left: 12px;
+}
+#templateside > ul > li > ul[role=group] {
+	padding-left: 0;
+}
+
+/*
+ * Styles for Theme and Plugin editors.
+ */
+
+/* Hide collapsed items. */
+[role="treeitem"][aria-expanded="false"] > ul {
+	display: none;
+}
+
+/* Use arrow dashicons for folder states, but hide from screen readers. */
+[role="treeitem"] span[aria-hidden] {
+	display: inline;
+	font-family: dashicons;
+	font-size: 20px;
+	position: absolute;
+	pointer-events: none;
+}
+[role="treeitem"][aria-expanded="false"] > .folder-label .icon:after {
+	content: "\f139";
+}
+[role="treeitem"][aria-expanded="true"] > .folder-label .icon:after {
+	content: "\f140";
+}
+[role="treeitem"] .folder-label {
+	display: block;
+	padding: 3px 3px 3px 12px;
+	cursor: pointer;
+}
+
+/* Remove outline, and create our own focus and hover styles */
+[role="treeitem"] {
+	outline: 0;
+}
+[role="treeitem"] .folder-label.focus {
+	color: #124964;
+	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
+}
+[role="treeitem"].hover,
+[role="treeitem"] .folder-label.hover {
+	background-color: #eaeaea;
+}
+
+.tree-folder {
+	margin: 0;
+	position: relative;
+}
+[role="treeitem"] li {
+	position: relative;
+}
+
+/* Styles for folder indicators/depth */
+.tree-folder .tree-folder::after {
+	content: ' ';
+	display: block;
+	position: absolute;
+	left: 2px;
+	border-left: 1px solid #ccc;
+	top: -13px;
+	bottom: 10px;
+}
+.tree-folder > li::before {
+	content: ' ';
+	position: absolute;
+	display: block;
+	border-left: 1px solid #ccc;
+	left: 2px;
+	top: -5px;
+	height: 18px;
+	width: 7px;
+	border-bottom: 1px solid #ccc;
+}
+.tree-folder > li::after {
+	content: ' ';
+	position: absolute;
+	display: block;
+	border-left: 1px solid #ccc;
+	left: 2px;
+	bottom: -7px;
+	top: 0;
+}
+
+/* current-file needs to adjustment for .notice styles */
+#templateside .current-file {
+	margin: -4px 0 -2px;
+}
+.tree-folder > .current-file::before {
+	left: 4px;
+	height: 15px;
+	width: 0px;
+	border-left: none;
+	top: 3px;
+}
+.tree-folder > .current-file::after {
+	bottom: -4px;
+	height: 7px;
+	left: 2px;
+	top: auto;
+}
+
+/* Lines shouldn't continue on last item */
+.tree-folder > li:last-child::after,
+.tree-folder li:last-child > .tree-folder::after {
+	display: none;
+}
+
 
 #theme-plugin-editor-label {
 	display: inline-block;
@@ -3086,23 +3224,16 @@ img {
 }
 #templateside {
 	float: right;
-	width: 190px;
+	width: 16em;
 	word-wrap: break-word;
 }
 
-#templateside h2,
 #postcustomstuff p.submit {
 	margin: 0;
 }
 
 #templateside h4 {
 	margin: 1em 0 0;
-}
-
-#templateside ol,
-#templateside ul {
-	margin: .5em 0;
-	padding: 0;
 }
 
 #templateside li {
@@ -3112,8 +3243,12 @@ img {
 #templateside li a,
 .theme-editor-php .highlight {
 	display: block;
-	padding: 3px 3px 3px 12px;
+	padding: 3px 0 3px 12px;
 	text-decoration: none;
+}
+
+#templateside li > a:first-of-type {
+	padding-top: 0;
 }
 
 .theme-editor-php .highlight {
@@ -3301,7 +3436,7 @@ img {
 
 .control-section .accordion-section-title:after,
 .customize-pane-child .accordion-section-title:after {
-	top: 11px;
+	top: calc(50% - 10px); /* Arrow height is 20px, so use half of that to vertically center */
 }
 
 .js .control-section:hover .accordion-section-title,
@@ -3590,7 +3725,7 @@ img {
 	}
 
 	.wp-responsive-open #wpbody {
-		right: -190px;
+		right: -16em;
 	}
 
 	code {
@@ -3621,9 +3756,19 @@ img {
 	}
 
 	/* Theme/Plugin File Editor */
+	
+	#template textarea, 
+	#template .CodeMirror {
+		box-sizing: border-box;
+	}
+	
 	#templateside {
 		float: none;
 		width: auto;
+	}
+	
+	#templateside > ul {
+		border-left: 1px solid #ddd;
 	}
 
 	#templateside li {
@@ -3653,8 +3798,70 @@ img {
 		width: 100%;
 	}
 
+	#templateside ul ul {
+		padding-left: 1.5em;
+	}
+	[role="treeitem"] .folder-label {
+		display: block;
+		padding: 5px;
+	}
+	.tree-folder > li::before,
+	.tree-folder > li::after,
+	.tree-folder .tree-folder::after {
+		left: -8px;
+	}
+	.tree-folder > li::before {
+		top: 0px;
+		height: 13px;
+	}
+	.tree-folder > .current-file::before {
+		left: -5px;
+		top: 7px;
+		width: 4px;
+	}
+	.tree-folder > .current-file::after {
+		height: 9px;
+		left: -8px;
+	}
+	.wrap #templateside span.notice {
+		margin-left: -5px;
+		width: 100%;
+	}
+
 	.fileedit-sub .alignright {
+		float: left;
 		margin-top: 15px;
+		width: 100%;
+		text-align: left;
+	}
+	
+	.fileedit-sub .alignright label {
+		display: block;
+	}
+	
+	.fileedit-sub #theme, 
+	.fileedit-sub #plugin {
+		margin-left: 0;
+	    max-width: 70%;
+	}
+	
+	.fileedit-sub input[type="submit"] {
+		margin-bottom: 0px;
+		padding: 8px 18px;
+	}
+	
+	#documentation label[for="docs-list"] {
+		display: block;
+	}
+	
+	#documentation select[name="docs-list"] {
+		margin-left: 0;
+		max-width: 60%;
+	}
+	
+	#documentation input[type="button"] {
+		margin-bottom: 0;
+		padding: 8px 18px;
 	}
 
 	#wpfooter {
@@ -3713,6 +3920,23 @@ img {
 	h3 .nav-tab {
 		margin: 10px 10px 0 0;
 		border-bottom: 1px solid #ccc;
+	}
+}
+
+.options-media-php br {
+	display: none;
+}
+
+@media screen and (max-width: 375px) {
+	.options-media-php input[type="number"][name*="_size_"] {
+		margin: 5px 0;
+	}
+	.options-media-php label[for*="_size_h"]:before {
+		content: '';
+		display: block;
+	}
+	.options-media-php br {
+		display: block;
 	}
 }
 

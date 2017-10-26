@@ -421,9 +421,9 @@ class WP_Customize_Control {
 		$id    = 'customize-control-' . str_replace( array( '[', ']' ), array( '-', '' ), $this->id );
 		$class = 'customize-control customize-control-' . $this->type;
 
-		?><li id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $class ); ?>">
-			<?php $this->render_content(); ?>
-		</li><?php
+		printf( '<li id="%s" class="%s">', esc_attr( $id ), esc_attr( $class ) );
+		$this->render_content();
+		echo '</li>';
 	}
 
 	/**
@@ -649,7 +649,9 @@ class WP_Customize_Control {
 					type="<?php echo esc_attr( $this->type ); ?>"
 					<?php echo $describedby_attr; ?>
 					<?php $this->input_attrs(); ?>
-					value="<?php echo esc_attr( $this->value() ); ?>"
+					<?php if ( ! isset( $this->input_attrs['value'] ) ) : ?>
+						value="<?php echo esc_attr( $this->value() ); ?>"
+					<?php endif; ?>
 					<?php $this->link(); ?>
 					/>
 				<?php

@@ -429,59 +429,46 @@ class Tests_Term_Query extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @ticket 41796
+	 * @ticket 41293
 	 */
-	public function test_number_should_work_with_object_ids() {
-		register_taxonomy( 'wptests_tax', 'post' );
-
-		$term_1 = self::factory()->term->create( array(
+	public function test_should_allow_same_args_with_the_get_terms() {
+		register_post_type( 'wptests_pt' );
+		register_taxonomy( 'wptests_tax', 'wptests_pt' );
+		$t1 = self::factory()->term->create( array(
 			'taxonomy' => 'wptests_tax',
+			'name' => 'foo',
+			'slug' => 'bar',
 		) );
-		$term_2 = self::factory()->term->create( array(
+		$t2 = self::factory()->term->create( array(
 			'taxonomy' => 'wptests_tax',
-		) );
-
-		$post_1 = self::factory()->post->create();
-		$post_2 = self::factory()->post->create();
-
-		wp_set_object_terms( $post_1, array( $term_1, $term_2 ), 'wptests_tax' );
-		wp_set_object_terms( $post_2, array( $term_1 ), 'wptests_tax' );
-
-		$q = new WP_Term_Query( array(
-			'taxonomy' => 'wptests_tax',
-			'object_ids' => array( $post_1, $post_2 ),
-			'number' => 2,
+			'name' => 'bar',
+			'slug' => 'foo',
 		) );
 
-		$this->assertEqualSets( array( $term_1, $term_2 ), wp_list_pluck( $q->terms, 'term_id' ) );
-	}
-
-	/**
-	 * @ticket 41796
-	 */
-	public function test_number_should_work_with_object_ids_and_all_with_object_id() {
-		register_taxonomy( 'wptests_tax', 'post' );
-
-		$term_1 = self::factory()->term->create( array(
-			'taxonomy' => 'wptests_tax',
-		) );
-		$term_2 = self::factory()->term->create( array(
-			'taxonomy' => 'wptests_tax',
+		$p = self::factory()->post->create( array(
+			'post_type' => 'wptests_pt',
 		) );
 
-		$post_1 = self::factory()->post->create();
-		$post_2 = self::factory()->post->create();
+		wp_set_object_terms( $p, array( $t1, $t2 ), 'wptests_tax' );
 
-		wp_set_object_terms( $post_1, array( $term_1, $term_2 ), 'wptests_tax' );
-		wp_set_object_terms( $post_2, array( $term_1 ), 'wptests_tax' );
-
-		$q = new WP_Term_Query( array(
-			'taxonomy' => 'wptests_tax',
-			'object_ids' => array( $post_1, $post_2 ),
-			'fields' => 'all_with_object_id',
-			'number' => 2,
+		$expected = wp_get_post_terms( $p, 'wptests_tax', array(
+			'fields' => 'ids',
 		) );
 
-		$this->assertEqualSets( array( $term_1, $term_1 ), wp_list_pluck( $q->terms, 'term_id' ) );
+		$found1 = array_keys( wp_get_object_terms( $p, 'wptests_tax', array(
+			'fields' => 'id=>parent',
+		) ) );
+
+		$found2 = array_keys( wp_get_object_terms( $p, 'wptests_tax', array(
+			'fields' => 'id=>slug',
+		) ) );
+
+		$found3 = array_keys( wp_get_object_terms( $p, 'wptests_tax', array(
+			'fields' => 'id=>name',
+		) ) );
+
+		$this->assertSame( $expected, $found1 );
+		$this->assertSame( $expected, $found2 );
+		$this->assertSame( $expected, $found3 );
 	}
 }

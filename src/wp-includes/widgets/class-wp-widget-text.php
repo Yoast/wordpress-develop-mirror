@@ -192,8 +192,10 @@ class WP_Widget_Text extends WP_Widget {
 	public function widget( $args, $instance ) {
 		global $post;
 
+		$title = ! empty( $instance['title'] ) ? $instance['title'] : '';
+
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
-		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? '' : $instance['title'], $instance, $this->id_base );
+		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
 		$text = ! empty( $instance['text'] ) ? $instance['text'] : '';
 		$is_visual_text_widget = ( ! empty( $instance['visual'] ) && ! empty( $instance['filter'] ) );
@@ -290,10 +292,29 @@ class WP_Widget_Text extends WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
+		$text = preg_replace_callback( '#<(video|iframe|object|embed)\s[^>]*>#i', array( $this, 'inject_video_max_width_style' ), $text );
+
 		?>
 			<div class="textwidget"><?php echo $text; ?></div>
 		<?php
 		echo $args['after_widget'];
+	}
+
+	/**
+	 * Inject max-width and remove height for videos too constrained to fit inside sidebars on frontend.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @see WP_Widget_Media_Video::inject_video_max_width_style()
+	 * @param array $matches Pattern matches from preg_replace_callback.
+	 * @return string HTML Output.
+	 */
+	public function inject_video_max_width_style( $matches ) {
+		$html = $matches[0];
+		$html = preg_replace( '/\sheight="\d+"/', '', $html );
+		$html = preg_replace( '/\swidth="\d+"/', '', $html );
+		$html = preg_replace( '/(?<=width:)\s*\d+px(?=;?)/', '100%', $html );
+		return $html;
 	}
 
 	/**
