@@ -2,6 +2,68 @@
 (function( exports, $ ){
 	var Container, focus, normalizedTransitionendEventName, api = wp.customize;
 
+	api.OverlayNotification = api.Notification.extend(/** @lends wp.customize.OverlayNotification.prototype */{
+
+		/**
+		 * Whether the notification should show a loading spinner.
+		 *
+		 * @since 4.9.0
+		 * @var {boolean}
+		 */
+		loading: false,
+
+		/**
+		 * A notification that is displayed in a full-screen overlay.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @constructs wp.customize.OverlayNotification
+		 * @augments   wp.customize.Notification
+		 *
+		 * @param {string} code - Code.
+		 * @param {object} params - Params.
+		 */
+		initialize: function( code, params ) {
+			var notification = this;
+			api.Notification.prototype.initialize.call( notification, code, params );
+			notification.containerClasses += ' notification-overlay';
+			if ( notification.loading ) {
+				notification.containerClasses += ' notification-loading';
+			}
+		},
+
+		/**
+		 * Render notification.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @return {jQuery} Notification container.
+		 */
+		render: function() {
+			var li = api.Notification.prototype.render.call( this );
+			li.on( 'keydown', _.bind( this.handleEscape, this ) );
+			return li;
+		},
+
+		/**
+		 * Stop propagation on escape key presses, but also dismiss notification if it is dismissible.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {jQuery.Event} event - Event.
+		 * @returns {void}
+		 */
+		handleEscape: function( event ) {
+			var notification = this;
+			if ( 27 === event.which ) {
+				event.stopPropagation();
+				if ( notification.dismissible && notification.parent ) {
+					notification.parent.remove( notification.code );
+				}
+			}
+		}
+	});
+
 	api.Notifications = api.Values.extend(/** @lends wp.customize.Notifications.prototype */{
 
 		/**
