@@ -2380,22 +2380,16 @@
 		}
 	});
 
-	/**
-	 * Class wp.customize.OuterSection.
-	 *
-	 * Creates section outside of the sidebar, there is no ui to trigger collapse/expand so
-	 * it would require custom handling.
-	 *
-	 * @since 4.9
-	 *
-	 * @constructor
-	 * @augments wp.customize.Section
-	 * @augments wp.customize.Container
-	 */
-	api.OuterSection = api.Section.extend({
+	api.OuterSection = api.Section.extend(/** @lends wp.customize.OuterSection.prototype */{
 
 		/**
-		 * Initialize.
+		 * Class wp.customize.OuterSection.
+		 *
+		 * Creates section outside of the sidebar, there is no ui to trigger collapse/expand so
+		 * it would require custom handling.
+		 *
+		 * @constructs wp.customize.OuterSection
+		 * @augments   wp.customize.Section
 		 *
 		 * @since 4.9.0
 		 *
