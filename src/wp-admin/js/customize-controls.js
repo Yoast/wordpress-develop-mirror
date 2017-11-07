@@ -1382,8 +1382,21 @@
 		 * @param {string=}        [options.params.customizeAction] - Additional context information shown before the section title when expanded.
 		 */
 		initialize: function ( id, options ) {
-			var section = this;
-			Container.prototype.initialize.call( section, id, options );
+			var section = this, params;
+			params = options.params || options;
+
+			// Look up the type if one was not supplied.
+			if ( ! params.type ) {
+				_.find( api.sectionConstructor, function( Constructor, type ) {
+					if ( Constructor === section.constructor ) {
+						params.type = type;
+						return true;
+					}
+					return false;
+				} );
+			}
+
+			Container.prototype.initialize.call( section, id, params );
 
 			section.id = id;
 			section.panel = new api.Value();
@@ -1406,41 +1419,42 @@
 		 */
 		embed: function () {
 			var inject,
-				section = this,
-				container = $( '#customize-theme-controls' );
+				section = this;
 
-			// Watch for changes to the panel state
+			section.containerParent = api.ensure( section.containerParent );
+
+			// Watch for changes to the panel state.
 			inject = function ( panelId ) {
 				var parentContainer;
 				if ( panelId ) {
-					// The panel has been supplied, so wait until the panel object is registered
+					// The panel has been supplied, so wait until the panel object is registered.
 					api.panel( panelId, function ( panel ) {
-						// The panel has been registered, wait for it to become ready/initialized
+						// The panel has been registered, wait for it to become ready/initialized.
 						panel.deferred.embedded.done( function () {
 							parentContainer = panel.contentContainer;
 							if ( ! section.headContainer.parent().is( parentContainer ) ) {
 								parentContainer.append( section.headContainer );
 							}
 							if ( ! section.contentContainer.parent().is( section.headContainer ) ) {
-								container.append( section.contentContainer );
+								section.containerParent.append( section.contentContainer );
 							}
 							section.deferred.embedded.resolve();
 						});
 					} );
 				} else {
 					// There is no panel, so embed the section in the root of the customizer
-					parentContainer = $( '.customize-pane-parent' ); // @todo This should be defined elsewhere, and to be configurable
+					parentContainer = api.ensure( section.containerPaneParent );
 					if ( ! section.headContainer.parent().is( parentContainer ) ) {
 						parentContainer.append( section.headContainer );
 					}
 					if ( ! section.contentContainer.parent().is( section.headContainer ) ) {
-						container.append( section.contentContainer );
+						section.containerParent.append( section.contentContainer );
 					}
 					section.deferred.embedded.resolve();
 				}
 			};
 			section.panel.bind( inject );
-			inject( section.panel.get() ); // Since a section may never get a panel, assume that it won't ever get one
+			inject( section.panel.get() ); // Since a section may never get a panel, assume that it won't ever get one.
 		},
 
 		/**
@@ -1478,8 +1492,10 @@
 				}
 				content = meta.find( '.customize-section-description:first' );
 				content.toggleClass( 'open' );
-				content.slideToggle();
-				content.attr( 'aria-expanded', function ( i, attr ) {
+				content.slideToggle( section.defaultExpandedArguments.duration, function() {
+					content.trigger( 'toggled' );
+				} );
+				$( this ).attr( 'aria-expanded', function( i, attr ) {
 					return 'true' === attr ? 'false' : 'true';
 				});
 			});
@@ -1571,9 +1587,11 @@
 						completeCallback: expand
 					});
 				} else {
-					api.panel.each( function( panel ) {
-						panel.collapse();
-					});
+					if ( ! args.allowMultiple ) {
+						api.panel.each( function( panel ) {
+							panel.collapse();
+						});
+					}
 					expand();
 				}
 
