@@ -217,7 +217,7 @@ wpWidgets = {
 			 *
 			 * @ignore
 			 *
-			 * @param event
+			 * @param {object} event jQuery event object.
 			 */
 			over: function( event ) {
 				var $wrap = $( event.target ).parent();
@@ -240,7 +240,7 @@ wpWidgets = {
 			 *
 			 * @ignore
 			 *
-			 * @param event
+			 * @param {object} event jQuery event object.
 			 */
 			out: function( event ) {
 				if ( wpWidgets.hoveredSidebar ) {
