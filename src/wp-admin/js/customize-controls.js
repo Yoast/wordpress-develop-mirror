@@ -200,11 +200,18 @@
 		 * @returns {void}
 		 * @this {wp.customize.Notifications}
 		 */
+		/**
+		 * Render notifications area.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 * @this {wp.customize.Notifications}
+		 */
 		render: function() {
 			var collection = this,
-				notifications,
+				notifications, hadOverlayNotification = false, hasOverlayNotification, overlayNotifications = [],
 				previousNotificationsByCode = {},
-				listElement;
+				listElement, focusableElements;
 
 			// Short-circuit if there are no container to render into.
 			if ( ! collection.container || ! collection.container.length ) {
@@ -235,15 +242,89 @@
 
 			// Add all notifications in the sorted order.
 			_.each( notifications, function( notification ) {
+				var notificationContainer;
 				if ( wp.a11y && ( ! previousNotificationsByCode[ notification.code ] || ! _.isEqual( notification.message, previousNotificationsByCode[ notification.code ].message ) ) ) {
 					wp.a11y.speak( notification.message, 'assertive' );
 				}
-				listElement.append( $( notification.render() ) ); // @todo Consider slideDown() as enhancement.
+				notificationContainer = $( notification.render() );
+				notification.container = notificationContainer;
+				listElement.append( notificationContainer ); // @todo Consider slideDown() as enhancement.
+
+				if ( notification.extended( api.OverlayNotification ) ) {
+					overlayNotifications.push( notification );
+				}
 			});
+			hasOverlayNotification = Boolean( overlayNotifications.length );
+
+			if ( collection.previousNotifications ) {
+				hadOverlayNotification = Boolean( _.find( collection.previousNotifications, function( notification ) {
+					return notification.extended( api.OverlayNotification );
+				} ) );
+			}
+
+			if ( hasOverlayNotification !== hadOverlayNotification ) {
+				$( document.body ).toggleClass( 'customize-loading', hasOverlayNotification );
+				collection.container.toggleClass( 'has-overlay-notifications', hasOverlayNotification );
+				if ( hasOverlayNotification ) {
+					collection.previousActiveElement = document.activeElement;
+					$( document ).on( 'keydown', collection.constrainFocus );
+				} else {
+					$( document ).off( 'keydown', collection.constrainFocus );
+				}
+			}
+
+			if ( hasOverlayNotification ) {
+				collection.focusContainer = overlayNotifications[ overlayNotifications.length - 1 ].container;
+				collection.focusContainer.prop( 'tabIndex', -1 );
+				focusableElements = collection.focusContainer.find( ':focusable' );
+				if ( focusableElements.length ) {
+					focusableElements.first().focus();
+				} else {
+					collection.focusContainer.focus();
+				}
+			} else if ( collection.previousActiveElement ) {
+				$( collection.previousActiveElement ).focus();
+				collection.previousActiveElement = null;
+			}
 
 			collection.previousNotifications = notifications;
 			collection.previousContainer = collection.container;
 			collection.trigger( 'rendered' );
+		},
+
+		/**
+		 * Constrain focus on focus container.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {jQuery.Event} event - Event.
+		 * @returns {void}
+		 */
+		constrainFocus: function constrainFocus( event ) {
+			var collection = this, focusableElements;
+
+			// Prevent keys from escaping.
+			event.stopPropagation();
+
+			if ( 9 !== event.which ) { // Tab key.
+				return;
+			}
+
+			focusableElements = collection.focusContainer.find( ':focusable' );
+			if ( 0 === focusableElements.length ) {
+				focusableElements = collection.focusContainer;
+			}
+
+			if ( ! $.contains( collection.focusContainer[0], event.target ) || ! $.contains( collection.focusContainer[0], document.activeElement ) ) {
+				event.preventDefault();
+				focusableElements.first().focus();
+			} else if ( focusableElements.last().is( event.target ) && ! event.shiftKey ) {
+				event.preventDefault();
+				focusableElements.first().focus();
+			} else if ( focusableElements.first().is( event.target ) && event.shiftKey ) {
+				event.preventDefault();
+				focusableElements.last().focus();
+			}
 		}
 	});
 
