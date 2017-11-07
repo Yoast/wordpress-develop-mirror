@@ -100,6 +100,8 @@
 
 			api.Values.prototype.initialize.call( collection, options );
 
+			_.bindAll( collection, 'constrainFocus' );
+
 			// Keep track of the order in which the notifications were added for sorting purposes.
 			collection._addedIncrement = 0;
 			collection._addedOrder = {};
@@ -127,17 +129,25 @@
 		 * Add notification to the collection.
 		 *
 		 * @since 4.9.0
-		 * @param {string} code - Notification code.
-		 * @param {object} params - Notification params.
-		 * @return {api.Notification} Added instance (or existing instance if it was already added).
+		 *
+		 * @param {string|wp.customize.Notification} notification - Notification object to add. Alternatively code may be supplied, and in that case the second notificationObject argument must be supplied.
+		 * @param {wp.customize.Notification} [notificationObject] - Notification to add when first argument is the code string.
+		 * @returns {wp.customize.Notification} Added notification (or existing instance if it was already added).
 		 */
-		add: function( code, params ) {
-			var collection = this;
+		add: function( notification, notificationObject ) {
+			var collection = this, code, instance;
+			if ( 'string' === typeof notification ) {
+				code = notification;
+				instance = notificationObject;
+			} else {
+				code = notification.code;
+				instance = notification;
+			}
 			if ( ! collection.has( code ) ) {
 				collection._addedIncrement += 1;
 				collection._addedOrder[ code ] = collection._addedIncrement;
 			}
-			return api.Values.prototype.add.call( this, code, params );
+			return api.Values.prototype.add.call( collection, code, instance );
 		},
 
 		/**
@@ -193,13 +203,6 @@
 			return notifications;
 		},
 
-		/**
-		 * Render notifications area.
-		 *
-		 * @since 4.9.0
-		 * @returns {void}
-		 * @this {wp.customize.Notifications}
-		 */
 		/**
 		 * Render notifications area.
 		 *
