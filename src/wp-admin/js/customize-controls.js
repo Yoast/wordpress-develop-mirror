@@ -4378,6 +4378,784 @@
 		}
 	});
 
+	/**
+	 * Class wp.customize.CodeEditorControl
+	 *
+	 * @since 4.9.0
+	 *
+	 * @constructor
+	 * @augments wp.customize.Control
+	 * @augments wp.customize.Class
+	 */
+	api.CodeEditorControl = api.Control.extend({
+
+		/**
+		 * Initialize.
+		 *
+		 * @since 4.9.0
+		 * @param {string} id      - Unique identifier for the control instance.
+		 * @param {object} options - Options hash for the control instance.
+		 * @returns {void}
+		 */
+		initialize: function( id, options ) {
+			var control = this;
+			control.deferred = _.extend( control.deferred || {}, {
+				codemirror: $.Deferred()
+			} );
+			api.Control.prototype.initialize.call( control, id, options );
+		},
+
+		/**
+		 * Initialize the editor when the containing section is ready and expanded.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		ready: function() {
+			var control = this;
+			if ( ! control.section() ) {
+				control.initEditor();
+				return;
+			}
+
+			// Wait to initialize editor until section is embedded and expanded.
+			api.section( control.section(), function( section ) {
+				section.deferred.embedded.done( function() {
+					var onceExpanded;
+					if ( section.expanded() ) {
+						control.initEditor();
+					} else {
+						onceExpanded = function( isExpanded ) {
+							if ( isExpanded ) {
+								control.initEditor();
+								section.expanded.unbind( onceExpanded );
+							}
+						};
+						section.expanded.bind( onceExpanded );
+					}
+				} );
+			} );
+		},
+
+		/**
+		 * Initialize editor.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		initEditor: function() {
+			var control = this, element, editorSettings = false;
+
+			// Obtain editorSettings for instantiation.
+			if ( wp.codeEditor && ( _.isUndefined( control.params.editor_settings ) || false !== control.params.editor_settings ) ) {
+
+				// Obtain default editor settings.
+				editorSettings = wp.codeEditor.defaultSettings ? _.clone( wp.codeEditor.defaultSettings ) : {};
+				editorSettings.codemirror = _.extend(
+					{},
+					editorSettings.codemirror,
+					{
+						indentUnit: 2,
+						tabSize: 2
+					}
+				);
+
+				// Merge editor_settings param on top of defaults.
+				if ( _.isObject( control.params.editor_settings ) ) {
+					_.each( control.params.editor_settings, function( value, key ) {
+						if ( _.isObject( value ) ) {
+							editorSettings[ key ] = _.extend(
+								{},
+								editorSettings[ key ],
+								value
+							);
+						}
+					} );
+				}
+			}
+
+			element = new api.Element( control.container.find( 'textarea' ) );
+			control.elements.push( element );
+			element.sync( control.setting );
+			element.set( control.setting() );
+
+			if ( editorSettings ) {
+				control.initSyntaxHighlightingEditor( editorSettings );
+			} else {
+				control.initPlainTextareaEditor();
+			}
+		},
+
+		/**
+		 * Make sure editor gets focused when control is focused.
+		 *
+		 * @since 4.9.0
+		 * @param {Object}   [params] - Focus params.
+		 * @param {Function} [params.completeCallback] - Function to call when expansion is complete.
+		 * @returns {void}
+		 */
+		focus: function( params ) {
+			var control = this, extendedParams = _.extend( {}, params ), originalCompleteCallback;
+			originalCompleteCallback = extendedParams.completeCallback;
+			extendedParams.completeCallback = function() {
+				if ( originalCompleteCallback ) {
+					originalCompleteCallback();
+				}
+				if ( control.editor ) {
+					control.editor.codemirror.focus();
+				}
+			};
+			api.Control.prototype.focus.call( control, extendedParams );
+		},
+
+		/**
+		 * Initialize syntax-highlighting editor.
+		 *
+		 * @since 4.9.0
+		 * @param {object} codeEditorSettings - Code editor settings.
+		 * @returns {void}
+		 */
+		initSyntaxHighlightingEditor: function( codeEditorSettings ) {
+			var control = this, $textarea = control.container.find( 'textarea' ), settings, suspendEditorUpdate = false;
+
+			settings = _.extend( {}, codeEditorSettings, {
+				onTabNext: _.bind( control.onTabNext, control ),
+				onTabPrevious: _.bind( control.onTabPrevious, control ),
+				onUpdateErrorNotice: _.bind( control.onUpdateErrorNotice, control )
+			});
+
+			control.editor = wp.codeEditor.initialize( $textarea, settings );
+
+			// Improve the editor accessibility.
+			$( control.editor.codemirror.display.lineDiv )
+				.attr({
+					role: 'textbox',
+					'aria-multiline': 'true',
+					'aria-label': control.params.label,
+					'aria-describedby': 'editor-keyboard-trap-help-1 editor-keyboard-trap-help-2 editor-keyboard-trap-help-3 editor-keyboard-trap-help-4'
+				});
+
+			// Focus the editor when clicking on its label.
+			control.container.find( 'label' ).on( 'click', function() {
+				control.editor.codemirror.focus();
+			});
+
+			/*
+			 * When the CodeMirror instance changes, mirror to the textarea,
+			 * where we have our "true" change event handler bound.
+			 */
+			control.editor.codemirror.on( 'change', function( codemirror ) {
+				suspendEditorUpdate = true;
+				$textarea.val( codemirror.getValue() ).trigger( 'change' );
+				suspendEditorUpdate = false;
+			});
+
+			// Update CodeMirror when the setting is changed by another plugin.
+			control.setting.bind( function( value ) {
+				if ( ! suspendEditorUpdate ) {
+					control.editor.codemirror.setValue( value );
+				}
+			});
+
+			// Prevent collapsing section when hitting Esc to tab out of editor.
+			control.editor.codemirror.on( 'keydown', function onKeydown( codemirror, event ) {
+				var escKeyCode = 27;
+				if ( escKeyCode === event.keyCode ) {
+					event.stopPropagation();
+				}
+			});
+
+			control.deferred.codemirror.resolveWith( control, [ control.editor.codemirror ] );
+		},
+
+		/**
+		 * Handle tabbing to the field after the editor.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		onTabNext: function onTabNext() {
+			var control = this, controls, controlIndex, section;
+			section = api.section( control.section() );
+			controls = section.controls();
+			controlIndex = controls.indexOf( control );
+			if ( controls.length === controlIndex + 1 ) {
+				$( '#customize-footer-actions .collapse-sidebar' ).focus();
+			} else {
+				controls[ controlIndex + 1 ].container.find( ':focusable:first' ).focus();
+			}
+		},
+
+		/**
+		 * Handle tabbing to the field before the editor.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		onTabPrevious: function onTabPrevious() {
+			var control = this, controls, controlIndex, section;
+			section = api.section( control.section() );
+			controls = section.controls();
+			controlIndex = controls.indexOf( control );
+			if ( 0 === controlIndex ) {
+				section.contentContainer.find( '.customize-section-title .customize-help-toggle, .customize-section-title .customize-section-description.open .section-description-close' ).last().focus();
+			} else {
+				controls[ controlIndex - 1 ].contentContainer.find( ':focusable:first' ).focus();
+			}
+		},
+
+		/**
+		 * Update error notice.
+		 *
+		 * @since 4.9.0
+		 * @param {Array} errorAnnotations - Error annotations.
+		 * @returns {void}
+		 */
+		onUpdateErrorNotice: function onUpdateErrorNotice( errorAnnotations ) {
+			var control = this, message;
+			control.setting.notifications.remove( 'csslint_error' );
+
+			if ( 0 !== errorAnnotations.length ) {
+				if ( 1 === errorAnnotations.length ) {
+					message = api.l10n.customCssError.singular.replace( '%d', '1' );
+				} else {
+					message = api.l10n.customCssError.plural.replace( '%d', String( errorAnnotations.length ) );
+				}
+				control.setting.notifications.add( new api.Notification( 'csslint_error', {
+					message: message,
+					type: 'error'
+				} ) );
+			}
+		},
+
+		/**
+		 * Initialize plain-textarea editor when syntax highlighting is disabled.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		initPlainTextareaEditor: function() {
+			var control = this, $textarea = control.container.find( 'textarea' ), textarea = $textarea[0];
+
+			$textarea.on( 'blur', function onBlur() {
+				$textarea.data( 'next-tab-blurs', false );
+			} );
+
+			$textarea.on( 'keydown', function onKeydown( event ) {
+				var selectionStart, selectionEnd, value, tabKeyCode = 9, escKeyCode = 27;
+
+				if ( escKeyCode === event.keyCode ) {
+					if ( ! $textarea.data( 'next-tab-blurs' ) ) {
+						$textarea.data( 'next-tab-blurs', true );
+						event.stopPropagation(); // Prevent collapsing the section.
+					}
+					return;
+				}
+
+				// Short-circuit if tab key is not being pressed or if a modifier key *is* being pressed.
+				if ( tabKeyCode !== event.keyCode || event.ctrlKey || event.altKey || event.shiftKey ) {
+					return;
+				}
+
+				// Prevent capturing Tab characters if Esc was pressed.
+				if ( $textarea.data( 'next-tab-blurs' ) ) {
+					return;
+				}
+
+				selectionStart = textarea.selectionStart;
+				selectionEnd = textarea.selectionEnd;
+				value = textarea.value;
+
+				if ( selectionStart >= 0 ) {
+					textarea.value = value.substring( 0, selectionStart ).concat( '\t', value.substring( selectionEnd ) );
+					$textarea.selectionStart = textarea.selectionEnd = selectionStart + 1;
+				}
+
+				event.stopPropagation();
+				event.preventDefault();
+			});
+
+			control.deferred.codemirror.rejectWith( control );
+		}
+	});
+
+	/**
+	 * Class wp.customize.DateTimeControl.
+	 *
+	 * @since 4.9.0
+	 * @constructor
+	 * @augments wp.customize.Control
+	 * @augments wp.customize.Class
+	 */
+	api.DateTimeControl = api.Control.extend({
+
+		/**
+		 * Initialize behaviors.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		ready: function ready() {
+			var control = this;
+
+			control.inputElements = {};
+			control.invalidDate = false;
+
+			_.bindAll( control, 'populateSetting', 'updateDaysForMonth', 'populateDateInputs' );
+
+			if ( ! control.setting ) {
+				throw new Error( 'Missing setting' );
+			}
+
+			control.container.find( '.date-input' ).each( function() {
+				var input = $( this ), component, element;
+				component = input.data( 'component' );
+				element = new api.Element( input );
+				control.inputElements[ component ] = element;
+				control.elements.push( element );
+
+				// Add invalid date error once user changes (and has blurred the input).
+				input.on( 'change', function() {
+					if ( control.invalidDate ) {
+						control.notifications.add( new api.Notification( 'invalid_date', {
+							message: api.l10n.invalidDate
+						} ) );
+					}
+				} );
+
+				// Remove the error immediately after validity change.
+				input.on( 'input', _.debounce( function() {
+					if ( ! control.invalidDate ) {
+						control.notifications.remove( 'invalid_date' );
+					}
+				} ) );
+
+				// Add zero-padding when blurring field.
+				input.on( 'blur', _.debounce( function() {
+					if ( ! control.invalidDate ) {
+						control.populateDateInputs();
+					}
+				} ) );
+			} );
+
+			control.inputElements.month.bind( control.updateDaysForMonth );
+			control.inputElements.year.bind( control.updateDaysForMonth );
+			control.populateDateInputs();
+			control.setting.bind( control.populateDateInputs );
+
+			// Start populating setting after inputs have been populated.
+			_.each( control.inputElements, function( element ) {
+				element.bind( control.populateSetting );
+			} );
+		},
+
+		/**
+		 * Parse datetime string.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {string} datetime - Date/Time string. Accepts Y-m-d[ H:i[:s]] format.
+		 * @returns {object|null} Returns object containing date components or null if parse error.
+		 */
+		parseDateTime: function parseDateTime( datetime ) {
+			var control = this, matches, date, midDayHour = 12;
+
+			if ( datetime ) {
+				matches = datetime.match( /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/ );
+			}
+
+			if ( ! matches ) {
+				return null;
+			}
+
+			matches.shift();
+
+			date = {
+				year: matches.shift(),
+				month: matches.shift(),
+				day: matches.shift(),
+				hour: matches.shift() || '00',
+				minute: matches.shift() || '00',
+				second: matches.shift() || '00'
+			};
+
+			if ( control.params.includeTime && control.params.twelveHourFormat ) {
+				date.hour = parseInt( date.hour, 10 );
+				date.meridian = date.hour >= midDayHour ? 'pm' : 'am';
+				date.hour = date.hour % midDayHour ? String( date.hour % midDayHour ) : String( midDayHour );
+				delete date.second; // @todo Why only if twelveHourFormat?
+			}
+
+			return date;
+		},
+
+		/**
+		 * Validates if input components have valid date and time.
+		 *
+		 * @since 4.9.0
+		 * @return {boolean} If date input fields has error.
+		 */
+		validateInputs: function validateInputs() {
+			var control = this, components, validityInput;
+
+			control.invalidDate = false;
+
+			components = [ 'year', 'day' ];
+			if ( control.params.includeTime ) {
+				components.push( 'hour', 'minute' );
+			}
+
+			_.find( components, function( component ) {
+				var element, max, min, value;
+
+				element = control.inputElements[ component ];
+				validityInput = element.element.get( 0 );
+				max = parseInt( element.element.attr( 'max' ), 10 );
+				min = parseInt( element.element.attr( 'min' ), 10 );
+				value = parseInt( element(), 10 );
+				control.invalidDate = isNaN( value ) || value > max || value < min;
+
+				if ( ! control.invalidDate ) {
+					validityInput.setCustomValidity( '' );
+				}
+
+				return control.invalidDate;
+			} );
+
+			if ( control.inputElements.meridian && ! control.invalidDate ) {
+				validityInput = control.inputElements.meridian.element.get( 0 );
+				if ( 'am' !== control.inputElements.meridian.get() && 'pm' !== control.inputElements.meridian.get() ) {
+					control.invalidDate = true;
+				} else {
+					validityInput.setCustomValidity( '' );
+				}
+			}
+
+			if ( control.invalidDate ) {
+				validityInput.setCustomValidity( api.l10n.invalidValue );
+			} else {
+				validityInput.setCustomValidity( '' );
+			}
+			if ( ! control.section() || api.section.has( control.section() ) && api.section( control.section() ).expanded() ) {
+				_.result( validityInput, 'reportValidity' );
+			}
+
+			return control.invalidDate;
+		},
+
+		/**
+		 * Updates number of days according to the month and year selected.
+		 *
+		 * @since 4.9.0
+		 * @return {void}
+		 */
+		updateDaysForMonth: function updateDaysForMonth() {
+			var control = this, daysInMonth, year, month, day;
+
+			month = parseInt( control.inputElements.month(), 10 );
+			year = parseInt( control.inputElements.year(), 10 );
+			day = parseInt( control.inputElements.day(), 10 );
+
+			if ( month && year ) {
+				daysInMonth = new Date( year, month, 0 ).getDate();
+				control.inputElements.day.element.attr( 'max', daysInMonth );
+
+				if ( day > daysInMonth ) {
+					control.inputElements.day( String( daysInMonth ) );
+				}
+			}
+		},
+
+		/**
+		 * Populate setting value from the inputs.
+		 *
+		 * @since 4.9.0
+		 * @returns {boolean} If setting updated.
+		 */
+		populateSetting: function populateSetting() {
+			var control = this, date;
+
+			if ( control.validateInputs() || ! control.params.allowPastDate && ! control.isFutureDate() ) {
+				return false;
+			}
+
+			date = control.convertInputDateToString();
+			control.setting.set( date );
+			return true;
+		},
+
+		/**
+		 * Converts input values to string in Y-m-d H:i:s format.
+		 *
+		 * @since 4.9.0
+		 * @return {string} Date string.
+		 */
+		convertInputDateToString: function convertInputDateToString() {
+			var control = this, date = '', dateFormat, hourInTwentyFourHourFormat,
+				getElementValue, pad;
+
+			pad = function( number, padding ) {
+				var zeros;
+				if ( String( number ).length < padding ) {
+					zeros = padding - String( number ).length;
+					number = Math.pow( 10, zeros ).toString().substr( 1 ) + String( number );
+				}
+				return number;
+			};
+
+			getElementValue = function( component ) {
+				var value = parseInt( control.inputElements[ component ].get(), 10 );
+
+				if ( _.contains( [ 'month', 'day', 'hour', 'minute' ], component ) ) {
+					value = pad( value, 2 );
+				} else if ( 'year' === component ) {
+					value = pad( value, 4 );
+				}
+				return value;
+			};
+
+			dateFormat = [ 'year', '-', 'month', '-', 'day' ];
+			if ( control.params.includeTime ) {
+				hourInTwentyFourHourFormat = control.inputElements.meridian ? control.convertHourToTwentyFourHourFormat( control.inputElements.hour(), control.inputElements.meridian() ) : control.inputElements.hour();
+				dateFormat = dateFormat.concat( [ ' ', pad( hourInTwentyFourHourFormat, 2 ), ':', 'minute', ':', '00' ] );
+			}
+
+			_.each( dateFormat, function( component ) {
+				date += control.inputElements[ component ] ? getElementValue( component ) : component;
+			} );
+
+			return date;
+		},
+
+		/**
+		 * Check if the date is in the future.
+		 *
+		 * @since 4.9.0
+		 * @returns {boolean} True if future date.
+		 */
+		isFutureDate: function isFutureDate() {
+			var control = this;
+			return 0 < api.utils.getRemainingTime( control.convertInputDateToString() );
+		},
+
+		/**
+		 * Convert hour in twelve hour format to twenty four hour format.
+		 *
+		 * @since 4.9.0
+		 * @param {string} hourInTwelveHourFormat - Hour in twelve hour format.
+		 * @param {string} meridian - Either 'am' or 'pm'.
+		 * @returns {string} Hour in twenty four hour format.
+		 */
+		convertHourToTwentyFourHourFormat: function convertHour( hourInTwelveHourFormat, meridian ) {
+			var hourInTwentyFourHourFormat, hour, midDayHour = 12;
+
+			hour = parseInt( hourInTwelveHourFormat, 10 );
+			if ( isNaN( hour ) ) {
+				return '';
+			}
+
+			if ( 'pm' === meridian && hour < midDayHour ) {
+				hourInTwentyFourHourFormat = hour + midDayHour;
+			} else if ( 'am' === meridian && midDayHour === hour ) {
+				hourInTwentyFourHourFormat = hour - midDayHour;
+			} else {
+				hourInTwentyFourHourFormat = hour;
+			}
+
+			return String( hourInTwentyFourHourFormat );
+		},
+
+		/**
+		 * Populates date inputs in date fields.
+		 *
+		 * @since 4.9.0
+		 * @returns {boolean} Whether the inputs were populated.
+		 */
+		populateDateInputs: function populateDateInputs() {
+			var control = this, parsed;
+
+			parsed = control.parseDateTime( control.setting.get() );
+
+			if ( ! parsed ) {
+				return false;
+			}
+
+			_.each( control.inputElements, function( element, component ) {
+				var value = parsed[ component ]; // This will be zero-padded string.
+
+				// Set month and meridian regardless of focused state since they are dropdowns.
+				if ( 'month' === component || 'meridian' === component ) {
+
+					// Options in dropdowns are not zero-padded.
+					value = value.replace( /^0/, '' );
+
+					element.set( value );
+				} else {
+
+					value = parseInt( value, 10 );
+					if ( ! element.element.is( document.activeElement ) ) {
+
+						// Populate element with zero-padded value if not focused.
+						element.set( parsed[ component ] );
+					} else if ( value !== parseInt( element(), 10 ) ) {
+
+						// Forcibly update the value if its underlying value changed, regardless of zero-padding.
+						element.set( String( value ) );
+					}
+				}
+			} );
+
+			return true;
+		},
+
+		/**
+		 * Toggle future date notification for date control.
+		 *
+		 * @since 4.9.0
+		 * @param {boolean} notify Add or remove the notification.
+		 * @return {wp.customize.DateTimeControl}
+		 */
+		toggleFutureDateNotification: function toggleFutureDateNotification( notify ) {
+			var control = this, notificationCode, notification;
+
+			notificationCode = 'not_future_date';
+
+			if ( notify ) {
+				notification = new api.Notification( notificationCode, {
+					type: 'error',
+					message: api.l10n.futureDateError
+				} );
+				control.notifications.add( notification );
+			} else {
+				control.notifications.remove( notificationCode );
+			}
+
+			return control;
+		}
+	});
+
+	/**
+	 * Class PreviewLinkControl.
+	 *
+	 * @since 4.9.0
+	 * @constructor
+	 * @augments wp.customize.Control
+	 * @augments wp.customize.Class
+	 */
+	api.PreviewLinkControl = api.Control.extend({
+
+		defaults: _.extend( {}, api.Control.prototype.defaults, {
+			templateId: 'customize-preview-link-control'
+		} ),
+
+		/**
+		 * Initialize behaviors.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		ready: function ready() {
+			var control = this, element, component, node, url, input, button;
+
+			_.bindAll( control, 'updatePreviewLink' );
+
+			if ( ! control.setting ) {
+				control.setting = new api.Value();
+			}
+
+			control.previewElements = {};
+
+			control.container.find( '.preview-control-element' ).each( function() {
+				node = $( this );
+				component = node.data( 'component' );
+				element = new api.Element( node );
+				control.previewElements[ component ] = element;
+				control.elements.push( element );
+			} );
+
+			url = control.previewElements.url;
+			input = control.previewElements.input;
+			button = control.previewElements.button;
+
+			input.link( control.setting );
+			url.link( control.setting );
+
+			url.bind( function( value ) {
+				url.element.parent().attr( {
+					href: value,
+					target: api.settings.changeset.uuid
+				} );
+			} );
+
+			api.bind( 'ready', control.updatePreviewLink );
+			api.state( 'saved' ).bind( control.updatePreviewLink );
+			api.state( 'changesetStatus' ).bind( control.updatePreviewLink );
+			api.state( 'activated' ).bind( control.updatePreviewLink );
+			api.previewer.previewUrl.bind( control.updatePreviewLink );
+
+			button.element.on( 'click', function( event ) {
+				event.preventDefault();
+				if ( control.setting() ) {
+					input.element.select();
+					document.execCommand( 'copy' );
+					button( button.element.data( 'copied-text' ) );
+				}
+			} );
+
+			url.element.parent().on( 'click', function( event ) {
+				if ( $( this ).hasClass( 'disabled' ) ) {
+					event.preventDefault();
+				}
+			} );
+
+			button.element.on( 'mouseenter', function() {
+				if ( control.setting() ) {
+					button( button.element.data( 'copy-text' ) );
+				}
+			} );
+		},
+
+		/**
+		 * Updates Preview Link
+		 *
+		 * @since 4.9.0
+		 * @return {void}
+		 */
+		updatePreviewLink: function updatePreviewLink() {
+			var control = this, unsavedDirtyValues;
+
+			unsavedDirtyValues = ! api.state( 'saved' ).get() || '' === api.state( 'changesetStatus' ).get() || 'auto-draft' === api.state( 'changesetStatus' ).get();
+
+			control.toggleSaveNotification( unsavedDirtyValues );
+			control.previewElements.url.element.parent().toggleClass( 'disabled', unsavedDirtyValues );
+			control.previewElements.button.element.prop( 'disabled', unsavedDirtyValues );
+			control.setting.set( api.previewer.getFrontendPreviewUrl() );
+		},
+
+		/**
+		 * Toggles save notification.
+		 *
+		 * @since 4.9.0
+		 * @param {boolean} notify Add or remove notification.
+		 * @return {void}
+		 */
+		toggleSaveNotification: function toggleSaveNotification( notify ) {
+			var control = this, notificationCode, notification;
+
+			notificationCode = 'changes_not_saved';
+
+			if ( notify ) {
+				notification = new api.Notification( notificationCode, {
+					type: 'info',
+					message: api.l10n.saveBeforeShare
+				} );
+				control.notifications.add( notification );
+			} else {
+				control.notifications.remove( notificationCode );
+			}
+		}
+	});
+
 	// Change objects contained within the main customize object to Settings.
 	api.defaultConstructor = api.Setting;
 
