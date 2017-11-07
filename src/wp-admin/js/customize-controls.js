@@ -628,6 +628,103 @@
 	};
 
 	/**
+	 * Highlight the existence of a button.
+	 *
+	 * This function reminds the user of a button represented by the specified
+	 * UI element, after an optional delay. If the user focuses the element
+	 * before the delay passes, the reminder is canceled.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param {jQuery} button - The element to highlight.
+	 * @param {object} [options] - Options.
+	 * @param {number} [options.delay=0] - Delay in milliseconds.
+	 * @param {jQuery} [options.focusTarget] - A target for user focus that defaults to the highlighted element.
+	 *                                         If the user focuses the target before the delay passes, the reminder
+	 *                                         is canceled. This option exists to accommodate compound buttons
+	 *                                         containing auxiliary UI, such as the Publish button augmented with a
+	 *                                         Settings button.
+	 * @returns {Function} An idempotent function that cancels the reminder.
+	 */
+	api.utils.highlightButton = function highlightButton( button, options ) {
+		var animationClass = 'button-see-me',
+			canceled = false,
+			params;
+
+		params = _.extend(
+			{
+				delay: 0,
+				focusTarget: button
+			},
+			options
+		);
+
+		function cancelReminder() {
+			canceled = true;
+		}
+
+		params.focusTarget.on( 'focusin', cancelReminder );
+		setTimeout( function() {
+			params.focusTarget.off( 'focusin', cancelReminder );
+
+			if ( ! canceled ) {
+				button.addClass( animationClass );
+				button.one( 'animationend', function() {
+					/*
+					 * Remove animation class to avoid situations in Customizer where
+					 * DOM nodes are moved (re-inserted) and the animation repeats.
+					 */
+					button.removeClass( animationClass );
+				} );
+			}
+		}, params.delay );
+
+		return cancelReminder;
+	};
+
+	/**
+	 * Get current timestamp adjusted for server clock time.
+	 *
+	 * Same functionality as the `current_time( 'mysql', false )` function in PHP.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @returns {int} Current timestamp.
+	 */
+	api.utils.getCurrentTimestamp = function getCurrentTimestamp() {
+		var currentDate, currentClientTimestamp, timestampDifferential;
+		currentClientTimestamp = _.now();
+		currentDate = new Date( api.settings.initialServerDate.replace( /-/g, '/' ) );
+		timestampDifferential = currentClientTimestamp - api.settings.initialClientTimestamp;
+		timestampDifferential += api.settings.initialClientTimestamp - api.settings.initialServerTimestamp;
+		currentDate.setTime( currentDate.getTime() + timestampDifferential );
+		return currentDate.getTime();
+	};
+
+	/**
+	 * Get remaining time of when the date is set.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param {string|int|Date} datetime - Date time or timestamp of the future date.
+	 * @return {int} remainingTime - Remaining time in milliseconds.
+	 */
+	api.utils.getRemainingTime = function getRemainingTime( datetime ) {
+		var millisecondsDivider = 1000, remainingTime, timestamp;
+		if ( datetime instanceof Date ) {
+			timestamp = datetime.getTime();
+		} else if ( 'string' === typeof datetime ) {
+			timestamp = ( new Date( datetime.replace( /-/g, '/' ) ) ).getTime();
+		} else {
+			timestamp = datetime;
+		}
+
+		remainingTime = timestamp - api.utils.getCurrentTimestamp();
+		remainingTime = Math.ceil( remainingTime / millisecondsDivider );
+		return remainingTime;
+	};
+
+	/**
 	 * Return browser supported `transitionend` event name.
 	 *
 	 * @since 4.7.0
