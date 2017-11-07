@@ -1968,6 +1968,125 @@
 		}
 	});
 
+	/**
+	 * Class wp.customize.OuterSection.
+	 *
+	 * Creates section outside of the sidebar, there is no ui to trigger collapse/expand so
+	 * it would require custom handling.
+	 *
+	 * @since 4.9
+	 *
+	 * @constructor
+	 * @augments wp.customize.Section
+	 * @augments wp.customize.Container
+	 */
+	api.OuterSection = api.Section.extend({
+
+		/**
+		 * Initialize.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @returns {void}
+		 */
+		initialize: function() {
+			var section = this;
+			section.containerParent = '#customize-outer-theme-controls';
+			section.containerPaneParent = '.customize-outer-pane-parent';
+			api.Section.prototype.initialize.apply( section, arguments );
+		},
+
+		/**
+		 * Overrides api.Section.prototype.onChangeExpanded to prevent collapse/expand effect
+		 * on other sections and panels.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {Boolean}  expanded - The expanded state to transition to.
+		 * @param {Object}   [args] - Args.
+		 * @param {boolean}  [args.unchanged] - Whether the state is already known to not be changed, and so short-circuit with calling completeCallback early.
+		 * @param {Function} [args.completeCallback] - Function to call when the slideUp/slideDown has completed.
+		 * @param {Object}   [args.duration] - The duration for the animation.
+		 */
+		onChangeExpanded: function( expanded, args ) {
+			var section = this,
+				container = section.headContainer.closest( '.wp-full-overlay-sidebar-content' ),
+				content = section.contentContainer,
+				backBtn = content.find( '.customize-section-back' ),
+				sectionTitle = section.headContainer.find( '.accordion-section-title' ).first(),
+				body = $( document.body ),
+				expand, panel;
+
+			body.toggleClass( 'outer-section-open', expanded );
+			section.container.toggleClass( 'open', expanded );
+			section.container.removeClass( 'busy' );
+			api.section.each( function( _section ) {
+				if ( 'outer' === _section.params.type && _section.id !== section.id ) {
+					_section.container.removeClass( 'open' );
+				}
+			} );
+
+			if ( expanded && ! content.hasClass( 'open' ) ) {
+
+				if ( args.unchanged ) {
+					expand = args.completeCallback;
+				} else {
+					expand = $.proxy( function() {
+						section._animateChangeExpanded( function() {
+							sectionTitle.attr( 'tabindex', '-1' );
+							backBtn.attr( 'tabindex', '0' );
+
+							backBtn.focus();
+							content.css( 'top', '' );
+							container.scrollTop( 0 );
+
+							if ( args.completeCallback ) {
+								args.completeCallback();
+							}
+						} );
+
+						content.addClass( 'open' );
+					}, this );
+				}
+
+				if ( section.panel() ) {
+					api.panel( section.panel() ).expand({
+						duration: args.duration,
+						completeCallback: expand
+					});
+				} else {
+					expand();
+				}
+
+			} else if ( ! expanded && content.hasClass( 'open' ) ) {
+				if ( section.panel() ) {
+					panel = api.panel( section.panel() );
+					if ( panel.contentContainer.hasClass( 'skip-transition' ) ) {
+						panel.collapse();
+					}
+				}
+				section._animateChangeExpanded( function() {
+					backBtn.attr( 'tabindex', '-1' );
+					sectionTitle.attr( 'tabindex', '0' );
+
+					sectionTitle.focus();
+					content.css( 'top', '' );
+
+					if ( args.completeCallback ) {
+						args.completeCallback();
+					}
+				} );
+
+				content.removeClass( 'open' );
+
+			} else {
+				if ( args.completeCallback ) {
+					args.completeCallback();
+				}
+			}
+		}
+	});
+
 	api.Panel = Container.extend(/** @lends wp.customize.Panel.prototype */{
 		containerType: 'panel',
 
