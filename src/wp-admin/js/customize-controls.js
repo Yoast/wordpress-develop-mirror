@@ -2341,6 +2341,437 @@
 		}
 	});
 
+	/**
+	 * Class wp.customize.ThemesPanel.
+	 *
+	 * Custom section for themes that displays without the customize preview.
+	 *
+	 * @constructor
+	 * @augments wp.customize.Panel
+	 * @augments wp.customize.Container
+	 */
+	api.ThemesPanel = api.Panel.extend({
+
+		/**
+		 * Initialize.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {string} id - The ID for the panel.
+		 * @param {object} options - Options.
+		 * @returns {void}
+		 */
+		initialize: function( id, options ) {
+			var panel = this;
+			panel.installingThemes = [];
+			api.Panel.prototype.initialize.call( panel, id, options );
+		},
+
+		/**
+		 * Determine whether a given theme can be switched to, or in general.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {string} [slug] - Theme slug.
+		 * @returns {boolean} Whether the theme can be switched to.
+		 */
+		canSwitchTheme: function canSwitchTheme( slug ) {
+			if ( slug && slug === api.settings.theme.stylesheet ) {
+				return true;
+			}
+			return 'publish' === api.state( 'selectedChangesetStatus' ).get() && ( '' === api.state( 'changesetStatus' ).get() || 'auto-draft' === api.state( 'changesetStatus' ).get() );
+		},
+
+		/**
+		 * Attach events.
+		 *
+		 * @since 4.9.0
+		 * @returns {void}
+		 */
+		attachEvents: function() {
+			var panel = this;
+
+			// Attach regular panel events.
+			api.Panel.prototype.attachEvents.apply( panel );
+
+			// Temporary since supplying SFTP credentials does not work yet. See #42184
+			if ( api.settings.theme._filesystemCredentialsNeeded ) {
+				panel.notifications.add( new api.Notification( 'theme_install_unavailable', {
+					message: api.l10n.themeInstallUnavailable,
+					type: 'info',
+					dismissible: true
+				} ) );
+			}
+
+			function toggleDisabledNotifications() {
+				if ( panel.canSwitchTheme() ) {
+					panel.notifications.remove( 'theme_switch_unavailable' );
+				} else {
+					panel.notifications.add( new api.Notification( 'theme_switch_unavailable', {
+						message: api.l10n.themePreviewUnavailable,
+						type: 'warning'
+					} ) );
+				}
+			}
+			toggleDisabledNotifications();
+			api.state( 'selectedChangesetStatus' ).bind( toggleDisabledNotifications );
+			api.state( 'changesetStatus' ).bind( toggleDisabledNotifications );
+
+			// Collapse panel to customize the current theme.
+			panel.contentContainer.on( 'click', '.customize-theme', function() {
+				panel.collapse();
+			});
+
+			// Toggle between filtering and browsing themes on mobile.
+			panel.contentContainer.on( 'click', '.customize-themes-section-title, .customize-themes-mobile-back', function() {
+				$( '.wp-full-overlay' ).toggleClass( 'showing-themes' );
+			});
+
+			// Install (and maybe preview) a theme.
+			panel.contentContainer.on( 'click', '.theme-install', function( event ) {
+				panel.installTheme( event );
+			});
+
+			// Update a theme. Theme cards have the class, the details modal has the id.
+			panel.contentContainer.on( 'click', '.update-theme, #update-theme', function( event ) {
+
+				// #update-theme is a link.
+				event.preventDefault();
+				event.stopPropagation();
+
+				panel.updateTheme( event );
+			});
+
+			// Delete a theme.
+			panel.contentContainer.on( 'click', '.delete-theme', function( event ) {
+				panel.deleteTheme( event );
+			});
+
+			_.bindAll( panel, 'installTheme', 'updateTheme' );
+		},
+
+		/**
+		 * Update UI to reflect expanded state
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {Boolean}  expanded - Expanded state.
+		 * @param {Object}   args - Args.
+		 * @param {Boolean}  args.unchanged - Whether or not the state changed.
+		 * @param {Function} args.completeCallback - Callback to execute when the animation completes.
+		 * @returns {void}
+		 */
+		onChangeExpanded: function( expanded, args ) {
+			var panel = this, overlay, sections, hasExpandedSection = false;
+
+			// Expand/collapse the panel normally.
+			api.Panel.prototype.onChangeExpanded.apply( this, [ expanded, args ] );
+
+			// Immediately call the complete callback if there were no changes
+			if ( args.unchanged ) {
+				if ( args.completeCallback ) {
+					args.completeCallback();
+				}
+				return;
+			}
+
+			overlay = panel.headContainer.closest( '.wp-full-overlay' );
+
+			if ( expanded ) {
+				overlay
+					.addClass( 'in-themes-panel' )
+					.delay( 200 ).find( '.customize-themes-full-container' ).addClass( 'animate' );
+
+				_.delay( function() {
+					overlay.addClass( 'themes-panel-expanded' );
+				}, 200 );
+
+				// Automatically open the first section (except on small screens), if one isn't already expanded.
+				if ( 600 < window.innerWidth ) {
+					sections = panel.sections();
+					_.each( sections, function( section ) {
+						if ( section.expanded() ) {
+							hasExpandedSection = true;
+						}
+					} );
+					if ( ! hasExpandedSection && sections.length > 0 ) {
+						sections[0].expand();
+					}
+				}
+			} else {
+				overlay
+					.removeClass( 'in-themes-panel themes-panel-expanded' )
+					.find( '.customize-themes-full-container' ).removeClass( 'animate' );
+			}
+		},
+
+		/**
+		 * Install a theme via wp.updates.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {jQuery.Event} event - Event.
+		 * @returns {jQuery.promise} Promise.
+		 */
+		installTheme: function( event ) {
+			var panel = this, preview, onInstallSuccess, slug = $( event.target ).data( 'slug' ), deferred = $.Deferred(), request;
+			preview = $( event.target ).hasClass( 'preview' );
+
+			// Temporary since supplying SFTP credentials does not work yet. See #42184.
+			if ( api.settings.theme._filesystemCredentialsNeeded ) {
+				deferred.reject({
+					errorCode: 'theme_install_unavailable'
+				});
+				return deferred.promise();
+			}
+
+			// Prevent loading a non-active theme preview when there is a drafted/scheduled changeset.
+			if ( ! panel.canSwitchTheme( slug ) ) {
+				deferred.reject({
+					errorCode: 'theme_switch_unavailable'
+				});
+				return deferred.promise();
+			}
+
+			// Theme is already being installed.
+			if ( _.contains( panel.installingThemes, slug ) ) {
+				deferred.reject({
+					errorCode: 'theme_already_installing'
+				});
+				return deferred.promise();
+			}
+
+			wp.updates.maybeRequestFilesystemCredentials( event );
+
+			onInstallSuccess = function( response ) {
+				var theme = false, themeControl;
+				if ( preview ) {
+					api.notifications.remove( 'theme_installing' );
+
+					panel.loadThemePreview( slug );
+
+				} else {
+					api.control.each( function( control ) {
+						if ( 'theme' === control.params.type && control.params.theme.id === response.slug ) {
+							theme = control.params.theme; // Used below to add theme control.
+							control.rerenderAsInstalled( true );
+						}
+					});
+
+					// Don't add the same theme more than once.
+					if ( ! theme || api.control.has( 'installed_theme_' + theme.id ) ) {
+						deferred.resolve( response );
+						return;
+					}
+
+					// Add theme control to installed section.
+					theme.type = 'installed';
+					themeControl = new api.controlConstructor.theme( 'installed_theme_' + theme.id, {
+						type: 'theme',
+						section: 'installed_themes',
+						theme: theme,
+						priority: 0 // Add all newly-installed themes to the top.
+					} );
+
+					api.control.add( themeControl );
+					api.control( themeControl.id ).container.trigger( 'render-screenshot' );
+
+					// Close the details modal if it's open to the installed theme.
+					api.section.each( function( section ) {
+						if ( 'themes' === section.params.type ) {
+							if ( theme.id === section.currentTheme ) { // Don't close the modal if the user has navigated elsewhere.
+								section.closeDetails();
+							}
+						}
+					});
+				}
+				deferred.resolve( response );
+			};
+
+			panel.installingThemes.push( slug ); // Note: we don't remove elements from installingThemes, since they shouldn't be installed again.
+			request = wp.updates.installTheme( {
+				slug: slug
+			} );
+
+			// Also preview the theme as the event is triggered on Install & Preview.
+			if ( preview ) {
+				api.notifications.add( new api.OverlayNotification( 'theme_installing', {
+					message: api.l10n.themeDownloading,
+					type: 'info',
+					loading: true
+				} ) );
+			}
+
+			request.done( onInstallSuccess );
+			request.fail( function() {
+				api.notifications.remove( 'theme_installing' );
+			} );
+
+			return deferred.promise();
+		},
+
+		/**
+		 * Load theme preview.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {string} themeId Theme ID.
+		 * @returns {jQuery.promise} Promise.
+		 */
+		loadThemePreview: function( themeId ) {
+			var panel = this, deferred = $.Deferred(), onceProcessingComplete, urlParser, queryParams;
+
+			// Prevent loading a non-active theme preview when there is a drafted/scheduled changeset.
+			if ( ! panel.canSwitchTheme( themeId ) ) {
+				deferred.reject({
+					errorCode: 'theme_switch_unavailable'
+				});
+				return deferred.promise();
+			}
+
+			urlParser = document.createElement( 'a' );
+			urlParser.href = location.href;
+			queryParams = _.extend(
+				api.utils.parseQueryString( urlParser.search.substr( 1 ) ),
+				{
+					theme: themeId,
+					changeset_uuid: api.settings.changeset.uuid,
+					'return': api.settings.url['return']
+				}
+			);
+
+			// Include autosaved param to load autosave revision without prompting user to restore it.
+			if ( ! api.state( 'saved' ).get() ) {
+				queryParams.customize_autosaved = 'on';
+			}
+
+			urlParser.search = $.param( queryParams );
+
+			// Update loading message. Everything else is handled by reloading the page.
+			api.notifications.add( new api.OverlayNotification( 'theme_previewing', {
+				message: api.l10n.themePreviewWait,
+				type: 'info',
+				loading: true
+			} ) );
+
+			onceProcessingComplete = function() {
+				var request;
+				if ( api.state( 'processing' ).get() > 0 ) {
+					return;
+				}
+
+				api.state( 'processing' ).unbind( onceProcessingComplete );
+
+				request = api.requestChangesetUpdate( {}, { autosave: true } );
+				request.done( function() {
+					deferred.resolve();
+					$( window ).off( 'beforeunload.customize-confirm' );
+					location.replace( urlParser.href );
+				} );
+				request.fail( function() {
+
+					// @todo Show notification regarding failure.
+					api.notifications.remove( 'theme_previewing' );
+
+					deferred.reject();
+				} );
+			};
+
+			if ( 0 === api.state( 'processing' ).get() ) {
+				onceProcessingComplete();
+			} else {
+				api.state( 'processing' ).bind( onceProcessingComplete );
+			}
+
+			return deferred.promise();
+		},
+
+		/**
+		 * Update a theme via wp.updates.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {jQuery.Event} event - Event.
+		 * @returns {void}
+		 */
+		updateTheme: function( event ) {
+			wp.updates.maybeRequestFilesystemCredentials( event );
+
+			$( document ).one( 'wp-theme-update-success', function( e, response ) {
+
+				// Rerender the control to reflect the update.
+				api.control.each( function( control ) {
+					if ( 'theme' === control.params.type && control.params.theme.id === response.slug ) {
+						control.params.theme.hasUpdate = false;
+						control.params.theme.version = response.newVersion;
+						setTimeout( function() {
+							control.rerenderAsInstalled( true );
+						}, 2000 );
+					}
+				});
+			} );
+
+			wp.updates.updateTheme( {
+				slug: $( event.target ).closest( '.notice' ).data( 'slug' )
+			} );
+		},
+
+		/**
+		 * Delete a theme via wp.updates.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {jQuery.Event} event - Event.
+		 * @returns {void}
+		 */
+		deleteTheme: function( event ) {
+			var theme, section;
+			theme = $( event.target ).data( 'slug' );
+			section = api.section( 'installed_themes' );
+
+			event.preventDefault();
+
+			// Temporary since supplying SFTP credentials does not work yet. See #42184.
+			if ( api.settings.theme._filesystemCredentialsNeeded ) {
+				return;
+			}
+
+			// Confirmation dialog for deleting a theme.
+			if ( ! window.confirm( api.settings.l10n.confirmDeleteTheme ) ) {
+				return;
+			}
+
+			wp.updates.maybeRequestFilesystemCredentials( event );
+
+			$( document ).one( 'wp-theme-delete-success', function() {
+				var control = api.control( 'installed_theme_' + theme );
+
+				// Remove theme control.
+				control.container.remove();
+				api.control.remove( control.id );
+
+				// Update installed count.
+				section.loaded = section.loaded - 1;
+				section.updateCount();
+
+				// Rerender any other theme controls as uninstalled.
+				api.control.each( function( control ) {
+					if ( 'theme' === control.params.type && control.params.theme.id === theme ) {
+						control.rerenderAsInstalled( false );
+					}
+				});
+			} );
+
+			wp.updates.deleteTheme( {
+				slug: theme
+			} );
+
+			// Close modal and focus the section.
+			section.closeDetails();
+			section.focus();
+		}
+	});
+
 	api.Control = api.Class.extend(/** @lends wp.customize.Control.prototype */{
 		defaultActiveArguments: { duration: 'fast', completeCallback: $.noop },
 
