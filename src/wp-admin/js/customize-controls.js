@@ -2747,19 +2747,15 @@
 		}
 	});
 
-	/**
-	 * Class wp.customize.ThemesPanel.
-	 *
-	 * Custom section for themes that displays without the customize preview.
-	 *
-	 * @constructor
-	 * @augments wp.customize.Panel
-	 * @augments wp.customize.Container
-	 */
-	api.ThemesPanel = api.Panel.extend({
+	api.ThemesPanel = api.Panel.extend(/** @lends wp.customize.ThemesPanel.prototype */{
 
 		/**
-		 * Initialize.
+		 * Class wp.customize.ThemesPanel.
+		 *
+		 * Custom section for themes that displays without the customize preview.
+		 *
+		 * @constructs wp.customize.ThemesPanel
+		 * @augments   wp.customize.Panel
 		 *
 		 * @since 4.9.0
 		 *
@@ -4784,21 +4780,16 @@
 		}
 	});
 
-	/**
-	 * Class wp.customize.CodeEditorControl
-	 *
-	 * @since 4.9.0
-	 *
-	 * @constructor
-	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
-	 */
-	api.CodeEditorControl = api.Control.extend({
+	api.CodeEditorControl = api.Control.extend(/** @lends wp.customize.CodeEditorControl.prototype */{
 
 		/**
-		 * Initialize.
+		 * Class wp.customize.CodeEditorControl
 		 *
 		 * @since 4.9.0
+		 *
+		 * @constructs wp.customize.CodeEditorControl
+		 * @augments   wp.customize.Control
+		 *
 		 * @param {string} id      - Unique identifier for the control instance.
 		 * @param {object} options - Options hash for the control instance.
 		 * @returns {void}
@@ -5085,18 +5076,13 @@
 		}
 	});
 
-	/**
-	 * Class wp.customize.DateTimeControl.
-	 *
-	 * @since 4.9.0
-	 * @constructor
-	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
-	 */
-	api.DateTimeControl = api.Control.extend({
+	api.DateTimeControl = api.Control.extend(/** @lends wp.customize.DateTimeControl.prototype */{
 
 		/**
-		 * Initialize behaviors.
+		 * Class wp.customize.DateTimeControl.
+		 *
+		 * @constructs wp.customize.DateTimeControl
+		 * @augments   wp.customize.Control
 		 *
 		 * @since 4.9.0
 		 * @returns {void}
@@ -5444,11 +5430,10 @@
 	 * Class PreviewLinkControl.
 	 *
 	 * @since 4.9.0
-	 * @constructor
+	 * @class    wp.customize.PreviewLinkControl
 	 * @augments wp.customize.Control
-	 * @augments wp.customize.Class
 	 */
-	api.PreviewLinkControl = api.Control.extend({
+	api.PreviewLinkControl = api.Control.extend(/** @lends wp.customize.PreviewLinkControl.prototype */{
 
 		defaults: _.extend( {}, api.Control.prototype.defaults, {
 			templateId: 'customize-preview-link-control'
