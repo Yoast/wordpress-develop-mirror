@@ -248,6 +248,18 @@
 	});
 
 	api.Setting = api.Value.extend(/** @lends wp.customize.Setting.prototype */{
+
+		/**
+		 * Default params.
+		 *
+		 * @since 4.9.0
+		 * @var {object}
+		 */
+		defaults: {
+			transport: 'refresh',
+			dirty: false
+		},
+
 		/**
 		 * A Customizer Setting.
 		 *
