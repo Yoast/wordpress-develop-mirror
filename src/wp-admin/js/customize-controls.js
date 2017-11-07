@@ -2248,16 +2248,22 @@
 		 * Render control's screenshot if the control comes into view.
 		 *
 		 * @since 4.2.0
+		 *
+		 * @returns {void}
 		 */
-		renderScreenshots: function( ) {
+		renderScreenshots: function() {
 			var section = this;
 
-			// Fill queue initially.
-			if ( section.screenshotQueue === null ) {
-				section.screenshotQueue = section.controls();
+			// Fill queue initially, or check for more if empty.
+			if ( null === section.screenshotQueue || 0 === section.screenshotQueue.length ) {
+
+				// Add controls that haven't had their screenshots rendered.
+				section.screenshotQueue = _.filter( section.controls(), function( control ) {
+					return ! control.screenshotRendered;
+				});
 			}
 
-			// Are all screenshots rendered?
+			// Are all screenshots rendered (for now)?
 			if ( ! section.screenshotQueue.length ) {
 				return;
 			}
@@ -2337,6 +2343,8 @@
 		 * Advance the modal to the next theme.
 		 *
 		 * @since 4.2.0
+		 *
+		 * @returns {void}
 		 */
 		nextTheme: function () {
 			var section = this;
@@ -2351,24 +2359,30 @@
 		 * Get the next theme model.
 		 *
 		 * @since 4.2.0
+		 *
+		 * @returns {wp.customize.ThemeControl|boolean} Next theme.
 		 */
 		getNextTheme: function () {
-			var control, next;
-			control = api.control( 'theme_' + this.currentTheme );
-			next = control.container.next( 'li.customize-control-theme' );
-			if ( ! next.length ) {
+			var section = this, control, nextControl, sectionControls, i;
+			control = api.control( section.params.action + '_theme_' + section.currentTheme );
+			sectionControls = section.controls();
+			i = _.indexOf( sectionControls, control );
+			if ( -1 === i ) {
 				return false;
 			}
-			next = next[0].id.replace( 'customize-control-', '' );
-			control = api.control( next );
 
-			return control.params.theme;
+			nextControl = sectionControls[ i + 1 ];
+			if ( ! nextControl ) {
+				return false;
+			}
+			return nextControl.params.theme;
 		},
 
 		/**
 		 * Advance the modal to the previous theme.
 		 *
 		 * @since 4.2.0
+		 * @returns {void}
 		 */
 		previousTheme: function () {
 			var section = this;
@@ -2383,24 +2397,30 @@
 		 * Get the previous theme model.
 		 *
 		 * @since 4.2.0
+		 * @returns {wp.customize.ThemeControl|boolean} Previous theme.
 		 */
 		getPreviousTheme: function () {
-			var control, previous;
-			control = api.control( 'theme_' + this.currentTheme );
-			previous = control.container.prev( 'li.customize-control-theme' );
-			if ( ! previous.length ) {
+			var section = this, control, nextControl, sectionControls, i;
+			control = api.control( section.params.action + '_theme_' + section.currentTheme );
+			sectionControls = section.controls();
+			i = _.indexOf( sectionControls, control );
+			if ( -1 === i ) {
 				return false;
 			}
-			previous = previous[0].id.replace( 'customize-control-', '' );
-			control = api.control( previous );
 
-			return control.params.theme;
+			nextControl = sectionControls[ i - 1 ];
+			if ( ! nextControl ) {
+				return false;
+			}
+			return nextControl.params.theme;
 		},
 
 		/**
 		 * Disable buttons when we're viewing the first or last theme.
 		 *
 		 * @since 4.2.0
+		 *
+		 * @returns {void}
 		 */
 		updateLimits: function () {
 			if ( ! this.getNextTheme() ) {
@@ -2417,52 +2437,12 @@
 		 * @since 4.7.0
 		 * @access public
 		 *
+		 * @deprecated
 		 * @param {string} themeId Theme ID.
 		 * @returns {jQuery.promise} Promise.
 		 */
 		loadThemePreview: function( themeId ) {
-			var deferred = $.Deferred(), onceProcessingComplete, overlay, urlParser;
-
-			urlParser = document.createElement( 'a' );
-			urlParser.href = location.href;
-			urlParser.search = $.param( _.extend(
-				api.utils.parseQueryString( urlParser.search.substr( 1 ) ),
-				{
-					theme: themeId,
-					changeset_uuid: api.settings.changeset.uuid
-				}
-			) );
-
-			overlay = $( '.wp-full-overlay' );
-			overlay.addClass( 'customize-loading' );
-
-			onceProcessingComplete = function() {
-				var request;
-				if ( api.state( 'processing' ).get() > 0 ) {
-					return;
-				}
-
-				api.state( 'processing' ).unbind( onceProcessingComplete );
-
-				request = api.requestChangesetUpdate();
-				request.done( function() {
-					$( window ).off( 'beforeunload.customize-confirm' );
-					top.location.href = urlParser.href;
-					deferred.resolve();
-				} );
-				request.fail( function() {
-					overlay.removeClass( 'customize-loading' );
-					deferred.reject();
-				} );
-			};
-
-			if ( 0 === api.state( 'processing' ).get() ) {
-				onceProcessingComplete();
-			} else {
-				api.state( 'processing' ).bind( onceProcessingComplete );
-			}
-
-			return deferred.promise();
+			return api.ThemesPanel.prototype.loadThemePreview.call( this, themeId );
 		},
 
 		/**
@@ -2470,52 +2450,59 @@
 		 *
 		 * @since 4.2.0
 		 *
-		 * @param {Object}   theme
+		 * @param {object} theme - Theme.
+		 * @param {Function} [callback] - Callback once the details have been shown.
+		 * @returns {void}
 		 */
 		showDetails: function ( theme, callback ) {
-			var section = this, link;
-			callback = callback || function(){};
+			var section = this, panel = api.panel( 'themes' );
 			section.currentTheme = theme.id;
 			section.overlay.html( section.template( theme ) )
 				.fadeIn( 'fast' )
 				.focus();
-			$( 'body' ).addClass( 'modal-open' );
+
+			function disableSwitchButtons() {
+				return ! panel.canSwitchTheme( theme.id );
+			}
+
+			// Temporary special function since supplying SFTP credentials does not work yet. See #42184.
+			function disableInstallButtons() {
+				return disableSwitchButtons() || true === api.settings.theme._filesystemCredentialsNeeded;
+			}
+
+			section.overlay.find( 'button.preview, button.preview-theme' ).toggleClass( 'disabled', disableSwitchButtons() );
+			section.overlay.find( 'button.theme-install' ).toggleClass( 'disabled', disableInstallButtons() );
+
+			section.$body.addClass( 'modal-open' );
 			section.containFocus( section.overlay );
 			section.updateLimits();
-
-			link = section.overlay.find( '.inactive-theme > a' );
-
-			link.on( 'click', function( event ) {
-				event.preventDefault();
-
-				// Short-circuit if request is currently being made.
-				if ( link.hasClass( 'disabled' ) ) {
-					return;
-				}
-				link.addClass( 'disabled' );
-
-				section.loadThemePreview( theme.id ).fail( function() {
-					link.removeClass( 'disabled' );
-				} );
-			} );
-			callback();
+			wp.a11y.speak( api.settings.l10n.announceThemeDetails.replace( '%s', theme.name ) );
+			if ( callback ) {
+				callback();
+			}
 		},
 
 		/**
 		 * Close the theme details modal.
 		 *
 		 * @since 4.2.0
+		 *
+		 * @returns {void}
 		 */
 		closeDetails: function () {
-			$( 'body' ).removeClass( 'modal-open' );
-			this.overlay.fadeOut( 'fast' );
-			api.control( 'theme_' + this.currentTheme ).focus();
+			var section = this;
+			section.$body.removeClass( 'modal-open' );
+			section.overlay.fadeOut( 'fast' );
+			api.control( section.params.action + '_theme_' + section.currentTheme ).container.find( '.theme' ).focus();
 		},
 
 		/**
 		 * Keep tab focus within the theme details modal.
 		 *
 		 * @since 4.2.0
+		 *
+		 * @param {jQuery} el - Element to contain focus.
+		 * @returns {void}
 		 */
 		containFocus: function( el ) {
 			var tabbables;
