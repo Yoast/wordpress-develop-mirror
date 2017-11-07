@@ -2727,8 +2727,22 @@
 		 * @param {boolean=true}   [options.params.active] - Whether the panel is active or not.
 		 */
 		initialize: function ( id, options ) {
-			var panel = this;
-			Container.prototype.initialize.call( panel, id, options );
+			var panel = this, params;
+			params = options.params || options;
+
+			// Look up the type if one was not supplied.
+			if ( ! params.type ) {
+				_.find( api.panelConstructor, function( Constructor, type ) {
+					if ( Constructor === panel.constructor ) {
+						params.type = type;
+						return true;
+					}
+					return false;
+				} );
+			}
+
+			Container.prototype.initialize.call( panel, id, params );
+
 			panel.embed();
 			panel.deferred.embedded.done( function () {
 				panel.ready();
@@ -2750,8 +2764,8 @@
 			}
 			if ( ! panel.contentContainer.parent().is( panel.headContainer ) ) {
 				container.append( panel.contentContainer );
-				panel.renderContent();
 			}
+			panel.renderContent();
 
 			panel.deferred.embedded.resolve();
 		},
@@ -2788,12 +2802,7 @@
 
 			meta = panel.container.find( '.panel-meta:first' );
 
-			meta.find( '> .accordion-section-title .customize-help-toggle' ).on( 'click keydown', function( event ) {
-				if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
-					return;
-				}
-				event.preventDefault(); // Keep this AFTER the key filter above
-
+			meta.find( '> .accordion-section-title .customize-help-toggle' ).on( 'click', function() {
 				if ( meta.hasClass( 'cannot-expand' ) ) {
 					return;
 				}
@@ -2801,10 +2810,14 @@
 				var content = meta.find( '.customize-panel-description:first' );
 				if ( meta.hasClass( 'open' ) ) {
 					meta.toggleClass( 'open' );
-					content.slideUp( panel.defaultExpandedArguments.duration );
+					content.slideUp( panel.defaultExpandedArguments.duration, function() {
+						content.trigger( 'toggled' );
+					} );
 					$( this ).attr( 'aria-expanded', false );
 				} else {
-					content.slideDown( panel.defaultExpandedArguments.duration );
+					content.slideDown( panel.defaultExpandedArguments.duration, function() {
+						content.trigger( 'toggled' );
+					} );
 					meta.toggleClass( 'open' );
 					$( this ).attr( 'aria-expanded', true );
 				}
@@ -2828,7 +2841,7 @@
 		 *
 		 * @since 4.1.0
 		 *
-		 * @returns {boolean}
+		 * @returns {boolean} Whether contextually active.
 		 */
 		isContextuallyActive: function () {
 			var panel = this,
@@ -2843,7 +2856,7 @@
 		},
 
 		/**
-		 * Update UI to reflect expanded state
+		 * Update UI to reflect expanded state.
 		 *
 		 * @since 4.1.0
 		 *
@@ -2851,6 +2864,7 @@
 		 * @param {Object}   args
 		 * @param {Boolean}  args.unchanged
 		 * @param {Function} args.completeCallback
+		 * @returns {void}
 		 */
 		onChangeExpanded: function ( expanded, args ) {
 
@@ -2956,7 +2970,10 @@
 				template = wp.template( 'customize-panel-default-content' );
 			}
 			if ( template && panel.headContainer ) {
-				panel.contentContainer.html( template( panel.params ) );
+				panel.contentContainer.html( template( _.extend(
+					{ id: panel.id },
+					panel.params
+				) ) );
 			}
 		}
 	});
