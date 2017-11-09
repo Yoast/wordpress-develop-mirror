@@ -33,15 +33,15 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 			'replace_media' => _x( 'Replace Video', 'label for button in the video widget; should preferably not be longer than ~13 characters long' ),
 			'edit_media' => _x( 'Edit Video', 'label for button in the video widget; should preferably not be longer than ~13 characters long' ),
 			'missing_attachment' => sprintf(
-				/* translators: placeholder is URL to media library */
+				/* translators: %s: URL to media library */
 				__( 'We can&#8217;t find that video. Check your <a href="%s">media library</a> and make sure it wasn&#8217;t deleted.' ),
 				esc_url( admin_url( 'upload.php' ) )
 			),
-			/* translators: %d is widget count */
+			/* translators: %d: widget count */
 			'media_library_state_multi' => _n_noop( 'Video Widget (%d)', 'Video Widget (%d)' ),
 			'media_library_state_single' => __( 'Video Widget' ),
-			/* translators: placeholder is a list of valid video file extensions */
-			'unsupported_file_type' => sprintf( __( 'Sorry, we can&#8217;t display the video file type selected. Please select a supported video file (%1$s) or stream (YouTube or Vimeo) instead.' ), '<code>.' . implode( '</code>, <code>.', wp_get_video_extensions() ) . '</code>' ),
+			/* translators: %s: a list of valid video file extensions */
+			'unsupported_file_type' => sprintf( __( 'Sorry, we can&#8217;t load the video at the supplied URL. Please check that the URL is for a supported video file (%s) or stream (e.g. YouTube and Vimeo).' ), '<code>.' . implode( '</code>, <code>.', wp_get_video_extensions() ) . '</code>' ),
 		) );
 	}
 
@@ -87,7 +87,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 				'type' => 'string',
 				'default' => '',
 				'format' => 'uri',
-				/* translators: placeholder is video extension */
+				/* translators: %s: video extension */
 				'description' => sprintf( __( 'URL to the %s video source file' ), $video_extension ),
 			);
 		}
@@ -121,17 +121,24 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 			return;
 		}
 
-		add_filter( 'wp_video_shortcode', array( $this, 'inject_video_max_width_style' ) );
+		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
+		$vimeo_pattern   = '#^https?://(.+\.)?vimeo\.com/.*#';
 
-		echo wp_video_shortcode(
-			array_merge(
-				$instance,
-				compact( 'src' )
-			),
-			$instance['content']
-		);
+		if ( $attachment || preg_match( $youtube_pattern, $src ) || preg_match( $vimeo_pattern, $src ) ) {
+			add_filter( 'wp_video_shortcode', array( $this, 'inject_video_max_width_style' ) );
 
-		remove_filter( 'wp_video_shortcode', array( $this, 'inject_video_max_width_style' ) );
+			echo wp_video_shortcode(
+				array_merge(
+					$instance,
+					compact( 'src' )
+				),
+				$instance['content']
+			);
+
+			remove_filter( 'wp_video_shortcode', array( $this, 'inject_video_max_width_style' ) );
+		} else {
+			echo $this->inject_video_max_width_style( wp_oembed_get( $src ) );
+		}
 	}
 
 	/**
@@ -227,11 +234,11 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 				<div class="notice notice-error notice-alt">
 					<p><?php _e( 'Unable to preview media due to an unknown error.' ); ?></p>
 				</div>
-			<# } else if ( data.is_hosted_embed && data.model.poster ) { #>
+			<# } else if ( data.is_oembed && data.model.poster ) { #>
 				<a href="{{ data.model.src }}" target="_blank" class="media-widget-video-link">
 					<img src="{{ data.model.poster }}" />
 				</a>
-			<# } else if ( data.is_hosted_embed ) { #>
+			<# } else if ( data.is_oembed ) { #>
 				<a href="{{ data.model.src }}" target="_blank" class="media-widget-video-link no-poster">
 					<span class="dashicons dashicons-format-video"></span>
 				</a>

@@ -44,14 +44,17 @@ class WP_Widget_Categories extends WP_Widget {
 	public function widget( $args, $instance ) {
 		static $first_dropdown = true;
 
+		$title = ! empty( $instance['title'] ) ? $instance['title'] : __( 'Categories' );
+
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
-		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Categories' ) : $instance['title'], $instance, $this->id_base );
+		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
 		$c = ! empty( $instance['count'] ) ? '1' : '0';
 		$h = ! empty( $instance['hierarchical'] ) ? '1' : '0';
 		$d = ! empty( $instance['dropdown'] ) ? '1' : '0';
 
 		echo $args['before_widget'];
+
 		if ( $title ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
@@ -76,12 +79,14 @@ class WP_Widget_Categories extends WP_Widget {
 			 * Filters the arguments for the Categories widget drop-down.
 			 *
 			 * @since 2.8.0
+			 * @since 4.9.0 Added the `$instance` parameter.
 			 *
 			 * @see wp_dropdown_categories()
 			 *
 			 * @param array $cat_args An array of Categories widget drop-down arguments.
+			 * @param array $instance Array of settings for the current widget.
 			 */
-			wp_dropdown_categories( apply_filters( 'widget_categories_dropdown_args', $cat_args ) );
+			wp_dropdown_categories( apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ) );
 
 			echo '</form>';
 			?>
@@ -111,10 +116,12 @@ class WP_Widget_Categories extends WP_Widget {
 		 * Filters the arguments for the Categories widget.
 		 *
 		 * @since 2.8.0
+		 * @since 4.9.0 Added the `$instance` parameter.
 		 *
 		 * @param array $cat_args An array of Categories widget options.
+		 * @param array $instance Array of settings for the current widget.
 		 */
-		wp_list_categories( apply_filters( 'widget_categories_args', $cat_args ) );
+		wp_list_categories( apply_filters( 'widget_categories_args', $cat_args, $instance ) );
 ?>
 		</ul>
 <?php

@@ -390,7 +390,7 @@ class WP_Http {
 		 * @param array|WP_Error $response HTTP response or WP_Error object.
 		 * @param string         $context  Context under which the hook is fired.
 		 * @param string         $class    HTTP transport used.
-		 * @param array          $args     HTTP request arguments.
+		 * @param array          $r        HTTP request arguments.
 		 * @param string         $url      The request URL.
 		 */
 		do_action( 'http_api_debug', $response, 'response', 'Requests', $r, $url );
@@ -458,7 +458,7 @@ class WP_Http {
 	 *
 	 * @param string            $location URL to redirect to.
 	 * @param array             $headers  Headers for the redirect.
-	 * @param mixed             $data     The data to add to the cache.
+	 * @param string|array      $data     Body to send with the request.
 	 * @param array             $options  Redirect request options.
 	 * @param Requests_Response $original Response object.
 	 */

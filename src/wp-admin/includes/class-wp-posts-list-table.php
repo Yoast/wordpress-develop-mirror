@@ -231,18 +231,23 @@ class WP_Posts_List_Table extends WP_List_Table {
 	protected function get_edit_link( $args, $label, $class = '' ) {
 		$url = add_query_arg( $args, 'edit.php' );
 
-		$class_html = '';
+		$class_html = $aria_current = '';
 		if ( ! empty( $class ) ) {
 			 $class_html = sprintf(
 				' class="%s"',
 				esc_attr( $class )
 			);
+
+			if ( 'current' === $class ) {
+				$aria_current = ' aria-current="page"';
+			}
 		}
 
 		return sprintf(
-			'<a href="%s"%s>%s</a>',
+			'<a href="%s"%s%s>%s</a>',
 			esc_url( $url ),
 			$class_html,
+			$aria_current,
 			$label
 		);
 	}
@@ -944,7 +949,11 @@ class WP_Posts_List_Table extends WP_List_Table {
 		echo "</strong>\n";
 
 		if ( ! is_post_type_hierarchical( $this->screen->post_type ) && 'excerpt' === $mode && current_user_can( 'read_post', $post->ID ) ) {
-			echo esc_html( get_the_excerpt() );
+			if ( post_password_required( $post ) ) {
+				echo '<span class="protected-post-excerpt">' . esc_html( get_the_excerpt() ) . '</span>';
+			} else {
+				echo esc_html( get_the_excerpt() );
+			}
 		}
 
 		get_inline_data( $post );
@@ -1375,11 +1384,15 @@ class WP_Posts_List_Table extends WP_List_Table {
 	<form method="get"><table style="display: none"><tbody id="inlineedit">
 		<?php
 		$hclass = count( $hierarchical_taxonomies ) ? 'post' : 'page';
+		$inline_edit_classes = "inline-edit-row inline-edit-row-$hclass";
+		$bulk_edit_classes   = "bulk-edit-row bulk-edit-row-$hclass bulk-edit-{$screen->post_type}";
+		$quick_edit_classes  = "quick-edit-row quick-edit-row-$hclass inline-edit-{$screen->post_type}";
+
 		$bulk = 0;
 		while ( $bulk < 2 ) { ?>
 
-		<tr id="<?php echo $bulk ? 'bulk-edit' : 'inline-edit'; ?>" class="inline-edit-row inline-edit-row-<?php echo "$hclass inline-edit-" . $screen->post_type;
-			echo $bulk ? " bulk-edit-row bulk-edit-row-$hclass bulk-edit-{$screen->post_type}" : " quick-edit-row quick-edit-row-$hclass inline-edit-{$screen->post_type}";
+		<tr id="<?php echo $bulk ? 'bulk-edit' : 'inline-edit'; ?>" class="<?php echo $inline_edit_classes . ' ';
+			echo $bulk ? $bulk_edit_classes : $quick_edit_classes;
 		?>" style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
 
 		<fieldset class="inline-edit-col-left">
@@ -1728,7 +1741,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 
 		}
 	?>
-		<p class="submit inline-edit-save">
+		<div class="submit inline-edit-save">
 			<button type="button" class="button cancel alignleft"><?php _e( 'Cancel' ); ?></button>
 			<?php if ( ! $bulk ) {
 				wp_nonce_field( 'inlineeditnonce', '_inline_edit', false );
@@ -1743,9 +1756,11 @@ class WP_Posts_List_Table extends WP_List_Table {
 			<?php if ( ! $bulk && ! post_type_supports( $screen->post_type, 'author' ) ) { ?>
 				<input type="hidden" name="post_author" value="<?php echo esc_attr( $post->post_author ); ?>" />
 			<?php } ?>
-			<span class="error" style="display:none"></span>
 			<br class="clear" />
-		</p>
+			<div class="notice notice-error notice-alt inline hidden">
+				<p class="error"></p>
+			</div>
+		</div>
 		</td></tr>
 	<?php
 		$bulk++;

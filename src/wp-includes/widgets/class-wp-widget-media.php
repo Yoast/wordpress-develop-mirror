@@ -69,11 +69,11 @@ abstract class WP_Widget_Media extends WP_Widget {
 			'edit_media' => _x( 'Edit Media', 'label for button in the media widget; should preferably not be longer than ~13 characters long' ),
 			'add_to_widget' => __( 'Add to Widget' ),
 			'missing_attachment' => sprintf(
-				/* translators: placeholder is URL to media library */
+				/* translators: %s: URL to media library */
 				__( 'We can&#8217;t find that file. Check your <a href="%s">media library</a> and make sure it wasn&#8217;t deleted.' ),
 				esc_url( admin_url( 'upload.php' ) )
 			),
-			/* translators: %d is widget count */
+			/* translators: %d: widget count */
 			'media_library_state_multi' => _n_noop( 'Media Widget (%d)', 'Media Widget (%d)' ),
 			'media_library_state_single' => __( 'Media Widget' ),
 			'unsupported_file_type' => __( 'Looks like this isn&#8217;t the correct kind of file. Please link to an appropriate file instead.' ),
@@ -127,7 +127,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 	 * @return array Schema for properties.
 	 */
 	public function get_instance_schema() {
-		return array(
+		$schema = array(
 			'attachment_id' => array(
 				'type' => 'integer',
 				'default' => 0,
@@ -149,6 +149,18 @@ abstract class WP_Widget_Media extends WP_Widget {
 				'should_preview_update' => false,
 			),
 		);
+
+		/**
+		 * Filters the media widget instance schema to add additional properties.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param array           $schema Instance schema.
+		 * @param WP_Widget_Media $this   Widget object.
+		 */
+		$schema = apply_filters( "widget_{$this->id_base}_instance_schema", $schema, $this );
+
+		return $schema;
 	}
 
 	/**
@@ -213,10 +225,10 @@ abstract class WP_Widget_Media extends WP_Widget {
 
 		echo $args['before_widget'];
 
-		if ( $instance['title'] ) {
+		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
+		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
-			/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
-			$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		if ( $title ) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
@@ -257,6 +269,12 @@ abstract class WP_Widget_Media extends WP_Widget {
 				continue;
 			}
 			$value = $new_instance[ $field ];
+
+			// Workaround for rest_validate_value_from_schema() due to the fact that rest_is_boolean( '' ) === false, while rest_is_boolean( '1' ) is true.
+			if ( 'boolean' === $field_schema['type'] && '' === $value ) {
+				$value = false;
+			}
+
 			if ( true !== rest_validate_value_from_schema( $value, $field_schema, $field ) ) {
 				continue;
 			}
@@ -316,7 +334,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 				class="media-widget-instance-property"
 				name="<?php echo esc_attr( $this->get_field_name( $name ) ); ?>"
 				id="<?php echo esc_attr( $this->get_field_id( $name ) ); // Needed specifically by wpWidgets.appendTitle(). ?>"
-				value="<?php echo esc_attr( strval( $value ) ); ?>"
+				value="<?php echo esc_attr( is_array( $value ) ? join( ',', $value ) : strval( $value ) ); ?>"
 			/>
 		<?php
 		endforeach;
@@ -388,7 +406,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 				<label for="{{ elementIdPrefix }}title"><?php esc_html_e( 'Title:' ); ?></label>
 				<input id="{{ elementIdPrefix }}title" type="text" class="widefat title">
 			</p>
-			<div class="media-widget-preview">
+			<div class="media-widget-preview <?php echo esc_attr( $this->id_base ); ?>">
 				<div class="attachment-media-view">
 					<div class="placeholder"><?php echo esc_html( $this->l10n['no_media_selected'] ); ?></div>
 				</div>
@@ -397,9 +415,11 @@ abstract class WP_Widget_Media extends WP_Widget {
 				<button type="button" class="button edit-media selected">
 					<?php echo esc_html( $this->l10n['edit_media'] ); ?>
 				</button>
+			<?php if ( ! empty( $this->l10n['replace_media'] ) ) : ?>
 				<button type="button" class="button change-media select-media selected">
 					<?php echo esc_html( $this->l10n['replace_media'] ); ?>
 				</button>
+			<?php endif; ?>
 				<button type="button" class="button select-media not-selected">
 					<?php echo esc_html( $this->l10n['add_media'] ); ?>
 				</button>

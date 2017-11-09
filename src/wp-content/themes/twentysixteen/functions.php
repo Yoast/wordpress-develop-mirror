@@ -371,7 +371,7 @@ require get_template_directory() . '/inc/customizer.php';
 function twentysixteen_content_image_sizes_attr( $sizes, $size ) {
 	$width = $size[0];
 
-	if ( 840 <= $width ){
+	if ( 840 <= $width ) {
 		$sizes = '(max-width: 709px) 85vw, (max-width: 909px) 67vw, (max-width: 1362px) 62vw, 840px';
 	}
 
@@ -415,17 +415,20 @@ function twentysixteen_post_thumbnail_sizes_attr( $attr, $attachment, $size ) {
 add_filter( 'wp_get_attachment_image_attributes', 'twentysixteen_post_thumbnail_sizes_attr', 10 , 3 );
 
 /**
- * Modifies tag cloud widget arguments to have all tags in the widget same font size.
+ * Modifies tag cloud widget arguments to display all tags in the same font size
+ * and use list format for better accessibility.
  *
  * @since Twenty Sixteen 1.1
  *
  * @param array $args Arguments for tag cloud widget.
- * @return array A new modified arguments.
+ * @return array The filtered arguments for tag cloud widget.
  */
 function twentysixteen_widget_tag_cloud_args( $args ) {
-	$args['largest'] = 1;
+	$args['largest']  = 1;
 	$args['smallest'] = 1;
-	$args['unit'] = 'em';
+	$args['unit']     = 'em';
+	$args['format']   = 'list'; 
+
 	return $args;
 }
 add_filter( 'widget_tag_cloud_args', 'twentysixteen_widget_tag_cloud_args' );

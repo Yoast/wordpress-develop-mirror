@@ -376,29 +376,44 @@ window.wp = window.wp || {};
 		/**
 		 * Add an item to the collection.
 		 *
-		 * @param {string} id    The ID of the item.
-		 * @param {mixed}  value The item instance.
-		 * @return {mixed} The new item's instance.
+		 * @param {string|wp.customize.Class} item - The item instance to add, or the ID for the instance to add. When an ID string is supplied, then itemObject must be provided.
+		 * @param {wp.customize.Class}        [itemObject] - The item instance when the first argument is a ID string.
+		 * @return {wp.customize.Class} The new item's instance, or an existing instance if already added.
 		 */
-		add: function( id, value ) {
-			if ( this.has( id ) )
-				return this.value( id );
+		add: function( item, itemObject ) {
+			var collection = this, id, instance;
+			if ( 'string' === typeof item ) {
+				id = item;
+				instance = itemObject;
+			} else {
+				if ( 'string' !== typeof item.id ) {
+					throw new Error( 'Unknown key' );
+				}
+				id = item.id;
+				instance = item;
+			}
 
-			this._value[ id ] = value;
-			value.parent = this;
+			if ( collection.has( id ) ) {
+				return collection.value( id );
+			}
+
+			collection._value[ id ] = instance;
+			instance.parent = collection;
 
 			// Propagate a 'change' event on an item up to the collection.
-			if ( value.extended( api.Value ) )
-				value.bind( this._change );
+			if ( instance.extended( api.Value ) ) {
+				instance.bind( collection._change );
+			}
 
-			this.trigger( 'add', value );
+			collection.trigger( 'add', instance );
 
 			// If a deferred object exists for this item,
 			// resolve it.
-			if ( this._deferreds[ id ] )
-				this._deferreds[ id ].resolve();
+			if ( collection._deferreds[ id ] ) {
+				collection._deferreds[ id ].resolve();
+			}
 
-			return this._value[ id ];
+			return collection._value[ id ];
 		},
 
 		/**
@@ -810,6 +825,14 @@ window.wp = window.wp || {};
 		templateId: 'customize-notification',
 
 		/**
+		 * Additional class names to add to the notification container.
+		 *
+		 * @since 4.9.0
+		 * @var {string}
+		 */
+		containerClasses: '',
+
+		/**
 		 * Initialize notification.
 		 *
 		 * @since 4.9.0
@@ -821,6 +844,7 @@ window.wp = window.wp || {};
 		 * @param {string}   [params.setting] - Related setting ID.
 		 * @param {Function} [params.template] - Function for rendering template. If not provided, this will come from templateId.
 		 * @param {string}   [params.templateId] - ID for template to render the notification.
+		 * @param {string}   [params.containerClasses] - Additional class names to add to the notification container.
 		 * @param {boolean}  [params.dismissible] - Whether the notification can be dismissed.
 		 */
 		initialize: function( code, params ) {
@@ -834,7 +858,8 @@ window.wp = window.wp || {};
 					data: null,
 					setting: null,
 					template: null,
-					dismissible: false
+					dismissible: false,
+					containerClasses: ''
 				},
 				params
 			);
@@ -860,7 +885,11 @@ window.wp = window.wp || {};
 			container = $( notification.template( data ) );
 
 			if ( notification.dismissible ) {
-				container.find( '.notice-dismiss' ).on( 'click', function() {
+				container.find( '.notice-dismiss' ).on( 'click keydown', function( event ) {
+					if ( 'keydown' === event.type && 13 !== event.which ) {
+						return;
+					}
+
 					if ( notification.parent ) {
 						notification.parent.remove( notification.code );
 					} else {

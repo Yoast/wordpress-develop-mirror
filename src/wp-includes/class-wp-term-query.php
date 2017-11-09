@@ -87,6 +87,7 @@ class WP_Term_Query {
 	 * @since 4.6.0
 	 * @since 4.6.0 Introduced 'term_taxonomy_id' parameter.
 	 * @since 4.7.0 Introduced 'object_ids' parameter.
+	 * @since 4.9.0 Added 'slug__in' support for 'orderby'.
 	 *
 	 * @param string|array $query {
 	 *     Optional. Array or query string of term query parameters. Default empty.
@@ -98,7 +99,8 @@ class WP_Term_Query {
 	 *     @type string       $orderby                Field(s) to order terms by. Accepts term fields ('name',
 	 *                                                'slug', 'term_group', 'term_id', 'id', 'description', 'parent'),
 	 *                                                'count' for term taxonomy count, 'include' to match the
-	 *                                                'order' of the $include param, 'meta_value', 'meta_value_num',
+	 *                                                'order' of the $include param, 'slug__in' to match the
+	 *                                                'order' of the $slug param, 'meta_value', 'meta_value_num',
 	 *                                                the value of `$meta_key`, the array keys of `$meta_query`, or
 	 *                                                'none' to omit the ORDER BY clause. Defaults to 'name'.
 	 *     @type string       $order                  Whether to order terms in ascending or descending order.
@@ -115,7 +117,9 @@ class WP_Term_Query {
 	 *                                                along with all of their descendant terms. If $include is
 	 *                                                non-empty, $exclude_tree is ignored. Default empty array.
 	 *     @type int|string   $number                 Maximum number of terms to return. Accepts ''|0 (all) or any
-	 *                                                positive number. Default ''|0 (all).
+	 *                                                positive number. Default ''|0 (all). Note that $number may
+	 *                                                not return accurate results when coupled with $object_ids.
+	 *                                                See #41796 for details.
 	 *     @type int          $offset                 The number by which to offset the terms query. Default empty.
 	 *     @type string       $fields                 Term fields to query for. Accepts 'all' (returns an array of
 	 *                                                complete term objects), 'all_with_object_id' (returns an
@@ -551,16 +555,6 @@ class WP_Term_Query {
 			$limits = '';
 		}
 
-		$do_distinct = false;
-
-		/*
-		 * Duplicate terms are generally removed when necessary after the database query.
-		 * But when a LIMIT clause is included in the query, we let MySQL enforce
-		 * distinctness so the count is correct.
-		 */
-		if ( ! empty( $limits ) && 'all_with_object_id' !== $args['fields'] ) {
-			$do_distinct = true;
-		}
 
 		if ( ! empty( $args['search'] ) ) {
 			$this->sql_clauses['where']['search'] = $this->get_search_sql( $args['search'] );
@@ -578,7 +572,8 @@ class WP_Term_Query {
 		if ( ! empty( $meta_clauses ) ) {
 			$join .= $mq_sql['join'];
 			$this->sql_clauses['where']['meta_query'] = preg_replace( '/^\s*AND\s*/', '', $mq_sql['where'] );
-			$do_distinct = true;
+			$distinct .= "DISTINCT";
+
 		}
 
 		$selects = array();
@@ -639,8 +634,6 @@ class WP_Term_Query {
 		}
 
 		$where = implode( ' AND ', $this->sql_clauses['where'] );
-
-		$distinct = $do_distinct ? 'DISTINCT' : '';
 
 		/**
 		 * Filters the terms query SQL clauses.
@@ -841,6 +834,9 @@ class WP_Term_Query {
 		} elseif ( 'include' == $_orderby && ! empty( $this->query_vars['include'] ) ) {
 			$include = implode( ',', wp_parse_id_list( $this->query_vars['include'] ) );
 			$orderby = "FIELD( t.term_id, $include )";
+		} elseif ( 'slug__in' == $_orderby && ! empty( $this->query_vars['slug'] ) && is_array( $this->query_vars['slug'] ) ) {
+			$slugs = implode( "', '", array_map( 'sanitize_title_for_query', $this->query_vars['slug'] ) );
+			$orderby = "FIELD( t.slug, '" . $slugs . "')";
 		} elseif ( 'none' == $_orderby ) {
 			$orderby = '';
 		} elseif ( empty( $_orderby ) || 'id' == $_orderby || 'term_id' === $_orderby ) {

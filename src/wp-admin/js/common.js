@@ -181,7 +181,27 @@ $('.contextual-help-tabs').delegate('a', 'click', function(e) {
 
 var permalinkStructureFocused = false,
     $permalinkStructure       = $( '#permalink_structure' ),
+    $permalinkStructureInputs = $( '.permalink-structure input:radio' ),
+    $permalinkCustomSelection = $( '#custom_selection' ),
     $availableStructureTags   = $( '.form-table.permalink-structure .available-structure-tags button' );
+
+// Change permalink structure input when selecting one of the common structures.
+$permalinkStructureInputs.on( 'change', function() {
+	if ( 'custom' === this.value ) {
+		return;
+	}
+
+	$permalinkStructure.val( this.value );
+
+	// Update button states after selection.
+	$availableStructureTags.each( function() {
+		changeStructureTagButtonState( $( this ) );
+	} );
+} );
+
+$permalinkStructure.on( 'click input', function() {
+	$permalinkCustomSelection.prop( 'checked', true );
+} );
 
 // Check if the permalink structure input field has had focus at least once.
 $permalinkStructure.on( 'focus', function( event ) {
@@ -227,7 +247,8 @@ $availableStructureTags.on( 'click', function() {
 	    selectionStart          = $permalinkStructure[ 0 ].selectionStart,
 	    selectionEnd            = $permalinkStructure[ 0 ].selectionEnd,
 	    textToAppend            = $( this ).text().trim(),
-	    textToAnnounce          = $( this ).attr( 'data-added' );
+	    textToAnnounce          = $( this ).attr( 'data-added' ),
+	    newSelectionStart;
 
 	// Remove structure tag if already part of the structure.
 	if ( -1 !== permalinkStructureValue.indexOf( textToAppend ) ) {
@@ -249,7 +270,7 @@ $availableStructureTags.on( 'click', function() {
 		selectionStart = selectionEnd = permalinkStructureValue.length;
 	}
 
-	$( '#custom_selection' ).prop( 'checked', true );
+	$permalinkCustomSelection.prop( 'checked', true );
 
 	// Prepend and append slashes if necessary.
 	if ( '/' !== permalinkStructureValue.substr( 0, selectionStart ).substr( -1 ) ) {
@@ -268,6 +289,13 @@ $availableStructureTags.on( 'click', function() {
 
 	// Disable button.
 	changeStructureTagButtonState( $( this ) );
+
+	// If input had focus give it back with cursor right after appended text.
+	if ( permalinkStructureFocused && $permalinkStructure[0].setSelectionRange ) {
+		newSelectionStart = ( permalinkStructureValue.substr( 0, selectionStart ) + textToAppend ).length;
+		$permalinkStructure[0].setSelectionRange( newSelectionStart, newSelectionStart );
+		$permalinkStructure.focus();
+	}
 } );
 
 $document.ready( function() {

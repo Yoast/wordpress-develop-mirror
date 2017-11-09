@@ -25,6 +25,15 @@
 	ImageWidgetControl = component.MediaWidgetControl.extend(/** @lends wp.mediaWidgets.controlConstructors.media_image.prototype */{
 
 		/**
+		 * View events.
+		 *
+		 * @type {object}
+		 */
+		events: _.extend( {}, component.MediaWidgetControl.prototype.events, {
+			'click .media-widget-preview.populated': 'editMedia'
+		} ),
+
+		/**
 		 * Render preview.
 		 *
 		 * @returns {void}
@@ -38,6 +47,7 @@
 			previewContainer = control.$el.find( '.media-widget-preview' );
 			previewTemplate = wp.template( 'wp-media-widget-image-preview' );
 			previewContainer.html( previewTemplate( control.previewTemplateProps.toJSON() ) );
+			previewContainer.addClass( 'populated' );
 
 			linkInput = control.$el.find( '.link' );
 			if ( ! linkInput.is( document.activeElement ) ) {

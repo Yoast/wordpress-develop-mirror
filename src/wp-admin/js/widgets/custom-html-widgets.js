@@ -214,12 +214,27 @@ wp.customHtmlWidgets = ( function( $ ) {
 				 * @returns {void}
 				 */
 				onUpdateErrorNotice: function onUpdateErrorNotice( errorAnnotations ) {
-					control.saveButton.toggleClass( 'validation-blocked', errorAnnotations.length );
+					control.saveButton.toggleClass( 'validation-blocked disabled', errorAnnotations.length );
 					control.updateErrorNotice( errorAnnotations );
 				}
 			});
 
 			control.editor = wp.codeEditor.initialize( control.fields.content, settings );
+
+			// Improve the editor accessibility.
+			$( control.editor.codemirror.display.lineDiv )
+				.attr({
+					role: 'textbox',
+					'aria-multiline': 'true',
+					'aria-labelledby': control.fields.content[0].id + '-label',
+					'aria-describedby': 'editor-keyboard-trap-help-1 editor-keyboard-trap-help-2 editor-keyboard-trap-help-3 editor-keyboard-trap-help-4'
+				});
+
+			// Focus the editor when clicking on its label.
+			$( '#' + control.fields.content[0].id + '-label' ).on( 'click', function() {
+				control.editor.codemirror.focus();
+			});
+
 			control.fields.content.on( 'change', function() {
 				if ( this.value !== control.editor.codemirror.getValue() ) {
 					control.editor.codemirror.setValue( this.value );

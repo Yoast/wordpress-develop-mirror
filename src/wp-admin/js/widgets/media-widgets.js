@@ -92,6 +92,23 @@ wp.mediaWidgets = ( function( $ ) {
 	component.MediaEmbedView = wp.media.view.Embed.extend(/** @lends wp.mediaWidgets.MediaEmbedView.prototype */{
 
 		/**
+		 * Initialize.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param {object} options - Options.
+		 * @returns {void}
+		 */
+		initialize: function( options ) {
+			var view = this, embedController; // eslint-disable-line consistent-this
+			wp.media.view.Embed.prototype.initialize.call( view, options );
+			if ( 'image' !== view.controller.options.mimeType ) {
+				embedController = view.controller.states.get( 'embed' );
+				embedController.off( 'scan', embedController.scanImage, embedController );
+			}
+		},
+
+		/**
 		 * Refresh embed view.
 		 *
 		 * Forked override of {wp.media.view.Embed#refresh()} to suppress irrelevant "link text" field.
@@ -150,21 +167,43 @@ wp.mediaWidgets = ( function( $ ) {
 					},
 
 					/**
+					 * Update oEmbed.
+					 *
+					 * @since 4.9.0
+					 *
+					 * @returns {void}
+					 */
+					updateoEmbed: function() {
+						var embedLinkView = this, url; // eslint-disable-line consistent-this
+
+						url = embedLinkView.model.get( 'url' );
+
+						// Abort if the URL field was emptied out.
+						if ( ! url ) {
+							embedLinkView.setErrorNotice( '' );
+							embedLinkView.setAddToWidgetButtonDisabled( true );
+							return;
+						}
+
+						if ( ! url.match( /^(http|https):\/\/.+\// ) ) {
+							embedLinkView.controller.$el.find( '#embed-url-field' ).addClass( 'invalid' );
+							embedLinkView.setAddToWidgetButtonDisabled( true );
+						}
+
+						wp.media.view.EmbedLink.prototype.updateoEmbed.call( embedLinkView );
+					},
+
+					/**
 					 * Fetch media.
 					 *
 					 * @returns {void}
 					 */
 					fetch: function() {
 						var embedLinkView = this, fetchSuccess, matches, fileExt, urlParser, url, re, youTubeEmbedMatch; // eslint-disable-line consistent-this
+						url = embedLinkView.model.get( 'url' );
 
 						if ( embedLinkView.dfd && 'pending' === embedLinkView.dfd.state() ) {
 							embedLinkView.dfd.abort();
-						}
-
-						// Abort if the URL field was emptied out.
-						if ( ! embedLinkView.model.get( 'url' ) ) {
-							embedLinkView.setErrorNotice( '' );
-							return;
 						}
 
 						fetchSuccess = function( response ) {
@@ -174,13 +213,13 @@ wp.mediaWidgets = ( function( $ ) {
 								}
 							});
 
-							$( '#embed-url-field' ).removeClass( 'invalid' );
+							embedLinkView.controller.$el.find( '#embed-url-field' ).removeClass( 'invalid' );
 							embedLinkView.setErrorNotice( '' );
 							embedLinkView.setAddToWidgetButtonDisabled( false );
 						};
 
 						urlParser = document.createElement( 'a' );
-						urlParser.href = embedLinkView.model.get( 'url' );
+						urlParser.href = url;
 						matches = urlParser.pathname.toLowerCase().match( /\.(\w+)$/ );
 						if ( matches ) {
 							fileExt = matches[1];
@@ -194,14 +233,7 @@ wp.mediaWidgets = ( function( $ ) {
 							return;
 						}
 
-						// If video, test for Vimeo and YouTube, otherwise, renderFail(). This should be removed once #34115 is resolved.
-						if ( 'video' === this.controller.options.mimeType && ! /vimeo|youtu\.?be/.test( urlParser.host ) ) {
-							embedLinkView.renderFail();
-							return;
-						}
-
 						// Support YouTube embed links.
-						url = embedLinkView.model.get( 'url' );
 						re = /https?:\/\/www\.youtube\.com\/embed\/([^/]+)/;
 						youTubeEmbedMatch = re.exec( url );
 						if ( youTubeEmbedMatch ) {
@@ -244,7 +276,7 @@ wp.mediaWidgets = ( function( $ ) {
 					 */
 					renderFail: function renderFail() {
 						var embedLinkView = this; // eslint-disable-line consistent-this
-						$( '#embed-url-field' ).addClass( 'invalid' );
+						embedLinkView.controller.$el.find( '#embed-url-field' ).addClass( 'invalid' );
 						embedLinkView.setErrorNotice( embedLinkView.controller.options.invalidEmbedTypeError || 'ERROR' );
 						embedLinkView.setAddToWidgetButtonDisabled( true );
 					}
@@ -434,6 +466,7 @@ wp.mediaWidgets = ( function( $ ) {
 		events: {
 			'click .notice-missing-attachment a': 'handleMediaLibraryLinkClick',
 			'click .select-media': 'selectMedia',
+			'click .placeholder': 'selectMedia',
 			'click .edit-media': 'editMedia'
 		},
 
@@ -601,17 +634,25 @@ wp.mediaWidgets = ( function( $ ) {
 		syncModelToInputs: function syncModelToInputs() {
 			var control = this;
 			control.syncContainer.find( '.media-widget-instance-property' ).each( function() {
-				var input = $( this ), value;
-				value = control.model.get( input.data( 'property' ) );
+				var input = $( this ), value, propertyName;
+				propertyName = input.data( 'property' );
+				value = control.model.get( propertyName );
 				if ( _.isUndefined( value ) ) {
 					return;
 				}
-				value = String( value );
-				if ( input.val() === value ) {
-					return;
+
+				if ( 'array' === control.model.schema[ propertyName ].type && _.isArray( value ) ) {
+					value = value.join( ',' );
+				} else if ( 'boolean' === control.model.schema[ propertyName ].type ) {
+					value = value ? '1' : ''; // Because in PHP, strval( true ) === '1' && strval( false ) === ''.
+				} else {
+					value = String( value );
 				}
-				input.val( value );
-				input.trigger( 'change' );
+
+				if ( input.val() !== value ) {
+					input.val( value );
+					input.trigger( 'change' );
+				}
 			});
 		},
 
@@ -1012,7 +1053,22 @@ wp.mediaWidgets = ( function( $ ) {
 					return;
 				}
 				type = model.schema[ name ].type;
-				if ( 'integer' === type ) {
+				if ( 'array' === type ) {
+					castedAttrs[ name ] = value;
+					if ( ! _.isArray( castedAttrs[ name ] ) ) {
+						castedAttrs[ name ] = castedAttrs[ name ].split( /,/ ); // Good enough for parsing an ID list.
+					}
+					if ( model.schema[ name ].items && 'integer' === model.schema[ name ].items.type ) {
+						castedAttrs[ name ] = _.filter(
+							_.map( castedAttrs[ name ], function( id ) {
+								return parseInt( id, 10 );
+							},
+							function( id ) {
+								return 'number' === typeof id;
+							}
+						) );
+					}
+				} else if ( 'integer' === type ) {
 					castedAttrs[ name ] = parseInt( value, 10 );
 				} else if ( 'boolean' === type ) {
 					castedAttrs[ name ] = ! ( ! value || '0' === value || 'false' === value );

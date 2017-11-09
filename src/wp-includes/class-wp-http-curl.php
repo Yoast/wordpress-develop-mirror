@@ -179,8 +179,14 @@ class WP_Http_Curl {
 				$this->stream_handle = @fopen( $r['filename'], 'w+' );
 			else
 				$this->stream_handle = fopen( $r['filename'], 'w+' );
-			if ( ! $this->stream_handle )
-				return new WP_Error( 'http_request_failed', sprintf( __( 'Could not open handle for fopen() to %s' ), $r['filename'] ) );
+			if ( ! $this->stream_handle ) {
+				return new WP_Error( 'http_request_failed', sprintf(
+					/* translators: 1: fopen() 2: file name */
+					__( 'Could not open handle for %1$s to %2$s.' ),
+					'fopen()',
+					$r['filename']
+				) );
+			}
 		} else {
 			$this->stream_handle = false;
 		}
@@ -207,7 +213,7 @@ class WP_Http_Curl {
 		 *
 		 * @since 2.8.0
 		 *
-		 * @param resource &$handle The cURL handle returned by curl_init().
+		 * @param resource $handle  The cURL handle returned by curl_init() (passed by reference).
 		 * @param array    $r       The HTTP request arguments.
 		 * @param string   $url     The request URL.
 		 */

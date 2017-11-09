@@ -57,8 +57,8 @@ function wp_signon( $credentials = array(), $secure_cookie = '' ) {
 	 *
 	 * @todo Decide whether to deprecate the wp_authenticate action.
 	 *
-	 * @param string $user_login    Username, passed by reference.
-	 * @param string $user_password User password, passed by reference.
+	 * @param string $user_login    Username (passed by reference).
+	 * @param string $user_password User password (passed by reference).
 	 */
 	do_action_ref_array( 'wp_authenticate', array( &$credentials['user_login'], &$credentials['user_password'] ) );
 
@@ -692,7 +692,7 @@ function get_blogs_of_user( $user_id, $all = false ) {
 /**
  * Find out whether a user is a member of a given blog.
  *
- * @since MU (3.0.0) 1.1
+ * @since MU (3.0.0)
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
@@ -855,7 +855,13 @@ function count_users( $strategy = 'time', $site_id = null ) {
 	$result = array();
 
 	if ( 'time' == $strategy ) {
-		$avail_roles = wp_roles()->get_names();
+		if ( is_multisite() && $site_id != get_current_blog_id() ) {
+			switch_to_blog( $site_id );
+			$avail_roles = wp_roles()->get_names();
+			restore_current_blog();
+		} else {
+			$avail_roles = wp_roles()->get_names();
+		}
 
 		// Build a CPU-intensive query that will return concise information.
 		$select_count = array();
@@ -1699,7 +1705,8 @@ function wp_insert_user( $userdata ) {
 	$user = new WP_User( $user_id );
 
 	/**
- 	 * Filters a user's meta values and keys before the user is created or updated.
+ 	 * Filters a user's meta values and keys immediately after the user is created or updated
+ 	 * and before any user meta is inserted or updated.
  	 *
  	 * Does not include contact methods. These are added using `wp_get_user_contact_methods( $user )`.
  	 *
@@ -2513,7 +2520,16 @@ function wp_get_users_with_no_role( $site_id = null ) {
 	}
 
 	$prefix = $wpdb->get_blog_prefix( $site_id );
-	$regex  = implode( '|', array_keys( wp_roles()->get_names() ) );
+
+	if ( is_multisite() && $site_id != get_current_blog_id() ) {
+		switch_to_blog( $site_id );
+		$role_names = wp_roles()->get_names();
+		restore_current_blog();
+	} else {
+		$role_names = wp_roles()->get_names();
+	}
+
+	$regex  = implode( '|', array_keys( $role_names ) );
 	$regex  = preg_replace( '/[^a-zA-Z_\|-]/', '', $regex );
 	$users  = $wpdb->get_col( $wpdb->prepare( "
 		SELECT user_id

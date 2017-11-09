@@ -1578,7 +1578,7 @@ function img_caption_shortcode( $attr, $content = null ) {
 
 	$style = '';
 	if ( $caption_width ) {
-		$style = 'style="width: ' . (int) $caption_width . 'px" ';
+		$style = 'style="max-width: ' . (int) $caption_width . 'px" ';
 	}
 
 	if ( $html5 ) {
@@ -3158,6 +3158,9 @@ function wp_prepare_attachment_for_js( $attachment ) {
 		$response['filesizeInBytes'] = $bytes;
 		$response['filesizeHumanReadable'] = size_format( $bytes );
 	}
+
+	$context = get_post_meta( $attachment->ID, '_wp_attachment_context', true );
+	$response['context'] = ( $context ) ? $context : '';
 
 	if ( current_user_can( 'edit_post', $attachment->ID ) ) {
 		$response['nonces']['update'] = wp_create_nonce( 'update-post_' . $attachment->ID );
