@@ -5,8 +5,8 @@
  *
  * @since 4.5.0
  *
- * @param {jQuery} $ The JQuery object.
- * @param {Object} _ The Utilities library.
+ * @param {jQuery} $ The jQuery object.
+ * @param {Object} _ The utilities library.
  * @param {Object} wp Current WordPress environment instance.
  * @param {Object} api Information from the API.
  *
@@ -115,7 +115,7 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 * Sends the widget-updated message to the parent so the spinner will get removed from the widget control.
 		 *
 		 * @inheritdoc
-		 * @param {function} placement The placement function.
+		 * @param {wp.customize.selectiveRefresh.Placement} placement The placement function.
 		 *
 		 * @returns {void}
 		 */
@@ -223,9 +223,9 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 *
 		 * @since 4.5.0
 		 *
-		 * @returns {Array.<{before: Comment, after: Comment, instanceNumber: number}>|void} Either an array with an object
+		 * @returns {Array.<{before: Comment, after: Comment, instanceNumber: number}>} Either an array with an object
 		 * for each sidebar instance, containing the node before and after the sidebar instance and its instance
-		 * number, or void.
+		 * number.
 		 */
 		findDynamicSidebarBoundaryNodes: function() {
 			var partial = this, regExp, boundaryNodes = {}, recursiveCommentTraversal;
@@ -286,6 +286,10 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 * Get the list of widget IDs associated with this widget area.
 		 *
 		 * @since 4.5.0
+		 *
+		 * @throws {Error} If there's no settingId.
+		 * @throws {Error} If the setting doesn't exist in the API.
+		 * @throws {Error} If the API doesn't pass an array of widget ids.
 		 *
 		 * @returns {Array} A shallow copy of the array containing widget IDs.
 		 */
@@ -376,7 +380,7 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 *
 		 * @param {string} widgetId The widget ID.
 		 *
-		 * @returns {wp.customize.selectiveRefresh.Partial|void} Either the widget instance partial, or void.
+		 * @returns {wp.customize.selectiveRefresh.Partial} Either the widget instance partial.
 		 */
 		ensureWidgetPlacementContainers: function( widgetId ) {
 			var sidebarPartial = this, widgetPartial, wasInserted = false, partialId = 'widget[' + widgetId + ']';
