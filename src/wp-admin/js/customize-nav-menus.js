@@ -2363,10 +2363,10 @@
 	 * Customizer control for a nav menu's locations.
 	 *
 	 * @since 4.9.0
-	 * @constructor
+	 * @class    wp.customize.Menus.MenuLocationsControl
 	 * @augments wp.customize.Control
 	 */
-	api.Menus.MenuLocationsControl = api.Control.extend({
+	api.Menus.MenuLocationsControl = api.Control.extend(/** @lends wp.customize.Menus.MenuLocationsControl.prototype */{
 
 		/**
 		 * Set up the control.
