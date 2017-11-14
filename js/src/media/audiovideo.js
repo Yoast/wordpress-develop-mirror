@@ -1,4 +1,4 @@
-var media = wp.media,
+var media = {},
 	baseSettings = window._wpmejsSettings || {},
 	l10n = window._wpMediaViewsL10n || {};
 
@@ -278,3 +278,5 @@ media.view.MediaFrame.VideoDetails = require( './views/frame/video-details.js' )
 media.view.MediaDetails = require( './views/media-details.js' );
 media.view.AudioDetails = require( './views/audio-details.js' );
 media.view.VideoDetails = require( './views/video-details.js' );
+
+exports = media;

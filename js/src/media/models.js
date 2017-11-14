@@ -1,9 +1,6 @@
 var $ = jQuery,
 	Attachment, Attachments, l10n, media;
 
-/** @namespace wp */
-window.wp = window.wp || {};
-
 /**
  * Create and return a media frame.
  *
@@ -16,7 +13,7 @@ window.wp = window.wp || {};
  * @param  {object} attributes The properties passed to the main media controller.
  * @return {wp.media.view.MediaFrame} A media workflow.
  */
-media = wp.media = function( attributes ) {
+media = function( attributes ) {
 	var MediaFrame = media.view.MediaFrame,
 		frame;
 
@@ -232,7 +229,4 @@ media.query = function( props ) {
 	});
 };
 
-// Clean up. Prevents mobile browsers caching
-$(window).on('unload', function(){
-	window.wp = null;
-});
+exports = media;
