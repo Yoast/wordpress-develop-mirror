@@ -30,8 +30,8 @@ manual_packages = {
 	// @see https://github.com/furf/jquery-ui-touch-punch/blob/master/jquery.ui.touch-punch.js
 	'src/wp-includes/js/jquery/jquery.ui.touch-punch.js': ['./src/js/wp-vendor/jquery.ui.touch-punch.js'],
 	// @see Origin unknown.
-	'src/wp-includes/js/jquery/suggest.js': ['./src/js/wp-vendor/suggest.js'],
-	'src/wp-includes/js/jquery/suggest.min.js': ['./src/js/wp-vendor/suggest.min.js'],
+	'src/wp-includes/js/jquery/suggest.js': ['./src/js/wp-vendor/deprecated/suggest.js'],
+	'src/wp-includes/js/jquery/suggest.min.js': ['./src/js/wp-vendor/deprecated/suggest.min.js'],
 	// @see https://github.com/douglascrockford/JSON-js
 	'src/wp-includes/js/json2.js': ['./src/js/wp-vendor/json2.js'],
 	// @see https://github.com/swfobject/swfobject
