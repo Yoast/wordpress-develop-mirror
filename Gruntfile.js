@@ -109,6 +109,25 @@ module.exports = function(grunt) {
 					}
 				]
 			},
+			'js-vendor': {
+				files: [
+					{
+						src: [
+							'js/enqueues/wp-vendor/**',
+							'!js/enqueues/wp-vendor/farbtastic.js',
+							'!js/enqueues/wp-vendor/iris.min.js'
+						],
+						dest: 'src/wp-includes/js/'
+					},
+					{
+						src: [
+							'js/enqueues/wp-vendor/farbtastic.js',
+							'js/enqueues/wp-vendor/iris.min.js'
+						],
+						dest: 'src/wp-admin/js/'
+					}
+				]
+			},
 			'wp-admin-css-compat-rtl': {
 				options: {
 					processContent: function( src ) {

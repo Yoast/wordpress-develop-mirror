@@ -1,0 +1,995 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d07bbe91-c632-4502-aac6-55f998d3d1f1" name="Default" comment="">
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/codemirror.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/codemirror.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/codemirror.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/codemirror.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/csslint.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/csslint.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/htmlhint-kses.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/htmlhint-kses.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/htmlhint.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/htmlhint.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/jshint.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/jshint.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/codemirror/jsonlint.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/codemirror/jsonlint.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/crop/cropper.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/crop/cropper.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/crop/cropper.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/crop/cropper.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/crop/marqueeHoriz.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/crop/marqueeHoriz.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/crop/marqueeVert.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/crop/marqueeVert.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/imgareaselect/border-anim-h.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/imgareaselect/border-anim-h.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/imgareaselect/border-anim-v.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/imgareaselect/border-anim-v.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/imgareaselect/imgareaselect.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/imgareaselect/imgareaselect.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/imgareaselect/jquery.imgareaselect.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/imgareaselect/jquery.imgareaselect.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/imgareaselect/jquery.imgareaselect.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/imgareaselect/jquery.imgareaselect.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/jcrop/Jcrop.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/jcrop/Jcrop.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/jcrop/jquery.Jcrop.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/jcrop/jquery.Jcrop.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/jcrop/jquery.Jcrop.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/jcrop/jquery.Jcrop.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/ca.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/ca.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/cs.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/cs.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/de.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/de.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/es.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/es.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/fa.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/fa.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/fr.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/fr.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/hr.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/hr.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/hu.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/hu.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/it.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/it.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/ja.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/ja.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/ko.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/ko.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/nl.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/nl.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/pl.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/pl.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/pt.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/pt.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/ro.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/ro.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/ru.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/ru.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/sk.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/sk.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/sv.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/sv.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/uk.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/uk.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/zh-cn.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/zh-cn.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/lang/zh.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/lang/zh.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-and-player.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-and-player.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-and-player.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-and-player.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-flash-audio-ogg.swf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-flash-audio-ogg.swf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-flash-audio.swf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-flash-audio.swf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-flash-video-hls.swf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-flash-video-hls.swf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-flash-video-mdash.swf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-flash-video-mdash.swf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-flash-video.swf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-flash-video.swf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement-migrate.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement-migrate.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelement.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelement.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelementplayer-legacy.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelementplayer-legacy.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelementplayer-legacy.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelementplayer-legacy.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelementplayer.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelementplayer.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mediaelementplayer.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mediaelementplayer.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mejs-controls.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mejs-controls.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/mejs-controls.svg" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/mejs-controls.svg" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/dailymotion.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/dailymotion.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/dailymotion.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/dailymotion.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/facebook.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/facebook.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/facebook.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/facebook.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/soundcloud.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/soundcloud.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/soundcloud.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/soundcloud.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/twitch.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/twitch.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/twitch.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/twitch.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/vimeo.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/vimeo.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/renderers/vimeo.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/renderers/vimeo.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/wp-mediaelement.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/wp-mediaelement.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/wp-mediaelement.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/wp-mediaelement.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/mediaelement/wp-playlist.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/mediaelement/wp-playlist.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/plupload/handlers.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/plupload/handlers.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/plupload/license.txt" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/plupload/license.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/plupload/moxie.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/plupload/moxie.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/plupload/plupload.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/plupload/plupload.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/plupload/wp-plupload.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/plupload/wp-plupload.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/swfupload/handlers.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/swfupload/handlers.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/swfupload/handlers.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/swfupload/handlers.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/swfupload/license.txt" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/swfupload/license.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/swfupload/swfupload.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/swfupload/swfupload.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/thickbox/loadingAnimation.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/thickbox/loadingAnimation.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/thickbox/macFFBgHack.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/thickbox/macFFBgHack.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/thickbox/thickbox.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/thickbox/thickbox.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/thickbox/thickbox.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/thickbox/thickbox.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/langs/wp-langs-en.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/langs/wp-langs-en.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/license.txt" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/license.txt" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/charmap/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/charmap/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/charmap/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/charmap/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/colorpicker/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/colorpicker/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/colorpicker/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/colorpicker/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/compat3x/css/dialog.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/compat3x/css/dialog.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/compat3x/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/compat3x/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/compat3x/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/compat3x/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/directionality/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/directionality/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/directionality/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/directionality/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/fullscreen/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/fullscreen/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/fullscreen/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/fullscreen/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/hr/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/hr/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/hr/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/hr/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/image/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/image/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/image/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/image/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/link/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/link/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/link/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/link/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/lists/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/lists/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/lists/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/lists/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/media/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/media/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/media/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/media/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/paste/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/paste/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/paste/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/paste/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/tabfocus/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/tabfocus/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/tabfocus/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/tabfocus/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/textcolor/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/textcolor/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/textcolor/plugin.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/textcolor/plugin.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wordpress/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wordpress/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wpautoresize/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wpautoresize/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wpdialogs/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wpdialogs/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wpeditimage/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wpeditimage/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wpemoji/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wpemoji/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wpgallery/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wpgallery/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wplink/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wplink/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wptextpattern/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wptextpattern/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/plugins/wpview/plugin.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/plugins/wpview/plugin.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/content.inline.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/content.inline.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/content.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/content.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce-small.eot" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce-small.eot" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce-small.svg" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce-small.svg" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce-small.ttf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce-small.ttf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce-small.woff" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce-small.woff" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.eot" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce.eot" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.svg" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce.svg" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.ttf" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce.ttf" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.woff" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/fonts/tinymce.woff" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/img/anchor.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/img/anchor.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/img/loader.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/img/loader.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/img/object.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/img/object.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/img/trans.gif" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/img/trans.gif" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/lightgray/skin.min.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/lightgray/skin.min.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/audio.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/audio.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/dashicon-edit.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/dashicon-edit.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/dashicon-no.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/dashicon-no.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/embedded.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/embedded.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/gallery-2x.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/gallery-2x.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/gallery.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/gallery.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/more-2x.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/more-2x.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/more.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/more.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/pagebreak-2x.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/pagebreak-2x.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/pagebreak.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/pagebreak.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/playlist-audio.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/playlist-audio.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/playlist-video.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/playlist-video.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/images/video.png" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/images/video.png" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/skins/wordpress/wp-content.css" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/skins/wordpress/wp-content.css" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/themes/inlite/theme.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/themes/inlite/theme.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/themes/inlite/theme.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/themes/inlite/theme.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/themes/modern/theme.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/themes/modern/theme.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/themes/modern/theme.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/themes/modern/theme.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/tiny_mce_popup.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/tiny_mce_popup.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/tinymce.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/tinymce.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/tinymce.min.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/tinymce.min.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/utils/editable_selects.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/utils/editable_selects.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/utils/form_utils.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/utils/form_utils.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/utils/mctabs.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/utils/mctabs.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/utils/validate.js" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/utils/validate.js" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/wp-includes/js/tinymce/wp-tinymce.php" afterPath="$PROJECT_DIR$/js/enqueues/wp-vendor/tinymce/wp-tinymce.php" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gruntfile.js" afterPath="$PROJECT_DIR$/Gruntfile.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webpack.config.dev.js" afterPath="$PROJECT_DIR$/webpack.config.dev.js" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="audiovideo.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/src/media/audiovideo.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="397">
+              <caret line="259" column="0" lean-forward="false" selection-start-line="259" selection-start-column="0" selection-end-line="259" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="webpack.config.dev.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/webpack.config.dev.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-2422">
+              <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Gruntfile.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Gruntfile.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-5466">
+              <caret line="129" column="14" lean-forward="true" selection-start-line="129" selection-start-column="14" selection-end-line="129" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="audiovideo.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/audiovideo.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="4" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="grid.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/grid.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/models.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="views.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/views.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="views.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/src/media/views.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="757">
+              <caret line="150" column="16" lean-forward="false" selection-start-line="150" selection-start-column="16" selection-end-line="150" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/src/media/models.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="697">
+              <caret line="229" column="2" lean-forward="false" selection-start-line="229" selection-start-column="2" selection-end-line="229" selection-end-column="2" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="grid.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/src/media/grid.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="12" column="16" lean-forward="false" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>@event</find>
+      <find>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</find>
+      <find>accordion.</find>
+      <find>wp_register_script</find>
+      <find>https://docs.npmjs.com/misc/scripts</find>
+      <find>wp_default_scripts</find>
+      <find>plupload</find>
+      <find>moxie</find>
+      <find>normalizedTra</find>
+      <find>api.Panel =</find>
+      <find>&gt;&gt;&gt;</find>
+      <find>&gt;&gt;</find>
+      <find>Container =</find>
+      <find>onChangeExpanded</find>
+      <find>ThemesPanel</find>
+      <find>=======</find>
+      <find>// Install (and maybe preview) a theme.</find>
+      <find>&gt;&gt;&gt;&gt;</find>
+      <find>@lends</find>
+      <find>@since 4.9</find>
+      <find>.extend( {</find>
+      <find>me</find>
+      <find>macffb</find>
+      <find>mediaelement-migrate</find>
+      <find>TB_overlayMacFFBGHack</find>
+      <find>src/js</find>
+      <find>copy:files</find>
+      <find>copy:wp-admin-css-compat-min</find>
+      <find>wp-admin-css-</find>
+      <find>copy:wp-admin</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>@lends</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$/src/wp-includes/js/media</dir>
+      <dir>$PROJECT_DIR$/src/wp-includes/js/media/views</dir>
+      <dir>$PROJECT_DIR$/src/wp-includes/js/</dir>
+      <dir>$PROJECT_DIR$</dir>
+      <dir>$PROJECT_DIR$/src</dir>
+      <dir>$PROJECT_DIR$/src/wp-includes/js</dir>
+      <dir>$PROJECT_DIR$/src/wp-admin/js</dir>
+      <dir>$PROJECT_DIR$/src/</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/src/wp-includes/js/shortcode.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/wp-backbone.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/plupload/wp-plupload.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/mediaelement/wp-playlist.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/mediaelement/wp-mediaelement.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/common.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/comment.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/bookmarklet.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/accordion.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/text-widgets.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/customize-base.js" />
+        <option value="$PROJECT_DIR$/build/wp-admin/js/customize-widgets.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/dashboard.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/nav-menu.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/customize-widgets.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/media-video-widget.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/color-picker.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/media-audio-widget.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/media-image-widget.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/custom-html-widgets.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/image-edit.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/post.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/plugin-install.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/media-widgets.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/code-editor.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/media/views/frame/post.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/wp-api.js" />
+        <option value="$PROJECT_DIR$/src/wp-includes/js/comment-reply.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/updates.js" />
+        <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/jsdoc.conf.json" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/media.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/inline-edit-post.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/inline-edit-tax.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/editor.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/postbox.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets.js" />
+        <option value="$PROJECT_DIR$/node_modules/ink-docstrap/template/publish.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/widgets/media-gallery-widget.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/customize-nav-menus.js" />
+        <option value="$PROJECT_DIR$/src/wp-admin/js/customize-controls.js" />
+        <option value="$PROJECT_DIR$/js/enqueues/wp/media/audiovideo.js" />
+        <option value="$PROJECT_DIR$/js/enqueues/wp/media/grid.js" />
+        <option value="$PROJECT_DIR$/js/enqueues/wp/media/views.js" />
+        <option value="$PROJECT_DIR$/js/src/media/views.js" />
+        <option value="$PROJECT_DIR$/js/src/media/models.js" />
+        <option value="$PROJECT_DIR$/js/enqueues/wp/media/models.js" />
+        <option value="$PROJECT_DIR$/js/src/media/grid.js" />
+        <option value="$PROJECT_DIR$/js/src/media/audiovideo.js" />
+        <option value="$PROJECT_DIR$/Gruntfile.js" />
+        <option value="$PROJECT_DIR$/webpack.config.dev.js" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER">
+    <gruntfile path="$PROJECT_DIR$/Gruntfile.js" />
+  </component>
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsFlowSettings">
+    <service-enabled>false</service-enabled>
+    <exe-path />
+    <annotation-enable>false</annotation-enable>
+    <other-services-enabled>false</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="NodeModulesDirectoryManager">
+    <handled-path value="$PROJECT_DIR$/node_modules" />
+  </component>
+  <component name="PhpServers">
+    <servers />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="1680" />
+    <option name="y" value="23" />
+    <option name="width" value="1680" />
+    <option name="height" value="977" />
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="wordpress-develop-mirror" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wordpress-develop-mirror" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="wordpress-develop-mirror" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wordpress-develop-mirror" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="js" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="wordpress-develop-mirror" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wordpress-develop-mirror" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="js" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="enqueues" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+            <path>
+              <item name="wordpress-develop-mirror" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wordpress-develop-mirror" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="js" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="enqueues" type="2a2b976b:PhpTreeStructureProvider$1" />
+              <item name="wp-vendor" type="2a2b976b:PhpTreeStructureProvider$1" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="nodejs_interpreter_path" value="/usr/local/bin/node" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.JavaScript" />
+    <property name="jsx.switch.disabled" value="true" />
+    <property name="SearchEverywhereHistoryKey" value="loader&#9;FILE&#9;file:///Users/herregroen/Projects/WordPress/wordpress-develop-mirror/build/wp-includes/script-loader.php&#10;wp_enque&#9;null&#9;null" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/js/enqueues/wp-vendor" />
+      <recent name="$PROJECT_DIR$/js/enqueues/wp/media" />
+      <recent name="$PROJECT_DIR$/js/src" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/js/enqueues" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d07bbe91-c632-4502-aac6-55f998d3d1f1" name="Default" comment="" />
+      <created>1502368226975</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1502368226975</updated>
+      <workItem from="1502368228066" duration="8537000" />
+      <workItem from="1502972491650" duration="8642000" />
+      <workItem from="1503040753820" duration="9715000" />
+      <workItem from="1503055179753" duration="9969000" />
+      <workItem from="1503299321407" duration="1828000" />
+      <workItem from="1503319063612" duration="915000" />
+      <workItem from="1503391290837" duration="604000" />
+      <workItem from="1503410705335" duration="286000" />
+      <workItem from="1503578337014" duration="6357000" />
+      <workItem from="1503650284109" duration="956000" />
+      <workItem from="1503911932323" duration="2434000" />
+      <workItem from="1503918569617" duration="1772000" />
+      <workItem from="1504184908623" duration="5799000" />
+      <workItem from="1505988156401" duration="501000" />
+      <workItem from="1505997719818" duration="8943000" />
+      <workItem from="1506068444791" duration="1898000" />
+      <workItem from="1506082610653" duration="745000" />
+      <workItem from="1506604516833" duration="7420000" />
+      <workItem from="1507209041595" duration="645000" />
+      <workItem from="1508247767964" duration="624000" />
+      <workItem from="1508853814543" duration="579000" />
+      <workItem from="1509019759842" duration="7788000" />
+      <workItem from="1509109240776" duration="2567000" />
+      <workItem from="1509456371296" duration="739000" />
+      <workItem from="1510044536916" duration="7761000" />
+      <workItem from="1510234716002" duration="5920000" />
+      <workItem from="1510654494712" duration="2976000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="106920000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="1680" y="23" width="1680" height="977" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23748474" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Grunt " active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32939914" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3276644" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/nav-menu.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="258">
+          <caret line="176" column="21" lean-forward="false" selection-start-line="176" selection-start-column="21" selection-end-line="176" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/customize-widgets.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="412">
+          <caret line="136" column="79" lean-forward="false" selection-start-line="136" selection-start-column="79" selection-end-line="136" selection-end-column="79" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/color-picker.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="60" column="26" lean-forward="false" selection-start-line="60" selection-start-column="26" selection-end-line="60" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets/media-image-widget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="62" lean-forward="false" selection-start-line="11" selection-start-column="16" selection-end-line="11" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets/media-video-widget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="31" column="48" lean-forward="false" selection-start-line="31" selection-start-column="48" selection-end-line="31" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets/media-audio-widget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/js/media/views/embed/image.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/js/media/views.manifest.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1019">
+          <caret line="142" column="51" lean-forward="false" selection-start-line="142" selection-start-column="51" selection-end-line="142" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets/custom-html-widgets.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1121">
+          <caret line="234" column="47" lean-forward="false" selection-start-line="234" selection-start-column="47" selection-end-line="234" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets/media-widgets.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1298">
+          <caret line="99" column="11" lean-forward="false" selection-start-line="99" selection-start-column="11" selection-end-line="99" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/code-editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3225">
+          <caret line="215" column="35" lean-forward="false" selection-start-line="215" selection-start-column="35" selection-end-line="215" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/js/media/views/frame/post.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="517">
+          <caret line="448" column="14" lean-forward="false" selection-start-line="448" selection-start-column="14" selection-end-line="448" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/js/wp-api.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="932">
+          <caret line="1096" column="30" lean-forward="false" selection-start-line="1096" selection-start-column="30" selection-end-line="1096" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/js/comment-reply.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="10" lean-forward="false" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/updates.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="554">
+          <caret line="37" column="28" lean-forward="false" selection-start-line="37" selection-start-column="28" selection-end-line="37" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/plugin-install.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="27" column="60" lean-forward="false" selection-start-line="27" selection-start-column="60" selection-end-line="27" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="36" column="29" lean-forward="false" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/media.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="25" column="41" lean-forward="false" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/image-edit.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="35" column="21" lean-forward="false" selection-start-line="35" selection-start-column="21" selection-end-line="35" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/inline-edit-post.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="2" lean-forward="false" selection-start-line="11" selection-start-column="2" selection-end-line="11" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/inline-edit-tax.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="10" lean-forward="false" selection-start-line="10" selection-start-column="10" selection-end-line="10" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2370">
+          <caret line="158" column="64" lean-forward="false" selection-start-line="158" selection-start-column="64" selection-end-line="158" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/postbox.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1155">
+          <caret line="85" column="14" lean-forward="false" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/functions.wp-scripts.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="20" column="17" lean-forward="false" selection-start-line="20" selection-start-column="17" selection-end-line="20" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/load-scripts.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="35" column="21" lean-forward="false" selection-start-line="35" selection-start-column="21" selection-end-line="35" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/class.wp-scripts.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2100">
+          <caret line="147" column="48" lean-forward="false" selection-start-line="147" selection-start-column="30" selection-end-line="147" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/default-filters.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6375">
+          <caret line="436" column="14" lean-forward="false" selection-start-line="436" selection-start-column="13" selection-end-line="436" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3675">
+          <caret line="245" column="63" lean-forward="false" selection-start-line="245" selection-start-column="63" selection-end-line="245" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-includes/js/customize-base.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9765">
+          <caret line="651" column="4" lean-forward="false" selection-start-line="651" selection-start-column="4" selection-end-line="651" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jsdoc.conf.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="46" lean-forward="false" selection-start-line="11" selection-start-column="46" selection-end-line="11" selection-end-column="46" />
+          <folding>
+            <marker date="1510657792000" expanded="true" signature="0:986" ph="{&quot;recurseDepth&quot;: 10...}" />
+            <marker date="1510657792000" expanded="true" signature="50:66" ph="{&quot;includePattern&quot;: &quot;.+\\.js(doc|x)?$&quot;...}" />
+            <marker date="1510657792000" expanded="true" signature="65:66" ph="[...]" />
+            <marker date="1510657792000" expanded="true" signature="973:984" ph="{&quot;template&quot;: &quot;./node_modules/ink-docstrap/template&quot;...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/ink-docstrap/template/publish.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9435">
+          <caret line="629" column="51" lean-forward="false" selection-start-line="629" selection-start-column="51" selection-end-line="629" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/widgets/media-gallery-widget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/customize-nav-menus.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23250">
+          <caret line="1550" column="34" lean-forward="false" selection-start-line="1550" selection-start-column="24" selection-end-line="1550" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/customize-controls.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="91965">
+          <caret line="6002" column="30" lean-forward="false" selection-start-line="6002" selection-start-column="30" selection-end-line="6002" selection-end-column="30" />
+          <caret line="6063" column="30" lean-forward="false" selection-start-line="6063" selection-start-column="30" selection-end-line="6063" selection-end-column="30" />
+          <caret line="6097" column="30" lean-forward="false" selection-start-line="6097" selection-start-column="30" selection-end-line="6097" selection-end-column="30" />
+          <caret line="6131" column="30" lean-forward="false" selection-start-line="6131" selection-start-column="30" selection-end-line="6131" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/wp-admin/js/post.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="245">
+          <caret line="272" column="19" lean-forward="true" selection-start-line="272" selection-start-column="19" selection-end-line="272" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/wp-includes/media.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="377">
+          <caret line="3640" column="40" lean-forward="false" selection-start-line="3640" selection-start-column="24" selection-end-line="3640" selection-end-column="40" />
+          <folding>
+            <marker date="1502367938000" expanded="true" signature="64535:64893" ph="..." />
+            <marker date="1502367938000" expanded="true" signature="64553:64577" ph="{...}" />
+            <marker date="1502367938000" expanded="true" signature="64608:64707" ph="{...}" />
+            <marker date="1502367938000" expanded="true" signature="64728:64765" ph="{...}" />
+            <marker date="1502367938000" expanded="true" signature="64799:64825" ph="{...}" />
+            <marker date="1502367938000" expanded="true" signature="66718:66729" ph="..." />
+            <marker date="1502367938000" expanded="true" signature="66831:66842" ph="..." />
+            <marker date="1502367938000" expanded="true" signature="118031:118142" ph="SELECT ID FR... ${$wpdb-&gt;posts}" />
+            <marker date="1502367938000" expanded="true" signature="119070:119181" ph="SELECT ID FR... ${$wpdb-&gt;posts}" />
+            <marker date="1502367938000" expanded="true" signature="119956:120098" ph="SELECT DISTI... ${$wpdb-&gt;posts}" />
+            <marker date="1502367938000" expanded="true" signature="137449:137541" ph="SELECT post_... ${$wpdb-&gt;postmeta}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/wp-includes/script-loader.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="319" column="72" lean-forward="false" selection-start-line="319" selection-start-column="72" selection-end-line="319" selection-end-column="72" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp-vendor/thickbox/thickbox.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="280">
+          <caret line="62" column="65" lean-forward="false" selection-start-line="62" selection-start-column="44" selection-end-line="62" selection-end-column="65" />
+          <folding>
+            <marker date="1502367937000" expanded="true" signature="3559:3565" ph=" " />
+            <marker date="1502367937000" expanded="true" signature="3565:3571" ph=" " />
+            <marker date="1502367937000" expanded="true" signature="3785:3791" ph=" " />
+            <marker date="1502367937000" expanded="true" signature="3791:3797" ph=" " />
+            <marker date="1502367937000" expanded="true" signature="7879:7944" ph="..." />
+            <marker date="1502367937000" expanded="true" signature="8280:8345" ph="..." />
+            <marker date="1502367937000" expanded="true" signature="8866:8916" ph="..." />
+            <marker date="1502367937000" expanded="true" signature="9075:9126" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/scripts/npm/postinstall.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/audiovideo.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/grid.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/views.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/src/media/models.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="697">
+          <caret line="229" column="2" lean-forward="false" selection-start-line="229" selection-start-column="2" selection-end-line="229" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/enqueues/wp/media/models.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/src/media/views.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="757">
+          <caret line="150" column="16" lean-forward="false" selection-start-line="150" selection-start-column="16" selection-end-line="150" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/src/media/grid.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="16" lean-forward="false" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/src/media/audiovideo.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="397">
+          <caret line="259" column="0" lean-forward="false" selection-start-line="259" selection-start-column="0" selection-end-line="259" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gruntfile.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-5466">
+          <caret line="129" column="14" lean-forward="true" selection-start-line="129" selection-start-column="14" selection-end-line="129" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webpack.config.dev.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2422">
+          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

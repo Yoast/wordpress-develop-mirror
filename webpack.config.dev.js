@@ -209,7 +209,7 @@ include_files = {
 module.exports = {
 	cache: true,
 	watch: true,
-	entry: Object.assign( manual_packages, npm_packages, admin_files, include_files ),
+	entry: Object.assign( npm_packages, admin_files, include_files ),
 	output: {
 		filename: '[name]',
 	}
