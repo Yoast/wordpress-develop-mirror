@@ -206,11 +206,24 @@ include_files = {
 // 	'src/wp-includes/js/tinymce': ['./js/enqueues/tinymce'],
 // }
 
-module.exports = {
-	cache: true,
-	watch: true,
-	entry: Object.assign( npm_packages, admin_files, include_files ),
-	output: {
-		filename: '[name]',
+module.exports = [
+	{
+		cache: true,
+		watch: true,
+		entry: Object.assign( npm_packages, admin_files, include_files ),
+		output: {
+			filename: '[name]',
+		}
+	},
+	{
+		cache: true,
+		watch: true,
+		entry: {
+			'src/wp-includes/js/wp-a11y.js': ['@wordpress/a11y']
+		},
+		output: {
+			filename: 'src/wp-includes/js/wp-a11y.js',
+			library: [ 'wp', 'a11y', 'speak' ],
+		}
 	}
-};
+];
