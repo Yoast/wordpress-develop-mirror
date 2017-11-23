@@ -186,25 +186,45 @@ function form_option( $option ) {
 function wp_load_alloptions() {
 	global $wpdb;
 
-	if ( ! wp_installing() || ! is_multisite() )
+	if ( ! wp_installing() || ! is_multisite() ) {
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
-	else
+	} else {
 		$alloptions = false;
+	}
 
-	if ( !$alloptions ) {
+	if ( ! $alloptions ) {
 		$suppress = $wpdb->suppress_errors();
-		if ( !$alloptions_db = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" ) )
+		if ( ! $alloptions_db = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" ) ) {
 			$alloptions_db = $wpdb->get_results( "SELECT option_name, option_value FROM $wpdb->options" );
-		$wpdb->suppress_errors($suppress);
+		}
+		$wpdb->suppress_errors( $suppress );
+
 		$alloptions = array();
 		foreach ( (array) $alloptions_db as $o ) {
 			$alloptions[$o->option_name] = $o->option_value;
 		}
-		if ( ! wp_installing() || ! is_multisite() )
+
+		if ( ! wp_installing() || ! is_multisite() ) {
+			/**
+			 * Filters all options before caching them.
+			 *
+			 * @since 4.9.0
+			 *
+			 * @param array $alloptions Array with all options.
+			 */
+			$alloptions = apply_filters( 'pre_cache_alloptions', $alloptions );
 			wp_cache_add( 'alloptions', $alloptions, 'options' );
+		}
 	}
 
-	return $alloptions;
+	/**
+	 * Filters all options after retrieving them.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param array $alloptions Array with all options.
+	 */
+	return apply_filters( 'alloptions', $alloptions );
 }
 
 /**
@@ -794,6 +814,61 @@ function set_transient( $transient, $value, $expiration = 0 ) {
 		do_action( 'setted_transient', $transient, $value, $expiration );
 	}
 	return $result;
+}
+
+/**
+ * Deletes all expired transients.
+ *
+ * The multi-table delete syntax is used to delete the transient record
+ * from table a, and the corresponding transient_timeout record from table b.
+ *
+ * @since 4.9.0
+ *
+ * @param bool $force_db Optional. Force cleanup to run against the database even when an external object cache is used.
+ */
+function delete_expired_transients( $force_db = false ) {
+	global $wpdb;
+
+	if ( ! $force_db && wp_using_ext_object_cache() ) {
+		return;
+	}
+
+	$wpdb->query( $wpdb->prepare(
+		"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+			WHERE a.option_name LIKE %s
+			AND a.option_name NOT LIKE %s
+			AND b.option_name = CONCAT( '_transient_timeout_', SUBSTRING( a.option_name, 12 ) )
+			AND b.option_value < %d",
+		$wpdb->esc_like( '_transient_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_' ) . '%',
+		time()
+	) );
+
+	if ( ! is_multisite() ) {
+		// non-Multisite stores site transients in the options table.
+		$wpdb->query( $wpdb->prepare(
+			"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
+				WHERE a.option_name LIKE %s
+				AND a.option_name NOT LIKE %s
+				AND b.option_name = CONCAT( '_site_transient_timeout_', SUBSTRING( a.option_name, 17 ) )
+				AND b.option_value < %d",
+			$wpdb->esc_like( '_site_transient_' ) . '%',
+			$wpdb->esc_like( '_site_transient_timeout_' ) . '%',
+			time()
+		) );
+	} elseif ( is_multisite() && is_main_site() && is_main_network() ) {
+		// Multisite stores site transients in the sitemeta table.
+		$wpdb->query( $wpdb->prepare(
+			"DELETE a, b FROM {$wpdb->sitemeta} a, {$wpdb->sitemeta} b
+				WHERE a.meta_key LIKE %s
+				AND a.meta_key NOT LIKE %s
+				AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
+				AND b.meta_value < %d",
+			$wpdb->esc_like( '_site_transient_' ) . '%',
+			$wpdb->esc_like( '_site_transient_timeout_' ) . '%',
+			time()
+		) );
+	}
 }
 
 /**

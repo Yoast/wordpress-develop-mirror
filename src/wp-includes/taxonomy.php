@@ -120,6 +120,7 @@ function create_initial_taxonomies() {
 			'separate_items_with_commas' => null,
 			'add_or_remove_items' => null,
 			'choose_from_most_used' => null,
+			'back_to_items' => __( '&larr; Back to Link Categories' ),
 		),
 		'capabilities' => array(
 			'manage_terms' => 'manage_links',
@@ -296,6 +297,7 @@ function is_taxonomy_hierarchical($taxonomy) {
  * @since 4.5.0 Introduced `publicly_queryable` argument.
  * @since 4.7.0 Introduced `show_in_rest`, 'rest_base' and 'rest_controller_class'
  *              arguments to register the Taxonomy in REST API.
+ * @since 5.0.0 Introduced `meta_box_sanitize_cb` argument.
  *
  * @global array $wp_taxonomies Registered taxonomies.
  *
@@ -338,6 +340,9 @@ function is_taxonomy_hierarchical($taxonomy) {
  *                                                post_categories_meta_box() is used for hierarchical taxonomies, and
  *                                                post_tags_meta_box() is used for non-hierarchical. If false, no meta
  *                                                box is shown.
+ *     @type callable      $meta_box_sanitize_cb  Callback function for sanitizing taxonomy data saved from a meta
+ *                                                box. If no callback is defined, an appropriate one is determined
+ *                                                based on the value of `$meta_box_cb`.
  *     @type array         $capabilities {
  *         Array of capabilities for this taxonomy.
  *
@@ -423,7 +428,7 @@ function unregister_taxonomy( $taxonomy ) {
 
 	// Do not allow unregistering internal taxonomies.
 	if ( $taxonomy_object->_builtin ) {
-		return new WP_Error( 'invalid_taxonomy', __( 'Unregistering a built-in taxonomy is not allowed' ) );
+		return new WP_Error( 'invalid_taxonomy', __( 'Unregistering a built-in taxonomy is not allowed.' ) );
 	}
 
 	global $wp_taxonomies;
@@ -452,7 +457,7 @@ function unregister_taxonomy( $taxonomy ) {
  * @since 3.0.0
  * @since 4.3.0 Added the `no_terms` label.
  * @since 4.4.0 Added the `items_list_navigation` and `items_list` labels.
- * @since 4.9.0 Added the `most_used` label.
+ * @since 4.9.0 Added the `most_used` and `back_to_items` labels.
  *
  * @param WP_Taxonomy $tax Taxonomy object.
  * @return object {
@@ -487,8 +492,8 @@ function unregister_taxonomy( $taxonomy ) {
  *                                              list tables.
  *     @type string $items_list_navigation      Label for the table pagination hidden heading.
  *     @type string $items_list                 Label for the table hidden heading.
- *     @type string $most_used                  Title used for the Most Used panel. Not used for non-hierarchical
- *                                              taxonomies. Default 'Most Used'.
+ *     @type string $most_used                  Title for the Most Used tab. Default 'Most Used'.
+ *     @type string $back_to_items              Label displayed after a term has been updated.
  * }
  */
 function get_taxonomy_labels( $tax ) {
@@ -520,7 +525,9 @@ function get_taxonomy_labels( $tax ) {
 		'no_terms' => array( __( 'No tags' ), __( 'No categories' ) ),
 		'items_list_navigation' => array( __( 'Tags list navigation' ), __( 'Categories list navigation' ) ),
 		'items_list' => array( __( 'Tags list' ), __( 'Categories list' ) ),
-		'most_used' => array( null, __( 'Most Used' ) ),
+		/* translators: Tab heading when selecting from the most used terms */
+		'most_used' => array( _x( 'Most Used', 'tags' ), _x( 'Most Used', 'categories' ) ),
+		'back_to_items' => array( __( '&larr; Back to Tags' ), __( '&larr; Back to Categories' ) ),
 	);
 	$nohier_vs_hier_defaults['menu_name'] = $nohier_vs_hier_defaults['name'];
 
@@ -742,7 +749,7 @@ function get_tax_sql( $tax_query, $primary_table, $primary_id_column ) {
  */
 function get_term( $term, $taxonomy = '', $output = OBJECT, $filter = 'raw' ) {
 	if ( empty( $term ) ) {
-		return new WP_Error( 'invalid_term', __( 'Empty Term' ) );
+		return new WP_Error( 'invalid_term', __( 'Empty Term.' ) );
 	}
 
 	if ( $taxonomy && ! taxonomy_exists( $taxonomy ) ) {
@@ -1908,7 +1915,14 @@ function wp_get_object_terms($object_ids, $taxonomies, $args = array()) {
 
 	// Taxonomies registered without an 'args' param are handled here.
 	if ( ! empty( $taxonomies ) ) {
-		$terms = array_merge( $terms, get_terms( $args ) );
+		$terms_from_remaining_taxonomies = get_terms( $args );
+
+		// Array keys should be preserved for values of $fields that use term_id for keys.
+		if ( ! empty( $args['fields'] ) && 0 === strpos( $args['fields'], 'id=>' ) ) {
+			$terms = $terms + $terms_from_remaining_taxonomies;
+		} else {
+			$terms = array_merge( $terms, $terms_from_remaining_taxonomies );
+		}
 	}
 
 	/**
@@ -2119,7 +2133,7 @@ function wp_insert_term( $term, $taxonomy, $args = array() ) {
 	$data = apply_filters( 'wp_insert_term_data', $data, $taxonomy, $args );
 
 	if ( false === $wpdb->insert( $wpdb->terms, $data ) ) {
-		return new WP_Error( 'db_insert_error', __( 'Could not insert term into the database' ), $wpdb->last_error );
+		return new WP_Error( 'db_insert_error', __( 'Could not insert term into the database.' ), $wpdb->last_error );
 	}
 
 	$term_id = (int) $wpdb->insert_id;
@@ -2343,7 +2357,7 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
 				$values[] = $wpdb->prepare( "(%d, %d, %d)", $object_id, $tt_id, ++$term_order);
 		if ( $values )
 			if ( false === $wpdb->query( "INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES " . join( ',', $values ) . " ON DUPLICATE KEY UPDATE term_order = VALUES(term_order)" ) )
-				return new WP_Error( 'db_insert_error', __( 'Could not insert term relationship into the database' ), $wpdb->last_error );
+				return new WP_Error( 'db_insert_error', __( 'Could not insert term relationship into the database.' ), $wpdb->last_error );
 	}
 
 	wp_cache_delete( $object_id, $taxonomy . '_relationships' );
@@ -2611,7 +2625,7 @@ function wp_update_term( $term_id, $taxonomy, $args = array() ) {
 	}
 
 	if ( ! $term ) {
-		return new WP_Error( 'invalid_term', __( 'Empty Term' ) );
+		return new WP_Error( 'invalid_term', __( 'Empty Term.' ) );
 	}
 
 	$term = (array) $term->data;
@@ -2697,7 +2711,7 @@ function wp_update_term( $term_id, $taxonomy, $args = array() ) {
 			$slug = wp_unique_term_slug($slug, (object) $args);
 		} else {
 			/* translators: 1: Taxonomy term slug */
-			return new WP_Error('duplicate_term_slug', sprintf(__('The slug &#8220;%s&#8221; is already in use by another term'), $slug));
+			return new WP_Error( 'duplicate_term_slug', sprintf( __( 'The slug &#8220;%s&#8221; is already in use by another term.' ), $slug ) );
 		}
 	}
 
@@ -3320,7 +3334,7 @@ function _get_term_children( $term_id, $terms, $taxonomy, &$ancestors = array() 
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @param array  $terms    List of term objects, passed by reference.
+ * @param array  $terms    List of term objects (passed by reference).
  * @param string $taxonomy Term context.
  */
 function _pad_term_counts( &$terms, $taxonomy ) {
@@ -3785,7 +3799,7 @@ function _wp_check_split_terms_in_menus( $term_id, $new_term_id, $term_taxonomy_
 			INNER JOIN {$wpdb->postmeta} AS m2 ON ( m2.post_id = m1.post_id )
 			INNER JOIN {$wpdb->postmeta} AS m3 ON ( m3.post_id = m1.post_id )
 		WHERE ( m1.meta_key = '_menu_item_type' AND m1.meta_value = 'taxonomy' )
-			AND ( m2.meta_key = '_menu_item_object' AND m2.meta_value = '%s' )
+			AND ( m2.meta_key = '_menu_item_object' AND m2.meta_value = %s )
 			AND ( m3.meta_key = '_menu_item_object_id' AND m3.meta_value = %d )",
 		$taxonomy,
 		$term_id
@@ -3912,7 +3926,7 @@ function get_term_link( $term, $taxonomy = '' ) {
 	}
 
 	if ( !is_object($term) )
-		$term = new WP_Error('invalid_term', __('Empty Term'));
+		$term = new WP_Error( 'invalid_term', __( 'Empty Term.' ) );
 
 	if ( is_wp_error( $term ) )
 		return $term;
@@ -4124,7 +4138,7 @@ function get_post_taxonomies( $post = 0 ) {
  */
 function is_object_in_term( $object_id, $taxonomy, $terms = null ) {
 	if ( !$object_id = (int) $object_id )
-		return new WP_Error( 'invalid_object', __( 'Invalid object ID' ) );
+		return new WP_Error( 'invalid_object', __( 'Invalid object ID.' ) );
 
 	$object_terms = get_object_term_cache( $object_id, $taxonomy );
 	if ( false === $object_terms ) {

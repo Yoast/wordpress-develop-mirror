@@ -118,7 +118,7 @@ class WP_Comment_Query {
 	 *
 	 * @since 4.0.0
 	 *
-	 * @param callable $name      Method to call.
+	 * @param string   $name      Method to call.
 	 * @param array    $arguments Arguments to pass when calling.
 	 * @return mixed|false Return value of the callback, false otherwise.
 	 */
@@ -222,9 +222,10 @@ class WP_Comment_Query {
 	 *                                                   Default empty.
 	 *     @type string       $search                    Search term(s) to retrieve matching comments for.
 	 *                                                   Default empty.
-	 *     @type string       $status                    Comment status to limit results by. Accepts 'hold'
-	 *                                                   (`comment_status=0`), 'approve' (`comment_status=1`),
-	 *                                                   'all', or a custom comment status. Default 'all'.
+	 *     @type string|array $status                    Comment stati to limit results by. Accepts an array
+	 *                                                   or space/comma separate list of 'hold' (`comment_status=0`),
+	 *                                                   'approve' (`comment_status=1`), 'all', or a custom
+	 *                                                   comment status. Default 'all'.
 	 *     @type string|array $type                      Include comments of a given type, or array of types.
 	 *                                                   Accepts 'comment', 'pings' (includes 'pingback' and
 	 *                                                   'trackback'), or anycustom type string. Default empty.
@@ -323,7 +324,7 @@ class WP_Comment_Query {
 		 *
 		 * @since 4.2.0
 		 *
-		 * @param WP_Comment_Query &$this The WP_Comment_Query instance (passed by reference).
+		 * @param WP_Comment_Query $this The WP_Comment_Query instance (passed by reference).
 		 */
 		do_action_ref_array( 'parse_comment_query', array( &$this ) );
 	}
@@ -369,7 +370,7 @@ class WP_Comment_Query {
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param WP_Comment_Query &$this Current instance of WP_Comment_Query, passed by reference.
+		 * @param WP_Comment_Query $this Current instance of WP_Comment_Query (passed by reference).
 		 */
 		do_action_ref_array( 'pre_get_comments', array( &$this ) );
 
@@ -450,7 +451,7 @@ class WP_Comment_Query {
 		 * @since 3.1.0
 		 *
 		 * @param array            $_comments An array of comments.
-		 * @param WP_Comment_Query &$this     Current instance of WP_Comment_Query, passed by reference.
+		 * @param WP_Comment_Query $this     Current instance of WP_Comment_Query (passed by reference).
 		 */
 		$_comments = apply_filters_ref_array( 'the_comments', array( $_comments, &$this ) );
 
@@ -848,7 +849,7 @@ class WP_Comment_Query {
 		 * @since 3.1.0
 		 *
 		 * @param array            $pieces A compacted array of comment query clauses.
-		 * @param WP_Comment_Query &$this  Current instance of WP_Comment_Query, passed by reference.
+		 * @param WP_Comment_Query $this  Current instance of WP_Comment_Query (passed by reference).
 		 */
 		$clauses = apply_filters_ref_array( 'comments_clauses', array( compact( $pieces ), &$this ) );
 

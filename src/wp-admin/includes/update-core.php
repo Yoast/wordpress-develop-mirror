@@ -714,8 +714,35 @@ $_old_files = array(
 'wp-includes/js/tinymce/skins/lightgray/fonts/tinymce.json',
 'wp-includes/js/tinymce/skins/lightgray/skin.ie7.min.css',
 // 4.9
+'wp-admin/css/press-this-editor-rtl.css',
+'wp-admin/css/press-this-editor-rtl.min.css',
+'wp-admin/css/press-this-editor.css',
+'wp-admin/css/press-this-editor.min.css',
+'wp-admin/css/press-this-rtl.css',
+'wp-admin/css/press-this-rtl.min.css',
+'wp-admin/css/press-this.css',
+'wp-admin/css/press-this.min.css',
+'wp-admin/includes/class-wp-press-this.php',
+'wp-admin/js/bookmarklet.js',
+'wp-admin/js/bookmarklet.min.js',
+'wp-admin/js/press-this.js',
+'wp-admin/js/press-this.min.js',
+'wp-includes/js/mediaelement/background.png',
+'wp-includes/js/mediaelement/bigplay.png',
+'wp-includes/js/mediaelement/bigplay.svg',
+'wp-includes/js/mediaelement/controls.png',
+'wp-includes/js/mediaelement/controls.svg',
+'wp-includes/js/mediaelement/flashmediaelement.swf',
+'wp-includes/js/mediaelement/froogaloop.min.js',
+'wp-includes/js/mediaelement/jumpforward.png',
+'wp-includes/js/mediaelement/loading.gif',
+'wp-includes/js/mediaelement/silverlightmediaelement.xap',
+'wp-includes/js/mediaelement/skipback.png',
 'wp-includes/js/plupload/plupload.flash.swf',
+'wp-includes/js/plupload/plupload.full.min.js',
 'wp-includes/js/plupload/plupload.silverlight.xap',
+'wp-includes/js/swfupload/plugins',
+'wp-includes/js/swfupload/swfupload.swf',
 );
 
 /**
@@ -848,7 +875,7 @@ function update_core($from, $to) {
 
 	/*
 	 * Import $wp_version, $required_php_version, and $required_mysql_version from the new version.
-	 * DO NOT globalise any variables imported from `version-current.php` in this function. 
+	 * DO NOT globalise any variables imported from `version-current.php` in this function.
 	 *
 	 * BC Note: $wp_filesystem->wp_content_dir() returned unslashed pre-2.8
 	 */

@@ -330,6 +330,10 @@
 				}
 			} );
 
+			if ( api.section.has( 'publish_settings' ) ) {
+				api.section( 'publish_settings' ).collapse();
+			}
+
 			$( 'body' ).addClass( 'adding-widget' );
 
 			this.$el.find( '.selected' ).removeClass( 'selected' );
@@ -549,6 +553,10 @@
 				return;
 			}
 			control.widgetContentEmbedded = true;
+
+			// Update the notification container element now that the widget content has been embedded.
+			control.notifications.container = control.getNotificationsContainerElement();
+			control.notifications.render();
 
 			widgetContent = $( control.params.widget_content );
 			control.container.find( '.widget-content:first' ).append( widgetContent );
@@ -2094,24 +2102,20 @@
 
 			controlConstructor = api.controlConstructor[controlType];
 			widgetFormControl = new controlConstructor( settingId, {
-				params: {
-					settings: {
-						'default': settingId
-					},
-					content: controlContainer,
-					sidebar_id: self.params.sidebar_id,
-					widget_id: widgetId,
-					widget_id_base: widget.get( 'id_base' ),
-					type: controlType,
-					is_new: ! isExistingWidget,
-					width: widget.get( 'width' ),
-					height: widget.get( 'height' ),
-					is_wide: widget.get( 'is_wide' ),
-					active: true
+				settings: {
+					'default': settingId
 				},
-				previewer: self.setting.previewer
+				content: controlContainer,
+				sidebar_id: self.params.sidebar_id,
+				widget_id: widgetId,
+				widget_id_base: widget.get( 'id_base' ),
+				type: controlType,
+				is_new: ! isExistingWidget,
+				width: widget.get( 'width' ),
+				height: widget.get( 'height' ),
+				is_wide: widget.get( 'is_wide' )
 			} );
-			api.control.add( settingId, widgetFormControl );
+			api.control.add( widgetFormControl );
 
 			// Make sure widget is removed from the other sidebars
 			api.each( function( otherSetting ) {

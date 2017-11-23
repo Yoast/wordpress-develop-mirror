@@ -810,7 +810,8 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 		} else {
 			// If this type doesn't support trashing, error out.
 			if ( ! $supports_trash ) {
-				return new WP_Error( 'rest_trash_not_supported', __( 'The comment does not support trashing. Set force=true to delete.' ), array( 'status' => 501 ) );
+				/* translators: %s: force=true */
+				return new WP_Error( 'rest_trash_not_supported', sprintf( __( "The comment does not support trashing. Set '%s' to delete." ), 'force=true' ), array( 'status' => 501 ) );
 			}
 
 			if ( 'trash' === $comment->comment_approved ) {
@@ -1140,7 +1141,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/schema#',
+			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'comment',
 			'type'                 => 'object',
 			'properties'           => array(
@@ -1199,6 +1200,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 					'context'         => array( 'view', 'edit', 'embed' ),
 					'arg_options'     => array(
 						'sanitize_callback' => null, // Note: sanitization implemented in self::prepare_item_for_database()
+						'validate_callback' => null, // Note: validation implemented in self::prepare_item_for_database()
 					),
 					'properties'      => array(
 						'raw'         => array(
@@ -1511,7 +1513,7 @@ class WP_REST_Comments_Controller extends WP_REST_Controller {
 		$has_password_filter = false;
 
 		// Only check password if a specific post was queried for or a single comment
-		$requested_post = ! empty( $request['post'] ) && 1 === count( $request['post'] );
+		$requested_post = ! empty( $request['post'] ) && ( !is_array( $request['post'] ) || 1 === count( $request['post'] ) );
 		$requested_comment = ! empty( $request['id'] );
 		if ( ( $requested_post || $requested_comment ) && $posts_controller->can_access_password_content( $post, $request ) ) {
 			add_filter( 'post_password_required', '__return_false' );

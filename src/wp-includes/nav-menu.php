@@ -185,6 +185,38 @@ function has_nav_menu( $location ) {
 }
 
 /**
+ * Returns the name of a navigation menu.
+ *
+ * @since 4.9.0
+ *
+ * @param string $location Menu location identifier.
+ * @return string Menu name.
+ */
+function wp_get_nav_menu_name( $location ) {
+	$menu_name = '';
+
+	$locations = get_nav_menu_locations();
+
+	if ( isset( $locations[ $location ] ) ) {
+		$menu = wp_get_nav_menu_object( $locations[ $location ] );
+
+		if ( $menu && $menu->name ) {
+			$menu_name = $menu->name;
+		}
+	}
+
+	/**
+	 * Filters the navigation menu name being returned.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param string $menu_name Menu name.
+	 * @param string $location  Menu location identifier.
+	 */
+	return apply_filters( 'wp_get_nav_menu_name', $menu_name, $location );
+}
+
+/**
  * Determines whether the given ID is a nav menu item.
  *
  * @since 3.0.0
@@ -631,7 +663,7 @@ function wp_get_nav_menu_items( $menu, $args = array() ) {
 	}
 
 	// Get all posts and terms at once to prime the caches
-	if ( empty( $fetched[$menu->term_id] ) || wp_using_ext_object_cache() ) {
+	if ( empty( $fetched[ $menu->term_id ] ) && ! wp_using_ext_object_cache() ) {
 		$fetched[$menu->term_id] = true;
 		$posts = array();
 		$terms = array();
@@ -1019,9 +1051,15 @@ function _wp_delete_customize_changeset_dependent_auto_drafts( $post_id ) {
 		return;
 	}
 	remove_action( 'delete_post', '_wp_delete_customize_changeset_dependent_auto_drafts' );
-	foreach ( $data['nav_menus_created_posts']['value'] as $post_id ) {
-		if ( ! empty( $post_id ) && 'auto-draft' === get_post_status( $post_id ) ) {
-			wp_delete_post( $post_id, true );
+	foreach ( $data['nav_menus_created_posts']['value'] as $stub_post_id ) {
+		if ( empty( $stub_post_id ) ) {
+			continue;
+		}
+		if ( 'auto-draft' === get_post_status( $stub_post_id ) ) {
+			wp_delete_post( $stub_post_id, true );
+		} elseif ( 'draft' === get_post_status( $stub_post_id ) ) {
+			wp_trash_post( $stub_post_id );
+			delete_post_meta( $stub_post_id, '_customize_changeset_uuid' );
 		}
 	}
 	add_action( 'delete_post', '_wp_delete_customize_changeset_dependent_auto_drafts' );
@@ -1052,7 +1090,8 @@ function _wp_menus_changed() {
  * @return array Nav menus mapped to new nav menu locations.
  */
 function wp_map_nav_menu_locations( $new_nav_menu_locations, $old_nav_menu_locations ) {
-	$registered_nav_menus = get_registered_nav_menus();
+	$registered_nav_menus   = get_registered_nav_menus();
+	$new_nav_menu_locations = array_intersect_key( $new_nav_menu_locations, $registered_nav_menus );
 
 	// Short-circuit if there are no old nav menu location assignments to map.
 	if ( empty( $old_nav_menu_locations ) ) {
@@ -1085,8 +1124,9 @@ function wp_map_nav_menu_locations( $new_nav_menu_locations, $old_nav_menu_locat
 	 * from within the same group, make an educated guess and map it.
 	 */
 	$common_slug_groups = array(
-		array( 'header', 'main', 'navigation', 'primary', 'top' ),
-		array( 'bottom', 'footer', 'secondary', 'subsidiary' ),
+		array( 'primary', 'menu-1', 'main', 'header', 'navigation', 'top' ),
+		array( 'secondary', 'menu-2', 'footer', 'subsidiary', 'bottom' ),
+		array( 'social' ),
 	);
 
 	// Go through each group...

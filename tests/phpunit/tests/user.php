@@ -180,7 +180,7 @@ class Tests_User extends WP_UnitTestCase {
 		$this->assertEquals( 'foo', $user->$key );
 		$this->assertEquals( 'foo', $user->data->$key );  // This will fail with WP < 3.3
 
-		foreach ( (array) $user as $key => $value ) {
+		foreach ( get_object_vars( $user ) as $key => $value ) {
 			$this->assertEquals( $value, $user->$key );
 		}
 	}
@@ -358,7 +358,7 @@ class Tests_User extends WP_UnitTestCase {
 		// Test update of fields in _get_additional_user_keys()
 		$user_data = array(
 			'ID' => self::$author_id, 'use_ssl' => 1, 'show_admin_bar_front' => 1,
-			'rich_editing' => 1, 'first_name' => 'first', 'last_name' => 'last',
+			'rich_editing' => 1, 'syntax_highlighting' => 1, 'first_name' => 'first', 'last_name' => 'last',
 			'nickname' => 'nick', 'comment_shortcuts' => 'true', 'admin_color' => 'classic',
 			'description' => 'describe'
 		);

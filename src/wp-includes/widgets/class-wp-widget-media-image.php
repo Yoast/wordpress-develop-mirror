@@ -33,11 +33,11 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 			'replace_media' => _x( 'Replace Image', 'label for button in the image widget; should preferably not be longer than ~13 characters long' ),
 			'edit_media' => _x( 'Edit Image', 'label for button in the image widget; should preferably not be longer than ~13 characters long' ),
 			'missing_attachment' => sprintf(
-				/* translators: placeholder is URL to media library */
+				/* translators: %s: URL to media library */
 				__( 'We can&#8217;t find that image. Check your <a href="%s">media library</a> and make sure it wasn&#8217;t deleted.' ),
 				esc_url( admin_url( 'upload.php' ) )
 			),
-			/* translators: %d is widget count */
+			/* translators: %d: widget count */
 			'media_library_state_multi' => _n_noop( 'Image Widget (%d)', 'Image Widget (%d)' ),
 			'media_library_state_single' => __( 'Image Widget' ),
 		) );
@@ -92,7 +92,7 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 				'link_type' => array(
 					'type' => 'string',
 					'enum' => array( 'none', 'file', 'post', 'custom' ),
-					'default' => 'none',
+					'default' => 'custom',
 					'media_prop' => 'link',
 					'description' => __( 'Link To' ),
 					'should_preview_update' => true,
@@ -177,8 +177,10 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 			$attachment = get_post( $instance['attachment_id'] );
 		}
 		if ( $attachment ) {
-			$caption = $attachment->post_excerpt;
-			if ( $instance['caption'] ) {
+			$caption = '';
+			if ( ! isset( $instance['caption'] ) ) {
+				$caption = $attachment->post_excerpt;
+			} elseif ( trim( $instance['caption'] ) ) {
 				$caption = $instance['caption'];
 			}
 
@@ -240,14 +242,20 @@ class WP_Widget_Media_Image extends WP_Widget_Media {
 		}
 
 		if ( $url ) {
-			$image = sprintf(
-				'<a href="%1$s" class="%2$s" rel="%3$s" target="%4$s">%5$s</a>',
-				esc_url( $url ),
-				esc_attr( $instance['link_classes'] ),
-				esc_attr( $instance['link_rel'] ),
-				! empty( $instance['link_target_blank'] ) ? '_blank' : '',
-				$image
-			);
+			$link = sprintf( '<a href="%s"', esc_url( $url ) );
+			if ( ! empty( $instance['link_classes'] ) ) {
+				$link .= sprintf( ' class="%s"', esc_attr( $instance['link_classes'] ) );
+			}
+			if ( ! empty( $instance['link_rel'] ) ) {
+				$link .= sprintf( ' rel="%s"', esc_attr( $instance['link_rel'] ) );
+			}
+			if ( ! empty( $instance['link_target_blank'] ) ) {
+				$link .= ' target="_blank"';
+			}
+			$link .= '>';
+			$link .= $image;
+			$link .= '</a>';
+			$image = $link;
 		}
 
 		if ( $caption ) {

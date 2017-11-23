@@ -36,6 +36,9 @@
 			newQueryParams = api.utils.parseQueryString( urlParser.search.substr( 1 ) );
 
 			newQueryParams.customize_changeset_uuid = oldQueryParams.customize_changeset_uuid;
+			if ( oldQueryParams.customize_autosaved ) {
+				newQueryParams.customize_autosaved = 'on';
+			}
 			if ( oldQueryParams.customize_theme ) {
 				newQueryParams.customize_theme = oldQueryParams.customize_theme;
 			}
@@ -87,12 +90,15 @@
 	};
 
 	/**
+	 * @memberOf wp.customize
+	 * @alias wp.customize.Preview
+	 *
 	 * @constructor
 	 * @augments wp.customize.Messenger
 	 * @augments wp.customize.Class
 	 * @mixes wp.customize.Events
 	 */
-	api.Preview = api.Messenger.extend({
+	api.Preview = api.Messenger.extend(/** @lends wp.customize.Preview.prototype */{
 		/**
 		 * @param {object} params  - Parameters to configure the messenger.
 		 * @param {object} options - Extend any instance parameter or method with this object.
@@ -361,6 +367,9 @@
 
 		queryParams = api.utils.parseQueryString( element.search.substring( 1 ) );
 		queryParams.customize_changeset_uuid = api.settings.changeset.uuid;
+		if ( api.settings.changeset.autosaved ) {
+			queryParams.customize_autosaved = 'on';
+		}
 		if ( ! api.settings.theme.active ) {
 			queryParams.customize_theme = api.settings.theme.stylesheet;
 		}
@@ -436,9 +445,16 @@
 
 			// Include customized state query params in URL.
 			queryParams.customize_changeset_uuid = api.settings.changeset.uuid;
+			if ( api.settings.changeset.autosaved ) {
+				queryParams.customize_autosaved = 'on';
+			}
 			if ( ! api.settings.theme.active ) {
 				queryParams.customize_theme = api.settings.theme.stylesheet;
 			}
+
+			// Ensure preview nonce is included with every customized request, to allow post data to be read.
+			queryParams.customize_preview_nonce = api.settings.nonce.preview;
+
 			urlParser.search = $.param( queryParams );
 			options.url = urlParser.href;
 		};
@@ -513,6 +529,9 @@
 		$( form ).removeClass( 'customize-unpreviewable' );
 
 		stateParams.customize_changeset_uuid = api.settings.changeset.uuid;
+		if ( api.settings.changeset.autosaved ) {
+			stateParams.customize_autosaved = 'on';
+		}
 		if ( ! api.settings.theme.active ) {
 			stateParams.customize_theme = api.settings.theme.stylesheet;
 		}
@@ -552,7 +571,7 @@
 		var previousPathName = location.pathname,
 			previousQueryString = location.search.substr( 1 ),
 			previousQueryParams = null,
-			stateQueryParams = [ 'customize_theme', 'customize_changeset_uuid', 'customize_messenger_channel' ];
+			stateQueryParams = [ 'customize_theme', 'customize_changeset_uuid', 'customize_messenger_channel', 'customize_autosaved' ];
 
 		return function keepAliveCurrentUrl() {
 			var urlParser, currentQueryParams;
@@ -657,7 +676,7 @@
 	};
 
 	$( function() {
-		var bg, setValue;
+		var bg, setValue, handleUpdatedChangesetUuid;
 
 		api.settings = window._wpCustomizeSettings;
 		if ( ! api.settings ) {
@@ -750,30 +769,59 @@
 			api.preview.send( 'scroll', $( window ).scrollTop() );
 		});
 
+		/**
+		 * Handle update to changeset UUID.
+		 *
+		 * @param {string} uuid - UUID.
+		 * @returns {void}
+		 */
+		handleUpdatedChangesetUuid = function( uuid ) {
+			api.settings.changeset.uuid = uuid;
+
+			// Update UUIDs in links and forms.
+			$( document.body ).find( 'a[href], area' ).each( function() {
+				api.prepareLinkPreview( this );
+			} );
+			$( document.body ).find( 'form' ).each( function() {
+				api.prepareFormPreview( this );
+			} );
+
+			/*
+			 * Replace the UUID in the URL. Note that the wrapped history.replaceState()
+			 * will handle injecting the current api.settings.changeset.uuid into the URL,
+			 * so this is merely to trigger that logic.
+			 */
+			if ( history.replaceState ) {
+				history.replaceState( currentHistoryState, '', location.href );
+			}
+		};
+
+		api.preview.bind( 'changeset-uuid', handleUpdatedChangesetUuid );
+
 		api.preview.bind( 'saved', function( response ) {
-
 			if ( response.next_changeset_uuid ) {
-				api.settings.changeset.uuid = response.next_changeset_uuid;
+				handleUpdatedChangesetUuid( response.next_changeset_uuid );
+			}
+			api.trigger( 'saved', response );
+		} );
 
-				// Update UUIDs in links and forms.
-				$( document.body ).find( 'a[href], area' ).each( function() {
-					api.prepareLinkPreview( this );
-				} );
-				$( document.body ).find( 'form' ).each( function() {
-					api.prepareFormPreview( this );
-				} );
-
-				/*
-				 * Replace the UUID in the URL. Note that the wrapped history.replaceState()
-				 * will handle injecting the current api.settings.changeset.uuid into the URL,
-				 * so this is merely to trigger that logic.
-				 */
-				if ( history.replaceState ) {
-					history.replaceState( currentHistoryState, '', location.href );
-				}
+		// Update the URLs to reflect the fact we've started autosaving.
+		api.preview.bind( 'autosaving', function() {
+			if ( api.settings.changeset.autosaved ) {
+				return;
 			}
 
-			api.trigger( 'saved', response );
+			api.settings.changeset.autosaved = true; // Start deferring to any autosave once changeset is updated.
+
+			$( document.body ).find( 'a[href], area' ).each( function() {
+				api.prepareLinkPreview( this );
+			} );
+			$( document.body ).find( 'form' ).each( function() {
+				api.prepareFormPreview( this );
+			} );
+			if ( history.replaceState ) {
+				history.replaceState( currentHistoryState, '', location.href );
+			}
 		} );
 
 		/*

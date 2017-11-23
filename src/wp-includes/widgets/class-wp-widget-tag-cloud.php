@@ -39,14 +39,15 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 	 * @param array $instance Settings for the current Tag Cloud widget instance.
 	 */
 	public function widget( $args, $instance ) {
-		$current_taxonomy = $this->_get_current_taxonomy($instance);
-		if ( !empty($instance['title']) ) {
+		$current_taxonomy = $this->_get_current_taxonomy( $instance );
+
+		if ( ! empty( $instance['title'] ) ) {
 			$title = $instance['title'];
 		} else {
-			if ( 'post_tag' == $current_taxonomy ) {
-				$title = __('Tags');
+			if ( 'post_tag' === $current_taxonomy ) {
+				$title = __( 'Tags' );
 			} else {
-				$tax = get_taxonomy($current_taxonomy);
+				$tax = get_taxonomy( $current_taxonomy );
 				$title = $tax->labels->name;
 			}
 		}
@@ -58,16 +59,18 @@ class WP_Widget_Tag_Cloud extends WP_Widget {
 		 *
 		 * @since 2.8.0
 		 * @since 3.0.0 Added taxonomy drop-down.
+		 * @since 4.9.0 Added the `$instance` parameter.
 		 *
 		 * @see wp_tag_cloud()
 		 *
-		 * @param array $args Args used for the tag cloud widget.
+		 * @param array $args     Args used for the tag cloud widget.
+		 * @param array $instance Array of settings for the current widget.
 		 */
 		$tag_cloud = wp_tag_cloud( apply_filters( 'widget_tag_cloud_args', array(
 			'taxonomy'   => $current_taxonomy,
 			'echo'       => false,
 			'show_count' => $show_count,
-		) ) );
+		), $instance ) );
 
 		if ( empty( $tag_cloud ) ) {
 			return;

@@ -243,6 +243,7 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 				'name'            => 'display_name',
 				'registered_date' => 'registered',
 				'slug'            => 'user_nicename',
+				'include_slugs'   => 'nicename__in',
 				'email'           => 'user_email',
 				'url'             => 'user_url',
 			);
@@ -740,7 +741,8 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 
 		// We don't support trashing for users.
 		if ( ! $force ) {
-			return new WP_Error( 'rest_trash_not_supported', __( 'Users do not support trashing. Set force=true to delete.' ), array( 'status' => 501 ) );
+			/* translators: %s: force=true */
+			return new WP_Error( 'rest_trash_not_supported', sprintf( __( "Users do not support trashing. Set '%s' to delete." ), 'force=true' ), array( 'status' => 501 ) );
 		}
 
 		if ( ! empty( $reassign ) ) {
@@ -1128,7 +1130,7 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'    => 'http://json-schema.org/schema#',
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'user',
 			'type'       => 'object',
 			'properties' => array(
@@ -1337,6 +1339,7 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 				'name',
 				'registered_date',
 				'slug',
+				'include_slugs',
 				'email',
 				'url',
 			),

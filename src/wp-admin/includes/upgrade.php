@@ -433,10 +433,13 @@ function wp_upgrade() {
 	wp_cache_flush();
 
 	if ( is_multisite() ) {
-		if ( $wpdb->get_row( "SELECT blog_id FROM {$wpdb->blog_versions} WHERE blog_id = '{$wpdb->blogid}'" ) )
-			$wpdb->query( "UPDATE {$wpdb->blog_versions} SET db_version = '{$wp_db_version}' WHERE blog_id = '{$wpdb->blogid}'" );
-		else
-			$wpdb->query( "INSERT INTO {$wpdb->blog_versions} ( `blog_id` , `db_version` , `last_updated` ) VALUES ( '{$wpdb->blogid}', '{$wp_db_version}', NOW());" );
+		$site_id = get_current_blog_id();
+
+		if ( $wpdb->get_row( $wpdb->prepare( "SELECT blog_id FROM {$wpdb->blog_versions} WHERE blog_id = %d", $site_id ) ) ) {
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->blog_versions} SET db_version = %d WHERE blog_id = %d", $wp_db_version, $site_id ) );
+		} else {
+			$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->blog_versions} ( `blog_id` , `db_version` , `last_updated` ) VALUES ( %d, %d, NOW() );", $site_id, $wp_db_version ) );
+		}
 	}
 
 	/**
@@ -1257,7 +1260,7 @@ function upgrade_280() {
 			}
 			$start += 20;
 		}
-		refresh_blog_details( $wpdb->blogid );
+		clean_blog_cache( get_current_blog_id() );
 	}
 }
 
@@ -1743,21 +1746,8 @@ function upgrade_460() {
 function upgrade_network() {
 	global $wp_current_db_version, $wpdb;
 
-	// Always.
-	if ( is_main_network() ) {
-		/*
-		 * Deletes all expired transients. The multi-table delete syntax is used
-		 * to delete the transient record from table a, and the corresponding
-		 * transient_timeout record from table b.
-		 */
-		$time = time();
-		$sql = "DELETE a, b FROM $wpdb->sitemeta a, $wpdb->sitemeta b
-			WHERE a.meta_key LIKE %s
-			AND a.meta_key NOT LIKE %s
-			AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
-			AND b.meta_value < %d";
-		$wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like ( '_site_transient_timeout_' ) . '%', $time ) );
-	}
+	// Always clear expired transients
+	delete_expired_transients( true );
 
 	// 2.8.
 	if ( $wp_current_db_version < 11549 ) {
