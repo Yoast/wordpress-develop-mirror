@@ -967,6 +967,9 @@ function wp( $query_vars = '' ) {
  * Retrieve the description for the HTTP status.
  *
  * @since 2.3.0
+ * @since 3.9.0 Added status codes 418, 428, 429, 431, and 511.
+ * @since 4.5.0 Added status codes 308, 421, and 451.
+ * @since 5.0.0 Added status code 103.
  *
  * @global array $wp_header_to_desc
  *
@@ -983,6 +986,7 @@ function get_status_header_desc( $code ) {
 			100 => 'Continue',
 			101 => 'Switching Protocols',
 			102 => 'Processing',
+			103 => 'Early Hints',
 
 			200 => 'OK',
 			201 => 'Created',
@@ -2751,9 +2755,15 @@ function _default_wp_die_handler( $message, $title = '', $args = array() ) {
 			$text_direction = 'rtl';
 		elseif ( function_exists( 'is_rtl' ) && is_rtl() )
 			$text_direction = 'rtl';
+
+			if ( function_exists( 'language_attributes' ) && function_exists( 'is_rtl' ) ) {
+				$dir_attr = get_language_attributes();
+			} else {
+				$dir_attr = "dir='$text_direction'";
+			}
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" <?php if ( function_exists( 'language_attributes' ) && function_exists( 'is_rtl' ) ) language_attributes(); else echo "dir='$text_direction'"; ?>>
+<html xmlns="http://www.w3.org/1999/xhtml" <?php echo $dir_attr; ?>>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=device-width">
@@ -3764,9 +3774,14 @@ function dead_db() {
 	status_header( 500 );
 	nocache_headers();
 	header( 'Content-Type: text/html; charset=utf-8' );
+
+	$dir_attr = '';
+	if ( is_rtl() ) {
+		$dir_attr = ' dir="rtl"';
+	}
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"<?php if ( is_rtl() ) echo ' dir="rtl"'; ?>>
+<html xmlns="http://www.w3.org/1999/xhtml"<?php echo $dir_attr; ?>>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><?php _e( 'Database Error' ); ?></title>
