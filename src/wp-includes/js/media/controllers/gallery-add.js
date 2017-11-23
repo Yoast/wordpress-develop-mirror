@@ -35,6 +35,7 @@ var Selection = wp.media.model.Selection,
  * @param {int}                        [attributes.priority=100]            The priority for the state link in the media menu.
  * @param {boolean}                    [attributes.syncSelection=false]     Whether the Attachments selection should be persisted from the last state.
  *                                                                          Defaults to false because for this state, because the library of the Edit Gallery state is the selection.
+ * @since 4.2
  */
 GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype */{
 	defaults: _.defaults({
@@ -49,10 +50,13 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 	}, Library.prototype.defaults ),
 
 	/**
-	 * @since 3.5.0
+	 * @summary If a library wasn't supplied, create a library of images.
+	 *
+	 * @since 3.5
+	 *
+	 * @returns {void}
 	 */
 	initialize: function() {
-		// If a library wasn't supplied, create a library of images.
 		if ( ! this.get('library') ) {
 			this.set( 'library', wp.media.query({ type: 'image' }) );
 		}
@@ -61,7 +65,11 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 	},
 
 	/**
-	 * @since 3.5.0
+	 * @summary
+	 *
+	 * @since 3.5
+	 *
+	 * @returns {void}
 	 */
 	activate: function() {
 		var library = this.get('library'),
