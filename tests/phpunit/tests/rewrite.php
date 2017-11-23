@@ -119,12 +119,9 @@ class Tests_Rewrite extends WP_UnitTestCase {
 	/**
 	 * @ticket 35531
 	 * @group multisite
+	 * @group ms-required
 	 */
 	function test_url_to_postid_of_http_site_when_current_site_uses_https() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'This test requires multisite' );
-		}
-
 		$_SERVER['HTTPS'] = 'on';
 
 		$network_home = home_url();
@@ -315,16 +312,9 @@ class Tests_Rewrite extends WP_UnitTestCase {
 
 	/**
 	 * Reveals bug introduced in WP 3.0
-	 *
-	 * Run tests using multisite `phpunit -c multisite`
+	 * @group ms-required
 	 */
 	function test_url_to_postid_ms_home_url_collision() {
-
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'test_url_to_postid_ms_home_url_collision requires multisite' );
-			return false;
-		}
-
 		$blog_id = self::factory()->blog->create( array( 'path' => '/example' ) );
 		switch_to_blog( $blog_id );
 
@@ -367,6 +357,20 @@ class Tests_Rewrite extends WP_UnitTestCase {
 		$this->assertSame( $post_id, url_to_postid( home_url() . '?random' ) );
 
 		update_option( 'show_on_front', 'posts' );
+	}
+
+	/**
+	 * @ticket 39373
+	 */
+	public function test_url_to_postid_should_bail_when_host_does_not_match() {
+		$this->set_permalink_structure( '/%postname%/' );
+
+		$post_id = self::factory()->post->create( array( 'post_name' => 'foo-bar-baz' ) );
+		$permalink = get_permalink( $post_id );
+		$url = str_replace( home_url(), 'http://some-other-domain.com', get_permalink( $post_id ) );
+
+		$this->assertSame( $post_id, url_to_postid( $permalink ) );
+		$this->assertSame( 0, url_to_postid( $url ) );
 	}
 
 	/**

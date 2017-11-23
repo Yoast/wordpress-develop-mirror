@@ -25,7 +25,7 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 		$_GET['test'] = 1;
 
 		// Make the request
-		$this->setExpectedException( 'WPAjaxDieStopException', '0' );
+		$this->setExpectedException( 'WPAjaxDieStopException', '-1' );
 		$this->_handleAjax( 'wp-compression-test' );
 	}
 
@@ -57,7 +57,7 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 	public function test_gzdeflate() {
 
 		if ( !function_exists( 'gzdeflate' ) ) {
-			$this->markTestSkipped( 'gzdeflate function not available' );
+			$this->fail( 'gzdeflate function not available' );
 		}
 
 		// Become an administrator
@@ -84,7 +84,7 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 	public function test_gzencode() {
 
 		if ( !function_exists('gzencode') ) {
-			$this->markTestSkipped( 'gzencode function not available' );
+			$this->fail( 'gzencode function not available' );
 		}
 
 		// Become an administrator

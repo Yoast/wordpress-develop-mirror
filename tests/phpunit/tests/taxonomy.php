@@ -292,6 +292,75 @@ class Tests_Taxonomy extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 37094
+	 */
+	public function test_term_assignment_should_invalidate_get_objects_in_term_cache() {
+		register_taxonomy( 'wptests_tax', 'post' );
+
+		$posts = self::factory()->post->create_many( 2 );
+		$term_id = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+		) );
+
+		wp_set_object_terms( $posts[1], $term_id, 'wptests_tax' );
+
+		// Prime cache.
+		$before = get_objects_in_term( $term_id, 'wptests_tax' );
+		$this->assertEqualSets( array( $posts[1] ), $before );
+
+		wp_set_object_terms( $posts[1], array(), 'wptests_tax' );
+
+		$after = get_objects_in_term( $term_id, 'wptests_tax' );
+		$this->assertSame( array(), $after );
+	}
+
+	/**
+	 * @ticket 37094
+	 */
+	public function test_term_deletion_should_invalidate_get_objects_in_term_cache() {
+		register_taxonomy( 'wptests_tax', 'post' );
+
+		$posts = self::factory()->post->create_many( 2 );
+		$term_id = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+		) );
+
+		wp_set_object_terms( $posts[1], $term_id, 'wptests_tax' );
+
+		// Prime cache.
+		$before = get_objects_in_term( $term_id, 'wptests_tax' );
+		$this->assertEqualSets( array( $posts[1] ), $before );
+
+		wp_delete_term( $term_id, 'wptests_tax' );
+
+		$after = get_objects_in_term( $term_id, 'wptests_tax' );
+		$this->assertSame( array(), $after );
+	}
+
+	/**
+	 * @ticket 37094
+	 */
+	public function test_post_deletion_should_invalidate_get_objects_in_term_cache() {
+		register_taxonomy( 'wptests_tax', 'post' );
+
+		$posts = self::factory()->post->create_many( 2 );
+		$term_id = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+		) );
+
+		wp_set_object_terms( $posts[1], $term_id, 'wptests_tax' );
+
+		// Prime cache.
+		$before = get_objects_in_term( $term_id, 'wptests_tax' );
+		$this->assertEqualSets( array( $posts[1] ), $before );
+
+		wp_delete_post( $posts[1], true );
+
+		$after = get_objects_in_term( $term_id, 'wptests_tax' );
+		$this->assertSame( array(), $after );
+	}
+
+	/**
 	 * @ticket 25706
 	 */
 	function test_in_category() {
@@ -695,7 +764,8 @@ class Tests_Taxonomy extends WP_UnitTestCase {
 
 		register_taxonomy( 'foo', 'post' );
 
-		$this->assertSame( 1, count( $wp_filter['wp_ajax_add-foo'] ) );
+		$this->assertArrayHasKey( 'wp_ajax_add-foo', $wp_filter );
+		$this->assertSame( 1, count( $wp_filter['wp_ajax_add-foo']->callbacks ) );
 		$this->assertTrue( unregister_taxonomy( 'foo' ) );
 		$this->assertArrayNotHasKey( 'wp_ajax_add-foo', $wp_filter );
 	}
@@ -710,4 +780,53 @@ class Tests_Taxonomy extends WP_UnitTestCase {
 		$this->assertFalse( taxonomy_exists( 'foo' ) );
 	}
 
+	/**
+	 * @ticket 39308
+	 */
+	public function test_taxonomy_name_property_should_not_get_overridden_by_passed_args() {
+		register_taxonomy( 'foo', 'post', array( 'name' => 'bar' ) );
+
+		$taxonomy = get_taxonomy( 'foo' );
+		unregister_taxonomy( 'foo' );
+
+		$this->assertSame( 'foo', $taxonomy->name );
+	}
+
+	/**
+	 * @ticket 36514
+	 */
+	public function test_edit_post_hierarchical_taxonomy() {
+
+		$taxonomy_name = 'foo';
+		$term_name     = 'bar';
+
+		register_taxonomy( $taxonomy_name, array( 'post' ), array(
+			'hierarchical' => false,
+			'meta_box_cb'  => 'post_categories_meta_box',
+		) );
+		$post = self::factory()->post->create_and_get( array(
+			'post_type' => 'post',
+		) );
+
+		$term_id  = self::factory()->term->create_object( array(
+			'name'     => $term_name,
+			'taxonomy' => $taxonomy_name,
+		) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$updated_post_id = edit_post( array(
+			'post_ID'   => $post->ID,
+			'post_type' => 'post',
+			'tax_input' => array(
+				$taxonomy_name => array(
+					(string) $term_id // Cast term_id as string to match whats sent in WP Admin.
+				),
+			),
+		) );
+
+		$terms_obj = get_the_terms( $updated_post_id, $taxonomy_name );
+		$problematic_term = current( wp_list_pluck( $terms_obj, 'name' ) );
+
+		$this->assertEquals( $problematic_term, $term_name );
+	}
 }

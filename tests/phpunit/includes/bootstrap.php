@@ -3,6 +3,12 @@
  * Installs WordPress for running the tests and loads WordPress and the test libraries
  */
 
+/**
+ * Compatibility with PHPUnit 6+
+ */
+if ( class_exists( 'PHPUnit\Runner\Version' ) ) {
+	require_once dirname( __FILE__ ) . '/phpunit6-compat.php';
+}
 
 $config_file_path = dirname( dirname( __FILE__ ) );
 if ( ! file_exists( $config_file_path . '/wp-tests-config.php' ) ) {
@@ -18,8 +24,9 @@ $config_file_path .= '/wp-tests-config.php';
  */
 global $wpdb, $current_site, $current_blog, $wp_rewrite, $shortcode_tags, $wp, $phpmailer, $wp_theme_directories;
 
-if ( !is_readable( $config_file_path ) ) {
-	die( "ERROR: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.\n" );
+if ( ! is_readable( $config_file_path ) ) {
+	echo "ERROR: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.\n";
+	exit( 1 );
 }
 require_once $config_file_path;
 require_once dirname( __FILE__ ) . '/functions.php';
@@ -58,7 +65,10 @@ if ( ! defined( 'WP_DEFAULT_THEME' ) ) {
 }
 $wp_theme_directories = array( DIR_TESTDATA . '/themedir1' );
 
-system( WP_PHP_BINARY . ' ' . escapeshellarg( dirname( __FILE__ ) . '/install.php' ) . ' ' . escapeshellarg( $config_file_path ) . ' ' . $multisite );
+system( WP_PHP_BINARY . ' ' . escapeshellarg( dirname( __FILE__ ) . '/install.php' ) . ' ' . escapeshellarg( $config_file_path ) . ' ' . $multisite, $retval );
+if ( 0 !== $retval ) {
+	exit( $retval );
+}
 
 if ( $multisite ) {
 	echo "Running as multisite..." . PHP_EOL;
@@ -125,7 +135,9 @@ class WP_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 	function __construct( $argv ) {
 		array_shift( $argv );
 		$options = array();
-		while ( list( $i, $arg ) = each( $argv ) ) {
+		while ( current( $argv ) ) {
+			$arg = current( $argv );
+			next( $argv );
 			try {
 				if ( strlen( $arg ) > 1 && $arg[0] === '-' && $arg[1] === '-' ) {
 					PHPUnit_Util_Getopt::parseLongOption( substr( $arg, 2 ), $this->longOptions, $options, $argv );

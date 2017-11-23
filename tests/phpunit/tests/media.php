@@ -20,9 +20,15 @@ class Tests_Media extends WP_UnitTestCase {
 		$GLOBALS['_wp_additional_image_sizes'] = self::$_sizes;
 	}
 
+	public static function tearDownAfterClass() {
+		wp_delete_post( self::$large_id, true );
+		parent::tearDownAfterClass();
+	}
+
 	function setUp() {
 		parent::setUp();
 		$this->caption = 'A simple caption.';
+		$this->alternate_caption = 'Alternate caption.';
 		$this->html_content = <<<CAP
 A <strong class='classy'>bolded</strong> <em>caption</em> with a <a href="#">link</a>.
 CAP;
@@ -46,9 +52,67 @@ CAP;
 		$this->assertNull( $result );
 	}
 
-	function test_img_caption_shortcode_with_bad_attr() {
-		$result = img_caption_shortcode( array(), 'content' );
-		$this->assertEquals( 'content', 'content' );
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_with_empty_params_but_content() {
+		$result = img_caption_shortcode( array(), $this->caption );
+		$this->assertEquals( $this->caption, $result );
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_short_circuit_filter() {
+		add_filter( 'img_caption_shortcode', array( $this, '_return_alt_caption' ) );
+
+		$result = img_caption_shortcode( array(), $this->caption );
+		$this->assertEquals( $this->alternate_caption, $result );
+	}
+
+	/**
+	 * Filter used in test_img_caption_shortcode_short_circuit_filter()
+	 */
+	function _return_alt_caption() {
+		return $this->alternate_caption;
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_empty_width() {
+		$result = img_caption_shortcode(
+			array(
+				'width' => 0,
+			),
+			$this->caption
+		);
+		$this->assertEquals( $this->caption, $result );
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_empty_caption() {
+		$result = img_caption_shortcode(
+			array(
+				'caption' => '',
+			)
+		);
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * @ticket 33981
+	 */
+	function test_img_caption_shortcode_empty_caption_and_content() {
+		$result = img_caption_shortcode(
+			array(
+				'caption' => '',
+			),
+			$this->caption
+		);
+		$this->assertEquals( $this->caption, $result );
 	}
 
 	function test_img_caption_shortcode_with_old_format() {
@@ -61,9 +125,9 @@ CAP;
 		$this->assertEquals( 1, preg_match_all( "/{$this->caption}/", $result, $_r ) );
 
 		if ( current_theme_supports( 'html5', 'caption' ) ) {
-			$this->assertEquals( 1, preg_match_all( "/width: 20/", $result, $_r ) );
+			$this->assertEquals( 1, preg_match_all( "/max-width: 20/", $result, $_r ) );
 		} else {
-			$this->assertEquals( 1, preg_match_all( "/width: 30/", $result, $_r ) );
+			$this->assertEquals( 1, preg_match_all( "/max-width: 30/", $result, $_r ) );
 		}
 	}
 
@@ -79,6 +143,18 @@ CAP;
 		$this->assertEquals( 1, preg_match_all( '/wp-caption &amp;myAlignment/', $result, $_r ) );
 		$this->assertEquals( 1, preg_match_all( '/id="myId"/', $result, $_r ) );
 		$this->assertEquals( 1, preg_match_all( "/{$this->caption}/", $result, $_r ) );
+	}
+
+	function test_img_caption_shortcode_with_old_format_and_class() {
+		$result = img_caption_shortcode(
+			array(
+				'width' => 20,
+				'class' => 'some-class another-class',
+				'caption' => $this->caption,
+			)
+		);
+		$this->assertEquals( 1, preg_match_all( '/wp-caption alignnone some-class another-class/', $result, $_r ) );
+
 	}
 
 	function test_new_img_caption_shortcode_with_html_caption() {
@@ -267,6 +343,18 @@ https://w.org</a>'
 		$this->assertEquals( 'image', $prepped['mime'] );
 		$this->assertEquals( 'image', $prepped['type'] );
 		$this->assertEquals( '', $prepped['subtype'] );
+
+		// Test that if author is not found, we return "(no author)" as `display_name`.
+		// The previously used test post contains no author, so we can reuse it.
+		$this->assertEquals( '(no author)', $prepped['authorName'] );
+
+		// Test that if author has HTML entities in display_name, they're decoded correctly.
+		$html_entity_author = self::factory()->user->create( array(
+			'display_name' => 'You &amp; Me',
+		) );
+		$post->post_author = $html_entity_author;
+		$prepped = wp_prepare_attachment_for_js( $post );
+		$this->assertEquals( 'You & Me', $prepped['authorName'] );
 	}
 
 	/**
@@ -388,6 +476,89 @@ BLOB;
 		$post_id = self::factory()->post->create( array( 'post_content' => $blob ) );
 		$srcs = get_post_galleries_images( $post_id );
 		$this->assertEquals( $srcs, array( $ids1_srcs, $ids2_srcs ) );
+	}
+
+	/**
+	 * @ticket 39304
+	 */
+	function test_post_galleries_images_without_global_post() {
+		// Set up an unattached image.
+		$this->factory->attachment->create_object( array(
+			'file' => 'test.jpg',
+			'post_parent' => 0,
+			'post_mime_type' => 'image/jpeg',
+			'post_type' => 'attachment'
+		) );
+
+		$post_id = $this->factory->post->create( array(
+			'post_content' => '[gallery]',
+		) );
+
+		$galleries = get_post_galleries( $post_id, false );
+
+		$this->assertEmpty( $galleries[0]['src'] );
+	}
+
+	/**
+	 * @ticket 39304
+	 */
+	function test_post_galleries_ignores_global_post() {
+		$global_post_id = $this->factory->post->create( array(
+			'post_content' => 'Global Post',
+		) );
+		$post_id = $this->factory->post->create( array(
+			'post_content' => '[gallery]',
+		) );
+		$this->factory->attachment->create_object( array(
+			'file' => 'test.jpg',
+			'post_parent' => $post_id,
+			'post_mime_type' => 'image/jpeg',
+			'post_type' => 'attachment'
+		) );
+		$expected_srcs = array(
+			'http://' . WP_TESTS_DOMAIN . '/wp-content/uploads/test.jpg'
+		);
+
+		// Set the global $post context to the other post.
+		$GLOBALS['post'] = get_post( $global_post_id );
+
+		$galleries = get_post_galleries( $post_id, false );
+
+		$this->assertNotEmpty( $galleries[0]['src'] );
+		$this->assertSame( $galleries[0]['src'], $expected_srcs );
+	}
+
+	/**
+	 * @ticket 39304
+	 */
+	function test_post_galleries_respects_id_attrs() {
+		$post_id = $this->factory->post->create( array(
+			'post_content' => 'No gallery defined',
+		) );
+		$post_id_two = $this->factory->post->create( array(
+			'post_content' => "[gallery id='$post_id']",
+		) );
+		$this->factory->attachment->create_object( array(
+			'file' => 'test.jpg',
+			'post_parent' => $post_id,
+			'post_mime_type' => 'image/jpeg',
+			'post_type' => 'attachment'
+		) );
+		$expected_srcs = array(
+			'http://' . WP_TESTS_DOMAIN . '/wp-content/uploads/test.jpg'
+		);
+
+		$galleries = get_post_galleries( $post_id_two, false );
+
+		// Set the global $post context
+		$GLOBALS['post'] = get_post( $post_id_two );
+		$galleries_with_global_context = get_post_galleries( $post_id_two, false );
+
+		// Check that the global post state doesn't affect the results
+		$this->assertSame( $galleries, $galleries_with_global_context );
+
+		$this->assertNotEmpty( $galleries[0]['src'] );
+		$this->assertSame( $galleries[0]['src'], $expected_srcs );
 	}
 
 	/**
@@ -570,6 +741,53 @@ VIDEO;
 	}
 
 	/**
+	 * Test [video] shortcode processing
+	 *
+	 */
+	function test_video_shortcode_body() {
+		$width = 720;
+		$height = 480;
+
+		$w = empty( $GLOBALS['content_width'] ) ? 640 : $GLOBALS['content_width'];
+		if ( $width > $w ) {
+			$width = $w;
+		}
+
+		$post_id = get_post() ? get_the_ID() : 0;
+
+		$video =<<<VIDEO
+[video width="$width" height="480" mp4="http://domain.tld/wp-content/uploads/2013/12/xyz.mp4"]
+<!-- WebM/VP8 for Firefox4, Opera, and Chrome -->
+<source type="video/webm" src="myvideo.webm" />
+<!-- Ogg/Vorbis for older Firefox and Opera versions -->
+<source type="video/ogg" src="myvideo.ogv" />
+<!-- Optional: Add subtitles for each language -->
+<track kind="subtitles" src="subtitles.srt" srclang="en" />
+<!-- Optional: Add chapters -->
+<track kind="chapters" src="chapters.srt" srclang="en" />
+[/video]
+VIDEO;
+
+
+		$h = ceil( ( $height * $width ) / $width );
+
+		$content = apply_filters( 'the_content', $video );
+
+		$expected = '<div style="width: ' . $width . 'px;" class="wp-video">' .
+			"<!--[if lt IE 9]><script>document.createElement('video');</script><![endif]-->\n" .
+			'<video class="wp-video-shortcode" id="video-' . $post_id . '-1" width="' . $width . '" height="' . $h . '" preload="metadata" controls="controls">' .
+			'<source type="video/mp4" src="http://domain.tld/wp-content/uploads/2013/12/xyz.mp4?_=1" />' .
+			'<!-- WebM/VP8 for Firefox4, Opera, and Chrome --><source type="video/webm" src="myvideo.webm" />' .
+			'<!-- Ogg/Vorbis for older Firefox and Opera versions --><source type="video/ogg" src="myvideo.ogv" />' .
+			'<!-- Optional: Add subtitles for each language --><track kind="subtitles" src="subtitles.srt" srclang="en" />' .
+			'<!-- Optional: Add chapters --><track kind="chapters" src="chapters.srt" srclang="en" />' .
+			'<a href="http://domain.tld/wp-content/uploads/2013/12/xyz.mp4">' .
+			"http://domain.tld/wp-content/uploads/2013/12/xyz.mp4</a></video></div>\n";
+
+		$this->assertEquals( $expected, $content );
+	}
+
+	/**
 	 * @ticket  35367
 	 * @depends test_video_shortcode_body
 	 */
@@ -629,50 +847,65 @@ VIDEO;
 	}
 
 	/**
-	 * Test [video] shortcode processing
-	 *
+	 * @ticket 40866
+	 * @depends test_video_shortcode_body
 	 */
-	function test_video_shortcode_body() {
-		$width = 720;
-		$height = 480;
+	function test_wp_video_shortcode_youtube_remove_feature() {
+		$actual = wp_video_shortcode( array(
+			'src' => 'https://www.youtube.com/watch?v=i_cVJgIz_Cs&feature=youtu.be',
+		) );
 
-		$w = empty( $GLOBALS['content_width'] ) ? 640 : $GLOBALS['content_width'];
-		if ( $width > $w ) {
-			$width = $w;
-		}
+		$this->assertNotContains( 'feature=youtu.be', $actual );
+	}
 
-		$post_id = get_post() ? get_the_ID() : 0;
+	/**
+	 * @ticket 40866
+	 * @depends test_video_shortcode_body
+	 */
+	function test_wp_video_shortcode_youtube_force_ssl() {
+		$actual = wp_video_shortcode( array(
+			'src' => 'http://www.youtube.com/watch?v=i_cVJgIz_Cs',
+		) );
 
-		$video =<<<VIDEO
-[video width="$width" height="480" mp4="http://domain.tld/wp-content/uploads/2013/12/xyz.mp4"]
-<!-- WebM/VP8 for Firefox4, Opera, and Chrome -->
-<source type="video/webm" src="myvideo.webm" />
-<!-- Ogg/Vorbis for older Firefox and Opera versions -->
-<source type="video/ogg" src="myvideo.ogv" />
-<!-- Optional: Add subtitles for each language -->
-<track kind="subtitles" src="subtitles.srt" srclang="en" />
-<!-- Optional: Add chapters -->
-<track kind="chapters" src="chapters.srt" srclang="en" />
-[/video]
-VIDEO;
+		$this->assertContains( 'src="https://www.youtube.com/watch?v=i_cVJgIz_Cs', $actual );
+	}
 
+	/**
+	 * @ticket 40866
+	 * @depends test_video_shortcode_body
+	 */
+	function test_wp_video_shortcode_vimeo_force_ssl_remove_query_args() {
+		$actual = wp_video_shortcode( array(
+			'src' => 'http://vimeo.com/190372437?blah=meh',
+		) );
 
-		$h = ceil( ( $height * $width ) / $width );
+		$this->assertContains( 'src="https://vimeo.com/190372437', $actual );
+		$this->assertNotContains( 'blah=meh', $actual );
+	}
 
-		$content = apply_filters( 'the_content', $video );
+	/**
+	 * @ticket 40977
+	 * @depends test_video_shortcode_body
+	 */
+	function test_wp_video_shortcode_vimeo_adds_loop() {
+		$actual = wp_video_shortcode( array(
+			'src' => 'http://vimeo.com/190372437',
+		) );
 
-		$expected = '<div style="width: ' . $width . 'px;" class="wp-video">' .
-			"<!--[if lt IE 9]><script>document.createElement('video');</script><![endif]-->\n" .
-			'<video class="wp-video-shortcode" id="video-' . $post_id . '-1" width="' . $width . '" height="' . $h . '" preload="metadata" controls="controls">' .
-			'<source type="video/mp4" src="http://domain.tld/wp-content/uploads/2013/12/xyz.mp4?_=1" />' .
-			'<!-- WebM/VP8 for Firefox4, Opera, and Chrome --><source type="video/webm" src="myvideo.webm" />' .
-			'<!-- Ogg/Vorbis for older Firefox and Opera versions --><source type="video/ogg" src="myvideo.ogv" />' .
-			'<!-- Optional: Add subtitles for each language --><track kind="subtitles" src="subtitles.srt" srclang="en" />' .
-			'<!-- Optional: Add chapters --><track kind="chapters" src="chapters.srt" srclang="en" />' .
-			'<a href="http://domain.tld/wp-content/uploads/2013/12/xyz.mp4">' .
-			"http://domain.tld/wp-content/uploads/2013/12/xyz.mp4</a></video></div>\n";
+		$this->assertContains( 'src="https://vimeo.com/190372437?loop=0', $actual );
+	}
 
-		$this->assertEquals( $expected, $content );
+	/**
+	 * @ticket 40977
+	 * @depends test_video_shortcode_body
+	 */
+	function test_wp_video_shortcode_vimeo_force_adds_loop_true() {
+		$actual = wp_video_shortcode( array(
+			'src' => 'http://vimeo.com/190372437',
+			'loop' => true,
+		) );
+
+		$this->assertContains( 'src="https://vimeo.com/190372437?loop=1', $actual );
 	}
 
 	/**
@@ -1175,7 +1408,7 @@ EOF;
 
 		// Test to confirm all sources in the array include the same edit hash.
 		foreach ( $sizes as $size ) {
-			$this->assertTrue( false !== strpos( $size, $hash ) );
+			$this->assertNotFalse( strpos( $size, $hash ) );
 		}
 	}
 
@@ -1904,6 +2137,191 @@ EOF;
 
 		$attachment_id = wp_insert_attachment( $data, '', 0 );
 		$this->assertSame( 0, $attachment_id );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_asf() {
+		$metadata = array(
+			'fileformat' => 'asf',
+			'asf'        => array(
+				'file_properties_object' => array(
+					'creation_date_unix' => 123,
+				),
+			),
+		);
+
+		$this->assertEquals( 123, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_matroska() {
+		$metadata = array(
+			'fileformat' => 'matroska',
+			'matroska'   => array(
+				'comments' => array(
+					'creation_time' => array(
+						'2015-12-24T17:40:09Z'
+					),
+				),
+			),
+		);
+
+		$this->assertEquals( 1450978809, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_quicktime() {
+		$metadata = array(
+			'fileformat' => 'quicktime',
+			'quicktime'  => array(
+				'moov' => array(
+					'subatoms' => array(
+						array(
+							'creation_time_unix' => 1450978805,
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertEquals( 1450978805, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_get_media_creation_timestamp_video_webm() {
+		$metadata = array(
+			'fileformat' => 'webm',
+			'matroska'   => array(
+				'info' => array(
+					array(
+						'DateUTC_unix' => 1265680539,
+					),
+				),
+			),
+		);
+
+		$this->assertEquals( 1265680539, wp_get_media_creation_timestamp( $metadata ) );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_quicktime() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mov';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_mp4() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mp4';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_mkv() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mkv';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 35218
+	 */
+	function test_wp_read_video_metadata_adds_creation_date_with_webm() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.webm';
+		$metadata = wp_read_video_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
+	 * @ticket 10752
+	 */
+	public function test_media_handle_upload_uses_post_parent_for_directory_date() {
+		$iptc_file = DIR_TESTDATA . '/images/test-image-iptc.jpg';
+
+		// Make a copy of this file as it gets moved during the file upload
+		$tmp_name = wp_tempnam( $iptc_file );
+
+		copy( $iptc_file, $tmp_name );
+
+		$_FILES['upload'] = array(
+			'tmp_name' => $tmp_name,
+			'name'     => 'test-image-iptc.jpg',
+			'type'     => 'image/jpeg',
+			'error'    => 0,
+			'size'     => filesize( $iptc_file )
+		);
+
+		$parent_id = self::factory()->post->create( array( 'post_date' => '2010-01-01' ) );
+
+		$post_id = media_handle_upload( 'upload', $parent_id, array(), array( 'action' => 'test_iptc_upload', 'test_form' => false ) );
+
+		unset( $_FILES['upload'] );
+
+		$url = wp_get_attachment_url( $post_id );
+
+		// Clean up.
+		wp_delete_attachment( $post_id );
+		wp_delete_post( $parent_id );
+
+		$this->assertSame( 'http://example.org/wp-content/uploads/2010/01/test-image-iptc.jpg', $url );
+	}
+
+	/**
+	 * @ticket 10752
+	 */
+	public function test_media_handle_upload_ignores_page_parent_for_directory_date() {
+		$iptc_file = DIR_TESTDATA . '/images/test-image-iptc.jpg';
+
+		// Make a copy of this file as it gets moved during the file upload
+		$tmp_name = wp_tempnam( $iptc_file );
+
+		copy( $iptc_file, $tmp_name );
+
+		$_FILES['upload'] = array(
+			'tmp_name' => $tmp_name,
+			'name'     => 'test-image-iptc.jpg',
+			'type'     => 'image/jpeg',
+			'error'    => 0,
+			'size'     => filesize( $iptc_file )
+		);
+
+		$parent_id = self::factory()->post->create( array( 'post_date' => '2010-01-01', 'post_type' => 'page' ) );
+		$parent = get_post( $parent_id );
+
+		$post_id = media_handle_upload( 'upload', $parent_id, array(), array( 'action' => 'test_iptc_upload', 'test_form' => false ) );
+
+		unset( $_FILES['upload'] );
+
+		$url = wp_get_attachment_url( $post_id );
+
+		$uploads_dir = wp_upload_dir( current_time( 'mysql' ) );
+
+		$expected = $uploads_dir['url'] . 'test-image-iptc.jpg';
+
+		// Clean up.
+		wp_delete_attachment( $post_id );
+		wp_delete_post( $parent_id );
+
+		$this->assertNotEquals( $expected, $url );
 	}
 }
 

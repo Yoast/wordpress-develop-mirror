@@ -211,9 +211,14 @@ function wp_maintenance() {
 	header( "$protocol 503 Service Unavailable", true, 503 );
 	header( 'Content-Type: text/html; charset=utf-8' );
 	header( 'Retry-After: 600' );
+
+	$dir_attr = '';
+	if ( is_rtl() ) {
+		$dir_attr = ' dir="rtl"';
+	}
 ?>
 	<!DOCTYPE html>
-	<html xmlns="http://www.w3.org/1999/xhtml"<?php if ( is_rtl() ) echo ' dir="rtl"'; ?>>
+	<html xmlns="http://www.w3.org/1999/xhtml"<?php echo $dir_attr; ?>>
 	<head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title><?php _e( 'Maintenance' ); ?></title>
@@ -470,6 +475,8 @@ function wp_using_ext_object_cache( $using = null ) {
  *
  * @since 3.0.0
  * @access private
+ *
+ * @global array $wp_filter Stores all of the filters.
  */
 function wp_start_object_cache() {
 	global $wp_filter;
@@ -515,7 +522,7 @@ function wp_start_object_cache() {
 	}
 
 	if ( function_exists( 'wp_cache_add_global_groups' ) ) {
-		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'site-lookup', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
+		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
 		wp_cache_add_non_persistent_groups( array( 'counts', 'plugins' ) );
 	}
 }
@@ -1012,6 +1019,8 @@ function wp_convert_hr_to_bytes( $value ) {
  *
  * @since 4.6.0
  *
+ * @staticvar array $ini_all
+ *
  * @link https://secure.php.net/manual/en/function.ini-get-all.php
  *
  * @param string $setting The name of the ini setting to check.
@@ -1060,6 +1069,24 @@ function wp_doing_ajax() {
 }
 
 /**
+ * Determines whether the current request is a WordPress cron request.
+ *
+ * @since 4.8.0
+ *
+ * @return bool True if it's a WordPress cron request, false otherwise.
+ */
+function wp_doing_cron() {
+	/**
+	 * Filters whether the current request is a WordPress cron request.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param bool $wp_doing_cron Whether the current request is a WordPress cron request.
+	 */
+	return apply_filters( 'wp_doing_cron', defined( 'DOING_CRON' ) && DOING_CRON );
+}
+
+/**
  * Check whether variable is a WordPress Error.
  *
  * Returns true if $thing is an object of the WP_Error class.
@@ -1071,4 +1098,67 @@ function wp_doing_ajax() {
  */
 function is_wp_error( $thing ) {
 	return ( $thing instanceof WP_Error );
+}
+
+/**
+ * Determines whether file modifications are allowed.
+ *
+ * @since 4.8.0
+ *
+ * @param string $context The usage context.
+ * @return bool True if file modification is allowed, false otherwise.
+ */
+function wp_is_file_mod_allowed( $context ) {
+	/**
+	 * Filters whether file modifications are allowed.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param bool   $file_mod_allowed Whether file modifications are allowed.
+	 * @param string $context          The usage context.
+	 */
+	return apply_filters( 'file_mod_allowed', ! defined( 'DISALLOW_FILE_MODS' ) || ! DISALLOW_FILE_MODS, $context );
+}
+
+/**
+ * Start scraping edited file errors.
+ *
+ * @since 4.9.0
+ */
+function wp_start_scraping_edited_file_errors() {
+	if ( ! isset( $_REQUEST['wp_scrape_key'] ) || ! isset( $_REQUEST['wp_scrape_nonce'] ) ) {
+		return;
+	}
+	$key = substr( sanitize_key( wp_unslash( $_REQUEST['wp_scrape_key'] ) ), 0, 32 );
+	$nonce = wp_unslash( $_REQUEST['wp_scrape_nonce'] );
+
+	if ( get_transient( 'scrape_key_' . $key ) !== $nonce ) {
+		echo "###### wp_scraping_result_start:$key ######";
+		echo wp_json_encode( array(
+			'code' => 'scrape_nonce_failure',
+			'message' => __( 'Scrape nonce check failed. Please try again.' ),
+		) );
+		echo "###### wp_scraping_result_end:$key ######";
+		die();
+	}
+	register_shutdown_function( 'wp_finalize_scraping_edited_file_errors', $key );
+}
+
+/**
+ * Finalize scraping for edited file errors.
+ *
+ * @since 4.9.0
+ *
+ * @param string $scrape_key Scrape key.
+ */
+function wp_finalize_scraping_edited_file_errors( $scrape_key ) {
+	$error = error_get_last();
+	echo "\n###### wp_scraping_result_start:$scrape_key ######\n";
+	if ( ! empty( $error ) && in_array( $error['type'], array( E_CORE_ERROR, E_COMPILE_ERROR, E_ERROR, E_PARSE, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+		$error = str_replace( ABSPATH, '', $error );
+		echo wp_json_encode( $error );
+	} else {
+		echo wp_json_encode( true );
+	}
+	echo "\n###### wp_scraping_result_end:$scrape_key ######\n";
 }

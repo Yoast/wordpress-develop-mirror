@@ -220,27 +220,6 @@ class Tests_Post_Types extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @ticket 33543
-	 */
-	function test_get_post_type_labels_should_fall_back_on_defaults_when_filtered_labels_do_not_contain_the_keys() {
-		add_filter( 'post_type_labels_foo', array( $this, 'filter_post_type_labels' ) );
-		register_post_type( 'foo' );
-
-		$this->assertObjectHasAttribute( 'featured_image', get_post_type_object( 'foo' )->labels );
-		$this->assertObjectHasAttribute( 'set_featured_image', get_post_type_object( 'foo' )->labels );
-
-		_unregister_post_type( 'foo' );
-		remove_filter( 'post_type_labels_foo', array( $this, 'filter_post_type_labels' ) );
-	}
-
-	public function filter_post_type_labels( $labels ) {
-		unset( $labels->featured_image );
-		unset( $labels->set_featured_image );
-		return $labels;
-	}
-
-
-	/**
 	 * @ticket 30013
 	 */
 	public function test_get_post_type_object_with_non_scalar_values() {
@@ -444,7 +423,8 @@ class Tests_Post_Types extends WP_UnitTestCase {
 			'public' => true,
 		) );
 
-		$this->assertSame( 1, count( $wp_filter['future_foo'] ) );
+		$this->assertArrayHasKey( 'future_foo', $wp_filter );
+		$this->assertSame( 1, count( $wp_filter['future_foo']->callbacks ) );
 		$this->assertTrue( unregister_post_type( 'foo' ) );
 		$this->assertArrayNotHasKey( 'future_foo', $wp_filter );
 	}
@@ -460,7 +440,8 @@ class Tests_Post_Types extends WP_UnitTestCase {
 			'register_meta_box_cb' => '__return_empty_string',
 		) );
 
-		$this->assertSame( 1, count( $wp_filter['add_meta_boxes_foo'] ) );
+		$this->assertArrayHasKey( 'add_meta_boxes_foo', $wp_filter );
+		$this->assertSame( 1, count( $wp_filter['add_meta_boxes_foo']->callbacks ) );
 		$this->assertTrue( unregister_post_type( 'foo' ) );
 		$this->assertArrayNotHasKey( 'add_meta_boxes_foo', $wp_filter );
 	}

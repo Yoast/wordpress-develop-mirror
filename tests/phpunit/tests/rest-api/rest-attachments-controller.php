@@ -182,7 +182,7 @@ class WP_Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Control
 		$data = $response->get_data();
 		$keys = array_keys( $data['endpoints'][0]['args'] );
 		sort( $keys );
-		$this->assertEquals( array( 'context' ), $keys );
+		$this->assertEquals( array( 'context', 'id' ), $keys );
 	}
 
 	public function test_get_items() {
@@ -480,6 +480,31 @@ class WP_Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Control
 		$this->assertEquals( 403, $response->get_status() );
 	}
 
+	public function test_get_item_inherit_status_with_invalid_parent() {
+		$attachment_id = $this->factory->attachment->create_object( $this->test_file, REST_TESTS_IMPOSSIBLY_HIGH_NUMBER, array(
+			'post_mime_type' => 'image/jpeg',
+			'post_excerpt'   => 'A sample caption',
+		) );
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $attachment_id, $data['id'] );
+	}
+
+	public function test_get_item_auto_status_with_invalid_parent_returns_error() {
+		$attachment_id = $this->factory->attachment->create_object( $this->test_file, REST_TESTS_IMPOSSIBLY_HIGH_NUMBER, array(
+			'post_mime_type' => 'image/jpeg',
+			'post_excerpt'   => 'A sample caption',
+			'post_status'    => 'auto-draft',
+		) );
+		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/media/%d', $attachment_id ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertErrorResponse( 'rest_forbidden', $response, 403 );
+	}
+
 	public function test_create_item() {
 		wp_set_current_user( self::$author_id );
 
@@ -515,7 +540,7 @@ class WP_Test_REST_Attachments_Controller extends WP_Test_REST_Post_Type_Control
 		$request->set_file_params( array(
 			'file' => array(
 				'file'     => file_get_contents( $this->test_file2 ),
-				'name'     => 'codeispoetry.jpg',
+				'name'     => 'codeispoetry.png',
 				'size'     => filesize( $this->test_file2 ),
 				'tmp_name' => $this->test_file2,
 			),

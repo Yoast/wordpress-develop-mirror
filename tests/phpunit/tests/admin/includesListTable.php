@@ -185,6 +185,10 @@ class Tests_Admin_includesListTable extends WP_UnitTestCase {
 		$this->table->display_rows( $pages->posts );
 		$output = ob_get_clean();
 
+		// Clean up.
+		unset( $_REQUEST['paged'] );
+		unset( $GLOBALS['per_page'] );
+
 		preg_match_all( '|<tr[^>]*>|', $output, $matches );
 
 		$this->assertCount( count( $expected_ids ), array_keys( $matches[0] ) );
@@ -234,5 +238,32 @@ class Tests_Admin_includesListTable extends WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertNotContains( 'id="cat"', $output );
+	}
+
+	/**
+	 * @ticket 38341
+	 */
+	public function test_empty_trash_button_should_not_be_shown_if_there_are_no_posts() {
+		// Set post type to a non-existent one.
+		$this->table->screen->post_type = 'foo';
+
+		ob_start();
+		$this->table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="delete_all"', $output );
+	}
+
+	/**
+	 * @ticket 38341
+	 */
+	public function test_empty_trash_button_should_not_be_shown_if_there_are_no_comments() {
+		$table = _get_list_table( 'WP_Comments_List_Table', array( 'screen' => 'edit-comments' ) );
+
+		ob_start();
+		$table->extra_tablenav( 'top' );
+		$output = ob_get_clean();
+
+		$this->assertNotContains( 'id="delete_all"', $output );
 	}
 }

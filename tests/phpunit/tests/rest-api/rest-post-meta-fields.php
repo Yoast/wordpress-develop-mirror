@@ -10,13 +10,16 @@
   * @group restapi
   */
 class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
+	protected static $wp_meta_keys_saved;
 	protected static $post_id;
 
 	public static function wpSetUpBeforeClass( $factory ) {
+		self::$wp_meta_keys_saved = $GLOBALS['wp_meta_keys'];
 		self::$post_id = $factory->post->create();
 	}
 
 	public static function wpTearDownAfterClass() {
+		$GLOBALS['wp_meta_keys'] = self::$wp_meta_keys_saved;
 		wp_delete_post( self::$post_id, true );
 	}
 
@@ -390,6 +393,8 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$response = $this->server->dispatch( $request );
 		remove_filter( 'query', array( $this, 'error_insert_query' ) );
 		$wpdb->show_errors = true;
+
+		$this->assertErrorResponse( 'rest_meta_database_error', $response, 500 );
 	}
 
 	public function test_set_value_invalid_type() {

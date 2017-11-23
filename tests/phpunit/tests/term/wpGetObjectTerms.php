@@ -85,6 +85,25 @@ class Tests_Term_WpGetObjectTerms extends WP_UnitTestCase {
 		}
 	}
 
+	/**
+	 * @ticket 40154
+	 */
+	public function test_taxonomies_passed_to_wp_get_object_terms_filter_should_be_quoted() {
+		register_taxonomy( 'wptests_tax', 'post' );
+		register_taxonomy( 'wptests_tax_2', 'post' );
+
+		add_filter( 'wp_get_object_terms', array( $this, 'wp_get_object_terms_callback' ), 10, 3 );
+		$terms = wp_get_object_terms( 1, array( 'wptests_tax', 'wptests_tax_2' ) );
+		remove_filter( 'wp_get_object_terms', array( $this, 'wp_get_object_terms_callback' ), 10, 3 );
+
+		$this->assertSame( "'wptests_tax', 'wptests_tax_2'", $this->taxonomies );
+	}
+
+	public function wp_get_object_terms_callback( $terms, $object_ids, $taxonomies ) {
+		$this->taxonomies = $taxonomies;
+		return $terms;
+	}
+
 	public function test_orderby_name() {
 		$p = self::factory()->post->create();
 
@@ -712,5 +731,69 @@ class Tests_Term_WpGetObjectTerms extends WP_UnitTestCase {
 		$found = wp_get_object_terms( $p, $this->taxonomy, 'orderby=name&fields=ids' );
 
 		$this->assertEquals( array( $t1, $t3, $t2 ), $found );
+	}
+
+	/**
+	 * @ticket 35925
+	 */
+	public function test_wp_get_object_terms_args_filter() {
+		$taxonomy = 'wptests_tax_4';
+
+		register_taxonomy( $taxonomy, 'post', array( 'sort' => 'true' ) );
+		$post_id = self::factory()->post->create();
+		$terms = array( 'foo', 'bar', 'baz' );
+		$set = wp_set_object_terms( $post_id, $terms, $taxonomy );
+
+		// Filter for maintaining term order
+		add_filter( 'wp_get_object_terms_args', array( $this, 'filter_wp_get_object_terms_args' ), 10, 3 );
+
+		// Test directly
+		$get_object_terms = wp_get_object_terms( $post_id, $taxonomy, array( 'fields' => 'names' ) );
+		$this->assertEquals( $terms, $get_object_terms );
+
+		// Test metabox taxonomy (admin advanced edit)
+		$terms_to_edit = get_terms_to_edit( $post_id, $taxonomy );
+		$this->assertEquals( implode( ',', $terms ), $terms_to_edit );
+	}
+
+	function filter_wp_get_object_terms_args ( $args, $object_ids, $taxonomies ) {
+		$args['orderby'] = 'term_order';
+		return $args;
+	}
+
+	/**
+	 * @ticket 41010
+	 */
+	public function test_duplicate_terms_should_not_be_returned_when_passed_multiple_taxonomies_registered_with_args_array() {
+		$taxonomy1 = 'wptests_tax';
+		$taxonomy2 = 'wptests_tax_2';
+
+		// Any non-empty 'args' array triggers the bug.
+		$taxonomy_arguments = array(
+			'args' => array( 0 ),
+		);
+
+		register_taxonomy( $taxonomy1, 'post', $taxonomy_arguments );
+		register_taxonomy( $taxonomy2, 'post', $taxonomy_arguments );
+
+		$post_id = self::factory()->post->create();
+		$term_1_id = self::factory()->term->create( array(
+			'taxonomy' => $taxonomy1,
+		) );
+		$term_2_id = self::factory()->term->create( array(
+			'taxonomy' => $taxonomy2,
+		) );
+
+		wp_set_object_terms( $post_id, $term_1_id, $taxonomy1 );
+		wp_set_object_terms( $post_id, $term_2_id, $taxonomy2 );
+
+		$expected = array( $term_1_id, $term_2_id );
+
+		$actual = wp_get_object_terms( $post_id, array( $taxonomy1, $taxonomy2 ), array(
+			'orderby' => 'term_id',
+			'fields' => 'ids',
+		) );
+
+		$this->assertEqualSets( $expected, $actual );
 	}
 }

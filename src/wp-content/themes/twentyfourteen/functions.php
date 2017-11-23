@@ -527,6 +527,27 @@ function twentyfourteen_wp_title( $title, $sep ) {
 }
 add_filter( 'wp_title', 'twentyfourteen_wp_title', 10, 2 );
 
+
+/**
+ * Modifies tag cloud widget arguments to display all tags in the same font size
+ * and use list format for better accessibility.
+ *
+ * @since Twenty Fourteen 2.1
+ *
+ * @param array $args Arguments for tag cloud widget.
+ * @return array The filtered arguments for tag cloud widget.
+ */
+function twentyfourteen_widget_tag_cloud_args( $args ) {
+	$args['largest']  = 22;
+	$args['smallest'] = 8;
+	$args['unit']     = 'pt';
+	$args['format']   = 'list';
+
+	return $args;
+}
+add_filter( 'widget_tag_cloud_args', 'twentyfourteen_widget_tag_cloud_args' );
+
+
 // Implement Custom Header features.
 require get_template_directory() . '/inc/custom-header.php';
 
@@ -545,3 +566,17 @@ require get_template_directory() . '/inc/customizer.php';
 if ( ! class_exists( 'Featured_Content' ) && 'plugins.php' !== $GLOBALS['pagenow'] ) {
 	require get_template_directory() . '/inc/featured-content.php';
 }
+
+/**
+ * Add an `is_customize_preview` function if it is missing.
+ *
+ * Enables installing Twenty Fourteen in WordPress versions before 4.0.0 when the
+ * `is_customize_preview` function was introduced.
+ */
+if ( ! function_exists( 'is_customize_preview' ) ) :
+function is_customize_preview() {
+	global $wp_customize;
+
+	return ( $wp_customize instanceof WP_Customize_Manager ) && $wp_customize->is_preview();
+}
+endif;

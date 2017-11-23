@@ -103,7 +103,7 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 	/**
 	 * Test crud methods on WP_Customize_Custom_CSS_Setting.
 	 *
-	 * @covers wp_get_custom_css()
+	 * @covers ::wp_get_custom_css
 	 * @covers WP_Customize_Custom_CSS_Setting::value()
 	 * @covers WP_Customize_Custom_CSS_Setting::preview()
 	 * @covers WP_Customize_Custom_CSS_Setting::update()
@@ -135,6 +135,8 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		) );
 		$twentyten_setting = new WP_Customize_Custom_CSS_Setting( $this->wp_customize, 'custom_css[twentyten]' );
 
+		remove_theme_mod( 'custom_css_post_id' );
+
 		$this->assertEquals( $post_id, wp_get_custom_css_post()->ID );
 		$this->assertEquals( $post_id, wp_get_custom_css_post( $this->setting->stylesheet )->ID );
 		$this->assertEquals( $twentyten_post_id, wp_get_custom_css_post( 'twentyten' )->ID );
@@ -148,7 +150,7 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$this->wp_customize->set_post_value( $this->setting->id, $updated_css );
 		$saved = $this->setting->save();
 
-		$this->assertTrue( false !== $saved );
+		$this->assertNotFalse( $saved );
 		$this->assertEquals( $updated_css, $this->setting->value() );
 		$this->assertEquals( $updated_css, wp_get_custom_css( $this->setting->stylesheet ) );
 		$this->assertEquals( $updated_css, get_post( $post_id )->post_content );
@@ -221,6 +223,29 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that wp_get_custom_css_post() doesn't query for a post after caching a failed lookup.
+	 *
+	 * @ticket 39259
+	 */
+	function test_get_custom_css_post_queries_after_failed_lookup() {
+		set_theme_mod( 'custom_css_post_id', -1 );
+		$queries_before = get_num_queries();
+		wp_get_custom_css_post();
+		$this->assertSame( get_num_queries(), $queries_before );
+	}
+
+	/**
+	 * Test that wp_update_custom_css_post() updates the 'custom_css_post_id' theme mod.
+	 *
+	 * @ticket 39259
+	 */
+	function test_update_custom_css_updates_theme_mod() {
+		set_theme_mod( 'custom_css_post_id', -1 );
+		$post = wp_update_custom_css_post( 'body { background: blue; }' );
+		$this->assertSame( $post->ID, get_theme_mod( 'custom_css_post_id' ) );
+	}
+
+	/**
 	 * Test crud methods on WP_Customize_Custom_CSS_Setting.
 	 *
 	 * @covers WP_Customize_Custom_CSS_Setting::value()
@@ -237,6 +262,7 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 			'post_status' => 'publish',
 			'post_type' => 'custom_css',
 		) );
+		remove_theme_mod( 'custom_css_post_id' );
 		$this->assertEquals( '/*custom*//*filtered*/', $this->setting->value() );
 
 		$this->wp_customize->set_post_value( $this->setting->id, '/*overridden*/' );
@@ -329,82 +355,9 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$result = $this->setting->validate( $basic_css );
 		$this->assertTrue( $result );
 
-		// Check for Unclosed Comment.
-		$unclosed_comment = $basic_css . ' /* This is a comment. ';
+		// Check for markup.
+		$unclosed_comment = $basic_css . '</style>';
 		$result = $this->setting->validate( $unclosed_comment );
-		$this->assertTrue( array_key_exists( 'unclosed_comment', $result->errors ) );
-
-		// Check for Unopened Comment.
-		$unclosed_comment = $basic_css . ' This is a comment.*/';
-		$result = $this->setting->validate( $unclosed_comment );
-		$this->assertTrue( array_key_exists( 'imbalanced_comments', $result->errors ) );
-
-		// Check for Unclosed Curly Brackets.
-		$unclosed_curly_bracket = $basic_css . '  a.link { text-decoration: none;';
-		$result = $this->setting->validate( $unclosed_curly_bracket );
-		$this->assertTrue( array_key_exists( 'imbalanced_curly_brackets', $result->errors ) );
-
-		// Check for Unopened Curly Brackets.
-		$unopened_curly_bracket = $basic_css . '  a.link text-decoration: none; }';
-		$result = $this->setting->validate( $unopened_curly_bracket );
-		$this->assertTrue( array_key_exists( 'imbalanced_curly_brackets', $result->errors ) );
-
-		// Check for Unclosed Braces.
-		$unclosed_brace = $basic_css . '  input[type="text" { color: #f00; } ';
-		$result = $this->setting->validate( $unclosed_brace );
-		$this->assertTrue( array_key_exists( 'imbalanced_braces', $result->errors ) );
-
-		// Check for Unopened Braces.
-		$unopened_brace = $basic_css . ' inputtype="text"] { color: #f00; } ';
-		$result = $this->setting->validate( $unopened_brace );
-		$this->assertTrue( array_key_exists( 'imbalanced_braces', $result->errors ) );
-
-		// Check for Imbalanced Double Quotes.
-		$imbalanced_double_quotes = $basic_css . ' div.background-image { background-image: url( "image.jpg ); } ';
-		$result = $this->setting->validate( $imbalanced_double_quotes );
-		$this->assertTrue( array_key_exists( 'unequal_double_quotes', $result->errors ) );
-
-		// Check for Unclosed Parentheses.
-		$unclosed_parentheses = $basic_css . ' div.background-image { background-image: url( "image.jpg" ; } ';
-		$result = $this->setting->validate( $unclosed_parentheses );
-		$this->assertTrue( array_key_exists( 'imbalanced_parentheses', $result->errors ) );
-
-		// Check for Unopened Parentheses.
-		$unopened_parentheses = $basic_css . ' div.background-image { background-image: url "image.jpg" ); } ';
-		$result = $this->setting->validate( $unopened_parentheses );
-		$this->assertTrue( array_key_exists( 'imbalanced_parentheses', $result->errors ) );
-
-		// A basic Content declaration with no other errors should not throw an error.
-		$content_declaration = $basic_css . ' a:before { content: ""; display: block; }';
-		$result = $this->setting->validate( $content_declaration );
-		$this->assertTrue( $result );
-
-		// An error, along with a Content declaration will throw two errors.
-		// In this case, we're using an extra opening brace.
-		$content_declaration = $basic_css . ' a:before { content: "["; display: block; }';
-		$result = $this->setting->validate( $content_declaration );
-		$this->assertTrue( array_key_exists( 'imbalanced_braces', $result->errors ) );
-		$this->assertTrue( array_key_exists( 'possible_false_positive', $result->errors ) );
-
-		$css = 'body { background: #f00; } h1.site-title { font-size: 36px; } a:hover { text-decoration: none; } input[type="text"] { padding: 1em; } /* This is a comment */';
-		$this->assertTrue( $this->setting->validate( $css ) );
-
-		$validity = $this->setting->validate( $css . ' /* This is another comment.' );
-		$this->assertInstanceOf( 'WP_Error', $validity );
-		$this->assertContains( 'unclosed code comment', join( ' ', $validity->get_error_messages() ) );
-
-		$css = '/* This is comment one. */  /* This is comment two. */';
-		$this->assertTrue( $this->setting->validate( $css ) );
-
-		$basic_css = 'body { background: #f00; } h1.site-title { font-size: 36px; } a:hover { text-decoration: none; } input[type="text"] { padding: 1em; }';
-		$this->assertTrue( $this->setting->validate( $basic_css ) );
-
-		$css = $basic_css . ' .link:before { content: "*"; display: block; }';
-		$this->assertTrue( $this->setting->validate( $css ) );
-
-		$css .= ' ( trailing';
-		$validity = $this->setting->validate( $css );
-		$this->assertWPError( $validity );
-		$this->assertNotEmpty( $result->get_error_message( 'possible_false_positive' ) );
+		$this->assertTrue( array_key_exists( 'illegal_markup', $result->errors ) );
 	}
 }

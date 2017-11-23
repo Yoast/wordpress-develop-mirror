@@ -35,7 +35,9 @@ class WP_Test_REST_Tags_Controller extends WP_Test_REST_Controller_Testcase {
 	}
 
 	public static function wpTearDownAfterClass() {
+		self::delete_user( self::$superadmin );
 		self::delete_user( self::$administrator );
+		self::delete_user( self::$editor );
 		self::delete_user( self::$subscriber );
 	}
 
@@ -248,6 +250,22 @@ class WP_Test_REST_Tags_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertEquals( 'Cantaloupe', $data[2]['name'] );
 	}
 
+	public function test_get_items_orderby_slugs() {
+		$this->factory->tag->create( array( 'name' => 'Burrito' ) );
+		$this->factory->tag->create( array( 'name' => 'Taco' ) );
+		$this->factory->tag->create( array( 'name' => 'Chalupa' ) );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/tags' );
+		$request->set_param( 'orderby', 'include_slugs' );
+		$request->set_param( 'slug', array( 'taco', 'burrito', 'chalupa' ) );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'taco', $data[0]['slug'] );
+		$this->assertEquals( 'burrito', $data[1]['slug'] );
+		$this->assertEquals( 'chalupa', $data[2]['slug'] );
+	}
+
 	public function test_get_items_post_args() {
 		$post_id = $this->factory->post->create();
 		$tag1 = $this->factory->tag->create( array( 'name' => 'DC' ) );
@@ -374,6 +392,40 @@ class WP_Test_REST_Tags_Controller extends WP_Test_REST_Controller_Testcase {
 		$data = $response->get_data();
 		$this->assertEquals( 1, count( $data ) );
 		$this->assertEquals( 'Apple', $data[0]['name'] );
+	}
+
+	public function test_get_items_slug_array_arg() {
+		$id1 = $this->factory->tag->create( array( 'name' => 'Taco' ) );
+		$id2 = $this->factory->tag->create( array( 'name' => 'Enchilada' ) );
+		$id3 = $this->factory->tag->create( array( 'name' => 'Burrito' ) );
+		$this->factory->tag->create( array( 'name' => 'Pizza' ) );
+		$request = new WP_REST_Request( 'GET', '/wp/v2/tags' );
+		$request->set_param( 'slug', array(
+			'taco',
+			'burrito',
+			'enchilada',
+		) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$names = wp_list_pluck( $data, 'name' );
+		sort( $names );
+		$this->assertEquals( array( 'Burrito', 'Enchilada', 'Taco' ), $names );
+	}
+
+	public function test_get_items_slug_csv_arg() {
+		$id1 = $this->factory->tag->create( array( 'name' => 'Taco' ) );
+		$id2 = $this->factory->tag->create( array( 'name' => 'Enchilada' ) );
+		$id3 = $this->factory->tag->create( array( 'name' => 'Burrito' ) );
+		$this->factory->tag->create( array( 'name' => 'Pizza' ) );
+		$request = new WP_REST_Request( 'GET', '/wp/v2/tags' );
+		$request->set_param( 'slug', 'taco,burrito, enchilada');
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$names = wp_list_pluck( $data, 'name' );
+		sort( $names );
+		$this->assertEquals( array( 'Burrito', 'Enchilada', 'Taco' ), $names );
 	}
 
 	public function test_get_terms_private_taxonomy() {

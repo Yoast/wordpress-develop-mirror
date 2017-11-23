@@ -1,15 +1,17 @@
+var l10n = wp.media.view.l10n,
+	Search;
+
 /**
  * wp.media.view.Search
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var l10n = wp.media.view.l10n,
-	Search;
-
-Search = wp.media.View.extend({
+Search = wp.media.View.extend(/** @lends wp.media.view.Search.prototype */{
 	tagName:   'input',
 	className: 'search',
 	id:        'media-search-input',
@@ -21,9 +23,7 @@ Search = wp.media.View.extend({
 
 	events: {
 		'input':  'search',
-		'keyup':  'search',
-		'change': 'search',
-		'search': 'search'
+		'keyup':  'search'
 	},
 
 	/**
@@ -34,13 +34,13 @@ Search = wp.media.View.extend({
 		return this;
 	},
 
-	search: function( event ) {
+	search: _.debounce( function( event ) {
 		if ( event.target.value ) {
 			this.model.set( 'search', event.target.value );
 		} else {
 			this.model.unset('search');
 		}
-	}
+	}, 300 )
 });
 
 module.exports = Search;

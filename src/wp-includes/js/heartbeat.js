@@ -404,6 +404,10 @@
 				has_focus: settings.hasFocus
 			};
 
+			if ( 'customize' === settings.screenId  ) {
+				ajaxData.wp_customize = 'on';
+			}
+
 			settings.connecting = true;
 			settings.xhr = $.ajax({
 				url: settings.url,
@@ -812,7 +816,11 @@
 		};
 	};
 
-	// Ensure the global `wp` object exists.
+	/**
+	 * Ensure the global `wp` object exists.
+	 *
+	 * @namespace wp
+	 */
 	window.wp = window.wp || {};
 	window.wp.heartbeat = new Heartbeat();
 

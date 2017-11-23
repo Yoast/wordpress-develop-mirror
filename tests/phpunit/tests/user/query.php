@@ -125,6 +125,16 @@ class Tests_User_Query extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 39297
+	 */
+	public function test_get_total_is_int() {
+		$users = new WP_User_Query( array( 'blog_id' => get_current_blog_id() ) );
+		$total_users = $users->get_total();
+
+		$this->assertSame( 13, $total_users );
+	}
+
+	/**
 	 * @dataProvider orderby_should_convert_non_prefixed_keys_data
 	 */
 	public function test_orderby_should_convert_non_prefixed_keys( $short_key, $full_key ) {
@@ -541,11 +551,10 @@ class Tests_User_Query extends WP_UnitTestCase {
 		$this->assertSame( array( 'author' => true ), $user->caps );
 	}
 
+	/**
+	 * @group ms-excluded
+	 */
 	public function test_roles_and_caps_should_be_populated_for_explicit_value_of_blog_id_on_nonms() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' is a non-multisite-only test.' );
-		}
-
 		$query = new WP_User_Query( array(
 			'include' => self::$author_ids[0],
 			'blog_id' => get_current_blog_id(),
@@ -559,11 +568,10 @@ class Tests_User_Query extends WP_UnitTestCase {
 		$this->assertSame( array( 'author' => true ), $user->caps );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_roles_and_caps_should_be_populated_for_explicit_value_of_current_blog_id_on_ms() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' is a multisite-only test.' );
-		}
-
 		$query = new WP_User_Query( array(
 			'include' => self::$author_ids[0],
 			'blog_id' => get_current_blog_id(),
@@ -577,11 +585,10 @@ class Tests_User_Query extends WP_UnitTestCase {
 		$this->assertSame( array( 'author' => true ), $user->caps );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_roles_and_caps_should_be_populated_for_explicit_value_of_different_blog_id_on_ms_when_fields_all_with_meta() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' is a multisite-only test.' );
-		}
-
 		$b = self::factory()->blog->create();
 
 		add_user_to_blog( $b, self::$author_ids[0], 'author' );
@@ -602,12 +609,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 31878
+	 * @group ms-required
 	 */
 	public function test_roles_and_caps_should_be_populated_for_explicit_value_of_different_blog_id_on_ms_when_fields_all() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' is a multisite-only test.' );
-		}
-
 		$b = self::factory()->blog->create();
 		add_user_to_blog( $b, self::$author_ids[0], 'author' );
 
@@ -627,12 +631,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 32019
+	 * @group ms-required
 	 */
 	public function test_who_authors() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' requires multisite.' );
-		}
-
 		$b = self::factory()->blog->create();
 
 		add_user_to_blog( $b, self::$author_ids[0], 'subscriber' );
@@ -653,12 +654,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 32019
+	 * @group ms-required
 	 */
 	public function test_who_authors_should_work_alongside_meta_query() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' requires multisite.' );
-		}
-
 		$b = self::factory()->blog->create();
 
 		add_user_to_blog( $b, self::$author_ids[0], 'subscriber' );
@@ -688,12 +686,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 36724
+	 * @group ms-required
 	 */
 	public function test_who_authors_should_work_alongside_meta_params() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' requires multisite.' );
-		}
-
 		$b = self::factory()->blog->create();
 
 		add_user_to_blog( $b, self::$author_ids[0], 'subscriber' );
@@ -781,12 +776,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 32250
+	 * @group ms-required
 	 */
 	public function test_has_published_posts_should_respect_blog_id() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' requires multisite.' );
-		}
-
 		$blogs = self::factory()->blog->create_many( 2 );
 
 		add_user_to_blog( $blogs[0], self::$author_ids[0], 'author' );
@@ -1348,12 +1340,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 22212
+	 * @group ms-required
 	 */
 	public function test_blog_id_should_restrict_by_blog_without_requiring_a_named_role() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' requires multisite.' );
-		}
-
 		$sites = self::factory()->blog->create_many( 2 );
 
 		add_user_to_blog( $sites[0], self::$author_ids[0], 'author' );
@@ -1370,12 +1359,9 @@ class Tests_User_Query extends WP_UnitTestCase {
 	/**
 	 * @ticket 22212
 	 * @ticket 21119
+	 * @group ms-required
 	 */
 	public function test_calling_prepare_query_a_second_time_should_not_add_another_cap_query_on_multisite() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( __METHOD__ . ' requires Multisite.' );
-		}
-
 		$site_id = get_current_blog_id();
 		add_user_to_blog( $site_id, self::$author_ids[0], 'author' );
 
@@ -1399,5 +1385,53 @@ class Tests_User_Query extends WP_UnitTestCase {
 
 		$this->assertSame( $r1, $r2 );
 		$this->assertSame( $r1, $r3 );
+	}
+
+	/**
+	 * @ticket 39643
+	 */
+	public function test_search_by_display_name_only() {
+
+		$new_user1 = $this->factory->user->create( array(
+			'user_login'   => 'name1',
+			'display_name' => 'Sophia Andresen',
+		) );
+		self::$author_ids[] = $new_user1;
+
+		$q = new WP_User_Query( array(
+			'search' => '*Sophia*',
+			'fields' => '',
+			'search_columns' => array( 'display_name' ),
+			'include' => self::$author_ids,
+		) );
+
+		$ids = $q->get_results();
+
+		/* must include user that has same string in display_name */
+		$this->assertEquals( array( $new_user1 ), $ids );
+	}
+
+	/**
+	 * @ticket 39643
+	 */
+	public function test_search_by_display_name_only_ignore_others() {
+
+		$new_user1 = $this->factory->user->create( array(
+			'user_login'   => 'Sophia Andresen',
+			'display_name' => 'name1',
+		) );
+		self::$author_ids[] = $new_user1;
+
+		$q = new WP_User_Query( array(
+			'search' => '*Sophia*',
+			'fields' => '',
+			'search_columns' => array( 'display_name' ),
+			'include' => self::$author_ids,
+		) );
+
+		$ids = $q->get_results();
+
+		/* must not include user that has same string in other fields */
+		$this->assertEquals( array(), $ids );
 	}
 }

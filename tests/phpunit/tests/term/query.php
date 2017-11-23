@@ -381,4 +381,161 @@ class Tests_Term_Query extends WP_UnitTestCase {
 		$count = $query->get_terms();
 		$this->assertEquals( 1, $count );
 	}
+
+	/**
+	 * @ticket 40496
+	 */
+	public function test_get_the_terms_should_respect_taxonomy_orderby() {
+		register_taxonomy( 'wptests_tax', 'post', array(
+			'sort' => true,
+			'args' => array(
+				'orderby' => 'term_order',
+			),
+		) );
+		$term_ids = self::factory()->term->create_many( 2, array(
+			'taxonomy' => 'wptests_tax',
+		) );
+		$post_id = self::factory()->post->create();
+		wp_set_object_terms( $post_id, array( $term_ids[0], $term_ids[1] ), 'wptests_tax' );
+		$terms = get_the_terms( $post_id, 'wptests_tax' );
+		$this->assertEquals( array( $term_ids[0], $term_ids[1] ), wp_list_pluck( $terms, 'term_id' ) );
+		// Flip the order
+		wp_set_object_terms( $post_id, array( $term_ids[1], $term_ids[0] ), 'wptests_tax' );
+		$terms = get_the_terms( $post_id, 'wptests_tax' );
+		$this->assertEquals( array( $term_ids[1], $term_ids[0] ), wp_list_pluck( $terms, 'term_id' ) );
+	}
+
+	/**
+	 * @ticket 40496
+	 */
+	public function test_wp_get_object_terms_should_respect_taxonomy_orderby() {
+		register_taxonomy( 'wptests_tax', 'post', array(
+			'sort' => true,
+			'args' => array(
+				'orderby' => 'term_order',
+			),
+		) );
+		$term_ids = self::factory()->term->create_many( 2, array(
+			'taxonomy' => 'wptests_tax',
+		) );
+		$post_id = self::factory()->post->create();
+		wp_set_object_terms( $post_id, array( $term_ids[0], $term_ids[1] ), 'wptests_tax' );
+		$terms = wp_get_object_terms( $post_id, array( 'category', 'wptests_tax' ) );
+		$this->assertEquals( array( $term_ids[0], $term_ids[1], 1 ), wp_list_pluck( $terms, 'term_id' ) );
+		// Flip the order
+		wp_set_object_terms( $post_id, array( $term_ids[1], $term_ids[0] ), 'wptests_tax' );
+		$terms = wp_get_object_terms( $post_id, array( 'category', 'wptests_tax' ) );
+		$this->assertEquals( array( $term_ids[1], $term_ids[0], 1 ), wp_list_pluck( $terms, 'term_id' ) );
+	}
+
+	/**
+	 * @ticket 41293
+	 */
+	public function test_should_allow_same_args_with_the_get_terms() {
+		register_post_type( 'wptests_pt' );
+		register_taxonomy( 'wptests_tax', 'wptests_pt' );
+		$t1 = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+			'name' => 'foo',
+			'slug' => 'bar',
+		) );
+		$t2 = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+			'name' => 'bar',
+			'slug' => 'foo',
+		) );
+
+		$p = self::factory()->post->create( array(
+			'post_type' => 'wptests_pt',
+		) );
+
+		wp_set_object_terms( $p, array( $t1, $t2 ), 'wptests_tax' );
+
+		$expected = wp_get_post_terms( $p, 'wptests_tax', array(
+			'fields' => 'ids',
+		) );
+
+		$found1 = array_keys( wp_get_object_terms( $p, 'wptests_tax', array(
+			'fields' => 'id=>parent',
+		) ) );
+
+		$found2 = array_keys( wp_get_object_terms( $p, 'wptests_tax', array(
+			'fields' => 'id=>slug',
+		) ) );
+
+		$found3 = array_keys( wp_get_object_terms( $p, 'wptests_tax', array(
+			'fields' => 'id=>name',
+		) ) );
+
+		$this->assertSame( $expected, $found1 );
+		$this->assertSame( $expected, $found2 );
+		$this->assertSame( $expected, $found3 );
+	}
+
+	/**
+	 * The query method should return zero for field as count and parent set.
+	 *
+	 * @ticket 42327
+	 */
+	public function test_query_should_return_zero_for_field_count_and_parent_set() {
+		$post_id = self::factory()->post->create();
+		register_taxonomy( 'wptests_tax', 'post' );
+
+		$term_id = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+		) );
+		wp_set_object_terms( $post_id, array( $term_id ), 'wptests_tax' );
+
+		$q = new WP_Term_Query();
+		$args = array(
+			'taxonomy' => 'wptests_tax',
+			'parent'   => $term_id,
+			'fields'   => 'count',
+		);
+		$this->assertSame( 0, $q->query( $args ) );
+	}
+
+	/**
+	 * The query method should return zero for field as count and child_of set.
+	 *
+	 * @ticket 42327
+	 */
+	public function test_query_should_return_zero_for_field_as_count_and_child_of_set() {
+		$post_id = self::factory()->post->create();
+		register_taxonomy( 'wptests_tax', 'post' );
+
+		$term_id = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+		) );
+		wp_set_object_terms( $post_id, array( $term_id ), 'wptests_tax' );
+
+		$q = new WP_Term_Query();
+		$args = array(
+			'taxonomy' => 'wptests_tax',
+			'child_of' => $term_id,
+			'fields'   => 'count',
+		);
+		$this->assertSame( 0, $q->query( $args ) );
+	}
+
+	/**
+	 * The terms property should be an empty array for fields not as count and parent set.
+	 *
+	 * @ticket 42327
+	 */
+	public function test_terms_property_should_be_empty_array_for_field_not_as_count_and_parent_set() {
+		$post_id = self::factory()->post->create();
+		register_taxonomy( 'wptests_tax', 'post' );
+
+		$term_id = self::factory()->term->create( array(
+			'taxonomy' => 'wptests_tax',
+		) );
+		wp_set_object_terms( $post_id, array( $term_id ), 'wptests_tax' );
+
+		$q = new WP_Term_Query( array(
+			'taxonomy' => 'wptests_tax',
+			'parent'   => $term_id,
+		) );
+		$this->assertSame( array(), $q->terms );
+	}
 }

@@ -120,7 +120,7 @@ class Tests_Multisite_User extends WP_UnitTestCase {
 		wp_set_current_user( $user1_id );
 
 		$this->assertTrue( is_blog_user() );
-		$this->assertTrue( is_blog_user( $wpdb->blogid ) );
+		$this->assertTrue( is_blog_user( get_current_blog_id() ) );
 
 		$blog_ids = array();
 
@@ -149,12 +149,13 @@ class Tests_Multisite_User extends WP_UnitTestCase {
 		$this->assertFalse( is_user_member_of_blog() );
 
 		wp_set_current_user( $user1_id );
+		$site_id = get_current_blog_id();
 
 		$this->assertTrue( is_user_member_of_blog() );
 		$this->assertTrue( is_user_member_of_blog( 0, 0 ) );
-		$this->assertTrue( is_user_member_of_blog( 0, $wpdb->blogid ) );
+		$this->assertTrue( is_user_member_of_blog( 0, $site_id ) );
 		$this->assertTrue( is_user_member_of_blog( $user1_id ) );
-		$this->assertTrue( is_user_member_of_blog( $user1_id, $wpdb->blogid ) );
+		$this->assertTrue( is_user_member_of_blog( $user1_id, $site_id ) );
 
 		$blog_ids = self::factory()->blog->create_many( 1 );
 		foreach ( $blog_ids as $blog_id ) {
@@ -398,6 +399,32 @@ class Tests_Multisite_User extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 41101
+	 */
+	public function test_should_fail_can_add_user_to_blog_filter() {
+		$site_id = self::factory()->blog->create();
+		$user_id = self::factory()->user->create();
+
+		add_filter( 'can_add_user_to_blog', '__return_false' );
+		$result = add_user_to_blog( $site_id, $user_id, 'subscriber' );
+
+		$this->assertWPError( $result );
+	}
+
+	/**
+	 * @ticket 41101
+	 */
+	public function test_should_succeed_can_add_user_to_blog_filter() {
+		$site_id = self::factory()->blog->create();
+		$user_id = self::factory()->user->create();
+
+		add_filter( 'can_add_user_to_blog', '__return_true' );
+		$result = add_user_to_blog( $site_id, $user_id, 'subscriber' );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
 	 * @ticket 23016
 	 */
 	public function test_wp_roles_global_is_reset() {
@@ -424,6 +451,7 @@ class Tests_Multisite_User extends WP_UnitTestCase {
 
 		$wp_roles->remove_role( $role );
 	}
+
 }
 
 endif ;

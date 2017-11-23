@@ -115,6 +115,10 @@ function _wp_die_handler_filter() {
 	return '_wp_die_handler';
 }
 
+function _wp_die_handler_filter_exit() {
+	return '_wp_die_handler_exit';
+}
+
 function _wp_die_handler_txt( $message, $title, $args ) {
 	echo "\nwp_die called\n";
 	echo "Message : $message\n";
@@ -125,6 +129,19 @@ function _wp_die_handler_txt( $message, $title, $args ) {
 			echo "\t $k : $v\n";
 		}
 	}
+}
+
+function _wp_die_handler_exit( $message, $title, $args ) {
+	echo "\nwp_die called\n";
+	echo "Message : $message\n";
+	echo "Title : $title\n";
+	if ( ! empty( $args ) ) {
+		echo "Args: \n";
+		foreach( $args as $k => $v ){
+			echo "\t $k : $v\n";
+		}
+	}
+	exit( 1 );
 }
 
 /**
@@ -164,21 +181,4 @@ function _upload_dir_https( $uploads ) {
 
 // Skip `setcookie` calls in auth_cookie functions due to warning:
 // Cannot modify header information - headers already sent by ...
-
-function wp_set_auth_cookie( $user_id, $remember = false, $secure = '', $token = '' ) {
-	$auth_cookie = null;
-	$expire = null;
-	$expiration = null;
-	$user_id = null;
-	$scheme = null;
-	/** This action is documented in wp-inclues/pluggable.php */
-	do_action( 'set_auth_cookie', $auth_cookie, $expire, $expiration, $user_id, $scheme );
-	$logged_in_cookie = null;
-	/** This action is documented in wp-inclues/pluggable.php */
-	do_action( 'set_logged_in_cookie', $logged_in_cookie, $expire, $expiration, $user_id, 'logged_in' );
-}
-
-function wp_clear_auth_cookie() {
-	/** This action is documented in wp-inclues/pluggable.php */
-	do_action( 'clear_auth_cookie' );
-}
+tests_add_filter( 'send_auth_cookies', '__return_false' );
