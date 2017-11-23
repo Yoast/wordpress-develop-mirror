@@ -179,7 +179,7 @@ final class _WP_Editors {
 				}
 
 				$buttons .= '<button type="button" id="' . $editor_id_attr . '-tmce" class="wp-switch-editor switch-tmce"' .
-					' data-wp-editor-id="' . $editor_id_attr . '">' . __('Visual') . "</button>\n";
+					' data-wp-editor-id="' . $editor_id_attr . '">' . _x( 'Visual', 'Name for the Visual editor tab' ) . "</button>\n";
 				$buttons .= '<button type="button" id="' . $editor_id_attr . '-html" class="wp-switch-editor switch-html"' .
 					' data-wp-editor-id="' . $editor_id_attr . '">' . _x( 'Text', 'Name for the Text editor tab (formerly HTML)' ) . "</button>\n";
 			} else {
@@ -565,10 +565,10 @@ final class _WP_Editors {
 				 * @param array  $buttons   An array of teenyMCE buttons.
 				 * @param string $editor_id Unique editor identifier, e.g. 'content'.
 				 */
-				$mce_buttons = apply_filters( 'teeny_mce_buttons', array('bold', 'italic', 'underline', 'blockquote', 'strikethrough', 'bullist', 'numlist', 'alignleft', 'aligncenter', 'alignright', 'undo', 'redo', 'link', 'unlink', 'fullscreen'), $editor_id );
+				$mce_buttons = apply_filters( 'teeny_mce_buttons', array('bold', 'italic', 'underline', 'blockquote', 'strikethrough', 'bullist', 'numlist', 'alignleft', 'aligncenter', 'alignright', 'undo', 'redo', 'link', 'fullscreen'), $editor_id );
 				$mce_buttons_2 = $mce_buttons_3 = $mce_buttons_4 = array();
 			} else {
-				$mce_buttons = array( 'formatselect', 'bold', 'italic', 'bullist', 'numlist', 'blockquote', 'alignleft', 'aligncenter', 'alignright', 'link', 'unlink', 'wp_more', 'spellchecker' );
+				$mce_buttons = array( 'formatselect', 'bold', 'italic', 'bullist', 'numlist', 'blockquote', 'alignleft', 'aligncenter', 'alignright', 'link', 'wp_more', 'spellchecker' );
 
 				if ( ! wp_is_mobile() ) {
 					if ( $set['_content_editor_dfw'] ) {
@@ -745,6 +745,8 @@ final class _WP_Editors {
 	/**
 	 *
 	 * @static
+	 * 
+	 * @param bool $default_scripts Optional. Whether default scripts should be enqueued. Default false.
 	 */
 	public static function enqueue_scripts( $default_scripts = false ) {
 		if ( $default_scripts || self::$has_tinymce ) {
@@ -981,6 +983,7 @@ final class _WP_Editors {
 			'end_container_on_empty_block' => true,
 			'wpeditimage_html5_captions' => true,
 			'wp_lang_attr' => get_bloginfo( 'language' ),
+			'wp_keep_scroll_position' => false,
 			'wp_shortcut_labels' => wp_json_encode( $shortcut_labels ),
 		);
 
@@ -1257,8 +1260,8 @@ final class _WP_Editors {
 			'Paste URL or type to search' => __( 'Paste URL or type to search' ), // Placeholder for the inline link dialog
 			'Apply'  => __( 'Apply' ), // Tooltip for the 'apply' button in the inline link dialog
 			'Link options'  => __( 'Link options' ), // Tooltip for the 'link options' button in the inline link dialog
-			'Visual' => __( 'Visual' ), // Editor switch tab label
-			'Text' => __( 'Text' ), // Editor switch tab label
+			'Visual' => _x( 'Visual', 'Name for the Visual editor tab' ), // Editor switch tab label
+			'Text' => _x( 'Text', 'Name for the Text editor tab (formerly HTML)' ), // Editor switch tab label
 
 			// Shortcuts help modal
 			'Keyboard Shortcuts' => array( __( 'Keyboard Shortcuts' ), 'accessH' ),
@@ -1374,7 +1377,7 @@ final class _WP_Editors {
 	/**
 	 * Print (output) the main TinyMCE scripts.
 	 *
-	 * @since 4.8
+	 * @since 4.8.0
 	 *
 	 * @static
 	 * @global string $tinymce_version
@@ -1623,9 +1626,6 @@ final class _WP_Editors {
 		// Do main query.
 		$get_posts = new WP_Query;
 		$posts = $get_posts->query( $query );
-		// Check if any posts were found.
-		if ( ! $get_posts->post_count )
-			return false;
 
 		// Build results.
 		$results = array();
@@ -1665,7 +1665,9 @@ final class _WP_Editors {
 		 * }
 		 * @param array $query  An array of WP_Query arguments.
 		 */
-		return apply_filters( 'wp_link_query', $results, $query );
+		$results = apply_filters( 'wp_link_query', $results, $query );
+
+		return ! empty( $results ) ? $results : false;
 	}
 
 	/**
