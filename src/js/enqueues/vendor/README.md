@@ -1,4 +1,4 @@
-# wp-vendor
+# src/js/enqueues/vendor
 
 In this directory you'll find vendor JavaScript packages that cannot be installed through NPM, but are included in WordPress. Below we've documented the sources for those packages.
 
