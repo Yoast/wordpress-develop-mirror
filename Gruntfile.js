@@ -266,6 +266,8 @@ module.exports = function(grunt) {
 							'js/enqueues/wp-vendor/**',
 							'!js/enqueues/wp-vendor/farbtastic.js',
 							'!js/enqueues/wp-vendor/iris.min.js'
+							'!js/enqueues/wp-vendor/jquery*'
+							'!js/enqueues/wp-vendor/deprecated/**'
 						],
 						dest: 'src/wp-includes/js/'
 					},
@@ -275,7 +277,14 @@ module.exports = function(grunt) {
 							'js/enqueues/wp-vendor/iris.min.js'
 						],
 						dest: 'src/wp-admin/js/'
-					}
+					},
+					{
+						src: [
+							'js/enqueues/wp-vendor/jquery*'
+							'!js/enqueues/wp-vendor/deprecated/suggest*'
+						],
+						dest: 'src/wp-includes/js/jquery/'
+					},
 				]
 			},
 			'wp-admin-css-compat-rtl': {
