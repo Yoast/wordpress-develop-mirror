@@ -249,7 +249,7 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 *
 		 * @since 4.5.0
 		 *
-		 * @returns {Array.<{before: Comment, after: Comment, instanceNumber: number}>} Either an array with an object
+		 * @returns {Array.<{before: Comment, after: Comment, instanceNumber: number}>} An array with an object
 		 * for each sidebar instance, containing the node before and after the sidebar instance and its instance
 		 * number.
 		 */
@@ -406,7 +406,7 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 *
 		 * @param {string} widgetId The widget ID.
 		 *
-		 * @returns {wp.customize.selectiveRefresh.Partial} Either the widget instance partial.
+		 * @returns {wp.customize.selectiveRefresh.Partial} The widget instance partial.
 		 */
 		ensureWidgetPlacementContainers: function( widgetId ) {
 			var sidebarPartial = this, widgetPartial, wasInserted = false, partialId = 'widget[' + widgetId + ']';
