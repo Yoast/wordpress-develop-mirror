@@ -3,12 +3,19 @@
  * Installs WordPress for running the tests and loads WordPress and the test libraries
  */
 
+/**
+ * Compatibility with PHPUnit 6+
+ */
+if ( class_exists( 'PHPUnit\Runner\Version' ) ) {
+	require_once dirname( __FILE__ ) . '/phpunit6-compat.php';
+}
 
 $config_file_path = dirname( dirname( __FILE__ ) );
 if ( ! file_exists( $config_file_path . '/wp-tests-config.php' ) ) {
 	// Support the config file from the root of the develop repository.
-	if ( basename( $config_file_path ) === 'phpunit' && basename( dirname( $config_file_path ) ) === 'tests' )
+	if ( basename( $config_file_path ) === 'phpunit' && basename( dirname( $config_file_path ) ) === 'tests' ) {
 		$config_file_path = dirname( dirname( $config_file_path ) );
+	}
 }
 $config_file_path .= '/wp-tests-config.php';
 
@@ -18,8 +25,9 @@ $config_file_path .= '/wp-tests-config.php';
  */
 global $wpdb, $current_site, $current_blog, $wp_rewrite, $shortcode_tags, $wp, $phpmailer, $wp_theme_directories;
 
-if ( !is_readable( $config_file_path ) ) {
-	die( "ERROR: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.\n" );
+if ( ! is_readable( $config_file_path ) ) {
+	echo "ERROR: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.\n";
+	exit( 1 );
 }
 require_once $config_file_path;
 require_once dirname( __FILE__ ) . '/functions.php';
@@ -31,8 +39,9 @@ define( 'DIR_TESTDATA', dirname( __FILE__ ) . '/../data' );
 
 define( 'WP_LANG_DIR', DIR_TESTDATA . '/languages' );
 
-if ( ! defined( 'WP_TESTS_FORCE_KNOWN_BUGS' ) )
+if ( ! defined( 'WP_TESTS_FORCE_KNOWN_BUGS' ) ) {
 	define( 'WP_TESTS_FORCE_KNOWN_BUGS', false );
+}
 
 // Cron tries to make an HTTP request to the blog, which always fails, because tests are run in CLI mode only
 define( 'DISABLE_WP_CRON', true );
@@ -46,7 +55,7 @@ $PHP_SELF = $GLOBALS['PHP_SELF'] = $_SERVER['PHP_SELF'] = '/index.php';
 
 // Should we run in multisite mode?
 $multisite = '1' == getenv( 'WP_MULTISITE' );
-$multisite = $multisite || ( defined( 'WP_TESTS_MULTISITE') && WP_TESTS_MULTISITE );
+$multisite = $multisite || ( defined( 'WP_TESTS_MULTISITE' ) && WP_TESTS_MULTISITE );
 $multisite = $multisite || ( defined( 'MULTISITE' ) && MULTISITE );
 
 // Override the PHPMailer
@@ -58,15 +67,18 @@ if ( ! defined( 'WP_DEFAULT_THEME' ) ) {
 }
 $wp_theme_directories = array( DIR_TESTDATA . '/themedir1' );
 
-system( WP_PHP_BINARY . ' ' . escapeshellarg( dirname( __FILE__ ) . '/install.php' ) . ' ' . escapeshellarg( $config_file_path ) . ' ' . $multisite );
+system( WP_PHP_BINARY . ' ' . escapeshellarg( dirname( __FILE__ ) . '/install.php' ) . ' ' . escapeshellarg( $config_file_path ) . ' ' . $multisite, $retval );
+if ( 0 !== $retval ) {
+	exit( $retval );
+}
 
 if ( $multisite ) {
-	echo "Running as multisite..." . PHP_EOL;
+	echo 'Running as multisite...' . PHP_EOL;
 	defined( 'MULTISITE' ) or define( 'MULTISITE', true );
 	defined( 'SUBDOMAIN_INSTALL' ) or define( 'SUBDOMAIN_INSTALL', false );
 	$GLOBALS['base'] = '/';
 } else {
-	echo "Running as single site... To run multisite, use -c tests/phpunit/multisite.xml" . PHP_EOL;
+	echo 'Running as single site... To run multisite, use -c tests/phpunit/multisite.xml' . PHP_EOL;
 }
 unset( $multisite );
 
@@ -76,14 +88,14 @@ tests_add_filter( 'wp_die_handler', '_wp_die_handler_filter' );
 
 // Preset WordPress options defined in bootstrap file.
 // Used to activate themes, plugins, as well as  other settings.
-if(isset($GLOBALS['wp_tests_options'])) {
+if ( isset( $GLOBALS['wp_tests_options'] ) ) {
 	function wp_tests_options( $value ) {
 		$key = substr( current_filter(), strlen( 'pre_option_' ) );
-		return $GLOBALS['wp_tests_options'][$key];
+		return $GLOBALS['wp_tests_options'][ $key ];
 	}
 
 	foreach ( array_keys( $GLOBALS['wp_tests_options'] ) as $key ) {
-		tests_add_filter( 'pre_option_'.$key, 'wp_tests_options' );
+		tests_add_filter( 'pre_option_' . $key, 'wp_tests_options' );
 	}
 }
 
@@ -119,19 +131,20 @@ require dirname( __FILE__ ) . '/spy-rest-server.php';
  */
 class WP_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 	protected $longOptions = array(
-	  'exclude-group=',
-	  'group=',
+		'exclude-group=',
+		'group=',
 	);
 	function __construct( $argv ) {
 		array_shift( $argv );
 		$options = array();
-		while ( list( $i, $arg ) = each( $argv ) ) {
+		while ( current( $argv ) ) {
+			$arg = current( $argv );
+			next( $argv );
 			try {
 				if ( strlen( $arg ) > 1 && $arg[0] === '-' && $arg[1] === '-' ) {
 					PHPUnit_Util_Getopt::parseLongOption( substr( $arg, 2 ), $this->longOptions, $options, $argv );
 				}
-			}
-			catch ( PHPUnit_Framework_Exception $e ) {
+			} catch ( PHPUnit_Framework_Exception $e ) {
 				// Enforcing recognized arguments or correctly formed arguments is
 				// not really the concern here.
 				continue;
@@ -139,19 +152,19 @@ class WP_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 		}
 
 		$skipped_groups = array(
-			'ajax' => true,
-			'ms-files' => true,
+			'ajax'          => true,
+			'ms-files'      => true,
 			'external-http' => true,
 		);
 
 		foreach ( $options as $option ) {
 			switch ( $option[0] ) {
-				case '--exclude-group' :
+				case '--exclude-group':
 					foreach ( $skipped_groups as $group_name => $skipped ) {
 						$skipped_groups[ $group_name ] = false;
 					}
 					continue 2;
-				case '--group' :
+				case '--group':
 					$groups = explode( ',', $option[1] );
 					foreach ( $groups as $group ) {
 						if ( is_numeric( $group ) || preg_match( '/^(UT|Plugin)\d+$/', $group ) ) {
@@ -179,6 +192,6 @@ class WP_PHPUnit_Util_Getopt extends PHPUnit_Util_Getopt {
 			echo 'If this changeset includes changes to HTTP, make sure there are no timeouts.' . PHP_EOL;
 			echo PHP_EOL;
 		}
-    }
+	}
 }
 new WP_PHPUnit_Util_Getopt( $_SERVER['argv'] );

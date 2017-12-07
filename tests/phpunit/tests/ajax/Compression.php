@@ -25,7 +25,7 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 		$_GET['test'] = 1;
 
 		// Make the request
-		$this->setExpectedException( 'WPAjaxDieStopException', '0' );
+		$this->setExpectedException( 'WPAjaxDieStopException', '-1' );
 		$this->_handleAjax( 'wp-compression-test' );
 	}
 
@@ -56,15 +56,15 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 	 */
 	public function test_gzdeflate() {
 
-		if ( !function_exists( 'gzdeflate' ) ) {
-			$this->markTestSkipped( 'gzdeflate function not available' );
+		if ( ! function_exists( 'gzdeflate' ) ) {
+			$this->fail( 'gzdeflate function not available' );
 		}
 
 		// Become an administrator
 		$this->_setRole( 'administrator' );
 
 		// Set up a default request
-		$_GET['test'] = 2;
+		$_GET['test']                    = 2;
 		$_SERVER['HTTP_ACCEPT_ENCODING'] = 'deflate';
 
 		// Make the request
@@ -83,15 +83,15 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 	 */
 	public function test_gzencode() {
 
-		if ( !function_exists('gzencode') ) {
-			$this->markTestSkipped( 'gzencode function not available' );
+		if ( ! function_exists( 'gzencode' ) ) {
+			$this->fail( 'gzencode function not available' );
 		}
 
 		// Become an administrator
 		$this->_setRole( 'administrator' );
 
 		// Set up a default request
-		$_GET['test'] = 2;
+		$_GET['test']                    = 2;
 		$_SERVER['HTTP_ACCEPT_ENCODING'] = 'gzip';
 
 		// Make the request
@@ -114,7 +114,7 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 		$this->_setRole( 'administrator' );
 
 		// Set up a default request
-		$_GET['test'] = 2;
+		$_GET['test']                    = 2;
 		$_SERVER['HTTP_ACCEPT_ENCODING'] = 'unknown';
 
 		// Make the request
@@ -200,6 +200,7 @@ class Tests_Ajax_CompressionTest extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * Undo gzencode.  This is ugly, but there's no stock gzdecode() function.
+	 *
 	 * @param string $encoded_data
 	 * @return string
 	 */

@@ -15,7 +15,7 @@ class Tests_User_WpDeleteUser extends WP_UnitTestCase {
 		$this->assertEquals( array(), get_blogs_of_user( 0 ) );
 
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
-		$blogs = get_blogs_of_user( $user_id );
+		$blogs   = get_blogs_of_user( $user_id );
 		$this->assertEquals( array( 1 ), array_keys( $blogs ) );
 
 		// Non-existent users don't have blogs.
@@ -55,46 +55,47 @@ class Tests_User_WpDeleteUser extends WP_UnitTestCase {
 
 	function test_delete_user() {
 		$user_id = self::factory()->user->create( array( 'role' => 'author' ) );
-		$user = new WP_User( $user_id );
+		$user    = new WP_User( $user_id );
 
 		$post = array(
-			'post_author' => $user_id,
-			'post_status' => 'publish',
+			'post_author'  => $user_id,
+			'post_status'  => 'publish',
 			'post_content' => 'Post content',
-			'post_title' => 'Post Title',
-			'post_type' => 'post',
+			'post_title'   => 'Post Title',
+			'post_type'    => 'post',
 		);
 
 		// insert a post and make sure the ID is ok
-		$post_id = wp_insert_post($post);
-		$this->assertTrue(is_numeric($post_id));
-		$this->assertTrue($post_id > 0);
+		$post_id = wp_insert_post( $post );
+		$this->assertTrue( is_numeric( $post_id ) );
+		$this->assertTrue( $post_id > 0 );
 
 		$post = get_post( $post_id );
 		$this->assertEquals( $post_id, $post->ID );
 
 		$post = array(
-			'post_author' => $user_id,
-			'post_status' => 'publish',
+			'post_author'  => $user_id,
+			'post_status'  => 'publish',
 			'post_content' => 'Post content',
-			'post_title' => 'Post Title',
-			'post_type' => 'nav_menu_item',
+			'post_title'   => 'Post Title',
+			'post_type'    => 'nav_menu_item',
 		);
 
 		// insert a post and make sure the ID is ok
-		$nav_id = wp_insert_post($post);
-		$this->assertTrue(is_numeric($nav_id));
-		$this->assertTrue($nav_id > 0);
+		$nav_id = wp_insert_post( $post );
+		$this->assertTrue( is_numeric( $nav_id ) );
+		$this->assertTrue( $nav_id > 0 );
 
 		$post = get_post( $nav_id );
 		$this->assertEquals( $nav_id, $post->ID );
 
 		wp_delete_user( $user_id );
 		$user = new WP_User( $user_id );
-		if ( is_multisite() )
+		if ( is_multisite() ) {
 			$this->assertTrue( $user->exists() );
-		else
+		} else {
 			$this->assertFalse( $user->exists() );
+		}
 
 		$this->assertNotNull( get_post( $post_id ) );
 		$this->assertEquals( 'trash', get_post( $post_id )->post_status );
@@ -111,9 +112,9 @@ class Tests_User_WpDeleteUser extends WP_UnitTestCase {
 	 * @ticket 20447
 	 */
 	function test_wp_delete_user_reassignment_clears_post_caches() {
-		$user_id   = self::factory()->user->create();
-		$reassign  = self::factory()->user->create();
-		$post_id   = self::factory()->post->create( array( 'post_author' => $user_id ) );
+		$user_id  = self::factory()->user->create();
+		$reassign = self::factory()->user->create();
+		$post_id  = self::factory()->post->create( array( 'post_author' => $user_id ) );
 
 		get_post( $post_id ); // Ensure this post is in the cache.
 
@@ -123,11 +124,10 @@ class Tests_User_WpDeleteUser extends WP_UnitTestCase {
 		$this->assertEquals( $reassign, $post->post_author );
 	}
 
+	/**
+	 * @group ms-excluded
+	 */
 	public function test_numeric_string_user_id() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'wp_delete_user() does not delete user records in Multisite.' );
-		}
-
 		$u = self::factory()->user->create();
 
 		$u_string = (string) $u;
@@ -144,12 +144,9 @@ class Tests_User_WpDeleteUser extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 33800
+	 * @group ms-excluded
 	 */
 	public function test_should_return_false_for_object_user_id() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'wp_delete_user() does not delete user records in Multisite.' );
-		}
-
 		$u_obj = self::factory()->user->create_and_get();
 		$this->assertFalse( wp_delete_user( $u_obj ) );
 		$this->assertEquals( $u_obj->ID, username_exists( $u_obj->user_login ) );

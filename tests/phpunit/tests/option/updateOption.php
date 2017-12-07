@@ -29,8 +29,8 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'test_update_option_default' );
-		$after = $wpdb->num_queries;
+		$value  = get_option( 'test_update_option_default' );
+		$after  = $wpdb->num_queries;
 
 		$this->assertEquals( $before, $after );
 		$this->assertEquals( $value, 'value' );
@@ -49,8 +49,8 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'test_update_option_default' );
-		$after = $wpdb->num_queries;
+		$value  = get_option( 'test_update_option_default' );
+		$after  = $wpdb->num_queries;
 
 		$this->assertEquals( $before, $after );
 		$this->assertEquals( $value, 'value' );
@@ -69,8 +69,8 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'test_update_option_default' );
-		$after = $wpdb->num_queries;
+		$value  = get_option( 'test_update_option_default' );
+		$after  = $wpdb->num_queries;
 
 		// Database has been hit.
 		$this->assertEquals( $before + 1, $after );
@@ -90,8 +90,8 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'test_update_option_default' );
-		$after = $wpdb->num_queries;
+		$value  = get_option( 'test_update_option_default' );
+		$after  = $wpdb->num_queries;
 
 		// Database has been hit.
 		$this->assertEquals( $before + 1, $after );
@@ -113,7 +113,7 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'foo' );
+		$value  = get_option( 'foo' );
 
 		$this->assertEquals( $before, $wpdb->num_queries );
 		$this->assertEquals( $value, 'bar2' );
@@ -134,7 +134,7 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'foo' );
+		$value  = get_option( 'foo' );
 
 		// 'foo' should still be autoload=yes, so we should see no additional querios.
 		$this->assertEquals( $before, $wpdb->num_queries );
@@ -158,11 +158,36 @@ class Tests_Option_UpdateOption extends WP_UnitTestCase {
 		wp_load_alloptions();
 
 		$before = $wpdb->num_queries;
-		$value = get_option( 'foo' );
+		$value  = get_option( 'foo' );
 
 		// 'foo' should still be autoload=yes, so we should see no additional querios.
 		$this->assertEquals( $before, $wpdb->num_queries );
 		$this->assertEquals( $value, 'bar2' );
+	}
+
+	/**
+	 * @ticket 38903
+	 */
+	public function test_update_option_array_with_object() {
+		$array_w_object = array(
+			'url'       => 'http://src.wordpress-develop.dev/wp-content/uploads/2016/10/cropped-Blurry-Lights.jpg',
+			'meta_data' => (object) array(
+				'attachment_id' => 292,
+				'height'        => 708,
+				'width'         => 1260,
+			),
+		);
+
+		// Add the option, it did not exist before this.
+		add_option( 'array_w_object', $array_w_object );
+
+		$num_queries_pre_update = get_num_queries();
+
+		// Update the option using the same array with an object for the value.
+		$this->assertFalse( update_option( 'array_w_object', $array_w_object ) );
+
+		// Check that no new database queries were performed.
+		$this->assertEquals( $num_queries_pre_update, get_num_queries() );
 	}
 
 	/**

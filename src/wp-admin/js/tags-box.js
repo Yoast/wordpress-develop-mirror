@@ -151,18 +151,15 @@ var tagBox, array_unique_noempty;
 			 * @returns {void}
 			 */
 			$.each( current_tags, function( key, val ) {
-				var span, xbutton;
+				var listItem, xbutton;
 
 				val = $.trim( val );
 
 				if ( ! val )
 					return;
 
-				/**
-				 * Create a new span and set its text value.
-				 * Setting the value via .text() ensures no additional HTML gets parsed into the element.
-				 */
-				span = $('<span />').text( val );
+				// Create a new list item, and ensure the text is properly escaped.
+				listItem = $( '<li />' ).text( val );
 
 				// If tags editing isn't disabled, create the X button.
 				if ( ! disabled ) {
@@ -172,7 +169,7 @@ var tagBox, array_unique_noempty;
 					 */
 					xbutton = $( '<button type="button" id="' + id + '-check-num-' + key + '" class="ntdelbutton">' +
 						'<span class="remove-tag-icon" aria-hidden="true"></span>' +
-						'<span class="screen-reader-text">' + window.tagsSuggestL10n.removeTerm + ' ' + val + '</span>' +
+						'<span class="screen-reader-text">' + window.tagsSuggestL10n.removeTerm + ' ' + listItem.html() + '</span>' +
 						'</button>' );
 
 					/**
@@ -204,10 +201,12 @@ var tagBox, array_unique_noempty;
 							tagBox.parseTags( this );
 						}
 					});
+
+					listItem.prepend( '&nbsp;' ).prepend( xbutton );
 				}
 
-				// Append the span to the tag list.
-				tagchecklist.append( span );
+				// Append the list item to the tag list.
+				tagchecklist.append( listItem );
 			});
 
 			// The buttons list is built now, give feedback to screen reader users.
@@ -226,7 +225,8 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @param {Object} el The container HTML element.
 		 * @param {Object|boolean} a Is either a link from the tag cloud or a hard set boolean value.
-		 * @param {*} f Determines whether or not focus should be applied to the input field.
+		 * @param {boolean} f Determines whether or not focus should be applied to the input field.
+		 *
 		 * @returns {boolean} Always returns false.
 		 */
 		flushTags : function( el, a, f ) {
@@ -298,7 +298,7 @@ var tagBox, array_unique_noempty;
 					return;
 				}
 
-				r = $( '<p id="tagcloud-' + tax + '" class="the-tagcloud">' + r + '</p>' );
+				r = $( '<div id="tagcloud-' + tax + '" class="the-tagcloud">' + r + '</div>' );
 
 				/**
 				 * Flushes the tagbox whenever an anchor or the tagcloud is clicked.
@@ -373,16 +373,17 @@ var tagBox, array_unique_noempty;
 			});
 
 			/**
-			 * Handles the flushing of the tagbox whenever the enter key is released in the new tag field.
+			 * Handles the flushing of the tagbox whenever the enter key is pressed in the new tag field.
 			 *
 			 * @summary Handles the flushing of the tagbox when adding a new tag.
 			 *
 			 * @since 4.2
 			 *
 			 * @param {Event} e The window event to handle.
+			 *
 			 * @returns {void}
 			 */
-			$( 'input.newtag', ajaxtag ).keyup( function( event ) {
+			$( 'input.newtag', ajaxtag ).keypress( function( event ) {
 				if ( 13 == event.which ) {
 					tagBox.userAction = 'add';
 					tagBox.flushTags( $( this ).closest( '.tagsdiv' ) );

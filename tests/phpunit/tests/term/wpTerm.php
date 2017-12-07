@@ -18,14 +18,18 @@ class Tests_Term_WpTerm extends WP_UnitTestCase {
 
 		// Ensure that there is a term with ID 1.
 		if ( ! get_term( 1 ) ) {
-			$wpdb->insert( $wpdb->terms, array(
-				'term_id' => 1,
-			) );
+			$wpdb->insert(
+				$wpdb->terms, array(
+					'term_id' => 1,
+				)
+			);
 
-			$wpdb->insert( $wpdb->term_taxonomy, array(
-				'term_id' => 1,
-				'taxonomy' => 'wptests_tax',
-			) );
+			$wpdb->insert(
+				$wpdb->term_taxonomy, array(
+					'term_id'  => 1,
+					'taxonomy' => 'wptests_tax',
+				)
+			);
 
 			clean_term_cache( 1, 'wptests_tax' );
 		}
@@ -63,15 +67,6 @@ class Tests_Term_WpTerm extends WP_UnitTestCase {
 	/**
 	 * @ticket 37738
 	 */
-	public function test_get_instance_should_fail_for_bool() {
-		$found = WP_Term::get_instance( true );
-
-		$this->assertFalse( $found );
-	}
-
-	/**
-	 * @ticket 37738
-	 */
 	public function test_get_instance_should_succeed_for_float_that_is_equal_to_post_id() {
 		$found = WP_Term::get_instance( 1.0 );
 
@@ -79,30 +74,17 @@ class Tests_Term_WpTerm extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @ticket 37738
+	 * @ticket 40671
 	 */
-	public function test_get_instance_should_fail_for_float() {
-		$found = WP_Term::get_instance( 1.6 );
+	public function test_get_instance_should_respect_taxonomy_when_term_id_is_found_in_cache() {
+		global $wpdb;
 
-		$this->assertFalse( $found );
-	}
+		register_taxonomy( 'wptests_tax2', 'post' );
 
-	/**
-	 * @ticket 37738
-	 */
-	public function test_get_instance_should_fail_for_array() {
-		$found = WP_Term::get_instance( array( 1 ) );
+		// Ensure that cache is primed.
+		WP_Term::get_instance( self::$term_id, 'wptests_tax' );
 
-		$this->assertFalse( $found );
-	}
-
-	/**
-	 * @ticket 37738
-	 */
-	public function test_get_instance_should_fail_for_class() {
-		$class = new stdClass();
-		$found = WP_Term::get_instance( $class );
-
+		$found = WP_Term::get_instance( self::$term_id, 'wptests_tax2' );
 		$this->assertFalse( $found );
 	}
 }

@@ -1,7 +1,12 @@
+var $ = jQuery,
+	UploaderWindow;
+
 /**
  * wp.media.view.UploaderWindow
  *
  * An uploader window that allows for dragging and dropping media.
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.View
@@ -14,10 +19,7 @@
  * @param {jQuery} [options.uploader.dropzone] jQuery collection of the dropzone.
  * @param {object} [options.uploader.params]
  */
-var $ = jQuery,
-	UploaderWindow;
-
-UploaderWindow = wp.media.View.extend({
+UploaderWindow = wp.media.View.extend(/** @lends wp.media.view.UploaderWindow.prototype */{
 	tagName:   'div',
 	className: 'uploader-window',
 	template:  wp.template('uploader-window'),
@@ -25,7 +27,7 @@ UploaderWindow = wp.media.View.extend({
 	initialize: function() {
 		var uploader;
 
-		this.$browser = $('<a href="#" class="browser" />').hide().appendTo('body');
+		this.$browser = $( '<button type="button" class="browser" />' ).hide().appendTo( 'body' );
 
 		uploader = this.options.uploader = _.defaults( this.options.uploader || {}, {
 			dropzone:  this.$el,

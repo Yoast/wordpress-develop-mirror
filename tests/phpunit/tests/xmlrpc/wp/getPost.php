@@ -12,22 +12,25 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 	function setUp() {
 		parent::setUp();
 
-		$this->post_date_ts = strtotime( '+1 day' );
-		$this->post_data = array(
-			'post_title' => rand_str(),
+		$this->post_date_ts            = strtotime( '+1 day' );
+		$this->post_data               = array(
+			'post_title'   => rand_str(),
 			'post_content' => rand_str( 2000 ),
 			'post_excerpt' => rand_str( 100 ),
-			'post_author' => $this->make_user_by_role( 'author' ),
-			'post_date'  => strftime( "%Y-%m-%d %H:%M:%S", $this->post_date_ts ),
+			'post_author'  => $this->make_user_by_role( 'author' ),
+			'post_date'    => strftime( '%Y-%m-%d %H:%M:%S', $this->post_date_ts ),
 		);
-		$this->post_id = wp_insert_post( $this->post_data );
-		$this->post_custom_field = array( 'key' => 'test_custom_field', 'value' => 12345678);
+		$this->post_id                 = wp_insert_post( $this->post_data );
+		$this->post_custom_field       = array(
+			'key'   => 'test_custom_field',
+			'value' => 12345678,
+		);
 		$this->post_custom_field['id'] = add_post_meta( $this->post_id, $this->post_custom_field['key'], $this->post_custom_field['value'] );
 	}
 
 	function test_invalid_username_password() {
 		$result = $this->myxmlrpcserver->wp_getPost( array( 1, 'username', 'password', 1 ) );
-		$this->assertInstanceOf( 'IXR_Error', $result );
+		$this->assertIXRError( $result );
 		$this->assertEquals( 403, $result->code );
 	}
 
@@ -36,7 +39,7 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 
 		$fields = array( 'post', 'custom_fields' );
 		$result = $this->myxmlrpcserver->wp_getPost( array( 1, 'author', 'author', $this->post_id, $fields ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 
 		// Check data types
 		$this->assertInternalType( 'string', $result['post_id'] );
@@ -79,7 +82,7 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 	function test_no_fields() {
 		$fields = array();
 		$result = $this->myxmlrpcserver->wp_getPost( array( 1, 'author', 'author', $this->post_id, $fields ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 
 		// when no fields are requested, only the IDs should be returned
 		$this->assertEquals( 1, count( $result ) );
@@ -88,7 +91,7 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 
 	function test_default_fields() {
 		$result = $this->myxmlrpcserver->wp_getPost( array( 1, 'author', 'author', $this->post_id ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 
 		$this->assertArrayHasKey( 'post_id', $result );
 		$this->assertArrayHasKey( 'link', $result ); // random field from 'posts' group
@@ -99,7 +102,7 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 	function test_date() {
 		$fields = array( 'post' );
 		$result = $this->myxmlrpcserver->wp_getPost( array( 1, 'author', 'author', $this->post_id, $fields ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 
 		$this->assertInstanceOf( 'IXR_Date', $result['post_date'] );
 		$this->assertInstanceOf( 'IXR_Date', $result['post_date_gmt'] );
@@ -109,7 +112,7 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 		$this->assertEquals( $this->post_date_ts, $result['post_date']->getTimestamp() );
 		$this->assertEquals( $this->post_date_ts, $result['post_modified']->getTimestamp() );
 
-		$post_date_gmt = strtotime( get_gmt_from_date( mysql2date( 'Y-m-d H:i:s', $this->post_data['post_date'], false ), 'Ymd\TH:i:s' ) );
+		$post_date_gmt     = strtotime( get_gmt_from_date( mysql2date( 'Y-m-d H:i:s', $this->post_data['post_date'], false ), 'Ymd\TH:i:s' ) );
 		$post_modified_gmt = strtotime( get_gmt_from_date( mysql2date( 'Y-m-d H:i:s', $this->post_data['post_date'], false ), 'Ymd\TH:i:s' ) );
 
 		$this->assertEquals( $post_date_gmt, $result['post_date_gmt']->getTimestamp() );
@@ -123,14 +126,16 @@ class Tests_XMLRPC_wp_getPost extends WP_XMLRPC_UnitTestCase {
 		$this->make_user_by_role( 'editor' );
 
 		$parent_page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
-		$child_page_id = self::factory()->post->create( array(
-			'post_type' => 'page',
-			'post_parent' => $parent_page_id,
-			'menu_order' => 2
-		) );
+		$child_page_id  = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_parent' => $parent_page_id,
+				'menu_order'  => 2,
+			)
+		);
 
 		$result = $this->myxmlrpcserver->wp_getPost( array( 1, 'editor', 'editor', $child_page_id ) );
-		$this->assertNotInstanceOf( 'IXR_Error', $result );
+		$this->assertNotIXRError( $result );
 
 		$this->assertInternalType( 'string', $result['post_id'] );
 		$this->assertInternalType( 'string', $result['post_parent'] );

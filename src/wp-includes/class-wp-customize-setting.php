@@ -18,7 +18,9 @@
  */
 class WP_Customize_Setting {
 	/**
-	 * @access public
+	 * Customizer bootstrap instance.
+	 *
+	 * @since 3.4.0
 	 * @var WP_Customize_Manager
 	 */
 	public $manager;
@@ -26,13 +28,15 @@ class WP_Customize_Setting {
 	/**
 	 * Unique string identifier for the setting.
 	 *
-	 * @access public
+	 * @since 3.4.0
 	 * @var string
 	 */
 	public $id;
 
 	/**
-	 * @access public
+	 * Type of customize settings.
+	 *
+	 * @since 3.4.0
 	 * @var string
 	 */
 	public $type = 'theme_mod';
@@ -40,27 +44,62 @@ class WP_Customize_Setting {
 	/**
 	 * Capability required to edit this setting.
 	 *
-	 * @var string
+	 * @since 3.4.0
+	 * @var string|array
 	 */
 	public $capability = 'edit_theme_options';
 
 	/**
 	 * Feature a theme is required to support to enable this setting.
 	 *
-	 * @access public
+	 * @since 3.4.0
 	 * @var string
 	 */
-	public $theme_supports  = '';
-	public $default         = '';
-	public $transport       = 'refresh';
+	public $theme_supports = '';
 
 	/**
-	 * Server-side sanitization callback for the setting's value.
+	 * The default value for the setting.
 	 *
-	 * @var callback
+	 * @since 3.4.0
+	 * @var string
 	 */
-	public $validate_callback    = '';
-	public $sanitize_callback    = '';
+	public $default = '';
+
+	/**
+	 * Options for rendering the live preview of changes in Theme Customizer.
+	 *
+	 * Set this value to 'postMessage' to enable a custom Javascript handler to render changes to this setting
+	 * as opposed to reloading the whole page.
+	 *
+	 * @link https://developer.wordpress.org/themes/customize-api
+	 *
+	 * @since 3.4.0
+	 * @var string
+	 */
+	public $transport = 'refresh';
+
+	/**
+	 * Server-side validation callback for the setting's value.
+	 *
+	 * @since 4.6.0
+	 * @var callable
+	 */
+	public $validate_callback = '';
+
+	/**
+	 * Callback to filter a Customize setting value in un-slashed form.
+	 *
+	 * @since 3.4.0
+	 * @var callable
+	 */
+	public $sanitize_callback = '';
+
+	/**
+	 * Callback to convert a Customize PHP setting value to a value that is JSON serializable.
+	 *
+	 * @since 3.4.0
+	 * @var string
+	 */
 	public $sanitize_js_callback = '';
 
 	/**
@@ -72,12 +111,14 @@ class WP_Customize_Setting {
 	 * from the start.
 	 *
 	 * @since 4.2.0
-	 * @access public
 	 * @var bool
 	 */
 	public $dirty = false;
 
 	/**
+	 * ID Data.
+	 *
+	 * @since 3.4.0
 	 * @var array
 	 */
 	protected $id_data = array();
@@ -86,7 +127,6 @@ class WP_Customize_Setting {
 	 * Whether or not preview() was called.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 * @var bool
 	 */
 	protected $is_previewed = false;
@@ -95,9 +135,8 @@ class WP_Customize_Setting {
 	 * Cache of multidimensional values to improve performance.
 	 *
 	 * @since 4.4.0
-	 * @access protected
-	 * @var array
 	 * @static
+	 * @var array
 	 */
 	protected static $aggregated_multidimensionals = array();
 
@@ -105,7 +144,6 @@ class WP_Customize_Setting {
 	 * Whether the multidimensional setting is aggregated.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 * @var bool
 	 */
 	protected $is_multidimensional_aggregated = false;
@@ -131,15 +169,15 @@ class WP_Customize_Setting {
 		}
 
 		$this->manager = $manager;
-		$this->id = $id;
+		$this->id      = $id;
 
 		// Parse the ID for array keys.
 		$this->id_data['keys'] = preg_split( '/\[/', str_replace( ']', '', $this->id ) );
 		$this->id_data['base'] = array_shift( $this->id_data['keys'] );
 
 		// Rebuild the ID.
-		$this->id = $this->id_data[ 'base' ];
-		if ( ! empty( $this->id_data[ 'keys' ] ) ) {
+		$this->id = $this->id_data['base'];
+		if ( ! empty( $this->id_data['keys'] ) ) {
 			$this->id .= '[' . implode( '][', $this->id_data['keys'] ) . ']';
 		}
 
@@ -168,7 +206,6 @@ class WP_Customize_Setting {
 	 * Get parsed ID data for multidimensional setting.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @return array {
 	 *     ID data for multidimensional setting.
@@ -188,7 +225,6 @@ class WP_Customize_Setting {
 	 * calls get combined into one call, greatly improving performance.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 */
 	protected function aggregate_multidimensional() {
 		$id_base = $this->id_data['base'];
@@ -216,7 +252,6 @@ class WP_Customize_Setting {
 	 * This is intended only for use by unit tests.
 	 *
 	 * @since 4.5.0
-	 * @access public
 	 * @ignore
 	 */
 	static public function reset_aggregated_multidimensionals() {
@@ -227,7 +262,6 @@ class WP_Customize_Setting {
 	 * The ID for the current site when the preview() method was called.
 	 *
 	 * @since 4.2.0
-	 * @access protected
 	 * @var int
 	 */
 	protected $_previewed_blog_id;
@@ -236,7 +270,6 @@ class WP_Customize_Setting {
 	 * Return true if the current site is not the same as the previewed site.
 	 *
 	 * @since 4.2.0
-	 * @access public
 	 *
 	 * @return bool If preview() has been called.
 	 */
@@ -265,7 +298,6 @@ class WP_Customize_Setting {
 	 *
 	 * @since 3.4.0
 	 * @since 4.4.0 Added boolean return value.
-	 * @access public
 	 *
 	 * @return bool False when preview short-circuits due no change needing to be previewed.
 	 */
@@ -279,8 +311,8 @@ class WP_Customize_Setting {
 			return true;
 		}
 
-		$id_base = $this->id_data['base'];
-		$is_multidimensional = ! empty( $this->id_data['keys'] );
+		$id_base                 = $this->id_data['base'];
+		$is_multidimensional     = ! empty( $this->id_data['keys'] );
 		$multidimensional_filter = array( $this, '_multidimensional_preview_filter' );
 
 		/*
@@ -289,19 +321,19 @@ class WP_Customize_Setting {
 		 * then the preview short-circuits because there is nothing that needs
 		 * to be previewed.
 		 */
-		$undefined = new stdClass();
+		$undefined     = new stdClass();
 		$needs_preview = ( $undefined !== $this->post_value( $undefined ) );
-		$value = null;
+		$value         = null;
 
 		// Since no post value was defined, check if we have an initial value set.
 		if ( ! $needs_preview ) {
 			if ( $this->is_multidimensional_aggregated ) {
-				$root = self::$aggregated_multidimensionals[ $this->type ][ $id_base ]['root_value'];
+				$root  = self::$aggregated_multidimensionals[ $this->type ][ $id_base ]['root_value'];
 				$value = $this->multidimensional_get( $root, $this->id_data['keys'], $undefined );
 			} else {
-				$default = $this->default;
+				$default       = $this->default;
 				$this->default = $undefined; // Temporarily set default to undefined so we can detect if existing value is set.
-				$value = $this->value();
+				$value         = $this->value();
 				$this->default = $default;
 			}
 			$needs_preview = ( $undefined === $value ); // Because the default needs to be supplied.
@@ -316,7 +348,7 @@ class WP_Customize_Setting {
 		}
 
 		switch ( $this->type ) {
-			case 'theme_mod' :
+			case 'theme_mod':
 				if ( ! $is_multidimensional ) {
 					add_filter( "theme_mod_{$id_base}", array( $this, '_preview_filter' ) );
 				} else {
@@ -327,7 +359,7 @@ class WP_Customize_Setting {
 					self::$aggregated_multidimensionals[ $this->type ][ $id_base ]['previewed_instances'][ $this->id ] = $this;
 				}
 				break;
-			case 'option' :
+			case 'option':
 				if ( ! $is_multidimensional ) {
 					add_filter( "pre_option_{$id_base}", array( $this, '_preview_filter' ) );
 				} else {
@@ -339,8 +371,7 @@ class WP_Customize_Setting {
 					self::$aggregated_multidimensionals[ $this->type ][ $id_base ]['previewed_instances'][ $this->id ] = $this;
 				}
 				break;
-			default :
-
+			default:
 				/**
 				 * Fires when the WP_Customize_Setting::preview() method is called for settings
 				 * not handled as theme_mods or options.
@@ -379,7 +410,7 @@ class WP_Customize_Setting {
 	 * is called for this setting.
 	 *
 	 * @since 4.4.0
-	 * @access private
+	 *
 	 * @see WP_Customize_Manager::set_post_value()
 	 * @see WP_Customize_Setting::_multidimensional_preview_filter()
 	 */
@@ -404,7 +435,7 @@ class WP_Customize_Setting {
 			return $original;
 		}
 
-		$undefined = new stdClass(); // Symbol hack.
+		$undefined  = new stdClass(); // Symbol hack.
 		$post_value = $this->post_value( $undefined );
 		if ( $undefined !== $post_value ) {
 			$value = $post_value;
@@ -426,7 +457,6 @@ class WP_Customize_Setting {
 	 * the first setting previewed will be used to apply the values for the others.
 	 *
 	 * @since 4.4.0
-	 * @access private
 	 *
 	 * @see WP_Customize_Setting::$aggregated_multidimensionals
 	 * @param mixed $original Original root value.
@@ -452,8 +482,8 @@ class WP_Customize_Setting {
 
 			// Do the replacements of the posted/default sub value into the root value.
 			$value = $previewed_setting->post_value( $previewed_setting->default );
-			$root = self::$aggregated_multidimensionals[ $previewed_setting->type ][ $id_base ]['root_value'];
-			$root = $previewed_setting->multidimensional_replace( $root, $previewed_setting->id_data['keys'], $value );
+			$root  = self::$aggregated_multidimensionals[ $previewed_setting->type ][ $id_base ]['root_value'];
+			$root  = $previewed_setting->multidimensional_replace( $root, $previewed_setting->id_data['keys'], $value );
 			self::$aggregated_multidimensionals[ $previewed_setting->type ][ $id_base ]['root_value'] = $root;
 
 			// Mark this setting having been applied so that it will be skipped when the filter is called again.
@@ -469,8 +499,6 @@ class WP_Customize_Setting {
 	 *
 	 * @since 3.4.0
 	 *
-	 * @access public
-	 *
 	 * @return false|void False if cap check fails or value isn't set or is invalid.
 	 */
 	final public function save() {
@@ -480,17 +508,19 @@ class WP_Customize_Setting {
 			return false;
 		}
 
+		$id_base = $this->id_data['base'];
+
 		/**
 		 * Fires when the WP_Customize_Setting::save() method is called.
 		 *
-		 * The dynamic portion of the hook name, `$this->id_data['base']` refers to
+		 * The dynamic portion of the hook name, `$id_base` refers to
 		 * the base slug of the setting name.
 		 *
 		 * @since 3.4.0
 		 *
 		 * @param WP_Customize_Setting $this WP_Customize_Setting instance.
 		 */
-		do_action( 'customize_save_' . $this->id_data['base'], $this );
+		do_action( "customize_save_{$id_base}", $this );
 
 		$this->update( $value );
 	}
@@ -534,7 +564,6 @@ class WP_Customize_Setting {
 	 * Validates an input.
 	 *
 	 * @since 4.6.0
-	 * @access public
 	 *
 	 * @see WP_REST_Request::has_valid_params()
 	 *
@@ -576,7 +605,6 @@ class WP_Customize_Setting {
 	 * Get the root value for a setting, especially for multidimensional ones.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @param mixed $default Value to return if root does not exist.
 	 * @return mixed
@@ -585,7 +613,7 @@ class WP_Customize_Setting {
 		$id_base = $this->id_data['base'];
 		if ( 'option' === $this->type ) {
 			return get_option( $id_base, $default );
-		} else if ( 'theme_mod' ) {
+		} elseif ( 'theme_mod' === $this->type ) {
 			return get_theme_mod( $id_base, $default );
 		} else {
 			/*
@@ -601,7 +629,6 @@ class WP_Customize_Setting {
 	 * Set the root value for a setting, especially for multidimensional ones.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @param mixed $value Value to set as root of multidimensional setting.
 	 * @return bool Whether the multidimensional root was updated successfully.
@@ -614,7 +641,7 @@ class WP_Customize_Setting {
 				$autoload = self::$aggregated_multidimensionals[ $this->type ][ $this->id_data['base'] ]['autoload'];
 			}
 			return update_option( $id_base, $value, $autoload );
-		} else if ( 'theme_mod' ) {
+		} elseif ( 'theme_mod' === $this->type ) {
 			set_theme_mod( $id_base, $value );
 			return true;
 		} else {
@@ -692,10 +719,19 @@ class WP_Customize_Setting {
 	 * @return mixed The value.
 	 */
 	public function value() {
-		$id_base = $this->id_data['base'];
+		$id_base      = $this->id_data['base'];
 		$is_core_type = ( 'option' === $this->type || 'theme_mod' === $this->type );
 
 		if ( ! $is_core_type && ! $this->is_multidimensional_aggregated ) {
+
+			// Use post value if previewed and a post value is present.
+			if ( $this->is_previewed ) {
+				$value = $this->post_value( null );
+				if ( null !== $value ) {
+					return $value;
+				}
+			}
+
 			$value = $this->get_root_value( $this->default );
 
 			/**
@@ -716,7 +752,7 @@ class WP_Customize_Setting {
 			$value = apply_filters( "customize_value_{$id_base}", $value, $this );
 		} elseif ( $this->is_multidimensional_aggregated ) {
 			$root_value = self::$aggregated_multidimensionals[ $this->type ][ $id_base ]['root_value'];
-			$value = $this->multidimensional_get( $root_value, $this->id_data['keys'], $this->default );
+			$value      = $this->multidimensional_get( $root_value, $this->id_data['keys'], $this->default );
 
 			// Ensure that the post value is used if the setting is previewed, since preview filters aren't applying on cached $root_value.
 			if ( $this->is_previewed ) {
@@ -749,8 +785,9 @@ class WP_Customize_Setting {
 		 */
 		$value = apply_filters( "customize_sanitize_js_{$this->id}", $this->value(), $this );
 
-		if ( is_string( $value ) )
-			return html_entity_decode( $value, ENT_QUOTES, 'UTF-8');
+		if ( is_string( $value ) ) {
+			return html_entity_decode( $value, ENT_QUOTES, 'UTF-8' );
+		}
 
 		return $value;
 	}
@@ -759,7 +796,6 @@ class WP_Customize_Setting {
 	 * Retrieves the data to export to the client via JSON.
 	 *
 	 * @since 4.6.0
-	 * @access public
 	 *
 	 * @return array Array of parameters passed to JavaScript.
 	 */
@@ -780,11 +816,13 @@ class WP_Customize_Setting {
 	 * @return bool False if theme doesn't support the setting or user can't change setting, otherwise true.
 	 */
 	final public function check_capabilities() {
-		if ( $this->capability && ! call_user_func_array( 'current_user_can', (array) $this->capability ) )
+		if ( $this->capability && ! call_user_func_array( 'current_user_can', (array) $this->capability ) ) {
 			return false;
+		}
 
-		if ( $this->theme_supports && ! call_user_func_array( 'current_theme_supports', (array) $this->theme_supports ) )
+		if ( $this->theme_supports && ! call_user_func_array( 'current_theme_supports', (array) $this->theme_supports ) ) {
 			return false;
+		}
 
 		return true;
 	}
@@ -800,21 +838,25 @@ class WP_Customize_Setting {
 	 * @return array|void Keys are 'root', 'node', and 'key'.
 	 */
 	final protected function multidimensional( &$root, $keys, $create = false ) {
-		if ( $create && empty( $root ) )
+		if ( $create && empty( $root ) ) {
 			$root = array();
+		}
 
-		if ( ! isset( $root ) || empty( $keys ) )
+		if ( ! isset( $root ) || empty( $keys ) ) {
 			return;
+		}
 
 		$last = array_pop( $keys );
 		$node = &$root;
 
 		foreach ( $keys as $key ) {
-			if ( $create && ! isset( $node[ $key ] ) )
+			if ( $create && ! isset( $node[ $key ] ) ) {
 				$node[ $key ] = array();
+			}
 
-			if ( ! is_array( $node ) || ! isset( $node[ $key ] ) )
+			if ( ! is_array( $node ) || ! isset( $node[ $key ] ) ) {
 				return;
+			}
 
 			$node = &$node[ $key ];
 		}
@@ -829,8 +871,9 @@ class WP_Customize_Setting {
 			}
 		}
 
-		if ( ! isset( $node[ $last ] ) )
+		if ( ! isset( $node[ $last ] ) ) {
 			return;
+		}
 
 		return array(
 			'root' => &$root,
@@ -850,15 +893,17 @@ class WP_Customize_Setting {
 	 * @return mixed
 	 */
 	final protected function multidimensional_replace( $root, $keys, $value ) {
-		if ( ! isset( $value ) )
+		if ( ! isset( $value ) ) {
 			return $root;
-		elseif ( empty( $keys ) ) // If there are no keys, we're replacing the root.
+		} elseif ( empty( $keys ) ) { // If there are no keys, we're replacing the root.
 			return $value;
+		}
 
 		$result = $this->multidimensional( $root, $keys, true );
 
-		if ( isset( $result ) )
+		if ( isset( $result ) ) {
 			$result['node'][ $result['key'] ] = $value;
+		}
 
 		return $root;
 	}
@@ -874,8 +919,9 @@ class WP_Customize_Setting {
 	 * @return mixed The requested value or the default value.
 	 */
 	final protected function multidimensional_get( $root, $keys, $default = null ) {
-		if ( empty( $keys ) ) // If there are no keys, test the root.
+		if ( empty( $keys ) ) { // If there are no keys, test the root.
 			return isset( $root ) ? $root : $default;
+		}
 
 		$result = $this->multidimensional( $root, $keys );
 		return isset( $result ) ? $result['node'][ $result['key'] ] : $default;
@@ -896,17 +942,27 @@ class WP_Customize_Setting {
 	}
 }
 
-/** WP_Customize_Filter_Setting class */
+/**
+ * WP_Customize_Filter_Setting class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-filter-setting.php' );
 
-/** WP_Customize_Header_Image_Setting class */
+/**
+ * WP_Customize_Header_Image_Setting class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-header-image-setting.php' );
 
-/** WP_Customize_Background_Image_Setting class */
+/**
+ * WP_Customize_Background_Image_Setting class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-background-image-setting.php' );
 
-/** WP_Customize_Nav_Menu_Item_Setting class */
+/**
+ * WP_Customize_Nav_Menu_Item_Setting class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-item-setting.php' );
 
-/** WP_Customize_Nav_Menu_Setting class */
+/**
+ * WP_Customize_Nav_Menu_Setting class.
+ */
 require_once( ABSPATH . WPINC . '/customize/class-wp-customize-nav-menu-setting.php' );

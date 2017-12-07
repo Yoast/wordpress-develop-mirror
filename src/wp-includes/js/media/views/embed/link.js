@@ -1,5 +1,10 @@
+var $ = jQuery,
+	EmbedLink;
+
 /**
  * wp.media.view.EmbedLink
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.view.Settings
@@ -7,10 +12,7 @@
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var $ = jQuery,
-	EmbedLink;
-
-EmbedLink = wp.media.view.Settings.extend({
+EmbedLink = wp.media.view.Settings.extend(/** @lends wp.media.view.EmbedLink.prototype */{
 	className: 'embed-link-settings',
 	template:  wp.template('embed-link-settings'),
 
@@ -35,10 +37,10 @@ EmbedLink = wp.media.view.Settings.extend({
 	}, wp.media.controller.Embed.sensitivity ),
 
 	fetch: function() {
-		var embed;
+		var url = this.model.get( 'url' ), re, youTubeEmbedMatch;
 
 		// check if they haven't typed in 500 ms
-		if ( $('#embed-url-field').val() !== this.model.get('url') ) {
+		if ( $('#embed-url-field').val() !== url ) {
 			return;
 		}
 
@@ -46,23 +48,31 @@ EmbedLink = wp.media.view.Settings.extend({
 			this.dfd.abort();
 		}
 
-		embed = new wp.shortcode({
-			tag: 'embed',
-			attrs: _.pick( this.model.attributes, [ 'width', 'height', 'src' ] ),
-			content: this.model.get('url')
-		});
+		// Support YouTube embed urls, since they work once in the editor.
+		re = /https?:\/\/www\.youtube\.com\/embed\/([^/]+)/;
+		youTubeEmbedMatch = re.exec( url );
+		if ( youTubeEmbedMatch ) {
+			url = 'https://www.youtube.com/watch?v=' + youTubeEmbedMatch[ 1 ];
+		}
 
-		this.dfd = $.ajax({
-			type:    'POST',
-			url:     wp.ajax.settings.url,
-			context: this,
-			data:    {
-				action: 'parse-embed',
-				post_ID: wp.media.view.settings.post.id,
-				shortcode: embed.string()
-			}
+		this.dfd = wp.apiRequest({
+			url: wp.media.view.settings.oEmbedProxyUrl,
+			data: {
+				url: url,
+				maxwidth: this.model.get( 'width' ),
+				maxheight: this.model.get( 'height' )
+			},
+			type: 'GET',
+			dataType: 'json',
+			context: this
 		})
-			.done( this.renderoEmbed )
+			.done( function( response ) {
+				this.renderoEmbed( {
+					data: {
+						body: response.html || ''
+					}
+				} );
+			} )
 			.fail( this.renderFail );
 	},
 

@@ -11,10 +11,12 @@ class Tests_Post_WpPost extends WP_UnitTestCase {
 
 		// Ensure that there is a post with ID 1.
 		if ( ! get_post( 1 ) ) {
-			$wpdb->insert( $wpdb->posts, array(
-				'ID' => 1,
-				'post_title' => 'Post 1',
-			) );
+			$wpdb->insert(
+				$wpdb->posts, array(
+					'ID'         => 1,
+					'post_title' => 'Post 1',
+				)
+			);
 		}
 
 		self::$post_id = self::factory()->post->create();
@@ -50,46 +52,9 @@ class Tests_Post_WpPost extends WP_UnitTestCase {
 	/**
 	 * @ticket 37738
 	 */
-	public function test_get_instance_should_fail_for_bool() {
-		$found = WP_Post::get_instance( true );
-
-		$this->assertFalse( $found );
-	}
-
-	/**
-	 * @ticket 37738
-	 */
 	public function test_get_instance_should_succeed_for_float_that_is_equal_to_post_id() {
 		$found = WP_Post::get_instance( 1.0 );
 
 		$this->assertSame( 1, $found->ID );
-	}
-
-	/**
-	 * @ticket 37738
-	 */
-	public function test_get_instance_should_fail_for_float() {
-		$found = WP_Post::get_instance( 1.6 );
-
-		$this->assertFalse( $found );
-	}
-
-	/**
-	 * @ticket 37738
-	 */
-	public function test_get_instance_should_fail_for_array() {
-		$found = WP_Post::get_instance( array( 1 ) );
-
-		$this->assertFalse( $found );
-	}
-
-	/**
-	 * @ticket 37738
-	 */
-	public function test_get_instance_should_fail_for_class() {
-		$class = new stdClass();
-		$found = WP_Post::get_instance( $class );
-
-		$this->assertFalse( $found );
 	}
 }

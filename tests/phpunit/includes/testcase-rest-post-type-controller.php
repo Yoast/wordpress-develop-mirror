@@ -10,12 +10,18 @@ abstract class WP_Test_REST_Post_Type_Controller_Testcase extends WP_Test_REST_C
 		$this->assertEquals( $post->post_name, $data['slug'] );
 		$this->assertEquals( get_permalink( $post->ID ), $data['link'] );
 		if ( '0000-00-00 00:00:00' === $post->post_date_gmt ) {
-			$this->assertNull( $data['date_gmt'] );
+			$post_date_gmt = date( 'Y-m-d H:i:s', strtotime( $post->post_date ) - ( get_option( 'gmt_offset' ) * 3600 ) );
+			$this->assertEquals( mysql_to_rfc3339( $post_date_gmt ), $data['date_gmt'] );
+		} else {
+			$this->assertEquals( mysql_to_rfc3339( $post->post_date_gmt ), $data['date_gmt'] );
 		}
 		$this->assertEquals( mysql_to_rfc3339( $post->post_date ), $data['date'] );
 
 		if ( '0000-00-00 00:00:00' === $post->post_modified_gmt ) {
-			$this->assertNull( $data['modified_gmt'] );
+			$post_modified_gmt = date( 'Y-m-d H:i:s', strtotime( $post->post_modified ) - ( get_option( 'gmt_offset' ) * 3600 ) );
+			$this->assertEquals( mysql_to_rfc3339( $post_modified_gmt ), $data['modified_gmt'] );
+		} else {
+			$this->assertEquals( mysql_to_rfc3339( $post->post_modified_gmt ), $data['modified_gmt'] );
 		}
 		$this->assertEquals( mysql_to_rfc3339( $post->post_modified ), $data['modified'] );
 
@@ -134,23 +140,11 @@ abstract class WP_Test_REST_Post_Type_Controller_Testcase extends WP_Test_REST_C
 			$this->assertFalse( isset( $data['excerpt'] ) );
 		}
 
+		$this->assertEquals( $post->post_status, $data['status'] );
 		$this->assertEquals( $post->guid, $data['guid']['rendered'] );
 
 		if ( 'edit' === $context ) {
 			$this->assertEquals( $post->guid, $data['guid']['raw'] );
-			$this->assertEquals( $post->post_status, $data['status'] );
-
-			if ( '0000-00-00 00:00:00' === $post->post_date_gmt ) {
-				$this->assertNull( $data['date_gmt'] );
-			} else {
-				$this->assertEquals( mysql_to_rfc3339( $post->post_date_gmt ), $data['date_gmt'] );
-			}
-
-			if ( '0000-00-00 00:00:00' === $post->post_modified_gmt ) {
-				$this->assertNull( $data['modified_gmt'] );
-			} else {
-				$this->assertEquals( mysql_to_rfc3339( $post->post_modified_gmt ), $data['modified_gmt'] );
-			}
 		}
 
 		$taxonomies = wp_list_filter( get_object_taxonomies( $post->post_type, 'objects' ), array( 'show_in_rest' => true ) );
@@ -165,7 +159,7 @@ abstract class WP_Test_REST_Post_Type_Controller_Testcase extends WP_Test_REST_C
 		// test links
 		if ( $links ) {
 
-			$links = test_rest_expand_compact_links( $links );
+			$links     = test_rest_expand_compact_links( $links );
 			$post_type = get_post_type_object( $data['type'] );
 			$this->assertEquals( $links['self'][0]['href'], rest_url( 'wp/v2/' . $post_type->rest_base . '/' . $data['id'] ) );
 			$this->assertEquals( $links['collection'][0]['href'], rest_url( 'wp/v2/' . $post_type->rest_base ) );
@@ -222,8 +216,13 @@ abstract class WP_Test_REST_Post_Type_Controller_Testcase extends WP_Test_REST_C
 			$links = $data['_links'];
 			foreach ( $links as &$links_array ) {
 				foreach ( $links_array as &$link ) {
-					$attributes = array_diff_key( $link, array( 'href' => 1, 'name' => 1 ) );
-					$link = array_diff_key( $link, $attributes );
+					$attributes         = array_diff_key(
+						$link, array(
+							'href' => 1,
+							'name' => 1,
+						)
+					);
+					$link               = array_diff_key( $link, $attributes );
 					$link['attributes'] = $attributes;
 				}
 			}
@@ -271,9 +270,9 @@ abstract class WP_Test_REST_Post_Type_Controller_Testcase extends WP_Test_REST_C
 
 	protected function set_post_data( $args = array() ) {
 		$defaults = array(
-			'title'   => rand_str(),
-			'content' => rand_str(),
-			'excerpt' => rand_str(),
+			'title'   => 'Post Title',
+			'content' => 'Post content',
+			'excerpt' => 'Post excerpt',
 			'name'    => 'test',
 			'status'  => 'publish',
 			'author'  => get_current_user_id(),
@@ -284,17 +283,21 @@ abstract class WP_Test_REST_Post_Type_Controller_Testcase extends WP_Test_REST_C
 	}
 
 	protected function set_raw_post_data( $args = array() ) {
-		return wp_parse_args( $args, $this->set_post_data( array(
-			'title'   => array(
-				'raw' => rand_str(),
-			),
-			'content' => array(
-				'raw' => rand_str(),
-			),
-			'excerpt' => array(
-				'raw' => rand_str(),
-			),
-		) ) );
+		return wp_parse_args(
+			$args, $this->set_post_data(
+				array(
+					'title'   => array(
+						'raw' => 'Post Title',
+					),
+					'content' => array(
+						'raw' => 'Post content',
+					),
+					'excerpt' => array(
+						'raw' => 'Post excerpt',
+					),
+				)
+			)
+		);
 	}
 
 	/**

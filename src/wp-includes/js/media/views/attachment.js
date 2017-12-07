@@ -1,16 +1,18 @@
+var View = wp.media.View,
+	$ = jQuery,
+	Attachment;
+
 /**
  * wp.media.view.Attachment
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var View = wp.media.View,
-	$ = jQuery,
-	Attachment;
-
-Attachment = View.extend({
+Attachment = View.extend(/** @lends wp.media.view.Attachment.prototype */{
 	tagName:   'li',
 	className: 'attachment',
 	template:  wp.template('attachment'),
@@ -26,7 +28,7 @@ Attachment = View.extend({
 	},
 
 	events: {
-		'click .js--select-attachment':   'toggleSelectionHandler',
+		'click':                          'toggleSelectionHandler',
 		'change [data-setting]':          'updateSetting',
 		'change [data-setting] input':    'updateSetting',
 		'change [data-setting] select':   'updateSetting',
@@ -518,6 +520,37 @@ _.each({
 	album:   '_syncAlbum'
 }, function( method, setting ) {
 	/**
+	 * @function _syncCaption
+	 * @memberOf wp.media.view.Attachment
+	 * @instance
+	 *
+	 * @param {Backbone.Model} model
+	 * @param {string} value
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
+	 */
+	/**
+	 * @function _syncTitle
+	 * @memberOf wp.media.view.Attachment
+	 * @instance
+	 *
+	 * @param {Backbone.Model} model
+	 * @param {string} value
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
+	 */
+	/**
+	 * @function _syncArtist
+	 * @memberOf wp.media.view.Attachment
+	 * @instance
+	 *
+	 * @param {Backbone.Model} model
+	 * @param {string} value
+	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining
+	 */
+	/**
+	 * @function _syncAlbum
+	 * @memberOf wp.media.view.Attachment
+	 * @instance
+	 *
 	 * @param {Backbone.Model} model
 	 * @param {string} value
 	 * @returns {wp.media.view.Attachment} Returns itself to allow chaining

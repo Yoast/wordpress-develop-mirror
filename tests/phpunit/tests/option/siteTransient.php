@@ -14,8 +14,8 @@ class Tests_Option_SiteTransient extends WP_UnitTestCase {
 	}
 
 	function test_the_basics() {
-		$key = 'key1';
-		$value = 'value1';
+		$key    = 'key1';
+		$value  = 'value1';
 		$value2 = 'value2';
 
 		$this->assertFalse( get_site_transient( 'doesnotexist' ) );
@@ -30,8 +30,11 @@ class Tests_Option_SiteTransient extends WP_UnitTestCase {
 	}
 
 	function test_serialized_data() {
-		$key = rand_str();
-		$value = array( 'foo' => true, 'bar' => true );
+		$key   = __FUNCTION__;
+		$value = array(
+			'foo' => true,
+			'bar' => true,
+		);
 
 		$this->assertTrue( set_site_transient( $key, $value ) );
 		$this->assertEquals( $value, get_site_transient( $key ) );
@@ -44,13 +47,11 @@ class Tests_Option_SiteTransient extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 22846
+	 * @group ms-excluded
 	 */
 	public function test_set_site_transient_is_not_stored_as_autoload_option() {
-		$key = rand_str();
+		$key = 'not_autoloaded';
 
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Does not apply when used in multisite.' );
-		}
 		set_site_transient( $key, 'Not an autoload option' );
 
 		$options = wp_load_alloptions();
