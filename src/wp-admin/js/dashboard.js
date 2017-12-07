@@ -3,7 +3,7 @@ var ajaxWidgets, ajaxPopulateWidgets, quickPressLoad;
 window.wp = window.wp || {};
 
 /**
- * @summary Dashboard widget functionality.
+ * Dashboard widget functionality.
  *
  * @since 2.7.0
  */
@@ -13,7 +13,7 @@ jQuery(document).ready( function($) {
 		updateWelcomePanel;
 
 	/**
-	 * @summary Save the visibility of the welcome panel.
+	 * Save the visibility of the welcome panel.
 	 *
 	 * @param {boolean} visible Should it be visible or not.
 	 *
@@ -50,7 +50,7 @@ jQuery(document).ready( function($) {
 	ajaxWidgets = ['dashboard_primary'];
 
 	/**
-	 * @summary Trigger widget updates via AJAX.
+	 * Trigger widget updates via AJAX.
 	 *
 	 * @since 2.7.0
 	 *
@@ -60,7 +60,7 @@ jQuery(document).ready( function($) {
 	 */
 	ajaxPopulateWidgets = function(el) {
 		/**
-		 * @summary Fetch the latest representation of the widget via Ajax and show it.
+		 * Fetch the latest representation of the widget via Ajax and show it.
 		 *
 		 * @param {int} i Number of half-seconds to use as the timeout.
 		 * @param {string} id ID of the element which is going to be checked for changes.
@@ -105,7 +105,7 @@ jQuery(document).ready( function($) {
 	postboxes.add_postbox_toggles(pagenow, { pbshow: ajaxPopulateWidgets } );
 
 	/**
-	 * @summary Control the Quick Press (Quick Draft) widget.
+	 * Control the Quick Press (Quick Draft) widget.
 	 *
 	 * @since 2.7.0
 	 *
@@ -156,10 +156,10 @@ jQuery(document).ready( function($) {
 		$('#publish').click( function() { act.val( 'post-quickpress-publish' ); } );
 
 		/**
-		 * Adds accessibility context to inputs.
-		 *
 		 * Use the 'screen-reader-text' class to hide the label when entering a value.
 		 * Apply it when the input is not empty or the input has focus.
+		 *
+		 * @summary Adds accessibility context to inputs.
 		 *
 		 * @returns {void}
 		 */
@@ -198,7 +198,7 @@ jQuery(document).ready( function($) {
 	$( '.meta-box-sortables' ).sortable( 'option', 'containment', '#wpwrap' );
 
 	/**
-	 * @summary Adjust the height of the textarea based on the content.
+	 * Adjust the height of the textarea based on the content.
 	 *
 	 * @since 3.6.0
 	 *
@@ -281,7 +281,7 @@ jQuery( function( $ ) {
 		app;
 
 	/**
-	 * @summary Global Community Events class.
+	 * Global Community Events class.
 	 *
 	 * @since 4.8.0
 	 *
@@ -293,7 +293,7 @@ jQuery( function( $ ) {
 		model: null,
 
 		/**
-		 * @summary Initializes the wp.communityEvents object.
+		 * Initializes the wp.communityEvents object.
 		 *
 		 * @since 4.8.0
 		 *
@@ -329,7 +329,7 @@ jQuery( function( $ ) {
 			$container.on( 'click', '.community-events-toggle-location, .community-events-cancel', app.toggleLocationForm );
 
 			/**
-			 * @summary Filter events based on entered location.
+			 * Filter events based on entered location.
 			 *
 			 * @returns {void}
 			 */
@@ -361,7 +361,7 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * @summary Toggles the visibility of the Edit Location form.
+		 * Toggles the visibility of the Edit Location form.
 		 *
 		 * @since 4.8.0
 		 *
@@ -407,7 +407,7 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * @summary Sends REST API requests to fetch events for the widget.
+		 * Sends REST API requests to fetch events for the widget.
 		 *
 		 * @since 4.8.0
 		 *
@@ -459,7 +459,7 @@ jQuery( function( $ ) {
 		},
 
 		/**
-		 * @summary Renders the template for the Events section of the Events & News widget.
+		 * Renders the template for the Events section of the Events & News widget.
 		 *
 		 * @since 4.8.0
 		 *
