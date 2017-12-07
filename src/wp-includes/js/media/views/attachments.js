@@ -39,8 +39,6 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 	 * @listens scrollElement:scroll
 	 * @listens this:ready
 	 * @listens controller:open
-	 *
-	 * @returns {void}
 	 */
 	initialize: function() {
 		this.el.id = _.uniqueId('__attachments-view-');
