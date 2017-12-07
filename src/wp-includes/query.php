@@ -34,7 +34,6 @@ function get_query_var( $var, $default = '' ) {
  * Wrapper for WP_Query::get_queried_object().
  *
  * @since 3.1.0
- * @access public
  *
  * @global WP_Query $wp_query Global WP_Query instance.
  *
@@ -94,9 +93,9 @@ function set_query_var( $var, $value ) {
  * @param array|string $query Array or string of WP_Query arguments.
  * @return array List of post objects.
  */
-function query_posts($query) {
+function query_posts( $query ) {
 	$GLOBALS['wp_query'] = new WP_Query();
-	return $GLOBALS['wp_query']->query($query);
+	return $GLOBALS['wp_query']->query( $query );
 }
 
 /**
@@ -323,6 +322,8 @@ function is_date() {
 
 /**
  * Is the query for an existing day archive?
+ *
+ * A conditional check to test whether the page is a date-based archive page displaying posts for the current day.
  *
  * @since 1.5.0
  *
@@ -874,18 +875,18 @@ function wp_old_slug_redirect() {
 			return;
 		}
 
-		$query = $wpdb->prepare("SELECT post_id FROM $wpdb->postmeta, $wpdb->posts WHERE ID = post_id AND post_type = %s AND meta_key = '_wp_old_slug' AND meta_value = %s", $post_type, get_query_var( 'name' ) );
+		$query = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta, $wpdb->posts WHERE ID = post_id AND post_type = %s AND meta_key = '_wp_old_slug' AND meta_value = %s", $post_type, get_query_var( 'name' ) );
 
 		// if year, monthnum, or day have been specified, make our query more precise
 		// just in case there are multiple identical _wp_old_slug values
 		if ( get_query_var( 'year' ) ) {
-			$query .= $wpdb->prepare(" AND YEAR(post_date) = %d", get_query_var( 'year' ) );
+			$query .= $wpdb->prepare( ' AND YEAR(post_date) = %d', get_query_var( 'year' ) );
 		}
 		if ( get_query_var( 'monthnum' ) ) {
-			$query .= $wpdb->prepare(" AND MONTH(post_date) = %d", get_query_var( 'monthnum' ) );
+			$query .= $wpdb->prepare( ' AND MONTH(post_date) = %d', get_query_var( 'monthnum' ) );
 		}
 		if ( get_query_var( 'day' ) ) {
-			$query .= $wpdb->prepare(" AND DAYOFMONTH(post_date) = %d", get_query_var( 'day' ) );
+			$query .= $wpdb->prepare( ' AND DAYOFMONTH(post_date) = %d', get_query_var( 'day' ) );
 		}
 
 		$id = (int) $wpdb->get_var( $query );
@@ -898,7 +899,7 @@ function wp_old_slug_redirect() {
 
 		if ( get_query_var( 'paged' ) > 1 ) {
 			$link = user_trailingslashit( trailingslashit( $link ) . 'page/' . get_query_var( 'paged' ) );
-		} elseif( is_embed() ) {
+		} elseif ( is_embed() ) {
 			$link = user_trailingslashit( trailingslashit( $link ) . 'embed' );
 		}
 
