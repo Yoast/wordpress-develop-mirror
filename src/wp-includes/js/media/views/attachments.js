@@ -1,17 +1,22 @@
-/**
- * wp.media.view.Attachments
- *
- * Represents the overview of attachments in the Media Library.
- */
-
-/**
- * @access private
- */
 var View = wp.media.View,
 	$ = jQuery,
 	Attachments;
 
-Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
+/**
+ * wp.media.view.Attachments
+ *
+ * Represents the overview of attachments in the Media Library.
+ *
+ * @memberOf wp.media.view
+ *
+ * @class
+ * @augments wp.media.View
+ * @augments wp.Backbone.View
+ * @augments Backbone.View
+ *
+ * @access private
+ */
+Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	tagName:   'ul',
 	className: 'attachments',
 

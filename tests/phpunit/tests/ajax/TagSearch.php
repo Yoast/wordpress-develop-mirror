@@ -17,10 +17,16 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * List of terms to insert on setup
+	 *
 	 * @var array
 	 */
 	private static $terms = array(
-		'chattels', 'depo', 'energumen', 'figuriste', 'habergeon', 'impropriation'
+		'chattels',
+		'depo',
+		'energumen',
+		'figuriste',
+		'habergeon',
+		'impropriation',
 	);
 
 	private static $term_ids = array();
@@ -64,11 +70,11 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 		// Set up a default request
 		$_GET['tax'] = 'post_tag';
-		$_GET['q']   = md5(uniqid());
+		$_GET['q']   = md5( uniqid() );
 
 		// Make the request
 		// No output, so we get a stop exception
-		$this->setExpectedException( 'WPAjaxDieStopException', '0' );
+		$this->setExpectedException( 'WPAjaxDieStopException', '' );
 		$this->_handleAjax( 'ajax-tag-search' );
 	}
 
