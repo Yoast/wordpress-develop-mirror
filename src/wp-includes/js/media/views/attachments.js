@@ -163,7 +163,7 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 			return;
 		}
 
-		// Left arrow
+		// Left arrow = 37.
 		if ( 37 === event.keyCode ) {
 			if ( 0 === index ) {
 				return;
@@ -171,7 +171,7 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 			attachments.eq( index - 1 ).focus();
 		}
 
-		// Up arrow
+		// Up arrow = 38.
 		if ( 38 === event.keyCode ) {
 			if ( 1 === row ) {
 				return;
@@ -179,7 +179,7 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 			attachments.eq( index - perRow ).focus();
 		}
 
-		// Right arrow
+		// Right arrow = 39.
 		if ( 39 === event.keyCode ) {
 			if ( attachments.length === index ) {
 				return;
@@ -187,7 +187,7 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 			attachments.eq( index + 1 ).focus();
 		}
 
-		// Down arrow
+		// Down arrow = 40.
 		if ( 40 === event.keyCode ) {
 			if ( Math.ceil( attachments.length / perRow ) === row ) {
 				return;
@@ -212,7 +212,10 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 	},
 
 	/**
-	 * Calculates the amount of columns and sets it on the data-columns attribute of .media-frame-content.
+	 * Calculates the amount of columns and sets it on the data-columns attribute
+	 * of .media-frame-content.
+	 *
+	 * @summary Calculates the amount of columns.
 	 *
 	 * @returns {void}
 	 */
@@ -341,6 +344,8 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 	 * Creates views for every attachment in collection if the collection is not empty,
 	 * otherwise clears all views and loads more attachments.
 	 *
+	 * @summary Creates views for every attachment in collection.
+	 *
 	 * @returns {void}
 	 */
 	prepare: function() {
@@ -365,6 +370,8 @@ Attachments = View.extend( /** @lends wp.media.view.Attachments.prototype */ {
 	 * Event handler for scroll events.
 	 * Shows the spinner if we're close to the bottom.
 	 * Loads more attachments from server if we're {refreshThreshold} times away from the bottom.
+	 *
+	 * @summary Event handler for scroll events.
 	 *
 	 * @returns {void}
 	 */
