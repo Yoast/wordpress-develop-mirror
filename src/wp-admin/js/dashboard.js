@@ -15,6 +15,8 @@ jQuery(document).ready( function($) {
 	/**
 	 * Save the visibility of the welcome panel.
 	 *
+	 * @since 3.3.0
+	 *
 	 * @param {boolean} visible Should it be visible or not.
 	 *
 	 * @returns {void}
