@@ -167,7 +167,7 @@ var tagBox, array_unique_noempty;
 					/**
 					 * @summary Handles the click and keypress event of a tag.
 					 *
-					 * Handles the click and keypress event when an event is called on a tag and reparses the tags
+					 * Handles the click and keypress event when an event is called on a tag and re-parses the tags
 					 * in the tag box.
 					 * Sets the focus on the new tag field when the enter key is pressed.
 					 *
@@ -367,7 +367,7 @@ var tagBox, array_unique_noempty;
 			 *
 			 * @summary Handles the flushing of the tagbox when adding a new tag.
 			 *
-			 * @since 4.2
+			 * @since 4.2.0
 			 *
 			 * @param {Event} e The window event to handle.
 			 *
