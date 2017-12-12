@@ -73,6 +73,7 @@ module.exports = function(grunt) {
 		},
 		clean: {
 			all: [BUILD_DIR],
+			js: [BUILD_DIR + 'wp-admin/js/', BUILD_DIR + 'wp-includes/js/'],
 			dynamic: {
 				dot: true,
 				expand: true,
@@ -91,14 +92,8 @@ module.exports = function(grunt) {
 						cwd: SOURCE_DIR,
 						src: [
 							'**',
-							'!wp-includes/js/media/**',
+							'!js/**', // JavaScript is extracted into separate copy tasks.
 							'!**/.{svn,git}/**', // Ignore version control directories.
-							// Ignore unminified versions of external libs we don't ship:
-							'!wp-includes/js/backbone.js',
-							'!wp-includes/js/underscore.js',
-							'!wp-includes/js/jquery/jquery.masonry.js',
-							'!wp-includes/js/jquery/ui/*.js',
-							'!wp-includes/js/tinymce/tinymce.js',
 							'!wp-includes/version.php' // Exclude version.php
 						],
 						dest: BUILD_DIR
@@ -109,62 +104,59 @@ module.exports = function(grunt) {
 					}
 				]
 			},
-			'npm_packages': {
+			'npm-packages': {
 				files: {
-					'build/wp-includes/js/backbone.js': ['./node_modules/backbone/backbone.js'],
 					'build/wp-includes/js/backbone.min.js': ['./node_modules/backbone/backbone-min.js'],
 					'build/wp-includes/js/hoverIntent.js': ['./node_modules/jquery-hoverintent/jquery.hoverIntent.js'],
 					'build/wp-includes/js/imagesloaded.min.js': ['./node_modules/imagesloaded/imagesloaded.pkgd.min.js'],
-					'build/wp-includes/js/jquery/jquery-migrate.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.js'],
 					'build/wp-includes/js/jquery/jquery-migrate.min.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.min.js'],
 					'build/wp-includes/js/jquery/jquery.color.min.js': ['./node_modules/jquery-color/dist/jquery.color.plus-names.min.js'],
-					'build/wp-includes/js/jquery/jquery.form.js': ['./node_modules/jquery-form/src/jquery.form.js'],
 					'build/wp-includes/js/jquery/jquery.form.min.js': ['./node_modules/jquery-form/dist/jquery.form.min.js'],
 					'build/wp-includes/js/jquery/jquery.js': ['./node_modules/jquery/dist/jquery.min.js'],
-					'build/wp-includes/js/jquery/ui/accordion.js': ['./node_modules/jquery-ui/ui/accordion.js'],
-					'build/wp-includes/js/jquery/ui/autocomplete.js': ['./node_modules/jquery-ui/ui/autocomplete.js'],
-					'build/wp-includes/js/jquery/ui/button.js': ['./node_modules/jquery-ui/ui/button.js'],
-					'build/wp-includes/js/jquery/ui/core.js': ['./node_modules/jquery-ui/ui/core.js'],
-					'build/wp-includes/js/jquery/ui/datepicker.js': ['./node_modules/jquery-ui/ui/datepicker.js'],
-					'build/wp-includes/js/jquery/ui/dialog.js': ['./node_modules/jquery-ui/ui/dialog.js'],
-					'build/wp-includes/js/jquery/ui/draggable.js': ['./node_modules/jquery-ui/ui/draggable.js'],
-					'build/wp-includes/js/jquery/ui/droppable.js': ['./node_modules/jquery-ui/ui/droppable.js'],
-					'build/wp-includes/js/jquery/ui/effect-blind.js': ['./node_modules/jquery-ui/ui/effect-blind.js'],
-					'build/wp-includes/js/jquery/ui/effect-bounce.js': ['./node_modules/jquery-ui/ui/effect-bounce.js'],
-					'build/wp-includes/js/jquery/ui/effect-clip.js': ['./node_modules/jquery-ui/ui/effect-clip.js'],
-					'build/wp-includes/js/jquery/ui/effect-drop.js': ['./node_modules/jquery-ui/ui/effect-drop.js'],
-					'build/wp-includes/js/jquery/ui/effect-explode.js': ['./node_modules/jquery-ui/ui/effect-explode.js'],
-					'build/wp-includes/js/jquery/ui/effect-fade.js': ['./node_modules/jquery-ui/ui/effect-fade.js'],
-					'build/wp-includes/js/jquery/ui/effect-fold.js': ['./node_modules/jquery-ui/ui/effect-fold.js'],
-					'build/wp-includes/js/jquery/ui/effect-highlight.js': ['./node_modules/jquery-ui/ui/effect-highlight.js'],
-					'build/wp-includes/js/jquery/ui/effect-puff.js': ['./node_modules/jquery-ui/ui/effect-puff.js'],
-					'build/wp-includes/js/jquery/ui/effect-pulsate.js': ['./node_modules/jquery-ui/ui/effect-pulsate.js'],
-					'build/wp-includes/js/jquery/ui/effect-scale.js': ['./node_modules/jquery-ui/ui/effect-scale.js'],
-					'build/wp-includes/js/jquery/ui/effect-shake.js': ['./node_modules/jquery-ui/ui/effect-shake.js'],
-					'build/wp-includes/js/jquery/ui/effect-size.js': ['./node_modules/jquery-ui/ui/effect-size.js'],
-					'build/wp-includes/js/jquery/ui/effect-slide.js': ['./node_modules/jquery-ui/ui/effect-slide.js'],
-					'build/wp-includes/js/jquery/ui/effect-transfer.js': ['./node_modules/jquery-ui/ui/effect-transfer.js'],
-					'build/wp-includes/js/jquery/ui/effect.js': ['./node_modules/jquery-ui/ui/effect.js'],
-					'build/wp-includes/js/jquery/ui/menu.js': ['./node_modules/jquery-ui/ui/menu.js'],
-					'build/wp-includes/js/jquery/ui/mouse.js': ['./node_modules/jquery-ui/ui/mouse.js'],
-					'build/wp-includes/js/jquery/ui/position.js': ['./node_modules/jquery-ui/ui/position.js'],
-					'build/wp-includes/js/jquery/ui/progressbar.js': ['./node_modules/jquery-ui/ui/progressbar.js'],
-					'build/wp-includes/js/jquery/ui/resizable.js': ['./node_modules/jquery-ui/ui/resizable.js'],
-					'build/wp-includes/js/jquery/ui/selectable.js': ['./node_modules/jquery-ui/ui/selectable.js'],
-					'build/wp-includes/js/jquery/ui/selectmenu.js': ['./node_modules/jquery-ui/ui/selectmenu.js'],
-					'build/wp-includes/js/jquery/ui/slider.js': ['./node_modules/jquery-ui/ui/slider.js'],
-					'build/wp-includes/js/jquery/ui/sortable.js': ['./node_modules/jquery-ui/ui/sortable.js'],
-					'build/wp-includes/js/jquery/ui/spinner.js': ['./node_modules/jquery-ui/ui/spinner.js'],
-					'build/wp-includes/js/jquery/ui/tabs.js': ['./node_modules/jquery-ui/ui/tabs.js'],
-					'build/wp-includes/js/jquery/ui/tooltip.js': ['./node_modules/jquery-ui/ui/tooltip.js'],
-					'build/wp-includes/js/jquery/ui/widget.js': ['./node_modules/jquery-ui/ui/widget.js'],
 					'build/wp-includes/js/masonry.min.js': ['./node_modules/masonry-layout/dist/masonry.pkgd.min.js'],
 					'build/wp-includes/js/twemoji.js': ['./node_modules/twemoji/2/twemoji.js'],
-					'build/wp-includes/js/underscore.js': ['./node_modules/underscore/underscore.js'],
 					'build/wp-includes/js/underscore.min.js': ['./node_modules/underscore/underscore-min.js'],
 					'build/wp-includes/js/zxcvbn.min.js': ['./node_modules/zxcvbn/dist/zxcvbn.js'],
 				}
-			}
+			},
+			'vendor-js': {
+				files: [
+					{
+						expand: true,
+						cwd: SOURCE_DIR + 'js/enqueues/vendor/',
+						src: [
+							'**/*',
+							'!farbtastic.js',
+							'!iris.min.js',
+							'!jquery*',
+							'!deprecated/**',
+							'!README.md',
+							// Ignore unminified version of vendor lib we don't ship.
+							'!tinymce/tinymce.js'
+						],
+						dest: 'build/wp-includes/js/'
+					},
+					{
+						expand: true,
+						cwd: SOURCE_DIR + 'js/enqueues/vendor/',
+						src: [
+							'farbtastic.js',
+							'iris.min.js'
+						],
+						dest: 'build/wp-admin/js/'
+					},
+					{
+						expand: true,
+						cwd: SOURCE_DIR + 'js/enqueues/vendor/',
+						src: [
+							'jquery*',
+							// Ignore unminified version of vendor lib we don't ship.
+							'!jquery.table-hotkeys.js'
+						],
+						dest: 'build/wp-includes/js/jquery/'
+					},
+				]
+			},
 			'admin-js': {
 				files: {
 					'build/wp-admin/js/accordion.js': ['./src/js/enqueues/lib/accordion.js'],
@@ -258,34 +250,6 @@ module.exports = function(grunt) {
 					'build/wp-includes/js/wplink.js': ['./src/js/enqueues/lib/link.js'],
 					'build/wp-includes/js/zxcvbn-async.js': ['./src/js/enqueues/lib/zxcvbn-async.js']
 				}
-			}
-			'js-vendor': {
-				files: [
-					{
-						src: [
-							'js/enqueues/wp-vendor/**',
-							'!js/enqueues/wp-vendor/farbtastic.js',
-							'!js/enqueues/wp-vendor/iris.min.js'
-							'!js/enqueues/wp-vendor/jquery*'
-							'!js/enqueues/wp-vendor/deprecated/**'
-						],
-						dest: 'src/wp-includes/js/'
-					},
-					{
-						src: [
-							'js/enqueues/wp-vendor/farbtastic.js',
-							'js/enqueues/wp-vendor/iris.min.js'
-						],
-						dest: 'src/wp-admin/js/'
-					},
-					{
-						src: [
-							'js/enqueues/wp-vendor/jquery*'
-							'!js/enqueues/wp-vendor/deprecated/suggest*'
-						],
-						dest: 'src/wp-includes/js/jquery/'
-					},
-				]
 			},
 			'wp-admin-css-compat-rtl': {
 				options: {
@@ -655,7 +619,7 @@ module.exports = function(grunt) {
 			},
 			core: {
 				expand: true,
-				cwd: SOURCE_DIR,
+				cwd: BUILD_DIR,
 				dest: BUILD_DIR,
 				ext: '.min.js',
 				src: [
@@ -669,14 +633,11 @@ module.exports = function(grunt) {
 					'wp-includes/js/tinymce/plugins/wp*/plugin.js',
 
 					// Exceptions
+					'!**/*.min.js',
 					'!wp-admin/js/custom-header.js', // Why? We should minify this.
 					'!wp-admin/js/farbtastic.js',
-					'!wp-admin/js/iris.min.js',
-					'!wp-includes/js/backbone.*',
-					'!wp-includes/js/masonry.min.js',
+					'!wp-includes/js/jquery/jquery.masonry.js',
 					'!wp-includes/js/swfobject.js',
-					'!wp-includes/js/underscore.*',
-					'!wp-includes/js/zxcvbn.min.js',
 					'!wp-includes/js/wp-embed.js' // We have extra options for this, see uglify:embed
 				]
 			},
@@ -687,22 +648,10 @@ module.exports = function(grunt) {
 					}
 				},
 				expand: true,
-				cwd: SOURCE_DIR,
+				cwd: BUILD_DIR,
 				dest: BUILD_DIR,
 				ext: '.min.js',
 				src: ['wp-includes/js/wp-embed.js']
-			},
-			media: {
-				expand: true,
-				cwd: SOURCE_DIR,
-				dest: BUILD_DIR,
-				ext: '.min.js',
-				src: [
-					'wp-includes/js/media-audiovideo.js',
-					'wp-includes/js/media-grid.js',
-					'wp-includes/js/media-models.js',
-					'wp-includes/js/media-views.js'
-				]
 			},
 			jqueryui: {
 				options: {
@@ -710,18 +659,18 @@ module.exports = function(grunt) {
 					preserveComments: /^!/
 				},
 				expand: true,
-				cwd: SOURCE_DIR,
-				dest: BUILD_DIR,
+				cwd: 'node_modules/jquery-ui/ui/',
+				dest: BUILD_DIR + 'wp-includes/js/jquery/ui/',
 				ext: '.min.js',
-				src: ['wp-includes/js/jquery/ui/*.js']
+				src: ['*.js']
 			},
 			masonry: {
 				options: {
 					// Preserve comments that start with a bang.
 					preserveComments: /^!/
 				},
-				src: SOURCE_DIR + 'wp-includes/js/jquery/jquery.masonry.js',
-				dest: SOURCE_DIR + 'wp-includes/js/jquery/jquery.masonry.min.js'
+				src: BUILD_DIR + 'wp-includes/js/jquery/jquery.masonry.js',
+				dest: BUILD_DIR + 'wp-includes/js/jquery/jquery.masonry.min.js'
 			}
 		},
 		webpack: {
@@ -892,6 +841,18 @@ module.exports = function(grunt) {
 					interval: 2000
 				}
 			},
+			js: {
+				files: [
+					SOURCE_DIR + 'js/**/*.js',
+					'webpack-dev.config.js'
+				],
+				tasks: ['build:js'],
+				options: {
+					dot: true,
+					spawn: false,
+					interval: 2000
+				}
+			},
 			config: {
 				files: [
 					'Gruntfile.js',
@@ -976,7 +937,6 @@ module.exports = function(grunt) {
 	grunt.registerTask( 'precommit:js', [
 		'webpack:prod',
 		'jshint:corejs',
-		'uglify:masonry',
 		'qunit:compiled'
 	] );
 
@@ -1084,27 +1044,55 @@ module.exports = function(grunt) {
 		}
 	} );
 
+	grunt.registerTask( 'copy:js', [
+		'copy:npm-packages',
+		'copy:vendor-js',
+		'copy:admin-js',
+		'copy:includes-js'
+	] );
+
+	grunt.registerTask( 'uglify:all', [
+		'uglify:core',
+		'uglify:embed',
+		'uglify:jqueryui',
+		'uglify:masonry'
+	] );
+
+	grunt.registerTask( 'build:tinymce', [
+		'concat:tinymce',
+		'compress:tinymce',
+		'clean:tinymce'
+	] );
+
+	grunt.registerTask( 'build:js', [
+		'clean:js',
+		'webpack:dev',
+		'copy:js',
+		'uglify:all',
+		'build:tinymce',
+		'concat:emoji',
+		'jsvalidate:build'
+	] );
+
 	grunt.registerTask( 'copy:all', [
 		'copy:files',
 		'copy:wp-admin-css-compat-rtl',
 		'copy:wp-admin-css-compat-min',
-		'copy:version'
+		'copy:version',
+		'copy:js'
 	] );
 
 	grunt.registerTask( 'build', [
 		'clean:all',
+		'webpack:dev',
 		'copy:all',
 		'cssmin:core',
 		'colors',
 		'rtl',
 		'cssmin:rtl',
 		'cssmin:colors',
-		'uglify:core',
-		'uglify:embed',
-		'uglify:jqueryui',
-		'concat:tinymce',
-		'compress:tinymce',
-		'clean:tinymce',
+		'uglify:all',
+		'build:tinymce',
 		'concat:emoji',
 		'includes:emoji',
 		'includes:embed',

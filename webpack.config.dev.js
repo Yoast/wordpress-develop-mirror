@@ -13,15 +13,15 @@ include_files = {
 module.exports = [
 	{
 		cache: true,
-		watch: true,
-		entry: Object.assign( npm_packages, admin_files, include_files ),
+		watch: false,
+		entry: Object.assign( admin_files, include_files ),
 		output: {
 			filename: '[name]',
 		}
 	},
 	{
 		cache: true,
-		watch: true,
+		watch: false,
 		entry: {
 			'build/wp-includes/js/wp-a11y.js': ['@wordpress/a11y'],
 		},
