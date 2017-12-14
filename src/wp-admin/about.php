@@ -53,7 +53,9 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 		</div>
 
 		<div class="floating-header-section">
-			<h2><?php _e( 'Customizer Workflow Improved' ); ?></h2>
+			<div class="section-header">
+				<h2><?php _e( 'Customizer Workflow Improved' ); ?></h2>
+			</div>
 
 			<div class="section-content">
 				<div class="section-item">
@@ -75,7 +77,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 						<img src="https://s.w.org/images/core/4.9/locking.svg" alt="">
 					</div>
 					<h3><?php _e( 'Design Locking To Guard Your Changes' ); ?></h3>
-					<p><?php _e( 'Ever encounter a scenario where two designers walk into a project and designer A overrides designer B&#8217;s beautiful changes? WordPress 4.9&#8217;s design lock feature (similar to post locking) secures your draft design so that no one can make changes to it or erase all your hard work.' );?></p>
+					<p><?php _e( 'Ever encounter a scenario where two designers walk into a project and designer A overrides designer B&#8217;s beautiful changes? WordPress 4.9&#8217;s design lock feature (similar to post locking) secures your draft design so that no one can make changes to it or erase all your hard work.' ); ?></p>
 				</div>
 				<div class="section-item">
 					<div class="inline-svg">
@@ -88,7 +90,9 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 		</div>
 
 		<div class="floating-header-section">
-			<h2><?php _e( 'Coding Enhancements' ); ?></h2>
+			<div class="section-header">
+				<h2><?php _e( 'Coding Enhancements' ); ?></h2>
+			</div>
 
 			<div class="section-content">
 				<div class="section-item">
@@ -110,13 +114,15 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 						<img src="https://s.w.org/images/core/4.9/warning.svg" alt="">
 					</div>
 					<h3><?php _e( 'Warning: Potential Danger Ahead!' ); ?></h3>
-					<p><?php _e( 'When you edit themes and plugins directly, WordPress 4.9 will politely warn you that this is a dangerous practice. It will recommend that you backup your files before saving, so they don&#8217;t get overwritten by the next update. Take the safe route: your future self will thank you. Your team and customers will thank you.' );?></p>
+					<p><?php _e( 'When you edit themes and plugins directly, WordPress 4.9 will politely warn you that this is a dangerous practice. It will recommend that you backup your files before saving, so they don&#8217;t get overwritten by the next update. Take the safe route: your future self will thank you. Your team and customers will thank you.' ); ?></p>
 				</div>
 			</div>
 		</div>
 
 		<div class="floating-header-section">
-			<h2><?php _e( 'Even More Widget Updates' ); ?></h2>
+			<div class="section-header">
+				<h2><?php _e( 'Even More Widget Updates' ); ?></h2>
+			</div>
 
 			<div class="section-content">
 				<div class="section-item">
@@ -137,7 +143,9 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 		</div>
 
 		<div class="floating-header-section">
-			<h2><?php _e( 'Site Building Improvements' ); ?></h2>
+			<div class="section-header">
+				<h2><?php _e( 'Site Building Improvements' ); ?></h2>
+			</div>
 
 			<div class="section-content">
 				<div class="section-item">
@@ -174,33 +182,42 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 					);
 				?>
 			</h2>
-			<p><?php printf(
-				__( 'WordPress is working on a new way to create and control your content and we&#8217;d love to have your help. Interested in being an <a href="%s">early tester</a> or getting involved with the Gutenberg project? <a href="%s">Contribute on GitHub</a>.' ),
+			<p>
+			<?php
+			printf(
+				__( 'WordPress is working on a new way to create and control your content and we&#8217;d love to have your help. Interested in being an <a href="%1$s">early tester</a> or getting involved with the Gutenberg project? <a href="%2$s">Contribute on GitHub</a>.' ),
 				__( 'https://wordpress.org/plugins/gutenberg/' ),
-				'https://github.com/WordPress/gutenberg' ); ?></p>
+				'https://github.com/WordPress/gutenberg'
+			);
+				?>
+				</p>
 		</div>
 
 		<hr />
 
 		<div class="changelog">
-			<h2><?php
+			<h2>
+			<?php
 				printf(
 					/* translators: %s: smiling face with smiling eyes emoji */
 					__( 'Developer Happiness %s' ),
 					'&#x1F60A'
 				);
-			?></h2>
+			?>
+			</h2>
 
 			<div class="under-the-hood two-col">
 				<div class="col">
 					<h3><a href="https://make.wordpress.org/core/2017/11/01/improvements-to-the-customize-js-api-in-4-9/"><?php _e( 'Customizer JS API Improvements' ); ?></a></h3>
-					<p><?php
+					<p>
+					<?php
 						printf(
 							/* translators: %s: https://make.wordpress.org/core/2017/11/01/improvements-to-the-customize-js-api-in-4-9/  */
 							__( 'We&#8217;ve made numerous improvements to the Customizer JS API in WordPress 4.9, eliminating many pain points and making it just as easy to work with as the PHP API. There are also new base control templates, a date/time control, and section/panel/global notifications to name a few. <a href="%s">Check out the full list.</a>' ),
 							'https://make.wordpress.org/core/2017/11/01/improvements-to-the-customize-js-api-in-4-9/'
 						);
-					?></p>
+					?>
+					</p>
 				</div>
 				<div class="col">
 					<h3><a href="https://make.wordpress.org/core/2017/10/22/code-editing-improvements-in-wordpress-4-9/"><?php _e( 'CodeMirror available for use in your themes and plugins' ); ?></a></h3>
@@ -211,7 +228,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 					<p><?php _e( 'WordPress 4.9 includes an upgraded version of MediaElement.js, which removes dependencies on jQuery, improves accessibility, modernizes the UI, and fixes many bugs.' ); ?></p>
 				</div>
 				<div class="col">
-					<h3><a href="https://make.wordpress.org/core/2017/10/15/improvements-for-roles-and-capabilities-in-4-9/"><?php _e( 'Roles and Capability Improvements' ); ?></a></h3>
+					<h3><a href="https://make.wordpress.org/core/2017/10/15/improvements-for-roles-and-capabilities-in-4-9/"><?php _e( 'Improvements to Roles and Capabilities' ); ?></a></h3>
 					<p><?php _e( 'New capabilities have been introduced that allow granular management of plugins and translation files. In addition, the site switching process in multisite has been fine-tuned to update the available roles and capabilities in a more reliable and coherent way.' ); ?></p>
 				</div>
 			</div>
@@ -242,34 +259,78 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 					offset += $adminbar.height();
 				}
 
-				var adjustScrollClass = _.throttle( function adjustScrollClass() {
+				function setup() {
+					$sections.each( function( i, section ) {
+						var $section = $( section );
+						// If the title is long, switch the layout
+						var $title = $section.find( 'h2' );
+						if ( $title.innerWidth() > 300 ) {
+							$section.addClass( 'has-long-title' );
+						}
+					} );
+				}
+
+				var adjustScrollPosition = _.throttle( function adjustScrollPosition() {
 					$sections.each( function( i, section ) {
 						var $section = $( section );
 						var $header = $section.find( 'h2' );
 						var width = $header.innerWidth();
+						var height = $header.innerHeight();
+
+						if ( $section.hasClass( 'has-long-title' ) ) {
+							return;
+						}
 
 						var sectionStart = $section.offset().top - offset;
-						var sectionEnd = sectionStart + $section.innerHeight() - 60;
+						var sectionEnd = sectionStart + $section.innerHeight();
+						var scrollPos = $window.scrollTop();
 
 						// If we're scrolled into a section, stick the header
-						if ( $window.scrollTop() >= sectionStart && $window.scrollTop() < sectionEnd ) {
-							$header.addClass( 'header-fixed' );
-							$header.css( { top: offset + 'px', width: width + 'px' } );
+						if ( scrollPos >= sectionStart && scrollPos < sectionEnd - height ) {
+							$header.css( {
+								position: 'fixed',
+								top: offset + 'px',
+								bottom: 'auto',
+								width: width + 'px'
+							} );
+						// If we're at the end of the section, stick the header to the bottom
+						} else if ( scrollPos >= sectionEnd - height && scrollPos < sectionEnd ) {
+							$header.css( {
+								position: 'absolute',
+								top: 'auto',
+								bottom: 0,
+								width: width + 'px'
+							} );
+						// Unstick the header
 						} else {
-							$header.removeClass( 'header-fixed' );
-							$header.css( { top: 0, width: 'auto' } );
+							$header.css( {
+								position: 'static',
+								top: 'auto',
+								bottom: 'auto',
+								width: 'auto'
+							} );
 						}
 					} );
 				}, 100 );
+
 				function enableFixedHeaders() {
 					if ( $window.width() > 782 ) {
-						adjustScrollClass();
-						$window.on( 'scroll', adjustScrollClass );
+						setup();
+						adjustScrollPosition();
+						$window.on( 'scroll', adjustScrollPosition );
 					} else {
-						$window.off( 'scroll', adjustScrollClass );
+						$window.off( 'scroll', adjustScrollPosition );
+						$sections.find( '.section-header' )
+							.css( {
+								width: 'auto'
+							} );
 						$sections.find( 'h2' )
-							.removeClass( 'header-fixed' )
-							.css( { top: 0, width: 'auto' } );
+							.css( {
+								position: 'static',
+								top: 'auto',
+								bottom: 'auto',
+								width: 'auto'
+							} );
 					}
 				}
 				$( window ).resize( enableFixedHeaders );
@@ -300,16 +361,22 @@ __( '<strong>Version %s</strong> addressed one security issue.' );
 __( '<strong>Version %s</strong> addressed some security issues.' );
 
 /* translators: 1: WordPress version number, 2: plural number of bugs. */
-_n_noop( '<strong>Version %1$s</strong> addressed %2$s bug.',
-         '<strong>Version %1$s</strong> addressed %2$s bugs.' );
+_n_noop(
+	'<strong>Version %1$s</strong> addressed %2$s bug.',
+	'<strong>Version %1$s</strong> addressed %2$s bugs.'
+);
 
 /* translators: 1: WordPress version number, 2: plural number of bugs. Singular security issue. */
-_n_noop( '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
-         '<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.' );
+_n_noop(
+	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bug.',
+	'<strong>Version %1$s</strong> addressed a security issue and fixed %2$s bugs.'
+);
 
 /* translators: 1: WordPress version number, 2: plural number of bugs. More than one security issue. */
-_n_noop( '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
-         '<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.' );
+_n_noop(
+	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bug.',
+	'<strong>Version %1$s</strong> addressed some security issues and fixed %2$s bugs.'
+);
 
 /* translators: %s: Codex URL */
 __( 'For more information, see <a href="%s">the release notes</a>.' );
