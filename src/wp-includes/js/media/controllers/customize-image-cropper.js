@@ -1,23 +1,29 @@
-/**
- * wp.media.controller.CustomizeImageCropper
- *
- * @summary Prepares the image to get cropped.
- *
- * Checks whether the image needs to be cropped according to a ratio.
- *
- * @since 4.3
- *
- * @class
- * @augments wp.media.controller.Cropper
- * @augments wp.media.controller.State
- * @augments Backbone.Model
- *
- * @returns ajax post Call to Ajax to crop the image according to the crop details.
- */
 var Controller = wp.media.controller,
 	CustomizeImageCropper;
 
-CustomizeImageCropper = Controller.Cropper.extend({
+/**
+ * A state for cropping an image in the customizer.
+ *
+ * @since 4.3.0
+ *
+ * @constructs wp.media.controller.CustomizeImageCropper
+ * @memberOf wp.media.controller
+ * @augments Controller.Cropper
+ * @augments Controller.State
+ * @augments Backbone.Model
+ * @inheritDoc
+ */
+CustomizeImageCropper = Controller.Cropper.extend(/** @lends wp.media.controller.CustomizeImageCropper.prototype */{
+	/**
+	 * Posts the crop details to the admin.
+	 *
+	 * Uses crop measurements when flexible in both directions.
+	 * Constrains flexible side based on image ratio and size of the fixed side.
+	 *
+	 * @param {Object} attachment The attachment to crop.
+	 *
+	 * @returns {$.promise} A jQuery promise that represents the crop image request.
+	 */
 	doCrop: function( attachment ) {
 		var cropDetails = attachment.get( 'cropDetails' ),
 			control = this.get( 'control' ),
