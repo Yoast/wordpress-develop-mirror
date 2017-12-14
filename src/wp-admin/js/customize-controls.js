@@ -3467,10 +3467,10 @@
 		 * @constructs wp.customize.Control
 		 * @augments   wp.customize.Class
 		 *
-		 * @borrows wp.customize~focus as focus
-		 * @borrows wp.customize~Container.prototype.activate as activate
-		 * @borrows wp.customize~Container.prototype.deactivate as deactivate
-		 * @borrows wp.customize~Container.prototype._toggleActive as _toggleActive
+		 * @borrows wp.customize~focus as this#focus
+		 * @borrows wp.customize~Container#activate as this#activate
+		 * @borrows wp.customize~Container#deactivate as this#deactivate
+		 * @borrows wp.customize~Container#_toggleActive as this#_toggleActive
 		 *
 		 * @param {string} id                       - Unique identifier for the control instance.
 		 * @param {object} options                  - Options hash for the control instance.
