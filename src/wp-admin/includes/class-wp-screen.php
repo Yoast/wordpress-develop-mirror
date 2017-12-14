@@ -1020,13 +1020,34 @@ final class WP_Screen {
 					update_user_meta( get_current_user_id(), 'show_welcome_panel', $welcome_checked );
 				} else {
 					$welcome_checked = get_user_meta( get_current_user_id(), 'show_welcome_panel', true );
-					if ( 2 == $welcome_checked && wp_get_current_user()->user_email != get_option( 'admin_email' ) ) {
+					if ( '' === $welcome_checked ) {
+						$welcome_checked = '1';
+					}
+					if ( '2' === $welcome_checked && wp_get_current_user()->user_email != get_option( 'admin_email' ) ) {
 						$welcome_checked = false;
 					}
 				}
 				echo '<label for="wp_welcome_panel-hide">';
 				echo '<input type="checkbox" id="wp_welcome_panel-hide"' . checked( (bool) $welcome_checked, true, false ) . ' />';
 				echo _x( 'Welcome', 'Welcome panel' ) . "</label>\n";
+			}
+
+			if ( 'dashboard' === $this->id && has_action( 'try_gutenberg_panel' ) ) {
+				if ( isset( $_GET['try_gutenberg'] ) ) {
+					$try_gutenberg_checked = empty( $_GET['try_gutenberg'] ) ? 0 : 1;
+					update_user_meta( get_current_user_id(), 'show_try_gutenberg_panel', $try_gutenberg_checked );
+				} else {
+					$try_gutenberg_checked = get_user_meta( get_current_user_id(), 'show_try_gutenberg_panel', true );
+					if ( '' === $try_gutenberg_checked ) {
+						$try_gutenberg_checked = '1';
+					}
+					if ( '2' === $try_gutenberg_checked && wp_get_current_user()->user_email != get_option( 'admin_email' ) ) {
+						$try_gutenberg_checked = false;
+					}
+				}
+				echo '<label for="wp_try_gutenberg_panel-hide">';
+				echo '<input type="checkbox" id="wp_try_gutenberg_panel-hide"' . checked( (bool) $try_gutenberg_checked, true, false ) . ' />';
+				echo __( 'New Editor' ) . "</label>\n";
 			}
 		?>
 		</fieldset>
@@ -1197,7 +1218,7 @@ final class WP_Screen {
 		 * @since 4.4.0
 		 *
 		 * @param array $view_mode_post_types Array of post types that can change view modes.
-		 *                                    Default hierarchical post types with show_ui on.
+		 *                                    Default non-hierarchical post types with show_ui on.
 		 */
 		$view_mode_post_types = apply_filters( 'view_mode_post_types', $view_mode_post_types );
 

@@ -28,7 +28,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	public $result;
 
 	/**
-	 * Whether a bulk upgrade/install is being performed.
+	 * Whether a bulk upgrade/installation is being performed.
 	 *
 	 * @since 3.7.0
 	 * @var bool $bulk
@@ -60,7 +60,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 		}
 
 		/*
-		 * Avoid messing with VCS installs, at least for now.
+		 * Avoid messing with VCS installations, at least for now.
 		 * Noted: this is not the ideal way to accomplish this.
 		 */
 		$check_vcs = new WP_Automatic_Updater;
@@ -112,7 +112,8 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 		$this->strings['starting_upgrade'] = __( 'Some of your translations need updating. Sit tight for a few more seconds while we update them as well.' );
 		$this->strings['up_to_date'] = __( 'The translations are up to date.' );
 		$this->strings['no_package'] = __( 'Update package not available.' );
-		$this->strings['downloading_package'] = __( 'Downloading translation from <span class="code">%s</span>&#8230;' );
+		/* translators: %s: package URL */
+		$this->strings['downloading_package'] = sprintf( __( 'Downloading translation from %s&#8230;' ), '<span class="code">%s</span>' );
 		$this->strings['unpack_package'] = __( 'Unpacking the update&#8230;' );
 		$this->strings['process_failed'] = __( 'Translation update failed.' );
 		$this->strings['process_success'] = __( 'Translation updated successfully.' );

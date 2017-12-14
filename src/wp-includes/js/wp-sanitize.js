@@ -32,13 +32,13 @@
 		 *
 		 * @return Sanitized text. False on failure.
 		 */
-		sanitizeText: function( text ) {
-			var _text = wp.utils.stripTags( text ),
+		stripTagsAndEncodeText: function( text ) {
+			var _text = wp.sanitize.stripTags( text ),
 				textarea = document.createElement( 'textarea' );
 
 			try {
 				textarea.innerHTML = _text;
-				_text = wp.utils.stripTags( textarea.value );
+				_text = wp.sanitize.stripTags( textarea.value );
 			} catch ( er ) {}
 
 			return _text;

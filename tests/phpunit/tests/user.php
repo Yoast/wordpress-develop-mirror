@@ -180,7 +180,7 @@ class Tests_User extends WP_UnitTestCase {
 		$this->assertEquals( 'foo', $user->$key );
 		$this->assertEquals( 'foo', $user->data->$key );  // This will fail with WP < 3.3
 
-		foreach ( (array) $user as $key => $value ) {
+		foreach ( get_object_vars( $user ) as $key => $value ) {
 			$this->assertEquals( $value, $user->$key );
 		}
 	}
@@ -358,7 +358,7 @@ class Tests_User extends WP_UnitTestCase {
 		// Test update of fields in _get_additional_user_keys()
 		$user_data = array(
 			'ID' => self::$author_id, 'use_ssl' => 1, 'show_admin_bar_front' => 1,
-			'rich_editing' => 1, 'first_name' => 'first', 'last_name' => 'last',
+			'rich_editing' => 1, 'syntax_highlighting' => 1, 'first_name' => 'first', 'last_name' => 'last',
 			'nickname' => 'nick', 'comment_shortcuts' => 'true', 'admin_color' => 'classic',
 			'description' => 'describe'
 		);
@@ -1136,6 +1136,140 @@ class Tests_User extends WP_UnitTestCase {
 
 		$this->assertTrue( $was_admin_email_sent );
 		$this->assertFalse( $was_user_email_sent );
+	}
+
+	/**
+	 * Ensure blog's admin email change notification emails do not contain encoded HTML entities
+	 * @ticket 40015
+	 */
+	function test_new_admin_email_notification_html_entities_decoded() {
+		reset_phpmailer_instance();
+
+		wp_set_current_user( self::$admin_id );
+
+		$existing_email = get_option( 'admin_email' );
+		$new_email = 'new-admin-email@test.dev';
+
+		// Give the site a name containing HTML entities
+		update_option( 'blogname', '&#039;Test&#039; blog&#039;s &quot;name&quot; has &lt;html entities&gt; &amp;' );
+
+		update_option_new_admin_email( $existing_email, $new_email );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$recipient = $mailer->get_recipient( 'to' );
+		$email = $mailer->get_sent();
+
+		// Assert reciepient is correct
+		$this->assertSame( $new_email, $recipient->address, 'Admin email change notification recipient not as expected' );
+
+		// Assert that HTML entites have been decode in body and subject
+		$this->assertContains( '\'Test\' blog\'s "name" has <html entities> &', $email->subject, 'Email subject does not contain the decoded HTML entities' );
+		$this->assertNotContains( '&#039;Test&#039; blog&#039;s &quot;name&quot; has &lt;html entities&gt; &amp;', $email->subject, $email->subject, 'Email subject does contains HTML entities' );
+	}
+
+	/**
+	 * A confirmation email should not be sent if the new admin email:
+	 * - Matches the existing admin email, or
+	 * - is not a valid email
+	 *
+	 * @dataProvider data_user_admin_email_confirmation_emails
+	 */
+	function test_new_admin_email_confirmation_not_sent_when_email_invalid( $email, $message ) {
+		reset_phpmailer_instance();
+
+		update_option_new_admin_email( get_option( 'admin_email' ), $email );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$this->assertFalse( $mailer->get_sent(), $message );
+	}
+
+	/**
+	 * Data provider for test_ms_new_admin_email_confirmation_not_sent_when_email_invalid().
+	 *
+	 * @return array {
+	 *     @type array {
+	 *         @type string $email   The new email for admin_email
+	 *         @type string $message An error message to display if the test fails
+	 *     }
+	 * }
+	 */
+	function data_user_admin_email_confirmation_emails() {
+		return array(
+			array(
+				get_option( 'admin_email' ),
+				'A confirmation email should not be sent if the current admin email matches the new email',
+			),
+			array(
+				'not an email',
+				'A confirmation email should not be sent if it is not a valid email',
+			)
+		);
+	}
+
+	/**
+	 * A confirmation email should not be sent if user's new email:
+	 * - Matches their existing email, or
+	 * - is not a valid email, or
+	 * - Matches another user's email
+	 *
+	 * @dataProvider data_user_change_email_confirmation_emails
+	 */
+	function test_profile_email_confirmation_not_sent_invalid_email( $email, $message ) {
+
+		$old_current = get_current_user_id();
+
+		$user_id = self::factory()->user->create( array(
+			'role'       => 'subscriber',
+			'user_email' => 'email@test.dev',
+		) );
+		wp_set_current_user( $user_id );
+
+		self::factory()->user->create( array(
+			'role'       => 'subscriber',
+			'user_email' => 'another-user@test.dev',
+		) );
+
+		reset_phpmailer_instance();
+
+		// Set $_POST['email'] with new email and $_POST['id'] with user's ID.
+		$_POST['user_id'] = $user_id;
+		$_POST['email'] = $email;
+		send_confirmation_on_profile_email();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$this->assertFalse( $mailer->get_sent(), $message );
+
+		wp_set_current_user( $old_current );
+	}
+
+	/**
+	 * Data provider for test_ms_profile_email_confirmation_not_sent_invalid_email().
+	 *
+	 * @return array {
+	 *     @type array {
+	 *         @type string $email   The user's new e-amil.
+	 *         @type string $message An error message to display if the test fails
+	 *     }
+	 * }
+	 */
+	function data_user_change_email_confirmation_emails() {
+		return array(
+			array(
+				'email@test.dev',
+				'Confirmation email should not be sent if it matches the user\'s existing email',
+			),
+			array(
+				'not an email',
+				'Confirmation email should not be sent if it is not a valid email',
+			),
+			array(
+				'another-user@test.dev',
+				'Confirmation email should not be sent if it matches another user\'s email',
+			),
+		);
 	}
 
 	/**

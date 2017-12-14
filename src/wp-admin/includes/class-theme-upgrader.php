@@ -45,7 +45,8 @@ class Theme_Upgrader extends WP_Upgrader {
 	public function upgrade_strings() {
 		$this->strings['up_to_date'] = __('The theme is at the latest version.');
 		$this->strings['no_package'] = __('Update package not available.');
-		$this->strings['downloading_package'] = __('Downloading update from <span class="code">%s</span>&#8230;');
+		/* translators: %s: package URL */
+		$this->strings['downloading_package'] = sprintf( __( 'Downloading update from %s&#8230;' ), '<span class="code">%s</span>' );
 		$this->strings['unpack_package'] = __('Unpacking the update&#8230;');
 		$this->strings['remove_old'] = __('Removing the old version of the theme&#8230;');
 		$this->strings['remove_old_failed'] = __('Could not remove the old theme.');
@@ -54,17 +55,18 @@ class Theme_Upgrader extends WP_Upgrader {
 	}
 
 	/**
-	 * Initialize the install strings.
+	 * Initialize the installation strings.
 	 *
 	 * @since 2.8.0
 	 */
 	public function install_strings() {
-		$this->strings['no_package'] = __('Install package not available.');
-		$this->strings['downloading_package'] = __('Downloading install package from <span class="code">%s</span>&#8230;');
+		$this->strings['no_package'] = __('Installation package not available.');
+		/* translators: %s: package URL */
+		$this->strings['downloading_package'] = sprintf( __( 'Downloading installation package from %s&#8230;' ), '<span class="code">%s</span>' );
 		$this->strings['unpack_package'] = __('Unpacking the package&#8230;');
 		$this->strings['installing_package'] = __('Installing the theme&#8230;');
 		$this->strings['no_files'] = __('The theme contains no files.');
-		$this->strings['process_failed'] = __('Theme install failed.');
+		$this->strings['process_failed'] = __('Theme installation failed.');
 		$this->strings['process_success'] = __('Theme installed successfully.');
 		/* translators: 1: theme name, 2: version */
 		$this->strings['process_success_specific'] = __('Successfully installed the theme <strong>%1$s %2$s</strong>.');
@@ -75,7 +77,8 @@ class Theme_Upgrader extends WP_Upgrader {
 		$this->strings['parent_theme_currently_installed'] = __('The parent theme, <strong>%1$s %2$s</strong>, is currently installed.');
 		/* translators: 1: theme name, 2: version */
 		$this->strings['parent_theme_install_success'] = __('Successfully installed the parent theme, <strong>%1$s %2$s</strong>.');
-		$this->strings['parent_theme_not_found'] = __('<strong>The parent theme could not be found.</strong> You will need to install the parent theme, <strong>%s</strong>, before you can use this child theme.');
+		/* translators: %s: theme name */
+		$this->strings['parent_theme_not_found'] = sprintf( __( '<strong>The parent theme could not be found.</strong> You will need to install the parent theme, %s, before you can use this child theme.' ), '<strong>%s</strong>' );
 	}
 
 	/**
@@ -110,7 +113,7 @@ class Theme_Upgrader extends WP_Upgrader {
 
 		if ( ! $api || is_wp_error($api) ) {
 			$this->skin->feedback( 'parent_theme_not_found', $theme_info->get('Template') );
-			// Don't show activate or preview actions after install
+			// Don't show activate or preview actions after installation
 			add_filter('install_theme_complete_actions', array($this, 'hide_activate_preview_actions') );
 			return $install_result;
 		}
@@ -180,7 +183,7 @@ class Theme_Upgrader extends WP_Upgrader {
 	 *                                    Default true.
 	 * }
 	 *
-	 * @return bool|WP_Error True if the install was successful, false or a WP_Error object otherwise.
+	 * @return bool|WP_Error True if the installation was successful, false or a WP_Error object otherwise.
 	 */
 	public function install( $package, $args = array() ) {
 

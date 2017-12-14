@@ -181,37 +181,38 @@ class WP_Users_List_Table extends WP_List_Table {
 		$avail_roles =& $users_of_blog['avail_roles'];
 		unset($users_of_blog);
 
-		$class = empty($role) ? ' class="current"' : '';
+		$current_link_attributes = empty( $role ) ? ' class="current" aria-current="page"' : '';
+
 		$role_links = array();
-		$role_links['all'] = "<a href='$url'$class>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_users, 'users' ), number_format_i18n( $total_users ) ) . '</a>';
+		$role_links['all'] = "<a href='$url'$current_link_attributes>" . sprintf( _nx( 'All <span class="count">(%s)</span>', 'All <span class="count">(%s)</span>', $total_users, 'users' ), number_format_i18n( $total_users ) ) . '</a>';
 		foreach ( $wp_roles->get_names() as $this_role => $name ) {
 			if ( !isset($avail_roles[$this_role]) )
 				continue;
 
-			$class = '';
+			$current_link_attributes = '';
 
 			if ( $this_role === $role ) {
-				$class = ' class="current"';
+				$current_link_attributes = ' class="current" aria-current="page"';
 			}
 
 			$name = translate_user_role( $name );
 			/* translators: User role name with count */
 			$name = sprintf( __('%1$s <span class="count">(%2$s)</span>'), $name, number_format_i18n( $avail_roles[$this_role] ) );
-			$role_links[$this_role] = "<a href='" . esc_url( add_query_arg( 'role', $this_role, $url ) ) . "'$class>$name</a>";
+			$role_links[$this_role] = "<a href='" . esc_url( add_query_arg( 'role', $this_role, $url ) ) . "'$current_link_attributes>$name</a>";
 		}
 
 		if ( ! empty( $avail_roles['none' ] ) ) {
 
-			$class = '';
+			$current_link_attributes = '';
 
 			if ( 'none' === $role ) {
-				$class = ' class="current"';
+				$current_link_attributes = ' class="current" aria-current="page"';
 			}
 
 			$name = __( 'No role' );
 			/* translators: User role name with count */
 			$name = sprintf( __('%1$s <span class="count">(%2$s)</span>'), $name, number_format_i18n( $avail_roles['none' ] ) );
-			$role_links['none'] = "<a href='" . esc_url( add_query_arg( 'role', 'none', $url ) ) . "'$class>$name</a>";
+			$role_links['none'] = "<a href='" . esc_url( add_query_arg( 'role', 'none', $url ) ) . "'$current_link_attributes>$name</a>";
 
 		}
 
