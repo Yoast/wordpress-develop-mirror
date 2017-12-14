@@ -2320,9 +2320,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Opens the crop image window.
-	 *
-	 * Shows the crop image window when called from the Add new image button.
+	 * Opens the crop image window. Shows the crop image window when called from the Add new image button.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2335,7 +2333,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Changes the state of the toolbar window to browse mode.
+	 * Changes the state of the toolbar window to browse mode.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2346,9 +2344,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Creates the crop image window.
-	 *
-	 * Initialized when clicking on the Select and Crop button.
+	 * Creates the crop image window. Initialized when clicking on the Select and Crop button.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2367,7 +2363,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Removes the image selection and closes the cropping window.
+	 * Removes the image selection and closes the cropping window.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2381,7 +2377,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Checks if cropping can be skipped and creates crop toolbar accordingly.
+	 * Checks if cropping can be skipped and creates crop toolbar accordingly.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2443,7 +2439,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Creates an object with the image attachment and crop properties.
+	 * Creates an object with the image attachment and crop properties.
 	 *
 	 * @since 4.2.0
 	 *

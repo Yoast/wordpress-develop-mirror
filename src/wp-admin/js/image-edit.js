@@ -1,8 +1,8 @@
 /* global imageEditL10n, ajaxurl, confirm */
 /**
- * @summary   The functions necessary for editing images.
+ * The functions necessary for editing images.
  *
- * @since     2.9.0
+ * @since 2.9.0
  */
 
 (function($) {
@@ -19,7 +19,7 @@
 	_view : false,
 
 	/**
-	 * @summary Converts a value to an integer.
+	 * Converts a value to an integer.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -37,8 +37,7 @@
 	},
 
 	/**
-	 * @summary Adds the disabled attribute and class to a single form element
-	 *          or a field set.
+	 * Adds the disabled attribute and class to a single form element or a field set.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -67,7 +66,7 @@
 	},
 
 	/**
-	 * @summary Initializes the image editor.
+	 * Initializes the image editor.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -110,7 +109,7 @@
 	},
 
 	/**
-	 * @summary Toggles the wait/load icon in the editor.
+	 * Toggles the wait/load icon in the editor.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -131,7 +130,7 @@
 	},
 
 	/**
-	 * @summary Shows or hides the image edit help box.
+	 * Shows or hides the image edit help box.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -150,7 +149,7 @@
 	},
 
 	/**
-	 * @summary Gets the value from the image edit target.
+	 * Gets the value from the image edit target.
 	 *
 	 * The image edit target contains the image sizes where the (possible) changes
 	 * have to be applied to.
@@ -168,7 +167,7 @@
 	},
 
 	/**
-	 * @summary Recalculates the height or width and keeps the original aspect ratio.
+	 * Recalculates the height or width and keeps the original aspect ratio.
 	 *
 	 * If the original image size is exceeded a red exclamation mark is shown.
 	 *
@@ -206,7 +205,7 @@
 	},
 
 	/**
-	 * @summary Gets the selected aspect ratio.
+	 * Gets the selected aspect ratio.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -232,7 +231,7 @@
 	},
 
 	/**
-	 * @summary Removes the last action from the image edit history
+	 * Removes the last action from the image edit history.
 	 * The history consist of (edit) actions performed on the image.
 	 *
 	 * @memberof imageEdit
@@ -296,7 +295,7 @@
 		return '';
 	},
 	/**
-	 * @summary Binds the necessary events to the image.
+	 * Binds the necessary events to the image.
 	 *
 	 * When the image source is reloaded the image will be reloaded.
 	 *
@@ -372,7 +371,7 @@
 			.attr('src', ajaxurl + '?' + $.param(data));
 	},
 	/**
-	 * @summary Performs an image edit action.
+	 * Performs an image edit action.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -439,7 +438,7 @@
 	},
 
 	/**
-	 * @summary Stores the changes that are made to the image.
+	 * Stores the changes that are made to the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -504,7 +503,7 @@
 	},
 
 	/**
-	 * @summary Creates the image edit window.
+	 * Creates the image edit window.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -561,7 +560,7 @@
 	},
 
 	/**
-	 * @summary Initializes the cropping tool and sets a default cropping selection.
+	 * Initializes the cropping tool and sets a default cropping selection.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -586,7 +585,7 @@
 	},
 
 	/**
-	 * @summary Initializes the cropping tool.
+	 * Initializes the cropping tool.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -612,7 +611,7 @@
 			minHeight: 3,
 
 			/**
-			 * @summary Sets the CSS styles and binds events for locking the aspect ratio.
+			 * Sets the CSS styles and binds events for locking the aspect ratio.
 			 *
 			 * @param {jQuery} img The preview image.
 			 */
@@ -623,7 +622,7 @@
 				$img.next().css( 'position', 'absolute' )
 					.nextAll( '.imgareaselect-outer' ).css( 'position', 'absolute' );
 				/**
-				 * @summary Binds mouse down event to the cropping container.
+				 * Binds mouse down event to the cropping container.
 				 *
 				 * @returns {void}
 				 */
@@ -643,7 +642,7 @@
 			},
 
 			/**
-			 * @summary Event triggered when starting a selection.
+			 * Event triggered when starting a selection.
 			 *
 			 * @returns {void}
 			 */
@@ -651,7 +650,7 @@
 				imageEdit.setDisabled($('#imgedit-crop-sel-' + postid), 1);
 			},
 			/**
-			 * @summary Event triggered when the selection is ended.
+			 * Event triggered when the selection is ended.
 			 *
 			 * @param {object} img jQuery object representing the image.
 			 * @param {object} c   The selection.
@@ -663,7 +662,7 @@
 			},
 
 			/**
-			 * @summary Event triggered when the selection changes.
+			 * Event triggered when the selection changes.
 			 *
 			 * @param {object} img jQuery object representing the image.
 			 * @param {object} c   The selection.
@@ -679,7 +678,7 @@
 	},
 
 	/**
-	 * @summary Stores the current crop selection.
+	 * Stores the current crop selection.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -710,7 +709,7 @@
 
 
 	/**
-	 * @summary Closes the image editor.
+	 * Closes the image editor.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -751,7 +750,7 @@
 	},
 
 	/**
-	 * @summary Checks if the image edit history is saved.
+	 * Checks if the image edit history is saved.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -775,7 +774,7 @@
 	},
 
 	/**
-	 * @summary Adds an image edit action to the history.
+	 * Adds an image edit action to the history.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -808,7 +807,7 @@
 	},
 
 	/**
-	 * @summary Rotates the image.
+	 * Rotates the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -829,7 +828,7 @@
 	},
 
 	/**
-	 * @summary Flips the image.
+	 * Flips the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -850,7 +849,7 @@
 	},
 
 	/**
-	 * @summary Crops the image.
+	 * Crops the image.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -879,7 +878,7 @@
 	},
 
 	/**
-	 * @summary Undoes an image edit action.
+	 * Undoes an image edit action.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0
@@ -942,7 +941,7 @@
 	},
 
 	/**
-	 * @summary Sets the selection for the height and width in pixels.
+	 * Sets the selection for the height and width in pixels.
 	 *
 	 * @memberof imageEdit
 	 * @since    2.9.0

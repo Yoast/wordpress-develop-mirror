@@ -3,8 +3,6 @@
 
 /**
  * Contains all dynamic functionality needed on post and term pages.
- *
- * @summary Control page and term functionality.
  */
 
 var commentsBox, WPSetThumbnailHTML, WPSetThumbnailID, WPRemoveThumbnail, wptitlehint, makeSlugeditClickable, editPermalink;
@@ -928,8 +926,6 @@ jQuery(document).ready( function($) {
 	/**
 	 * Handle the editing of the post_name. Create the required HTML elements and update the changes via AJAX.
 	 *
-	 * @summary Permalink aka slug aka post_name editing
-	 *
 	 * @global
 	 *
 	 * @returns void
@@ -1033,9 +1029,7 @@ jQuery(document).ready( function($) {
 	});
 
 	/**
-	 * Add screen reader text to the title prompt when needed.
-	 *
-	 * @summary Title screen reader text handler.
+	 * Adds screen reader text to the title prompt when needed.
 	 *
 	 * @param {string} id Optional. HTML ID to add the screen reader helper text to.
 	 *

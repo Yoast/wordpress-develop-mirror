@@ -1,7 +1,7 @@
 /* global ajaxurl, attachMediaBoxL10n, _wpMediaGridSettings, showNotice */
 
 /**
- * @summary Creates a dialog containing posts that can have a particular media attached to it.
+ * Creates a dialog containing posts that can have a particular media attached to it.
  *
  * @since 2.7.0
  *
@@ -15,8 +15,6 @@ var findPosts;
 ( function( $ ){
 	findPosts = {
 		/**
-		 * @summary Opens a dialog to attach media to a post.
-		 *
 		 * Adds an overlay prior to retrieving a list of posts to attach the media to.
 		 *
 		 * @since 2.7.0
@@ -59,7 +57,7 @@ var findPosts;
 		},
 
 		/**
-		 * @summary Clears the found posts lists before hiding the attach media dialog.
+		 * Clears the found posts lists before hiding the attach media dialog.
 		 *
 		 * @since 2.7.0
 		 *
@@ -74,7 +72,7 @@ var findPosts;
 		},
 
 		/**
-		 * @summary Binds a click event listener to the overlay which closes the attach media dialog.
+		 * Binds a click event listener to the overlay which closes the attach media dialog.
 		 *
 		 * @since 3.5.0
 		 *
@@ -89,7 +87,7 @@ var findPosts;
 		},
 
 		/**
-		 * @summary Retrieves and displays posts based on the search term.
+		 * Retrieves and displays posts based on the search term.
 		 *
 		 * Sends a post request to the admin_ajax.php, requesting posts based on the search term provided by the user.
 		 * Defaults to all posts if no search term is provided.
@@ -133,7 +131,7 @@ var findPosts;
 	};
 
 	/**
-	 * @summary Initializes the file once the DOM is fully loaded and attaches events to the various form elements.
+	 * Initializes the file once the DOM is fully loaded and attaches events to the various form elements.
 	 *
 	 * @returns {void}
 	 */
@@ -193,7 +191,7 @@ var findPosts;
 		});
 
 		/**
-		 * @summary Enables clicking on the entire table row.
+		 * Enables clicking on the entire table row.
 		 *
 		 * @returns {void}
 		 */
