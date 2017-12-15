@@ -79,6 +79,8 @@ var postboxes;
 			 * Contains a jQuery object with the relevant postbox element.
 			 *
 			 * @since 4.0.0
+			 * @ignore
+			 *
 			 * @event postboxes#postbox-toggled
 			 * @type {Object}
 			 */
@@ -131,6 +133,8 @@ var postboxes;
 			 * clicked this function will hide or show the relevant postboxes.
 			 *
 			 * @since 2.7.0
+			 * @ignore
+			 *
 			 * @fires postboxes#postbox-toggled
 			 *
 			 * @returns {void}
@@ -373,6 +377,8 @@ var postboxes;
 			 * Fires when the amount of columns on the post edit page has been changed.
 			 *
 			 * @since 4.0.0
+			 * @ignore
+			 *
 			 * @event postboxes#postboxes-columnchange
 			 */
 			$( document ).trigger( 'postboxes-columnchange' );
