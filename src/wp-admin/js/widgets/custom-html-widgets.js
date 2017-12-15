@@ -1,6 +1,11 @@
 /* global wp */
 /* eslint consistent-this: [ "error", "control" ] */
 /* eslint no-magic-numbers: ["error", { "ignore": [0,1,-1] }] */
+
+/**
+ * @namespace wp.customHtmlWidget
+ * @memberOf wp
+ */
 wp.customHtmlWidgets = ( function( $ ) {
 	'use strict';
 
@@ -15,14 +20,7 @@ wp.customHtmlWidgets = ( function( $ ) {
 		}
 	};
 
-	/**
-	 * Text widget control.
-	 *
-	 * @class CustomHtmlWidgetControl
-	 * @constructor
-	 * @abstract
-	 */
-	component.CustomHtmlWidgetControl = Backbone.View.extend({
+	component.CustomHtmlWidgetControl = Backbone.View.extend(/** @lends wp.customHtmlWidget.CustomHtmlWidgetControl.prototype */{
 
 		/**
 		 * View events.
@@ -32,11 +30,15 @@ wp.customHtmlWidgets = ( function( $ ) {
 		events: {},
 
 		/**
-		 * Initialize.
+		 * Text widget control.
+		 *
+		 * @constructs wp.customHtmlWidget.CustomHtmlWidgetControl
+		 * @abstract
 		 *
 		 * @param {Object} options - Options.
 		 * @param {jQuery} options.el - Control field container element.
 		 * @param {jQuery} options.syncContainer - Container element where fields are synced for the server.
+		 *
 		 * @returns {void}
 		 */
 		initialize: function initialize( options ) {
@@ -171,6 +173,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 				/**
 				 * Handle tabbing to the field before the editor.
 				 *
+				 * @ignore
+				 *
 				 * @returns {void}
 				 */
 				onTabPrevious: function onTabPrevious() {
@@ -179,6 +183,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 
 				/**
 				 * Handle tabbing to the field after the editor.
+				 *
+				 * @ignore
 				 *
 				 * @returns {void}
 				 */
@@ -190,6 +196,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 				/**
 				 * Disable save button and store linting errors for use in updateFields.
 				 *
+				 * @ignore
+				 *
 				 * @param {Array} errorAnnotations - Error notifications.
 				 * @returns {void}
 				 */
@@ -199,6 +207,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 
 				/**
 				 * Update error notice.
+				 *
+				 * @ignore
 				 *
 				 * @param {Array} errorAnnotations - Error annotations.
 				 * @returns {void}
@@ -259,6 +269,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 	/**
 	 * Mapping of widget ID to instances of CustomHtmlWidgetControl subclasses.
 	 *
+	 * @alias wp.customHtmlWidget.widgetControls
+	 *
 	 * @type {Object.<string, wp.textWidgets.CustomHtmlWidgetControl>}
 	 */
 	component.widgetControls = {};
@@ -266,8 +278,11 @@ wp.customHtmlWidgets = ( function( $ ) {
 	/**
 	 * Handle widget being added or initialized for the first time at the widget-added event.
 	 *
+	 * @alias wp.customHtmlWidget.handleWidgetAdded
+	 *
 	 * @param {jQuery.Event} event - Event.
 	 * @param {jQuery}       widgetContainer - Widget container element.
+	 *
 	 * @returns {void}
 	 */
 	component.handleWidgetAdded = function handleWidgetAdded( event, widgetContainer ) {
@@ -325,6 +340,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 	/**
 	 * Setup widget in accessibility mode.
 	 *
+	 * @alias wp.customHtmlWidget.setupAccessibleMode
+	 *
 	 * @returns {void}
 	 */
 	component.setupAccessibleMode = function setupAccessibleMode() {
@@ -358,6 +375,8 @@ wp.customHtmlWidgets = ( function( $ ) {
 	 * the widgets admin screen and also via the 'widget-synced' event when making
 	 * a change to a widget in the customizer.
 	 *
+	 * @alias wp.customHtmlWidget.handleWidgetUpdated
+	 *
 	 * @param {jQuery.Event} event - Event.
 	 * @param {jQuery}       widgetContainer - Widget container element.
 	 * @returns {void}
@@ -387,7 +406,10 @@ wp.customHtmlWidgets = ( function( $ ) {
 	 * When WordPress enqueues this script, it should have an inline script
 	 * attached which calls wp.textWidgets.init().
 	 *
+	 * @alias wp.customHtmlWidget.init
+	 *
 	 * @param {object} settings - Options for code editor, exported from PHP.
+	 *
 	 * @returns {void}
 	 */
 	component.init = function init( settings ) {

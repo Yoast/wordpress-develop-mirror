@@ -8,7 +8,7 @@ window.wp = window.wp || {};
 /**
  * Consists of functions relevant to the inline taxonomy editor.
  *
- * @namespace inlineEditTax
+ * @ignore
  *
  * @property {string} type The type of inline edit we are currently on.
  * @property {string} what The type property with a hash prefixed and a dash
