@@ -1064,7 +1064,19 @@ module.exports = function(grunt) {
 		'clean:tinymce'
 	] );
 
+	grunt.registerTask( 'build:npm-dist',
+		'builds the dist files for npm packages',
+		function() {
+			grunt.util.spawn({
+				cmd: 'sh',
+				args: [ 'tools/grunt/scripts/build-jquery-color.sh' ],
+				opts: {stdio: 'inherit'}
+			}, this.async());
+		}
+	);
+
 	grunt.registerTask( 'build:js', [
+		'build:npm-dist',
 		'clean:js',
 		'webpack:dev',
 		'copy:js',
