@@ -1095,6 +1095,7 @@ module.exports = function(grunt) {
 	] );
 
 	grunt.registerTask( 'build', [
+		'build:npm-dist',
 		'clean:all',
 		'webpack:dev',
 		'copy:all',
