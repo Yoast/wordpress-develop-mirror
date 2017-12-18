@@ -4,10 +4,10 @@ var path        	= require( 'path' ),
 	include_files 	= {};
 
 include_files = {
-	'build/wp-includes/js/media-audiovideo.js': ['./src/js/enqueues/wp/media/audiovideo.js'],
-	'build/wp-includes/js/media-grid.js': ['./src/js/enqueues/wp/media/grid.js'],
-	'build/wp-includes/js/media-models.js': ['./src/js/enqueues/wp/media/models.js'],
-	'build/wp-includes/js/media-views.js': ['./src/js/enqueues/wp/media/views.js'],
+	'build/wp-includes/js/media-audiovideo.js': ['./src/js/_enqueues/wp/media/audiovideo.js'],
+	'build/wp-includes/js/media-grid.js': ['./src/js/_enqueues/wp/media/grid.js'],
+	'build/wp-includes/js/media-models.js': ['./src/js/_enqueues/wp/media/models.js'],
+	'build/wp-includes/js/media-views.js': ['./src/js/_enqueues/wp/media/views.js'],
 };
 
 module.exports = [
