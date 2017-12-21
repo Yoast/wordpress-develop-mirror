@@ -1,10 +1,11 @@
 /* global wpActiveEditor, tinymce, QTags */
 
 /**
- * Updates the ThickBox anchor href and the ThickBox's own properties in order to set the size and position on every resize event.
- * Also adds a function to send HTML or text to the currently active editor.
+ * Makes sure the ThickBox dimensions are properly set and adds functionality to pass HTML to the editor.
  *
- * @summary Makes sure the ThickBox dimensions are properly set and adds functionality to pass HTML to the editor.
+ * Updates the ThickBox anchor href and the ThickBox's own properties in order
+ * to set the size and position on every resize event. Also adds a function to
+ * send HTML or text to the currently active editor.
  *
  * @since 2.3.3
  *
@@ -15,7 +16,7 @@
 var wpActiveEditor, send_to_editor;
 
 /**
- * @summary Sends the HTML passed in the parameters to TinyMCE.
+ * Sends the HTML passed in the parameters to TinyMCE.
  *
  * @since 2.3.3
  *
@@ -63,7 +64,7 @@ send_to_editor = function( html ) {
 var tb_position;
 (function($) {
 	/**
-	 * @summary Recalculates and applies the new ThickBox position based on the current window size.
+	 * Recalculates and applies the new ThickBox position based on the current window size.
 	 *
 	 * @since 2.6.0
 	 *
@@ -89,7 +90,7 @@ var tb_position;
 		}
 
 		/**
-		 * @summary Recalculates the new height and width for all links with a ThickBox class.
+		 * Recalculates the new height and width for all links with a ThickBox class.
 		 *
 		 * @since 2.6.0
 		 */
