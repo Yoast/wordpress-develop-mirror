@@ -2045,21 +2045,37 @@ EditImage = wp.media.controller.State.extend(/** @lends wp.media.controller.Edit
 	},
 
 	/**
+	 * Activates a frame for editing a featured image.
+	 *
 	 * @since 3.9.0
+	 *
+	 * @returns {void}
 	 */
 	activate: function() {
 		this.frame.on( 'toolbar:render:edit-image', _.bind( this.toolbar, this ) );
 	},
 
 	/**
+	 * Deactivates a frame for editing a featured image.
+	 *
 	 * @since 3.9.0
+	 *
+	 * @returns {void}
 	 */
 	deactivate: function() {
 		this.frame.off( 'toolbar:render:edit-image' );
 	},
 
 	/**
+	 * Adds a toolbar with a back button.
+	 *
+	 * When the back button is pressed it checks whether there is a previous state.
+	 * In case there is a previous state it sets that previous state otherwise it
+	 * closes the frame.
+	 *
 	 * @since 3.9.0
+	 *
+	 * @returns {void}
 	 */
 	toolbar: function() {
 		var frame = this.frame,
@@ -2320,8 +2336,6 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Opens the crop image window.
-	 *
 	 * Shows the crop image window when called from the Add new image button.
 	 *
 	 * @since 4.2.0
@@ -2335,7 +2349,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Changes the state of the toolbar window to browse mode.
+	 * Changes the state of the toolbar window to browse mode.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2346,7 +2360,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Creates the crop image window.
+	 * Creates the crop image window.
 	 *
 	 * Initialized when clicking on the Select and Crop button.
 	 *
@@ -2367,7 +2381,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Removes the image selection and closes the cropping window.
+	 * Removes the image selection and closes the cropping window.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2381,7 +2395,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Checks if cropping can be skipped and creates crop toolbar accordingly.
+	 * Checks if cropping can be skipped and creates crop toolbar accordingly.
 	 *
 	 * @since 4.2.0
 	 *
@@ -2443,7 +2457,7 @@ Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Croppe
 	},
 
 	/**
-	 * @summary Creates an object with the image attachment and crop properties.
+	 * Creates an object with the image attachment and crop properties.
 	 *
 	 * @since 4.2.0
 	 *
@@ -3725,7 +3739,8 @@ Post = Select.extend(/** @lends wp.media.view.MediaFrame.Post.prototype */{
 			requires: { selection: true },
 
 			/**
-			 * @callback
+			 * @ignore
+			 *
 			 * @fires wp.media.controller.State#insert
 			 */
 			click: function() {
