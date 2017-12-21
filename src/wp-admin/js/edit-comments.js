@@ -11,9 +11,11 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Extracts a number from a jQuery element.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param el jQuery element.
-	 * @returns {int}
+	 *
+	 * @returns {int} The number found in the given element.
 	 */
 	getCount = function(el) {
 		var n = parseInt( el.html().replace(/[^0-9]+/g, ''), 10 );
@@ -27,9 +29,11 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Injects a html element with a localized number string.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param el jQuery element.
 	 * @param n Number to be injected.
+	 *
 	 * @returns {void}
 	 */
 	updateCount = function(el, n) {
@@ -52,6 +56,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Updates the number of approved comments on a specific post and the filter bar.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param diff The amount to lower or raise the approved count with.
 	 * @param commentPostId The ID of the post to be updated.
@@ -103,6 +108,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Updates the number of comments in the filter bar.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param selector The jQuery selector for the element(s) to update.
 	 * @param diff The amount to lower or raise the count with.
@@ -123,6 +129,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Updates the comment count and the count of the comments that need moderation on the Dashboard.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param response Converts the internationalized comment to text.
 	 *
@@ -145,6 +152,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Updates the title of the document with the number of to be approved comments.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param diff The amount to lower or raise the number of to be approved comments with.
 	 *
@@ -187,6 +195,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Updates the number of pending comments on a specific post and the filter bar.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param diff The amount to lower or raise the pending count with.
 	 * @param commentPostId The ID of the post to be updated.
@@ -268,6 +277,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Updates the current total (stored in the _total hidden input).
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param {int} total Total number of comments.
 	 * @param {int} time Unix timestamp of response.
@@ -289,6 +299,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Called after dimming a list item.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
 	 * @param {object} r Response object
 	 * @param {object} settings Setting object
@@ -338,11 +349,12 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Executed before a list item is removed from the comments list.
 	 *
 	 * @since 4.4.0
+	 * @access private
 	 *
-	 * @param {object} settings Setting object.
+	 * @param {object} settings Settings object.
 	 * @param {element} list Comments table element.
 	 *
-	 * @returns {void}
+	 * @returns {object} The settings object.
 	 */
 	delBefore = function( settings, list ) {
 		var note, id, el, n, h, a, author,
