@@ -27,7 +27,6 @@ class WP_Tax_Query {
 	 * See WP_Tax_Query::__construct() for information on tax query arguments.
 	 *
 	 * @since 3.1.0
-	 * @access public
 	 * @var array
 	 */
 	public $queries = array();
@@ -36,7 +35,6 @@ class WP_Tax_Query {
 	 * The relation between the queries. Can be one of 'AND' or 'OR'.
 	 *
 	 * @since 3.1.0
-	 * @access public
 	 * @var string
 	 */
 	public $relation;
@@ -47,16 +45,17 @@ class WP_Tax_Query {
 	 * @since 3.2.0
 	 *
 	 * @static
-	 * @access private
 	 * @var string
 	 */
-	private static $no_results = array( 'join' => array( '' ), 'where' => array( '0 = 1' ) );
+	private static $no_results = array(
+		'join'  => array( '' ),
+		'where' => array( '0 = 1' ),
+	);
 
 	/**
 	 * A flat list of table aliases used in the JOIN clauses.
 	 *
 	 * @since 4.1.0
-	 * @access protected
 	 * @var array
 	 */
 	protected $table_aliases = array();
@@ -68,7 +67,6 @@ class WP_Tax_Query {
 	 * number of places by WP_Query.
 	 *
 	 * @since 4.1.0
-	 * @access public
 	 * @var array
 	 */
 	public $queried_terms = array();
@@ -77,7 +75,6 @@ class WP_Tax_Query {
 	 * Database table that where the metadata's objects are stored (eg $wpdb->users).
 	 *
 	 * @since 4.1.0
-	 * @access public
 	 * @var string
 	 */
 	public $primary_table;
@@ -86,7 +83,6 @@ class WP_Tax_Query {
 	 * Column in 'primary_table' that represents the ID of the object.
 	 *
 	 * @since 4.1.0
-	 * @access public
 	 * @var string
 	 */
 	public $primary_id_column;
@@ -96,7 +92,6 @@ class WP_Tax_Query {
 	 *
 	 * @since 3.1.0
 	 * @since 4.1.0 Added support for `$operator` 'NOT EXISTS' and 'EXISTS' values.
-	 * @access public
 	 *
 	 * @param array $tax_query {
 	 *     Array of taxonomy query clauses.
@@ -135,7 +130,6 @@ class WP_Tax_Query {
 	 * each first-order clause contains all the necessary keys from `$defaults`.
 	 *
 	 * @since 4.1.0
-	 * @access public
 	 *
 	 * @param array $queries Array of queries clauses.
 	 * @return array Sanitized array of query clauses.
@@ -144,10 +138,10 @@ class WP_Tax_Query {
 		$cleaned_query = array();
 
 		$defaults = array(
-			'taxonomy' => '',
-			'terms' => array(),
-			'field' => 'term_id',
-			'operator' => 'IN',
+			'taxonomy'         => '',
+			'terms'            => array(),
+			'field'            => 'term_id',
+			'operator'         => 'IN',
 			'include_children' => true,
 		);
 
@@ -155,12 +149,12 @@ class WP_Tax_Query {
 			if ( 'relation' === $key ) {
 				$cleaned_query['relation'] = $this->sanitize_relation( $query );
 
-			// First-order clause.
+				// First-order clause.
 			} elseif ( self::is_first_order_clause( $query ) ) {
 
-				$cleaned_clause = array_merge( $defaults, $query );
+				$cleaned_clause          = array_merge( $defaults, $query );
 				$cleaned_clause['terms'] = (array) $cleaned_clause['terms'];
-				$cleaned_query[] = $cleaned_clause;
+				$cleaned_query[]         = $cleaned_clause;
 
 				/*
 				 * Keep a copy of the clause in the flate
@@ -185,7 +179,7 @@ class WP_Tax_Query {
 					}
 				}
 
-			// Otherwise, it's a nested query, so we recurse.
+				// Otherwise, it's a nested query, so we recurse.
 			} elseif ( is_array( $query ) ) {
 				$cleaned_subquery = $this->sanitize_query( $query );
 
@@ -207,7 +201,6 @@ class WP_Tax_Query {
 	 * Sanitize a 'relation' operator.
 	 *
 	 * @since 4.1.0
-	 * @access public
 	 *
 	 * @param string $relation Raw relation key from the query argument.
 	 * @return string Sanitized relation ('AND' or 'OR').
@@ -232,7 +225,6 @@ class WP_Tax_Query {
 	 * @since 4.1.0
 	 *
 	 * @static
-	 * @access protected
 	 *
 	 * @param array $query Tax query arguments.
 	 * @return bool Whether the query clause is a first-order clause.
@@ -247,7 +239,6 @@ class WP_Tax_Query {
 	 * @since 3.1.0
 	 *
 	 * @static
-	 * @access public
 	 *
 	 * @param string $primary_table     Database table where the object being filtered is stored (eg wp_users).
 	 * @param string $primary_id_column ID column for the filtered object in $primary_table.
@@ -259,7 +250,7 @@ class WP_Tax_Query {
 	 * }
 	 */
 	public function get_sql( $primary_table, $primary_id_column ) {
-		$this->primary_table = $primary_table;
+		$this->primary_table     = $primary_table;
 		$this->primary_id_column = $primary_id_column;
 
 		return $this->get_sql_clauses();
@@ -272,7 +263,6 @@ class WP_Tax_Query {
 	 * is abstracted out to maintain parity with the other Query classes.
 	 *
 	 * @since 4.1.0
-	 * @access protected
 	 *
 	 * @return array {
 	 *     Array containing JOIN and WHERE SQL clauses to append to the main query.
@@ -287,7 +277,7 @@ class WP_Tax_Query {
 		 * To keep $this->queries unaltered, pass a copy.
 		 */
 		$queries = $this->queries;
-		$sql = $this->get_sql_for_query( $queries );
+		$sql     = $this->get_sql_for_query( $queries );
 
 		if ( ! empty( $sql['where'] ) ) {
 			$sql['where'] = ' AND ' . $sql['where'];
@@ -303,9 +293,8 @@ class WP_Tax_Query {
 	 * produce the properly nested SQL.
 	 *
 	 * @since 4.1.0
-	 * @access protected
 	 *
-	 * @param array $query Query to parse, passed by reference.
+	 * @param array $query Query to parse (passed by reference).
 	 * @param int   $depth Optional. Number of tree levels deep we currently are.
 	 *                     Used to calculate indentation. Default 0.
 	 * @return array {
@@ -328,7 +317,7 @@ class WP_Tax_Query {
 
 		$indent = '';
 		for ( $i = 0; $i < $depth; $i++ ) {
-			$indent .= "  ";
+			$indent .= '  ';
 		}
 
 		foreach ( $query as $key => &$clause ) {
@@ -350,7 +339,7 @@ class WP_Tax_Query {
 					}
 
 					$sql_chunks['join'] = array_merge( $sql_chunks['join'], $clause_sql['join'] );
-				// This is a subquery, so we recurse.
+					// This is a subquery, so we recurse.
 				} else {
 					$clause_sql = $this->get_sql_for_query( $clause, $depth + 1 );
 
@@ -385,11 +374,10 @@ class WP_Tax_Query {
 	 * Generate SQL JOIN and WHERE clauses for a "first-order" query clause.
 	 *
 	 * @since 4.1.0
-	 * @access public
 	 *
 	 * @global wpdb $wpdb The WordPress database abstraction object.
 	 *
-	 * @param array $clause       Query clause, passed by reference.
+	 * @param array $clause       Query clause (passed by reference).
 	 * @param array $parent_query Parent query array.
 	 * @return array {
 	 *     Array containing JOIN and WHERE SQL clauses to append to a first-order query.
@@ -414,7 +402,7 @@ class WP_Tax_Query {
 			return self::$no_results;
 		}
 
-		$terms = $clause['terms'];
+		$terms    = $clause['terms'];
 		$operator = strtoupper( $clause['operator'] );
 
 		if ( 'IN' == $operator ) {
@@ -431,7 +419,7 @@ class WP_Tax_Query {
 			 */
 			$alias = $this->find_compatible_table_alias( $clause, $parent_query );
 			if ( false === $alias ) {
-				$i = count( $this->table_aliases );
+				$i     = count( $this->table_aliases );
 				$alias = $i ? 'tt' . $i : $wpdb->term_relationships;
 
 				// Store the alias as part of a flat array to build future iterators.
@@ -444,7 +432,6 @@ class WP_Tax_Query {
 				$join .= $i ? " AS $alias" : '';
 				$join .= " ON ($this->primary_table.$this->primary_id_column = $alias.object_id)";
 			}
-
 
 			$where = "$alias.term_taxonomy_id $operator ($terms)";
 
@@ -481,14 +468,16 @@ class WP_Tax_Query {
 
 		} elseif ( 'NOT EXISTS' === $operator || 'EXISTS' === $operator ) {
 
-			$where = $wpdb->prepare( "$operator (
+			$where = $wpdb->prepare(
+				"$operator (
 				SELECT 1
 				FROM $wpdb->term_relationships
 				INNER JOIN $wpdb->term_taxonomy
 				ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
 				WHERE $wpdb->term_taxonomy.taxonomy = %s
 				AND $wpdb->term_relationships.object_id = $this->primary_table.$this->primary_id_column
-			)", $clause['taxonomy'] );
+			)", $clause['taxonomy']
+			);
 
 		}
 
@@ -511,7 +500,6 @@ class WP_Tax_Query {
 	 * clauses that are connected by the relation 'OR'.
 	 *
 	 * @since 4.1.0
-	 * @access protected
 	 *
 	 * @param array       $clause       Query clause.
 	 * @param array       $parent_query Parent query of $clause.
@@ -555,7 +543,6 @@ class WP_Tax_Query {
 	 * Validates a single query.
 	 *
 	 * @since 3.2.0
-	 * @access private
 	 *
 	 * @param array $query The single query. Passed by reference.
 	 */
@@ -578,12 +565,13 @@ class WP_Tax_Query {
 		if ( is_taxonomy_hierarchical( $query['taxonomy'] ) && $query['include_children'] ) {
 			$this->transform_query( $query, 'term_id' );
 
-			if ( is_wp_error( $query ) )
+			if ( is_wp_error( $query ) ) {
 				return;
+			}
 
 			$children = array();
 			foreach ( $query['terms'] as $term ) {
-				$children = array_merge( $children, get_term_children( $term, $query['taxonomy'] ) );
+				$children   = array_merge( $children, get_term_children( $term, $query['taxonomy'] ) );
 				$children[] = $term;
 			}
 			$query['terms'] = $children;
@@ -607,11 +595,13 @@ class WP_Tax_Query {
 	 *                                or 'term_id'. Default 'term_id'.
 	 */
 	public function transform_query( &$query, $resulting_field ) {
-		if ( empty( $query['terms'] ) )
+		if ( empty( $query['terms'] ) ) {
 			return;
+		}
 
-		if ( $query['field'] == $resulting_field )
+		if ( $query['field'] == $resulting_field ) {
 			return;
+		}
 
 		$resulting_field = sanitize_key( $resulting_field );
 

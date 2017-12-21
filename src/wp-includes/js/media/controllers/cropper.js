@@ -1,16 +1,18 @@
+var l10n = wp.media.view.l10n,
+	Cropper;
+
 /**
  * wp.media.controller.Cropper
  *
- * A state for cropping an image.
+ * A class for cropping an image when called from the header media customization panel.
+ *
+ * @memberOf wp.media.controller
  *
  * @class
  * @augments wp.media.controller.State
  * @augments Backbone.Model
  */
-var l10n = wp.media.view.l10n,
-	Cropper;
-
-Cropper = wp.media.controller.State.extend({
+Cropper = wp.media.controller.State.extend(/** @lends wp.media.controller.Cropper.prototype */{
 	defaults: {
 		id:          'cropper',
 		title:       l10n.cropImage,
@@ -24,16 +26,41 @@ Cropper = wp.media.controller.State.extend({
 		doCropArgs: {}
 	},
 
+	/**
+	 * Shows the crop image window when called from the Add new image button.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns {void}
+	 */
 	activate: function() {
 		this.frame.on( 'content:create:crop', this.createCropContent, this );
 		this.frame.on( 'close', this.removeCropper, this );
 		this.set('selection', new Backbone.Collection(this.frame._selection.single));
 	},
 
+	/**
+	 * Changes the state of the toolbar window to browse mode.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns {void}
+	 */
 	deactivate: function() {
 		this.frame.toolbar.mode('browse');
 	},
 
+	/**
+	 * Creates the crop image window.
+	 *
+	 * Initialized when clicking on the Select and Crop button.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @fires crop window
+	 *
+	 * @returns {void}
+	 */
 	createCropContent: function() {
 		this.cropperView = new wp.media.view.Cropper({
 			controller: this,
@@ -43,12 +70,28 @@ Cropper = wp.media.controller.State.extend({
 		this.frame.content.set(this.cropperView);
 
 	},
+
+	/**
+	 * Removes the image selection and closes the cropping window.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns {void}
+	 */
 	removeCropper: function() {
 		this.imgSelect.cancelSelection();
 		this.imgSelect.setOptions({remove: true});
 		this.imgSelect.update();
 		this.cropperView.remove();
 	},
+
+	/**
+	 * Checks if cropping can be skipped and creates crop toolbar accordingly.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns {void}
+	 */
 	createCropToolbar: function() {
 		var canSkipCrop, toolbarOptions;
 
@@ -104,6 +147,13 @@ Cropper = wp.media.controller.State.extend({
 		this.frame.toolbar.set( new wp.media.view.Toolbar(toolbarOptions) );
 	},
 
+	/**
+	 * Creates an object with the image attachment and crop properties.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns {$.promise} A jQuery promise with the custom header crop details.
+	 */
 	doCrop: function( attachment ) {
 		return wp.ajax.post( 'custom-header-crop', _.extend(
 			{},

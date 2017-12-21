@@ -1,20 +1,18 @@
 /* global tinymce, switchEditors */
 /* eslint consistent-this: [ "error", "control" ] */
+
+/**
+ * @namespace wp.textWidgets
+ */
 wp.textWidgets = ( function( $ ) {
 	'use strict';
 
 	var component = {
-		dismissedPointers: []
+		dismissedPointers: [],
+		idBases: [ 'text' ]
 	};
 
-	/**
-	 * Text widget control.
-	 *
-	 * @class TextWidgetControl
-	 * @constructor
-	 * @abstract
-	 */
-	component.TextWidgetControl = Backbone.View.extend({
+	component.TextWidgetControl = Backbone.View.extend(/** @lends wp.textWidgets.TextWidgetControl.prototype */{
 
 		/**
 		 * View events.
@@ -24,11 +22,16 @@ wp.textWidgets = ( function( $ ) {
 		events: {},
 
 		/**
-		 * Initialize.
+		 * Text widget control.
+		 *
+		 * @constructs wp.textWidgets.TextWidgetControl
+		 * @augments   Backbone.View
+		 * @abstract
 		 *
 		 * @param {Object} options - Options.
 		 * @param {jQuery} options.el - Control field container element.
 		 * @param {jQuery} options.syncContainer - Container element where fields are synced for the server.
+		 *
 		 * @returns {void}
 		 */
 		initialize: function initialize( options ) {
@@ -80,15 +83,15 @@ wp.textWidgets = ( function( $ ) {
 			// Sync input fields to hidden sync fields which actually get sent to the server.
 			_.each( control.fields, function( fieldInput, fieldName ) {
 				fieldInput.on( 'input change', function updateSyncField() {
-					var syncInput = control.syncContainer.find( 'input[type=hidden].' + fieldName );
-					if ( syncInput.val() !== $( this ).val() ) {
-						syncInput.val( $( this ).val() );
+					var syncInput = control.syncContainer.find( '.sync-input.' + fieldName );
+					if ( syncInput.val() !== fieldInput.val() ) {
+						syncInput.val( fieldInput.val() );
 						syncInput.trigger( 'change' );
 					}
 				});
 
 				// Note that syncInput cannot be re-used because it will be destroyed with each widget-updated event.
-				fieldInput.val( control.syncContainer.find( 'input[type=hidden].' + fieldName ).val() );
+				fieldInput.val( control.syncContainer.find( '.sync-input.' + fieldName ).val() );
 			});
 		},
 
@@ -144,11 +147,11 @@ wp.textWidgets = ( function( $ ) {
 			var control = this, syncInput;
 
 			if ( ! control.fields.title.is( document.activeElement ) ) {
-				syncInput = control.syncContainer.find( 'input[type=hidden].title' );
+				syncInput = control.syncContainer.find( '.sync-input.title' );
 				control.fields.title.val( syncInput.val() );
 			}
 
-			syncInput = control.syncContainer.find( 'input[type=hidden].text' );
+			syncInput = control.syncContainer.find( '.sync-input.text' );
 			if ( control.fields.text.is( ':visible' ) ) {
 				if ( ! control.fields.text.is( document.activeElement ) ) {
 					control.fields.text.val( syncInput.val() );
@@ -164,9 +167,56 @@ wp.textWidgets = ( function( $ ) {
 		 * @returns {void}
 		 */
 		initializeEditor: function initializeEditor() {
-			var control = this, changeDebounceDelay = 1000, id, textarea, restoreTextMode = false;
+			var control = this, changeDebounceDelay = 1000, id, textarea, triggerChangeIfDirty, restoreTextMode = false, needsTextareaChangeTrigger = false, previousValue;
 			textarea = control.fields.text;
 			id = textarea.attr( 'id' );
+			previousValue = textarea.val();
+
+			/**
+			 * Trigger change if dirty.
+			 *
+			 * @returns {void}
+			 */
+			triggerChangeIfDirty = function() {
+				var updateWidgetBuffer = 300; // See wp.customize.Widgets.WidgetControl._setupUpdateUI() which uses 250ms for updateWidgetDebounced.
+				if ( control.editor.isDirty() ) {
+
+					/*
+					 * Account for race condition in customizer where user clicks Save & Publish while
+					 * focus was just previously given to the editor. Since updates to the editor
+					 * are debounced at 1 second and since widget input changes are only synced to
+					 * settings after 250ms, the customizer needs to be put into the processing
+					 * state during the time between the change event is triggered and updateWidget
+					 * logic starts. Note that the debounced update-widget request should be able
+					 * to be removed with the removal of the update-widget request entirely once
+					 * widgets are able to mutate their own instance props directly in JS without
+					 * having to make server round-trips to call the respective WP_Widget::update()
+					 * callbacks. See <https://core.trac.wordpress.org/ticket/33507>.
+					 */
+					if ( wp.customize && wp.customize.state ) {
+						wp.customize.state( 'processing' ).set( wp.customize.state( 'processing' ).get() + 1 );
+						_.delay( function() {
+							wp.customize.state( 'processing' ).set( wp.customize.state( 'processing' ).get() - 1 );
+						}, updateWidgetBuffer );
+					}
+
+					if ( ! control.editor.isHidden() ) {
+						control.editor.save();
+					}
+				}
+
+				// Trigger change on textarea when it has changed so the widget can enter a dirty state.
+				if ( needsTextareaChangeTrigger && previousValue !== textarea.val() ) {
+					textarea.trigger( 'change' );
+					needsTextareaChangeTrigger = false;
+					previousValue = textarea.val();
+				}
+			};
+
+			// Just-in-time force-update the hidden input fields.
+			control.syncContainer.closest( '.widget' ).find( '[name=savewidget]:first' ).on( 'click', function onClickSaveButton() {
+				triggerChangeIfDirty();
+			});
 
 			/**
 			 * Build (or re-build) the visual editor.
@@ -174,7 +224,7 @@ wp.textWidgets = ( function( $ ) {
 			 * @returns {void}
 			 */
 			function buildEditor() {
-				var editor, triggerChangeIfDirty, onInit, showPointerElement;
+				var editor, onInit, showPointerElement;
 
 				// Abort building if the textarea is gone, likely due to the widget having been deleted entirely.
 				if ( ! document.getElementById( id ) ) {
@@ -184,7 +234,8 @@ wp.textWidgets = ( function( $ ) {
 				// The user has disabled TinyMCE.
 				if ( typeof window.tinymce === 'undefined' ) {
 					wp.editor.initialize( id, {
-						quicktags: true
+						quicktags: true,
+						mediaButtons: true
 					});
 
 					return;
@@ -196,11 +247,23 @@ wp.textWidgets = ( function( $ ) {
 					wp.editor.remove( id );
 				}
 
+				// Add or enable the `wpview` plugin.
+				$( document ).one( 'wp-before-tinymce-init.text-widget-init', function( event, init ) {
+					// If somebody has removed all plugins, they must have a good reason.
+					// Keep it that way.
+					if ( ! init.plugins ) {
+						return;
+					} else if ( ! /\bwpview\b/.test( init.plugins ) ) {
+						init.plugins += ',wpview';
+					}
+				} );
+
 				wp.editor.initialize( id, {
 					tinymce: {
 						wpautop: true
 					},
-					quicktags: true
+					quicktags: true,
+					mediaButtons: true
 				});
 
 				/**
@@ -230,7 +293,7 @@ wp.textWidgets = ( function( $ ) {
 
 					// If a prior mce instance was replaced, and it was in text mode, toggle to text mode.
 					if ( restoreTextMode ) {
-						switchEditors.go( id, 'toggle' );
+						switchEditors.go( id, 'html' );
 					}
 
 					// Show the pointer.
@@ -269,38 +332,19 @@ wp.textWidgets = ( function( $ ) {
 				}
 
 				control.editorFocused = false;
-				triggerChangeIfDirty = function() {
-					var updateWidgetBuffer = 300; // See wp.customize.Widgets.WidgetControl._setupUpdateUI() which uses 250ms for updateWidgetDebounced.
-					if ( editor.isDirty() ) {
 
-						/*
-						 * Account for race condition in customizer where user clicks Save & Publish while
-						 * focus was just previously given to to the editor. Since updates to the editor
-						 * are debounced at 1 second and since widget input changes are only synced to
-						 * settings after 250ms, the customizer needs to be put into the processing
-						 * state during the time between the change event is triggered and updateWidget
-						 * logic starts. Note that the debounced update-widget request should be able
-						 * to be removed with the removal of the update-widget request entirely once
-						 * widgets are able to mutate their own instance props directly in JS without
-						 * having to make server round-trips to call the respective WP_Widget::update()
-						 * callbacks. See <https://core.trac.wordpress.org/ticket/33507>.
-						 */
-						if ( wp.customize ) {
-							wp.customize.state( 'processing' ).set( wp.customize.state( 'processing' ).get() + 1 );
-							_.delay( function() {
-								wp.customize.state( 'processing' ).set( wp.customize.state( 'processing' ).get() - 1 );
-							}, updateWidgetBuffer );
-						}
-
-						editor.save();
-						textarea.trigger( 'change' );
-					}
-				};
-				editor.on( 'focus', function() {
+				editor.on( 'focus', function onEditorFocus() {
 					control.editorFocused = true;
 				});
+				editor.on( 'paste', function onEditorPaste() {
+					editor.setDirty( true ); // Because pasting doesn't currently set the dirty state.
+					triggerChangeIfDirty();
+				});
+				editor.on( 'NodeChange', function onNodeChange() {
+					needsTextareaChangeTrigger = true;
+				});
 				editor.on( 'NodeChange', _.debounce( triggerChangeIfDirty, changeDebounceDelay ) );
-				editor.on( 'blur', function() {
+				editor.on( 'blur hide', function onEditorBlur() {
 					control.editorFocused = false;
 					triggerChangeIfDirty();
 				});
@@ -315,6 +359,8 @@ wp.textWidgets = ( function( $ ) {
 	/**
 	 * Mapping of widget ID to instances of TextWidgetControl subclasses.
 	 *
+	 * @memberOf wp.textWidgets
+	 *
 	 * @type {Object.<string, wp.textWidgets.TextWidgetControl>}
 	 */
 	component.widgetControls = {};
@@ -322,16 +368,19 @@ wp.textWidgets = ( function( $ ) {
 	/**
 	 * Handle widget being added or initialized for the first time at the widget-added event.
 	 *
+	 * @memberOf wp.textWidgets
+	 *
 	 * @param {jQuery.Event} event - Event.
 	 * @param {jQuery}       widgetContainer - Widget container element.
+	 *
 	 * @returns {void}
 	 */
 	component.handleWidgetAdded = function handleWidgetAdded( event, widgetContainer ) {
-		var widgetForm, idBase, widgetControl, widgetId, animatedCheckDelay = 50, widgetInside, renderWhenAnimationDone, fieldContainer, syncContainer;
+		var widgetForm, idBase, widgetControl, widgetId, animatedCheckDelay = 50, renderWhenAnimationDone, fieldContainer, syncContainer;
 		widgetForm = widgetContainer.find( '> .widget-inside > .form, > .widget-inside > form' ); // Note: '.form' appears in the customizer, whereas 'form' on the widgets admin screen.
 
 		idBase = widgetForm.find( '> .id_base' ).val();
-		if ( 'text' !== idBase ) {
+		if ( -1 === component.idBases.indexOf( idBase ) ) {
 			return;
 		}
 
@@ -342,13 +391,13 @@ wp.textWidgets = ( function( $ ) {
 		}
 
 		// Bypass using TinyMCE when widget is in legacy mode.
-		if ( widgetForm.find( '.legacy' ).length > 0 ) {
+		if ( ! widgetForm.find( '.visual' ).val() ) {
 			return;
 		}
 
 		/*
 		 * Create a container element for the widget control fields.
-		 * This is inserted into the DOM immediately before the the .widget-content
+		 * This is inserted into the DOM immediately before the .widget-content
 		 * element because the contents of this element are essentially "managed"
 		 * by PHP, where each widget update cause the entire element to be emptied
 		 * and replaced with the rendered output of WP_Widget::form() which is
@@ -374,9 +423,8 @@ wp.textWidgets = ( function( $ ) {
 		 * This ensures that the textarea is visible and an iframe can be embedded
 		 * with TinyMCE being able to set contenteditable on it.
 		 */
-		widgetInside = widgetContainer.parent();
 		renderWhenAnimationDone = function() {
-			if ( widgetInside.is( ':animated' ) ) {
+			if ( ! widgetContainer.hasClass( 'open' ) ) {
 				setTimeout( renderWhenAnimationDone, animatedCheckDelay );
 			} else {
 				widgetControl.initializeEditor();
@@ -388,6 +436,8 @@ wp.textWidgets = ( function( $ ) {
 	/**
 	 * Setup widget in accessibility mode.
 	 *
+	 * @memberOf wp.textWidgets
+	 *
 	 * @returns {void}
 	 */
 	component.setupAccessibleMode = function setupAccessibleMode() {
@@ -398,12 +448,12 @@ wp.textWidgets = ( function( $ ) {
 		}
 
 		idBase = widgetForm.find( '> .widget-control-actions > .id_base' ).val();
-		if ( 'text' !== idBase ) {
+		if ( -1 === component.idBases.indexOf( idBase ) ) {
 			return;
 		}
 
 		// Bypass using TinyMCE when widget is in legacy mode.
-		if ( widgetForm.find( '.legacy' ).length > 0 ) {
+		if ( ! widgetForm.find( '.visual' ).val() ) {
 			return;
 		}
 
@@ -426,6 +476,8 @@ wp.textWidgets = ( function( $ ) {
 	 * the widgets admin screen and also via the 'widget-synced' event when making
 	 * a change to a widget in the customizer.
 	 *
+	 * @memberOf wp.textWidgets
+	 *
 	 * @param {jQuery.Event} event - Event.
 	 * @param {jQuery}       widgetContainer - Widget container element.
 	 * @returns {void}
@@ -435,7 +487,7 @@ wp.textWidgets = ( function( $ ) {
 		widgetForm = widgetContainer.find( '> .widget-inside > .form, > .widget-inside > form' );
 
 		idBase = widgetForm.find( '> .id_base' ).val();
-		if ( 'text' !== idBase ) {
+		if ( -1 === component.idBases.indexOf( idBase ) ) {
 			return;
 		}
 
@@ -454,6 +506,8 @@ wp.textWidgets = ( function( $ ) {
 	 * This function exists to prevent the JS file from having to boot itself.
 	 * When WordPress enqueues this script, it should have an inline script
 	 * attached which calls wp.textWidgets.init().
+	 *
+	 * @memberOf wp.textWidgets
 	 *
 	 * @returns {void}
 	 */

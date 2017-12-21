@@ -20,7 +20,6 @@ final class WP_oEmbed_Controller {
 	 * Register the oEmbed REST API route.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 */
 	public function register_routes() {
 		/**
@@ -32,67 +31,71 @@ final class WP_oEmbed_Controller {
 		 */
 		$maxwidth = apply_filters( 'oembed_default_width', 600 );
 
-		register_rest_route( 'oembed/1.0', '/embed', array(
-			array(
-				'methods'  => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_item' ),
-				'args'     => array(
-					'url'      => array(
-						'required'          => true,
-						'sanitize_callback' => 'esc_url_raw',
-					),
-					'format'   => array(
-						'default'           => 'json',
-						'sanitize_callback' => 'wp_oembed_ensure_format',
-					),
-					'maxwidth' => array(
-						'default'           => $maxwidth,
-						'sanitize_callback' => 'absint',
-					),
-				),
-			),
-		) );
-
-		register_rest_route( 'oembed/1.0', '/proxy', array(
-			array(
-				'methods'  => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_proxy_item' ),
-				'permission_callback' => array( $this, 'get_proxy_item_permissions_check' ),
-				'args'     => array(
-					'url'      => array(
-						'description'       => __( 'The URL of the resource for which to fetch oEmbed data.' ),
-						'type'              => 'string',
-						'required'          => true,
-						'sanitize_callback' => 'esc_url_raw',
-					),
-					'format'   => array(
-						'description'       => __( 'The oEmbed format to use.' ),
-						'type'              => 'string',
-						'default'           => 'json',
-						'enum'              => array(
-							'json',
-							'xml',
+		register_rest_route(
+			'oembed/1.0', '/embed', array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_item' ),
+					'args'     => array(
+						'url'      => array(
+							'required'          => true,
+							'sanitize_callback' => 'esc_url_raw',
+						),
+						'format'   => array(
+							'default'           => 'json',
+							'sanitize_callback' => 'wp_oembed_ensure_format',
+						),
+						'maxwidth' => array(
+							'default'           => $maxwidth,
+							'sanitize_callback' => 'absint',
 						),
 					),
-					'maxwidth' => array(
-						'description'       => __( 'The maximum width of the embed frame in pixels.' ),
-						'type'              => 'integer',
-						'default'           => $maxwidth,
-						'sanitize_callback' => 'absint',
-					),
-					'maxheight' => array(
-						'description'       => __( 'The maximum height of the embed frame in pixels.' ),
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-					),
-					'discover' => array(
-						'description'       => __( 'Whether to perform an oEmbed discovery request for non-whitelisted providers.' ),
-						'type'              => 'boolean',
-						'default'           => true,
+				),
+			)
+		);
+
+		register_rest_route(
+			'oembed/1.0', '/proxy', array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_proxy_item' ),
+					'permission_callback' => array( $this, 'get_proxy_item_permissions_check' ),
+					'args'                => array(
+						'url'       => array(
+							'description'       => __( 'The URL of the resource for which to fetch oEmbed data.' ),
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'esc_url_raw',
+						),
+						'format'    => array(
+							'description' => __( 'The oEmbed format to use.' ),
+							'type'        => 'string',
+							'default'     => 'json',
+							'enum'        => array(
+								'json',
+								'xml',
+							),
+						),
+						'maxwidth'  => array(
+							'description'       => __( 'The maximum width of the embed frame in pixels.' ),
+							'type'              => 'integer',
+							'default'           => $maxwidth,
+							'sanitize_callback' => 'absint',
+						),
+						'maxheight' => array(
+							'description'       => __( 'The maximum height of the embed frame in pixels.' ),
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+						'discover'  => array(
+							'description' => __( 'Whether to perform an oEmbed discovery request for non-whitelisted providers.' ),
+							'type'        => 'boolean',
+							'default'     => true,
+						),
 					),
 				),
-			),
-		) );
+			)
+		);
 	}
 
 	/**
@@ -101,7 +104,6 @@ final class WP_oEmbed_Controller {
 	 * Returns the JSON object for the post.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|array oEmbed response data or WP_Error on failure.
@@ -132,7 +134,6 @@ final class WP_oEmbed_Controller {
 	 * Checks if current user can make a proxy oEmbed request.
 	 *
 	 * @since 4.8.0
-	 * @access public
 	 *
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
@@ -149,7 +150,6 @@ final class WP_oEmbed_Controller {
 	 * Returns the JSON object for the proxied item.
 	 *
 	 * @since 4.8.0
-	 * @access public
 	 *
 	 * @see WP_oEmbed::get_html()
 	 * @param WP_REST_Request $request Full data about the request.
@@ -161,7 +161,7 @@ final class WP_oEmbed_Controller {
 		// Serve oEmbed data from cache if set.
 		unset( $args['_wpnonce'] );
 		$cache_key = 'oembed_' . md5( serialize( $args ) );
-		$data = get_transient( $cache_key );
+		$data      = get_transient( $cache_key );
 		if ( ! empty( $data ) ) {
 			return $data;
 		}
