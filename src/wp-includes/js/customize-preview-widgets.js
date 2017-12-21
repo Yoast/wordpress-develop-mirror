@@ -7,9 +7,9 @@
  *
  * @namespace wp.customize.widgetsPreview
  *
- * @param {jQuery} $ The jQuery object.
- * @param {Object} _ The utilities library.
- * @param {Object} wp Current WordPress environment instance.
+ * @param {jQuery} $   The jQuery object.
+ * @param {Object} _   The utilities library.
+ * @param {Object} wp  Current WordPress environment instance.
  * @param {Object} api Information from the API.
  *
  * @returns {Object} Widget-related variables.
@@ -82,6 +82,7 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 	 *
 	 * @class
 	 * @augments wp.customize.selectiveRefresh.Partial
+	 *
 	 * @since 4.5.0
 	 */
 	self.WidgetPartial = api.selectiveRefresh.Partial.extend(/** @lends wp.customize.widgetsPreview.WidgetPartial.prototype */{
@@ -90,8 +91,9 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 * Initializes the widget partial.
 		 *
 		 * @since 4.5.0
-		 * @param {string} id The partial's ID.
-		 * @param {Object} options Options used to initialize the partial's instance.
+		 *
+		 * @param {string} id             The partial's ID.
+		 * @param {Object} options        Options used to initialize the partial's instance.
 		 * @param {Object} options.params The options parameters.
 		 *
 		 * @returns {void}
@@ -120,6 +122,8 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		/**
 		 * Refreshes the widget partial.
 		 *
+		 * @since 4.5.0
+		 *
 		 * @returns {Promise|void} Either a promise postponing the refresh, or void.
 		 */
 		refresh: function() {
@@ -137,7 +141,7 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		/**
 		 * Sends the widget-updated message to the parent so the spinner will get removed from the widget control.
 		 *
-		 * @inheritdoc
+		 * @inheritDoc
 		 * @param {wp.customize.selectiveRefresh.Placement} placement The placement function.
 		 *
 		 * @returns {void}
@@ -167,8 +171,9 @@ wp.customize.widgetsPreview = wp.customize.WidgetCustomizerPreview = (function( 
 		 * Initializes the sidebar partial.
 		 *
 		 * @since 4.5.0
-		 * @param {string} id The partial's ID.
-		 * @param {Object} options Options used to initialize the partial's instance.
+		 *
+		 * @param {string} id             The partial's ID.
+		 * @param {Object} options        Options used to initialize the partial's instance.
 		 * @param {Object} options.params The options parameters.
 		 *
 		 * @returns {void}
