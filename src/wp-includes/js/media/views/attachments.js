@@ -7,6 +7,8 @@ var View = wp.media.View,
  *
  * Represents the overview of attachments in the Media Library.
  *
+ * @since 4.2.0
+ *
  * @memberOf wp.media.view
  *
  * @class
@@ -25,10 +27,12 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	},
 
 	/**
+	 * Binds events to scrolling to trigger the scroll function.
+	 *
 	 * Binds events to the collection this view represents when adding or removing attachments
 	 * or resetting the entire collection.
 	 *
-	 * @summary Binds events to scrolling to trigger the scroll function.
+	 * @since 4.2.0
 	 *
 	 * @constructs
 	 * @memberof wp.media.view
@@ -117,10 +121,12 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	},
 
 	/**
+	 * Listens to the resizeEvent on the window.
+	 *
 	 * Listens to the resizeEvent on the window and adjusts the amount of columns accordingly.
 	 * First removes any existing event handlers to prevent duplicate listeners.
 	 *
-	 * @summary Listens to the resizeEvent on the window
+	 * @since 4.2.0
 	 *
 	 * @listens window:resize
 	 *
@@ -133,6 +139,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	/**
 	 * Focuses the first item in the collection.
 	 *
+	 * @since 4.2.0
+	 *
 	 * @returns {void}
 	 */
 	attachmentFocus: function() {
@@ -141,6 +149,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 
 	/**
 	 * Restores focus to the selected item in the collection.
+	 *
+	 * @since 4.2.0
 	 *
 	 * @returns {void}
 	 */
@@ -151,6 +161,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	/**
 	 * Event handler for arrow key presses.
 	 * Focuses the attachment in the direction of the used arrow key if it exists.
+	 *
+	 * @since 4.2.0
 	 *
 	 * @param {KeyboardEvent} event The keyboard event that triggered this function.
 	 *
@@ -202,6 +214,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	/**
 	 * Clears any set event handlers.
 	 *
+	 * @since 4.2.0
+	 *
 	 * @returns {void}
 	 */
 	dispose: function() {
@@ -215,10 +229,12 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	},
 
 	/**
+	 * Calculates the amount of columns.
+	 *
 	 * Calculates the amount of columns and sets it on the data-columns attribute
 	 * of .media-frame-content.
 	 *
-	 * @summary Calculates the amount of columns.
+	 * @since 4.2.0
 	 *
 	 * @returns {void}
 	 */
@@ -236,10 +252,12 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	},
 
 	/**
+	 * Initializes jQuery sortable on the list.
+	 *
 	 * Initializes jQuery sortable on the list if jQuery sortable exists and sortable has
 	 * been passed to the options.
 	 *
-	 * @summary Initializes jQuery sortable on the list.
+	 * @since 4.2.0
 	 *
 	 * @fires collection:reset
 	 *
@@ -311,6 +329,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	/**
 	 * Disables jQuery sortable if collection has a comparator or collection.orderby equals menuOrder.
 	 *
+	 * @since 4.2.0
+	 *
 	 * @returns {void}
 	 */
 	refreshSortable: function() {
@@ -328,6 +348,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	/**
 	 * Creates a new view for an attachment and adds it to _viewsByCid.
 	 *
+	 * @since 4.2.0
+	 *
 	 * @param {wp.media.model.Attachment} attachment
 	 *
 	 * @returns {wp.media.View} The created view.
@@ -344,10 +366,12 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	},
 
 	/**
+	 * Creates views for every attachment in collection.
+	 *
 	 * Creates views for every attachment in collection if the collection is not empty,
 	 * otherwise clears all views and loads more attachments.
 	 *
-	 * @summary Creates views for every attachment in collection.
+	 * @since 4.2.0
 	 *
 	 * @returns {void}
 	 */
@@ -363,6 +387,8 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 	/**
 	 * Triggers the scroll function to check if we should query for additional attachments right away.
 	 *
+	 * @since 4.2.0
+	 *
 	 * @returns {void}
 	 */
 	ready: function() {
@@ -371,10 +397,11 @@ Attachments = View.extend(/** @lends wp.media.view.Attachments.prototype */{
 
 	/**
 	 * Event handler for scroll events.
-	 * Shows the spinner if we're close to the bottom.
-	 * Loads more attachments from server if we're {refreshThreshold} times away from the bottom.
 	 *
-	 * @summary Event handler for scroll events.
+	 * Shows the spinner if we're close to the bottom. Loads more attachments from
+	 * server if we're {refreshThreshold} times away from the bottom.
+	 *
+	 * @since 4.2.0
 	 *
 	 * @returns {void}
 	 */
