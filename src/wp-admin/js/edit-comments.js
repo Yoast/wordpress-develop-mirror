@@ -8,7 +8,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	titleDiv, titleRegEx;
 
 	/**
-	 * @summary Extracts a number from a jQuery element.
+	 * Extracts a number from a jQuery element.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param el jQuery element.
 	 * @returns {int}
@@ -22,7 +24,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Injects a html element with a localized number string.
+	 * Injects a html element with a localized number string.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param el jQuery element.
 	 * @param n Number to be injected.
@@ -45,7 +49,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Updates the number of approved comments on a specific post and the filter bar.
+	 * Updates the number of approved comments on a specific post and the filter bar.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param diff The amount to lower or raise the approved count with.
 	 * @param commentPostId The ID of the post to be updated.
@@ -94,7 +100,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Updates the number of comments in the filter bar.
+	 * Updates the number of comments in the filter bar.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param selector The jQuery selector for the element(s) to update.
 	 * @param diff The amount to lower or raise the count with.
@@ -112,7 +120,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Updates the comment count and the count of the comments that need moderation on the Dashboard.
+	 * Updates the comment count and the count of the comments that need moderation on the Dashboard.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param response Converts the internationalized comment to text.
 	 *
@@ -132,7 +142,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Updates the title of the document with the number of to be approved comments.
+	 * Updates the title of the document with the number of to be approved comments.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param diff The amount to lower or raise the number of to be approved comments with.
 	 *
@@ -172,7 +184,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Updates the number of pending comments on a specific post and the filter bar.
+	 * Updates the number of pending comments on a specific post and the filter bar.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param diff The amount to lower or raise the pending count with.
 	 * @param commentPostId The ID of the post to be updated.
@@ -236,7 +250,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Initializes the comments list.
+	 * Initializes the comments list.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @returns {void}
 	 */
@@ -249,7 +265,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	pageInput = $('input[name="_page"]', '#comments-form');
 
 	/**
-	 * @summary Updates the current total (stored in the _total hidden input).
+	 * Updates the current total (stored in the _total hidden input).
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param {int} total Total number of comments.
 	 * @param {int} time Unix timestamp of response.
@@ -268,7 +286,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @summary Called after dimming a list item.
+	 * Called after dimming a list item.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param {object} r Response object
 	 * @param {object} settings Setting object
@@ -315,7 +335,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 
 	// Send current total, page, per_page and url
 	/**
-	 * @summary Executed before a list item is removed from the comments list.
+	 * Executed before a list item is removed from the comments list.
+	 *
+	 * @since 4.4.0
 	 *
 	 * @param {object} settings Setting object.
 	 * @param {element} list Comments table element.
@@ -382,7 +404,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 
 	// In admin-ajax.php, we send back the unix time stamp instead of 1 on success
 	/**
-	 * @summary Executed after a list item is removed from the comments list
+	 * Executed after a list item is removed from the comments list
+	 *
+	 * @since 3.5.0
 	 *
 	 * @param {object} r Response object
 	 * @param {object} settings Setting object
@@ -604,7 +628,11 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		}
 	};
 
-
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param ev
+	 */
 	refillTheExtraList = function(ev) {
 		var args = $.query.get(), total_pages = $('.total-pages').text(), per_page = $('input[name="_per_page"]', '#comments-form').val();
 
@@ -663,6 +691,9 @@ commentReply = {
 	act : '',
 	originalContent : '',
 
+	/**
+	 * @since 3.5.0
+	 */
 	init : function() {
 		var row = $('#replyrow');
 
@@ -693,6 +724,11 @@ commentReply = {
 		}); */
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param r
+	 */
 	addEvents : function(r) {
 		r.each(function() {
 			$(this).find('.column-comment > p').dblclick(function(){
@@ -701,12 +737,22 @@ commentReply = {
 		});
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param el
+	 */
 	toggle : function(el) {
 		if ( 'none' !== $( el ).css( 'display' ) && ( $( '#replyrow' ).parent().is('#com-reply') || window.confirm( adminCommentsL10n.warnQuickEdit ) ) ) {
 			$( el ).find( 'a.vim-q' ).click();
 		}
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @returns {boolean}
+	 */
 	revert : function() {
 
 		if ( $('#the-comment-list #replyrow').length < 1 )
@@ -719,6 +765,9 @@ commentReply = {
 		return false;
 	},
 
+	/**
+	 * @since 3.5.0
+	 */
 	close : function() {
 		var c, replyrow = $('#replyrow');
 
@@ -750,6 +799,14 @@ commentReply = {
 		this.originalContent = '';
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param comment_id
+	 * @param post_id
+	 * @param action
+	 * @returns {boolean}
+	 */
 	open : function(comment_id, post_id, action) {
 		var editRow, rowData, act, replyButton, editHeight,
 			t = this,
@@ -843,6 +900,11 @@ commentReply = {
 		return false;
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @returns {boolean}
+	 */
 	send : function() {
 		var post = {},
 			$errorNotice = $( '#replysubmit .error-notice' );
@@ -874,6 +936,12 @@ commentReply = {
 		return false;
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param xml
+	 * @returns {boolean}
+	 */
 	show : function(xml) {
 		var t = this, r, c, id, bg, pid;
 
@@ -937,6 +1005,11 @@ commentReply = {
 
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param r
+	 */
 	error : function(r) {
 		var er = r.statusText,
 			$errorNotice = $( '#replysubmit .notice-error' ),
@@ -953,6 +1026,11 @@ commentReply = {
 		}
 	},
 
+	/**
+	 * @since 3.5.0
+	 *
+	 * @param post_id
+	 */
 	addcomment: function(post_id) {
 		var t = this;
 
@@ -966,6 +1044,8 @@ commentReply = {
 	/**
 	 * Alert the user if they have unsaved changes on a comment that will be
 	 * lost if they proceed.
+	 *
+	 * @since 4.6.0
 	 *
 	 * @returns {boolean}
 	 */
