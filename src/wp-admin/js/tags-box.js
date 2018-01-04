@@ -8,8 +8,9 @@ var tagBox, array_unique_noempty;
 	var tagDelimiter = ( window.tagsSuggestL10n && window.tagsSuggestL10n.tagDelimiter ) || ',';
 
 	/**
-	 * @summary Filters all items from an array into a new array containing only the unique items.
+	 * Filters unique items and returns a new array.
 	 *
+	 * Filters all items from an array into a new array containing only the unique items.
 	 * This also excludes whitespace or empty values.
 	 *
 	 * @since 4.2.0
@@ -46,7 +47,7 @@ var tagBox, array_unique_noempty;
 	tagBox = {
 
 		/**
-		 * @summary Cleans up tags by removing redundant characters.
+		 * Cleans up tags by removing redundant characters.
 		 *
 		 * Converting the tag delimiter to commas and by removing extra spaces and commas.
 		 *
@@ -72,7 +73,7 @@ var tagBox, array_unique_noempty;
 		},
 
 		/**
-		 * @summary Parses tags and makes them editable.
+		 * Parses tags and makes them editable.
 		 *
 		 * @since 4.2.0
 		 * @memberOf tagBox
@@ -106,7 +107,7 @@ var tagBox, array_unique_noempty;
 		},
 
 		/**
-		 * @summary Creates clickable links, buttons and fields for adding or editing tags.
+		 * Creates clickable links, buttons and fields for adding or editing tags.
 		 *
 		 * @since 4.2.0
 		 * @memberOf tagBox
@@ -130,11 +131,9 @@ var tagBox, array_unique_noempty;
 			tagchecklist.empty();
 
 			/**
-			 * @summary Creates spans for every available tag and optionally adds a delete button.
-			 *
 			 * Creates a delete button if tag editing is enabled, before adding it to the tag list.
 			 *
-	 		 * @since 4.2.0
+			 * @since 4.2.0
 			 * @memberOf tagBox
 			 *
 			 * @param key The key value of the current tag.
@@ -165,7 +164,7 @@ var tagBox, array_unique_noempty;
 						'</button>' );
 
 					/**
-					 * @summary Handles the click and keypress event of a tag.
+					 * Handles the click and keypress event of a tag.
 					 *
 					 * Handles the click and keypress event when an event is called on a tag and re-parses the tags
 					 * in the tag box.
@@ -206,7 +205,7 @@ var tagBox, array_unique_noempty;
 		},
 
 		/**
-		 * @summary Flushes tags on save and on delete.
+		 * Flushes tags on save and on delete.
 		 *
 		 * Flushes the tags to a hidden field as a comma separated list on save.
 		 * Also ensures that the quick links are properly generated.
@@ -216,7 +215,7 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @param {Object} el The container HTML element.
 		 * @param {Object|boolean} a Is either a link from the tag cloud or a hard set boolean value.
-		 * @param {boolean} f Determines whether or not focus should be applied to the input field.
+		 * @param {Number|boolean} f Determines whether or not focus should be applied to the input field.
 		 *
 		 * @returns {boolean} Always returns false.
 		 */
@@ -257,8 +256,9 @@ var tagBox, array_unique_noempty;
 		},
 
 		/**
-		 * @summary Retrieves the available tags from the database and creates an interactive tagcloud.
+		 * Retrieves the available tags and creates a tagcloud.
 		 *
+		 * Retrieves the available tags from the database and creates an interactive tagcloud.
 		 * If a tag is clicked, the tagbox is flushed for the current taxonomy.
 		 *
 		 * @since 4.2.0
@@ -272,8 +272,9 @@ var tagBox, array_unique_noempty;
 			var tax = id.substr( id.indexOf('-') + 1 );
 
 			/**
-			 * @summary Handles the AJAX request and creates a tagcloud.
+			 * Creates a tagcloud based on the AJAX request.
 			 *
+			 * Handles the AJAX request and creates a tagcloud.
 			 * Also handles the flushing of the tagbox whenever an anchor or a tagcloud is clicked.
 			 *
 			 * @since 4.2.0
@@ -291,7 +292,7 @@ var tagBox, array_unique_noempty;
 				r = $( '<div id="tagcloud-' + tax + '" class="the-tagcloud">' + r + '</div>' );
 
 				/**
-				 * @summary Flushes the tagbox when an anchor is clicked.
+				 * Flushes the tagbox when an anchor is clicked.
 				 *
 				 * @since 4.2.0
 				 *
@@ -315,7 +316,7 @@ var tagBox, array_unique_noempty;
 		userAction: '',
 
 		/**
-		 * @summary Dispatches an audible message to screen readers.
+		 * Dispatches an audible message to screen readers.
 		 *
 		 * @since 4.7.0
 		 *
@@ -341,7 +342,7 @@ var tagBox, array_unique_noempty;
 		},
 
 		/**
-		 * @summary Initializes the tags box by setting up the links, buttons. Also adds event handling.
+		 * Initializes the tags box by setting up the links, buttons. Also adds event handling.
 		 *
 		 * This includes handling of pressing the enter key in the input field and the retrieval of tag suggestions.
 		 *
@@ -363,9 +364,9 @@ var tagBox, array_unique_noempty;
 			});
 
 			/**
-			 * Handles the flushing of the tagbox whenever the enter key is pressed in the new tag field.
+			 * Handles the flushing of the tagbox when adding a new tag.
 			 *
-			 * @summary Handles the flushing of the tagbox when adding a new tag.
+			 * Handles the flushing of the tagbox whenever the enter key is pressed in the new tag field.
 			 *
 			 * @since 4.2.0
 			 *
@@ -390,7 +391,7 @@ var tagBox, array_unique_noempty;
 			});
 
 			/**
-			 * @summary Flushes tags whenever the post is saved.
+			 * Flushes tags whenever the post is saved.
 			 *
 			 * @since 4.2.0
 			 *
@@ -403,7 +404,7 @@ var tagBox, array_unique_noempty;
 			});
 
 			/**
-			 * @summary Unbinds the click event and toggles siblings.
+			 * Unbinds the click event and toggles siblings.
 			 *
 			 * Unbinds the click event and toggles all sibling tagcloud elements when the tagcloud-link is clicked.
 			 *
