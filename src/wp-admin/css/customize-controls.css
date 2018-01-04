@@ -332,11 +332,6 @@ body.trashing #publish-settings {
 	margin-top: 10px;
 }
 
-.customize-control.customize-control-date_time .date-time-fields .date-input,
-.customize-control.customize-control-date_time .date-time-fields .date-time-separator {
-	float: left;
-	margin-right: 5px;
-}
 .customize-control.customize-control-date_time .date-time-fields .date-input.day {
 	margin-right: 0;
 }
@@ -361,16 +356,11 @@ body.trashing #publish-settings {
 	margin: 0;
 }
 
-.date-time-fields .date-time-separator {
-	line-height: 2;
-}
-
 .date-time-fields .time-row {
 	margin-top: 12px;
 }
 
 .date-time-fields .date-timezone {
-	float: left;
 	line-height: 2.2;
 	text-decoration: none;
 }
@@ -1675,6 +1665,12 @@ p.customize-section-description {
 	margin-right: 12px;
 }
 
+.theme-browser .theme.active .theme-actions,
+.wp-customizer .theme-browser .theme .theme-actions {
+	padding: 10px 15px;
+	box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
+}
+
 @media screen and ( max-width: 640px ) {
 	.customize-section-description-container + #customize-control-custom_css:last-child {
 		margin-right: 0;
@@ -2024,7 +2020,7 @@ p.customize-section-description {
 	display: none;
 }
 
-.themes-section-installed_themes .theme .notice-success {
+.themes-section-installed_themes .theme .notice-success:not(.updated-message) {
 	display: none; /* Hide "installed" notice on installed themes tab. */
 }
 
@@ -2096,21 +2092,6 @@ p.customize-section-description {
 
 #customize-controls h3.theme-name {
 	font-size: 15px;
-}
-
-.theme-id-container {
-	position: relative;
-}
-
-.theme-browser .theme.active .theme-actions,
-.wp-customizer .theme-browser .theme .theme-actions {
-	position: absolute;
-	top: 50%;
-	-webkit-transform: translateY(-50%);
-	transform: translateY(-50%);
-	right: 0;
-	padding: 10px 15px;
-	box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
 }
 
 #customize-controls .theme-overlay .theme-name {
@@ -2315,6 +2296,10 @@ p.customize-section-description {
 .wp-customizer.modal-open .control-panel-themes .filter-themes-count,
 .wp-customizer.modal-open .control-panel-themes .customize-themes-section-title.selected:after {
 	z-index: -1;
+}
+
+.wp-full-overlay.in-themes-panel.themes-panel-expanded #customize-controls .wp-full-overlay-sidebar-content {
+	overflow: visible;
 }
 
 .wp-customizer .theme-overlay .theme-backdrop {
@@ -2721,6 +2706,7 @@ body.adding-widget .add-new-widget:before,
 }
 
 #available-menu-items-search .search-icon:after,
+#available-widgets-filter .search-icon:after,
 .themes-filter-bar .search-icon:after {
 	content: "\f179";
 	font: normal 20px/1 dashicons;
@@ -2835,7 +2821,6 @@ body.adding-widget .add-new-widget:before,
 		width: 80px;
 	}
 
-	.date-time-fields .date-time-separator,
 	.date-time-fields .date-timezone {
 		line-height: 3.2;
 	}
@@ -2868,11 +2853,6 @@ body.adding-widget .add-new-widget:before,
 }
 
 @media screen and ( max-width: 640px ) {
-
-	.wp-full-overlay.expanded,
-	.outer-section-open .wp-full-overlay.expanded {
-		margin-left: 0;
-	}
 
 	/* when the sidebar is collapsed and switching to responsive view,
 	   bring it back see ticket #35220 */
@@ -2936,10 +2916,6 @@ body.adding-widget .add-new-widget:before,
 		display: block;
 	}
 
-	.wp-full-overlay.expanded {
-		margin-left: 300px;
-	}
-
 	.wp-core-ui.wp-customizer .button {
 		padding: 6px 14px;
 		line-height: normal;
@@ -2959,18 +2935,7 @@ body.adding-widget .add-new-widget:before,
 	body.adding-widget div#available-widgets,
 	body.adding-menu-items div#available-menu-items,
 	body.outer-section-open div#customize-sidebar-outer-content {
-		top: 46px;
-		left: 0;
-		z-index: 10;
 		width: 100%;
-	}
-
-	body.wp-customizer .wp-full-overlay.expanded #customize-sidebar-outer-content {
-		left: -100%;
-	}
-
-	body.wp-customizer.outer-section-open .wp-full-overlay.expanded #customize-sidebar-outer-content {
-		left: 0;
 	}
 
 	#available-widgets .customize-section-title,
@@ -3036,5 +3001,32 @@ body.adding-widget .add-new-widget:before,
 	.wp-customizer .theme-browser .theme .theme-actions {
 		padding: 9px 15px;
 		box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
+	}
+}
+
+@media screen and ( max-width: 600px ) {
+	.theme-browser .theme.active .theme-actions,
+	.wp-customizer .theme-browser .theme .theme-actions {
+		padding: 8px 15px;
+		box-shadow: none;
+	}
+
+	.wp-full-overlay.expanded {
+		margin-left: 0;
+	}
+
+	body.adding-widget div#available-widgets,
+	body.adding-menu-items div#available-menu-items,
+	body.outer-section-open div#customize-sidebar-outer-content {
+		top: 46px;
+		z-index: 10;
+	}
+
+	body.wp-customizer .wp-full-overlay.expanded #customize-sidebar-outer-content {
+		left: -100%;
+	}
+
+	body.wp-customizer.outer-section-open .wp-full-overlay.expanded #customize-sidebar-outer-content {
+		left: 0;
 	}
 }

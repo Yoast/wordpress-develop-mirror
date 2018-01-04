@@ -2,9 +2,6 @@
  * Functions for ajaxified updates, deletions and installs inside the WordPress admin.
  *
  * @version 4.2.0
- *
- * @package WordPress
- * @subpackage Administration
  */
 
 /* global pagenow */
@@ -38,7 +35,7 @@
 	 *
 	 * @since 4.2.0
 	 *
-	 * @type {object}
+	 * @namespace wp.updates
 	 */
 	wp.updates = {};
 
@@ -84,19 +81,19 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 Added `available` property to indicate whether credentials have been provided.
 	 *
-	 * @type {object} filesystemCredentials                    Holds filesystem credentials.
-	 * @type {object} filesystemCredentials.ftp                Holds FTP credentials.
-	 * @type {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
-	 * @type {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
-	 *                                                         Default empty string.
-	 * @type {object} filesystemCredentials.ssh                Holds SSH credentials.
-	 * @type {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
-	 * @type {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
-	 * @type {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
-	 * @type {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
-	 *                                                         Default 'false'.
+	 * @type {Object}
+	 * @property {Object} filesystemCredentials.ftp                Holds FTP credentials.
+	 * @property {string} filesystemCredentials.ftp.host           FTP host. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.username       FTP user name. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.password       FTP password. Default empty string.
+	 * @property {string} filesystemCredentials.ftp.connectionType Type of FTP connection. 'ssh', 'ftp', or 'ftps'.
+	 *                                                             Default empty string.
+	 * @property {Object} filesystemCredentials.ssh                Holds SSH credentials.
+	 * @property {string} filesystemCredentials.ssh.publicKey      The public key. Default empty string.
+	 * @property {string} filesystemCredentials.ssh.privateKey     The private key. Default empty string.
+	 * @property {string} filesystemCredentials.fsNonce            Filesystem credentials form nonce.
+	 * @property {bool}   filesystemCredentials.available          Whether filesystem credentials have been provided.
+	 *                                                             Default 'false'.
 	 */
 	wp.updates.filesystemCredentials = {
 		ftp:       {
@@ -128,7 +125,7 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @type {function} A function that lazily-compiles the template requested.
+	 * @type {function}
 	 */
 	wp.updates.adminNotice = wp.template( 'wp-updates-admin-notice' );
 
@@ -407,7 +404,6 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginSuccess`.
 	 *
-	 * @typedef {object} updatePluginSuccess
 	 * @param {object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin to be updated.
 	 * @param {string} response.plugin     Basename of the plugin to be updated.
@@ -452,7 +448,6 @@
 	 * @since 4.2.0
 	 * @since 4.6.0 More accurately named `updatePluginError`.
 	 *
-	 * @typedef {object} updatePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be updated.
 	 * @param {string}  response.plugin       Basename of the plugin to be updated.
@@ -574,7 +569,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installPluginSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -585,17 +579,9 @@
 
 		$message
 			.removeClass( 'updating-message' )
-			.addClass( 'updated-message installed' )
+			.addClass( 'updated-message installed button-disabled' )
 			.attr( 'aria-label', wp.updates.l10n.pluginInstalledLabel.replace( '%s', response.pluginName ) )
 			.text( wp.updates.l10n.pluginInstalled );
-
-		if ( $message.hasClass( 'button-primary' ) ) {
-			$message.addClass( 'button-primary-disabled' );
-		} else if ( $message.hasClass( 'button-secondary' ) ) {
-			$message.addClass( 'button-secondary-disabled' );
-		} else {
-			$message.addClass( 'button-disabled' );
-		}
 
 		wp.a11y.speak( wp.updates.l10n.installedMsg, 'polite' );
 
@@ -605,8 +591,7 @@
 			setTimeout( function() {
 
 				// Transform the 'Install' button into an 'Activate' button.
-				$message.removeClass( 'install-now installed button-primary-disabled button-secondary-disabled button-disabled updated-message' )
-					.addClass( 'activate-now button-primary' )
+				$message.removeClass( 'install-now installed button-disabled updated-message' ).addClass( 'activate-now button-primary' )
 					.attr( 'href', response.activateUrl )
 					.attr( 'aria-label', wp.updates.l10n.activatePluginLabel.replace( '%s', response.pluginName ) )
 					.text( wp.updates.l10n.activatePlugin );
@@ -619,7 +604,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installPluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -670,7 +654,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installImporterSuccess
 	 * @param {object} response             Response from the server.
 	 * @param {string} response.slug        Slug of the installed plugin.
 	 * @param {string} response.pluginName  Name of the installed plugin.
@@ -702,7 +685,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installImporterError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be installed.
 	 * @param {string=} response.pluginName   Optional. Name of the plugin to be installed.
@@ -777,8 +759,7 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deletePluginSuccess
-	 * @param {object} response            Response from the server.
+	 * @param {Object} response            Response from the server.
 	 * @param {string} response.slug       Slug of the plugin that was deleted.
 	 * @param {string} response.plugin     Base name of the plugin that was deleted.
 	 * @param {string} response.pluginName Name of the plugin that was deleted.
@@ -792,7 +773,11 @@
 				$pluginRow       = $( this ),
 				columnCount      = $form.find( 'thead th:not(.hidden), thead td' ).length,
 				pluginDeletedRow = wp.template( 'item-deleted-row' ),
-				/** @type {object} plugins Base names of plugins in their different states. */
+				/**
+				 * Plugins Base names of plugins in their different states.
+				 *
+				 * @type {Object}
+				 */
 				plugins          = settings.plugins;
 
 			// Add a success message after deleting a plugin.
@@ -867,7 +852,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deletePluginError
 	 * @param {object}  response              Response from the server.
 	 * @param {string}  response.slug         Slug of the plugin to be deleted.
 	 * @param {string}  response.plugin       Base name of the plugin to be deleted
@@ -946,12 +930,12 @@
 		} else if ( 'customize' === pagenow ) {
 
 			// Update the theme details UI.
-			$notice = $( '#update-theme' ).closest( '.notice' ).removeClass( 'notice-large' );
+			$notice = $( '[data-slug="' + args.slug + '"].notice' ).removeClass( 'notice-large' );
 
 			$notice.find( 'h3' ).remove();
 
 			// Add the top-level UI, and update both.
-			$notice = $notice.add( $( '#customize-control-theme-installed_' + args.slug ).find( '.update-message' ) );
+			$notice = $notice.add( $( '#customize-control-installed_theme_' + args.slug ).find( '.update-message' ) );
 			$notice = $notice.addClass( 'updating-message' ).find( 'p' );
 
 		} else {
@@ -980,7 +964,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} updateThemeSuccess
 	 * @param {object} response
 	 * @param {string} response.slug       Slug of the theme to be updated.
 	 * @param {object} response.theme      Updated theme.
@@ -997,10 +980,17 @@
 			$notice, newText;
 
 		if ( 'customize' === pagenow ) {
-			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container;
-		}
+			$theme = $( '.updating-message' ).siblings( '.theme-name' );
 
-		if ( 'themes-network' === pagenow ) {
+			if ( $theme.length ) {
+
+				// Update the version number in the row.
+				newText = $theme.html().replace( response.oldVersion, response.newVersion );
+				$theme.html( newText );
+			}
+
+			$notice = $( '.theme-info .notice' ).add( wp.customize.control( 'installed_theme_' + response.slug ).container.find( '.theme' ).find( '.update-message' ) );
+		} else if ( 'themes-network' === pagenow ) {
 			$notice = $theme.find( '.update-message' );
 
 			// Update the version number in the row.
@@ -1025,7 +1015,7 @@
 		$document.trigger( 'wp-theme-update-success', response );
 
 		// Show updated message after modal re-rendered.
-		if ( isModalOpen ) {
+		if ( isModalOpen && 'customize' !== pagenow ) {
 			$( '.theme-info .theme-author' ).after( wp.updates.adminNotice( updatedMessage ) );
 		}
 	};
@@ -1035,7 +1025,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} updateThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be updated.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1055,7 +1044,7 @@
 		}
 
 		if ( 'customize' === pagenow ) {
-			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container;
+			$theme = wp.customize.control( 'installed_theme_' + response.slug ).container.find( '.theme' );
 		}
 
 		if ( 'themes-network' === pagenow ) {
@@ -1121,7 +1110,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installThemeSuccess
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.customizeUrl URL to the Customizer for the just installed theme.
@@ -1172,7 +1160,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} installThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be installed.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1202,7 +1189,7 @@
 				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
 				$card   = $button.closest( '.theme' ).addClass( 'theme-install-failed' ).append( $message );
 			}
-			$( '.wp-full-overlay' ).removeClass( 'customize-loading' );
+			wp.customize.notifications.remove( 'theme_installing' );
 		} else {
 			if ( $document.find( 'body' ).hasClass( 'full-overlay-active' ) ) {
 				$button = $( '.theme-install[data-slug="' + response.slug + '"]' );
@@ -1270,7 +1257,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deleteThemeSuccess
 	 * @param {object} response      Response from the server.
 	 * @param {string} response.slug Slug of the theme that was deleted.
 	 */
@@ -1329,7 +1315,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} deleteThemeError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.slug         Slug of the theme to be deleted.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
@@ -1603,7 +1588,6 @@
 	 *
 	 * @since 4.6.0
 	 *
-	 * @typedef {object} maybeHandleCredentialError
 	 * @param {object} response              Response from the server.
 	 * @param {string} response.errorCode    Error code for the error that occurred.
 	 * @param {string} response.errorMessage The error that occurred.

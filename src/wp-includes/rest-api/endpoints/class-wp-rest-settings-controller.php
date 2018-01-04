@@ -35,21 +35,23 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 	 */
 	public function register_routes() {
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'args'                => array(),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base, array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'args'                => array(),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
 	}
 
@@ -139,7 +141,7 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 	public function update_item( $request ) {
 		$options = $this->get_registered_options();
 
-		$params  = $request->get_params();
+		$params = $request->get_params();
 
 		foreach ( $options as $name => $args ) {
 			if ( ! array_key_exists( $name, $params ) ) {
@@ -232,7 +234,7 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 				'default'     => isset( $args['default'] ) ? $args['default'] : null,
 			);
 
-			$rest_args['schema'] = array_merge( $default_schema, $rest_args['schema'] );
+			$rest_args['schema']      = array_merge( $default_schema, $rest_args['schema'] );
 			$rest_args['option_name'] = $name;
 
 			// Skip over settings that don't have a defined type in the schema.
@@ -247,6 +249,8 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 			if ( ! in_array( $rest_args['schema']['type'], array( 'number', 'integer', 'string', 'boolean', 'array', 'object' ), true ) ) {
 				continue;
 			}
+
+			$rest_args['schema'] = $this->set_additional_properties_to_false( $rest_args['schema'] );
 
 			$rest_options[ $rest_args['name'] ] = $rest_args;
 		}
@@ -272,7 +276,7 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 		);
 
 		foreach ( $options as $option_name => $option ) {
-			$schema['properties'][ $option_name ] = $option['schema'];
+			$schema['properties'][ $option_name ]                = $option['schema'];
 			$schema['properties'][ $option_name ]['arg_options'] = array(
 				'sanitize_callback' => array( $this, 'sanitize_callback' ),
 			);
@@ -300,5 +304,33 @@ class WP_REST_Settings_Controller extends WP_REST_Controller {
 			return $value;
 		}
 		return rest_parse_request_arg( $value, $request, $param );
+	}
+
+	/**
+	 * Recursively add additionalProperties = false to all objects in a schema.
+	 *
+	 * This is need to restrict properties of objects in settings values to only
+	 * registered items, as the REST API will allow additional properties by
+	 * default.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param array $schema The schema array.
+	 * @return array
+	 */
+	protected function set_additional_properties_to_false( $schema ) {
+		switch ( $schema['type'] ) {
+			case 'object':
+				foreach ( $schema['properties'] as $key => $child_schema ) {
+					$schema['properties'][ $key ] = $this->set_additional_properties_to_false( $child_schema );
+				}
+				$schema['additionalProperties'] = false;
+				break;
+			case 'array':
+				$schema['items'] = $this->set_additional_properties_to_false( $schema['items'] );
+				break;
+		}
+
+		return $schema;
 	}
 }

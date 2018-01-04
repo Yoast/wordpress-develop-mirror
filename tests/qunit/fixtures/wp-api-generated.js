@@ -12,6 +12,7 @@ mockedApiResponse.Schema = {
     "home": "http://example.org",
     "gmt_offset": "0",
     "timezone_string": "",
+    "permalink_structure": false,
     "namespaces": [
         "oembed/1.0",
         "wp/v2"
@@ -470,9 +471,6 @@ mockedApiResponse.Schema = {
                         },
                         "template": {
                             "required": false,
-                            "enum": [
-                                ""
-                            ],
                             "description": "The theme file to use to display the object.",
                             "type": "string"
                         },
@@ -653,9 +651,6 @@ mockedApiResponse.Schema = {
                         },
                         "template": {
                             "required": false,
-                            "enum": [
-                                ""
-                            ],
                             "description": "The theme file to use to display the object.",
                             "type": "string"
                         },
@@ -1058,9 +1053,6 @@ mockedApiResponse.Schema = {
                         },
                         "template": {
                             "required": false,
-                            "enum": [
-                                ""
-                            ],
                             "description": "The theme file to use to display the object.",
                             "type": "string"
                         }
@@ -1213,9 +1205,6 @@ mockedApiResponse.Schema = {
                         },
                         "template": {
                             "required": false,
-                            "enum": [
-                                ""
-                            ],
                             "description": "The theme file to use to display the object.",
                             "type": "string"
                         }
@@ -1577,9 +1566,6 @@ mockedApiResponse.Schema = {
                         },
                         "template": {
                             "required": false,
-                            "enum": [
-                                ""
-                            ],
                             "description": "The theme file to use to display the object.",
                             "type": "string"
                         },
@@ -1717,9 +1703,6 @@ mockedApiResponse.Schema = {
                         },
                         "template": {
                             "required": false,
-                            "enum": [
-                                ""
-                            ],
                             "description": "The theme file to use to display the object.",
                             "type": "string"
                         },
