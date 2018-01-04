@@ -1,3 +1,9 @@
+/**
+ * Contains functionality of the admin Comments page.
+ *
+ * @since 3.5.0
+ */
+
 /* global adminCommentsL10n, thousandsSeparator, list_args, QTags, ajaxurl, wpAjax */
 var setCommentsList, theList, theExtraList, commentReply;
 
@@ -419,6 +425,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * Executed after a list item is removed from the comments list
 	 *
 	 * @since 3.5.0
+	 * @access private
 	 *
 	 * @param {object} r Response object
 	 * @param {object} settings Setting object
@@ -641,9 +648,14 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	};
 
 	/**
-	 * @since 3.5.0
+	 * Retrieves additional comments to populate the extra list.
 	 *
-	 * @param ev
+	 * @since 3.5.0
+	 * @access private
+	 *
+	 * @param {bool} [ev] Reset the extra comments list if true.
+	 *
+	 * @returns {void}
 	 */
 	refillTheExtraList = function(ev) {
 		var args = $.query.get(), total_pages = $('.total-pages').text(), per_page = $('input[name="_per_page"]', '#comments-form').val();
@@ -704,6 +716,8 @@ commentReply = {
 	originalContent : '',
 
 	/**
+	 * Initialize the comment reply functionality.
+	 *
 	 * @since 3.5.0
 	 */
 	init : function() {
@@ -737,9 +751,17 @@ commentReply = {
 	},
 
 	/**
-	 * @since 3.5.0
+	 * Adds events given jquery object.
 	 *
-	 * @param r
+	 * This function will take a jquery object, and add double-click event handlers to it.
+	 * The double-click event will toggle the comment quick editor.
+	 *
+	 * @since 3.5.0
+	 * @access private
+	 *
+	 * @param {Object[]} r The jquery objects.
+	 *
+	 * @returns {void}
 	 */
 	addEvents : function(r) {
 		r.each(function() {
@@ -750,9 +772,14 @@ commentReply = {
 	},
 
 	/**
-	 * @since 3.5.0
+	 * Toggle the comment quick editor.
 	 *
-	 * @param el
+	 * @since 3.5.0
+	 * @access private
+	 *
+	 * @param {Element} el The element you want to toggle the quick editor on.
+	 *
+	 * @returns {void}
 	 */
 	toggle : function(el) {
 		if ( 'none' !== $( el ).css( 'display' ) && ( $( '#replyrow' ).parent().is('#com-reply') || window.confirm( adminCommentsL10n.warnQuickEdit ) ) ) {
@@ -761,9 +788,12 @@ commentReply = {
 	},
 
 	/**
-	 * @since 3.5.0
+	 * Cancel quick editing a comment.
 	 *
-	 * @returns {boolean}
+	 * @since 3.5.0
+	 * @access private
+	 *
+	 * @returns {boolean} Always false.
 	 */
 	revert : function() {
 
@@ -778,7 +808,12 @@ commentReply = {
 	},
 
 	/**
+	 * Close the quick editor.
+	 *
 	 * @since 3.5.0
+	 * @access private
+	 *
+	 * @returns {void}
 	 */
 	close : function() {
 		var c, replyrow = $('#replyrow');
@@ -812,12 +847,16 @@ commentReply = {
 	},
 
 	/**
-	 * @since 3.5.0
+	 * Open te quick editor.
 	 *
-	 * @param comment_id
-	 * @param post_id
-	 * @param action
-	 * @returns {boolean}
+	 * @since 3.5.0
+	 * @access private
+	 *
+	 * @param comment_id The comment id.
+	 * @param post_id The post id.
+	 * @param action The action to perform.
+	 *
+	 * @returns {boolean} Always false.
 	 */
 	open : function(comment_id, post_id, action) {
 		var editRow, rowData, act, replyButton, editHeight,
