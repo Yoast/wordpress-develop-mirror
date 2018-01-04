@@ -8,9 +8,7 @@ var Controller = wp.media.controller,
  *
  * @constructs wp.media.controller.CustomizeImageCropper
  * @memberOf wp.media.controller
- * @augments Controller.Cropper
- * @augments Controller.State
- * @augments Backbone.Model
+ * @augments wp.media.controller.CustomizeImageCropper.Cropper
  * @inheritDoc
  */
 CustomizeImageCropper = Controller.Cropper.extend(/** @lends wp.media.controller.CustomizeImageCropper.prototype */{
