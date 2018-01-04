@@ -15,6 +15,8 @@ var tagBox, array_unique_noempty;
 	 *
 	 * @since 4.2.0
 	 *
+	 * @global
+	 *
 	 * @param {Array} array The array to filter through.
 	 *
 	 * @returns {Array} A new array containing only the unique items.
@@ -136,8 +138,8 @@ var tagBox, array_unique_noempty;
 			 * @since 4.2.0
 			 * @memberOf tagBox
 			 *
-			 * @param key The key value of the current tag.
-			 * @param val The value of the current tag.
+			 * @param {string} key The key value of the current tag.
+			 * @param {string} val The value of the current tag.
 			 *
 			 * @returns {void}
 			 */
