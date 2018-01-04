@@ -20,6 +20,8 @@ CustomizeImageCropper = Controller.Cropper.extend(/** @lends wp.media.controller
 	 * Uses crop measurements when flexible in both directions.
 	 * Constrains flexible side based on image ratio and size of the fixed side.
 	 *
+	 * @since 4.3.0
+	 *
 	 * @param {Object} attachment The attachment to crop.
 	 *
 	 * @returns {$.promise} A jQuery promise that represents the crop image request.
