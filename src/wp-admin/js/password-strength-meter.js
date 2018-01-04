@@ -44,7 +44,8 @@ var passwordStrength;
 		/**
 		 * Builds an array of data that should be penalized.
 		 *
-		 * Builds an array of data that should be penalized, because it would lower the entropy of a password if it were used.
+		 * Certain words need to be penalaized because it would lower the entropy of a password if they were used.
+		 * The blacklist is based on user input fields such as username, first name, email etc.
 		 *
 		 * @since 3.7.0
 		 *
