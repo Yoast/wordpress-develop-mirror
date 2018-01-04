@@ -10,6 +10,8 @@ var passwordStrength;
 	 * Contains functions to determine the password strength.
 	 *
 	 * @since 3.7.0
+	 *
+	 * @namespace
 	 */
 	wp.passwordStrength = {
 		/**
@@ -46,7 +48,7 @@ var passwordStrength;
 		 *
 		 * @since 3.7.0
 		 *
-		 * @return {Array} The array of data to be blacklisted.
+		 * @returns {Array} The array of data to be blacklisted.
 		 */
 		userInputBlacklist : function() {
 			var i, userInputFieldsLength, rawValuesLength, currentField,
