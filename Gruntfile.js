@@ -96,7 +96,7 @@ module.exports = function(grunt) {
 							'!**/.{svn,git}/**', // Ignore version control directories.
 							'!wp-includes/version.php', // Exclude version.php
 							'!index.php', '!wp-admin/index.php',
-							'!build-index.php', '!wp-admin/build-index.php'
+							'!_index.php', '!wp-admin/_index.php'
 						],
 						dest: BUILD_DIR
 					},
@@ -105,8 +105,8 @@ module.exports = function(grunt) {
 						dest: BUILD_DIR
 					},
 					{
-						'build/index.php': ['src/build-index.php'],
-						'build/wp-admin/index.php': ['src/wp-admin/build-index.php']
+						'build/index.php': ['src/_index.php'],
+						'build/wp-admin/index.php': ['src/wp-admin/_index.php']
 					}
 				]
 			},
