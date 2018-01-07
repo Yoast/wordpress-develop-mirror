@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Note: this file exists only to remind developers to run WordPress from the
+ * build directory. For the real index.php that gets built and boots WordPress,
+ * please refer to _index.php.
+ */
+
 /** Define ABSPATH as this file's directory */
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
