@@ -21,7 +21,7 @@ wp_load_translations_early();
 // Die with an error message
 $die  = sprintf(
 		/* translators: %1$s: WordPress, %2$s: src, %3$s: build */
-			__( 'You seem to be running %1$s from the %2$s directory. %1$s needs to be build and run from the %3$s directory before we can get started.' ),
+			__( 'You seem to be running %1$s from the %2$s directory. %1$s needs to be built and run from the %3$s directory before we can get started.' ),
 			'WordPress',
 			'<code>src</code>',
 			'<code>build</code>'
@@ -34,7 +34,7 @@ $die .= '<p>' . sprintf(
 $die .= '<p><code>npm install && grunt build</code></p>';
 $die .= '<p>' . sprintf(
 	/* translators: %1$s: NPM URL, %2$s: Grunt URL */
-		__( 'This requires <a href="%1$s">NPM</a> and <a href="%2$s">Grunt</a>. Need more help? <a href="%3$s">We got it</a>.' ),
+		__( 'This requires <a href="%1$s">NPM</a> and <a href="%2$s">Grunt</a>. <a href="%3$s">Read more about setting up your local development environment</a>.' ),
 		'https://www.npmjs.com/',
 		'https://gruntjs.com/',
 		__( 'https://codex.wordpress.org/' )
