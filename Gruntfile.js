@@ -73,6 +73,7 @@ module.exports = function(grunt) {
 		},
 		clean: {
 			all: [BUILD_DIR],
+			js: [BUILD_DIR + 'wp-admin/js/', BUILD_DIR + 'wp-includes/js/'],
 			dynamic: {
 				dot: true,
 				expand: true,
@@ -91,23 +92,170 @@ module.exports = function(grunt) {
 						cwd: SOURCE_DIR,
 						src: [
 							'**',
-							'!wp-includes/js/media/**',
+							'!js/**', // JavaScript is extracted into separate copy tasks.
 							'!**/.{svn,git}/**', // Ignore version control directories.
-							// Ignore unminified versions of external libs we don't ship:
-							'!wp-includes/js/backbone.js',
-							'!wp-includes/js/underscore.js',
-							'!wp-includes/js/jquery/jquery.masonry.js',
-							'!wp-includes/js/jquery/ui/*.js',
-							'!wp-includes/js/tinymce/tinymce.js',
-							'!wp-includes/version.php' // Exclude version.php
+							'!wp-includes/version.php', // Exclude version.php
+							'!index.php', '!wp-admin/index.php',
+							'!_index.php', '!wp-admin/_index.php'
 						],
 						dest: BUILD_DIR
 					},
 					{
 						src: 'wp-config-sample.php',
 						dest: BUILD_DIR
+					},
+					{
+						'build/index.php': ['src/_index.php'],
+						'build/wp-admin/index.php': ['src/wp-admin/_index.php']
 					}
 				]
+			},
+			'npm-packages': {
+				files: {
+					'build/wp-includes/js/backbone.min.js': ['./node_modules/backbone/backbone-min.js'],
+					'build/wp-includes/js/hoverIntent.js': ['./node_modules/jquery-hoverintent/jquery.hoverIntent.js'],
+					'build/wp-includes/js/imagesloaded.min.js': ['./node_modules/imagesloaded/imagesloaded.pkgd.min.js'],
+					'build/wp-includes/js/jquery/jquery-migrate.min.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.min.js'],
+					'build/wp-includes/js/jquery/jquery.color.min.js': ['./node_modules/jquery-color/dist/jquery.color.plus-names.min.js'],
+					'build/wp-includes/js/jquery/jquery.form.min.js': ['./node_modules/jquery-form/dist/jquery.form.min.js'],
+					'build/wp-includes/js/jquery/jquery.js': ['./node_modules/jquery/dist/jquery.min.js'],
+					'build/wp-includes/js/masonry.min.js': ['./node_modules/masonry-layout/dist/masonry.pkgd.min.js'],
+					'build/wp-includes/js/twemoji.js': ['./node_modules/twemoji/2/twemoji.js'],
+					'build/wp-includes/js/underscore.min.js': ['./node_modules/underscore/underscore-min.js'],
+					'build/wp-includes/js/zxcvbn.min.js': ['./node_modules/zxcvbn/dist/zxcvbn.js'],
+				}
+			},
+			'vendor-js': {
+				files: [
+					{
+						expand: true,
+						cwd: SOURCE_DIR + 'js/_enqueues/vendor/',
+						src: [
+							'**/*',
+							'!farbtastic.js',
+							'!iris.min.js',
+							'!jquery*',
+							'!deprecated/**',
+							'!README.md',
+							// Ignore unminified version of vendor lib we don't ship.
+							'!tinymce/tinymce.js'
+						],
+						dest: 'build/wp-includes/js/'
+					},
+					{
+						expand: true,
+						cwd: SOURCE_DIR + 'js/_enqueues/vendor/',
+						src: [
+							'farbtastic.js',
+							'iris.min.js'
+						],
+						dest: 'build/wp-admin/js/'
+					},
+					{
+						expand: true,
+						cwd: SOURCE_DIR + 'js/_enqueues/vendor/',
+						src: [
+							'jquery*',
+							// Ignore unminified version of vendor lib we don't ship.
+							'!jquery.table-hotkeys.js'
+						],
+						dest: 'build/wp-includes/js/jquery/'
+					},
+				]
+			},
+			'admin-js': {
+				files: {
+					'build/wp-admin/js/accordion.js': ['./src/js/_enqueues/lib/accordion.js'],
+					'build/wp-admin/js/code-editor.js': ['./src/js/_enqueues/wp/code-editor.js'],
+					'build/wp-admin/js/color-picker.js': ['./src/js/_enqueues/lib/color-picker.js'],
+					'build/wp-admin/js/comment.js': ['./src/js/_enqueues/admin/comment.js'],
+					'build/wp-admin/js/common.js': ['./src/js/_enqueues/admin/common.js'],
+					'build/wp-admin/js/custom-background.js': ['./src/js/_enqueues/admin/custom-background.js'],
+					'build/wp-admin/js/custom-header.js': ['./src/js/_enqueues/admin/custom-header.js'],
+					'build/wp-admin/js/customize-controls.js': ['./src/js/_enqueues/wp/customize/controls.js'],
+					'build/wp-admin/js/customize-nav-menus.js': ['./src/js/_enqueues/wp/customize/nav-menus.js'],
+					'build/wp-admin/js/customize-widgets.js': ['./src/js/_enqueues/wp/customize/widgets.js'],
+					'build/wp-admin/js/dashboard.js': ['./src/js/_enqueues/wp/dashboard.js'],
+					'build/wp-admin/js/edit-comments.js': ['./src/js/_enqueues/admin/edit-comments.js'],
+					'build/wp-admin/js/editor-expand.js': ['./src/js/_enqueues/wp/editor/dfw.js'],
+					'build/wp-admin/js/editor.js': ['./src/js/_enqueues/wp/editor/base.js'],
+					'build/wp-admin/js/gallery.js': ['./src/js/_enqueues/lib/gallery.js'],
+					'build/wp-admin/js/image-edit.js': ['./src/js/_enqueues/lib/image-edit.js'],
+					'build/wp-admin/js/inline-edit-post.js': ['./src/js/_enqueues/admin/inline-edit-post.js'],
+					'build/wp-admin/js/inline-edit-tax.js': ['./src/js/_enqueues/admin/inline-edit-tax.js'],
+					'build/wp-admin/js/language-chooser.js': ['./src/js/_enqueues/lib/language-chooser.js'],
+					'build/wp-admin/js/link.js': ['./src/js/_enqueues/admin/link.js'],
+					'build/wp-admin/js/media-gallery.js': ['./src/js/_enqueues/deprecated/media-gallery.js'],
+					'build/wp-admin/js/media-upload.js': ['./src/js/_enqueues/admin/media-upload.js'],
+					'build/wp-admin/js/media.js': ['./src/js/_enqueues/admin/media.js'],
+					'build/wp-admin/js/nav-menu.js': ['./src/js/_enqueues/lib/nav-menu.js'],
+					'build/wp-admin/js/password-strength-meter.js': ['./src/js/_enqueues/wp/password-strength-meter.js'],
+					'build/wp-admin/js/plugin-install.js': ['./src/js/_enqueues/admin/plugin-install.js'],
+					'build/wp-admin/js/post.js': ['./src/js/_enqueues/admin/post.js'],
+					'build/wp-admin/js/postbox.js': ['./src/js/_enqueues/admin/postbox.js'],
+					'build/wp-admin/js/revisions.js': ['./src/js/_enqueues/wp/revisions.js'],
+					'build/wp-admin/js/set-post-thumbnail.js': ['./src/js/_enqueues/admin/set-post-thumbnail.js'],
+					'build/wp-admin/js/svg-painter.js': ['./src/js/_enqueues/wp/svg-painter.js'],
+					'build/wp-admin/js/tags-box.js': ['./src/js/_enqueues/admin/tags-box.js'],
+					'build/wp-admin/js/tags-suggest.js': ['./src/js/_enqueues/admin/tags-suggest.js'],
+					'build/wp-admin/js/tags.js': ['./src/js/_enqueues/admin/tags.js'],
+					'build/wp-admin/js/theme-plugin-editor.js': ['./src/js/_enqueues/wp/theme-plugin-editor.js'],
+					'build/wp-admin/js/theme.js': ['./src/js/_enqueues/wp/theme.js'],
+					'build/wp-admin/js/updates.js': ['./src/js/_enqueues/wp/updates.js'],
+					'build/wp-admin/js/user-profile.js': ['./src/js/_enqueues/admin/user-profile.js'],
+					'build/wp-admin/js/user-suggest.js': ['./src/js/_enqueues/lib/user-suggest.js'],
+					'build/wp-admin/js/widgets/custom-html-widgets.js': ['./src/js/_enqueues/wp/widgets/custom-html.js'],
+					'build/wp-admin/js/widgets/media-audio-widget.js': ['./src/js/_enqueues/wp/widgets/media-audio.js'],
+					'build/wp-admin/js/widgets/media-gallery-widget.js': ['./src/js/_enqueues/wp/widgets/media-gallery.js'],
+					'build/wp-admin/js/widgets/media-image-widget.js': ['./src/js/_enqueues/wp/widgets/media-image.js'],
+					'build/wp-admin/js/widgets/media-video-widget.js': ['./src/js/_enqueues/wp/widgets/media-video.js'],
+					'build/wp-admin/js/widgets/media-widgets.js': ['./src/js/_enqueues/wp/widgets/media.js'],
+					'build/wp-admin/js/widgets/text-widgets.js': ['./src/js/_enqueues/wp/widgets/text.js'],
+					'build/wp-admin/js/widgets.js': ['./src/js/_enqueues/admin/widgets.js'],
+					'build/wp-admin/js/word-count.js': ['./src/js/_enqueues/wp/utils/word-count.js'],
+					'build/wp-admin/js/wp-fullscreen-stub.js': ['./src/js/_enqueues/deprecated/fullscreen-stub.js'],
+					'build/wp-admin/js/xfn.js': ['./src/js/_enqueues/admin/xfn.js']
+				}
+			},
+			'includes-js': {
+				files: {
+					'build/wp-includes/js/admin-bar.js': ['./src/js/_enqueues/lib/admin-bar.js'],
+					'build/wp-includes/js/api-request.js': ['./src/js/_enqueues/wp/api-request.js'],
+					'build/wp-includes/js/autosave.js': ['./src/js/_enqueues/wp/autosave.js'],
+					'build/wp-includes/js/comment-reply.js': ['./src/js/_enqueues/lib/comment-reply.js'],
+					'build/wp-includes/js/customize-base.js': ['./src/js/_enqueues/wp/customize/base.js'],
+					'build/wp-includes/js/customize-loader.js': ['./src/js/_enqueues/wp/customize/loader.js'],
+					'build/wp-includes/js/customize-models.js': ['./src/js/_enqueues/wp/customize/models.js'],
+					'build/wp-includes/js/customize-preview-nav-menus.js': ['./src/js/_enqueues/wp/customize/preview-nav-menus.js'],
+					'build/wp-includes/js/customize-preview-widgets.js': ['./src/js/_enqueues/wp/customize/preview-widgets.js'],
+					'build/wp-includes/js/customize-preview.js': ['./src/js/_enqueues/wp/customize/preview.js'],
+					'build/wp-includes/js/customize-selective-refresh.js': ['./src/js/_enqueues/wp/customize/selective-refresh.js'],
+					'build/wp-includes/js/customize-views.js': ['./src/js/_enqueues/wp/customize/views.js'],
+					'build/wp-includes/js/heartbeat.js': ['./src/js/_enqueues/wp/heartbeat.js'],
+					'build/wp-includes/js/mce-view.js': ['./src/js/_enqueues/wp/mce-view.js'],
+					'build/wp-includes/js/media-editor.js': ['./src/js/_enqueues/wp/media/editor.js'],
+					'build/wp-includes/js/quicktags.js': ['./src/js/_enqueues/lib/quicktags.js'],
+					'build/wp-includes/js/shortcode.js': ['./src/js/_enqueues/wp/shortcode.js'],
+					'build/wp-includes/js/utils.js': ['./src/js/_enqueues/lib/cookies.js'],
+					'build/wp-includes/js/wp-a11y.js': ['./src/js/_enqueues/wp/a11y.js'],
+					'build/wp-includes/js/wp-ajax-response.js': ['./src/js/_enqueues/lib/ajax-response.js'],
+					'build/wp-includes/js/wp-api.js': ['./src/js/_enqueues/wp/api.js'],
+					'build/wp-includes/js/wp-auth-check.js': ['./src/js/_enqueues/lib/auth-check.js'],
+					'build/wp-includes/js/wp-backbone.js': ['./src/js/_enqueues/wp/backbone.js'],
+					'build/wp-includes/js/wp-custom-header.js': ['./src/js/_enqueues/wp/custom-header.js'],
+					'build/wp-includes/js/wp-embed-template.js': ['./src/js/_enqueues/lib/embed-template.js'],
+					'build/wp-includes/js/wp-embed.js': ['./src/js/_enqueues/wp/embed.js'],
+					'build/wp-includes/js/wp-emoji-loader.js': ['./src/js/_enqueues/lib/emoji-loader.js'],
+					'build/wp-includes/js/wp-emoji.js': ['./src/js/_enqueues/wp/emoji.js'],
+					'build/wp-includes/js/wp-list-revisions.js': ['./src/js/_enqueues/lib/list-revisions.js'],
+					'build/wp-includes/js/wp-lists.js': ['./src/js/_enqueues/lib/lists.js'],
+					'build/wp-includes/js/wp-pointer.js': ['./src/js/_enqueues/lib/pointer.js'],
+					'build/wp-includes/js/wp-sanitize.js': ['./src/js/_enqueues/wp/sanitize.js'],
+					'build/wp-includes/js/wp-util.js': ['./src/js/_enqueues/wp/util.js'],
+					'build/wp-includes/js/wpdialog.js': ['./src/js/_enqueues/lib/dialog.js'],
+					'build/wp-includes/js/wplink.js': ['./src/js/_enqueues/lib/link.js'],
+					'build/wp-includes/js/zxcvbn-async.js': ['./src/js/_enqueues/lib/zxcvbn-async.js']
+				}
 			},
 			'wp-admin-css-compat-rtl': {
 				options: {
@@ -477,7 +625,7 @@ module.exports = function(grunt) {
 			},
 			core: {
 				expand: true,
-				cwd: SOURCE_DIR,
+				cwd: BUILD_DIR,
 				dest: BUILD_DIR,
 				ext: '.min.js',
 				src: [
@@ -491,14 +639,11 @@ module.exports = function(grunt) {
 					'wp-includes/js/tinymce/plugins/wp*/plugin.js',
 
 					// Exceptions
+					'!**/*.min.js',
 					'!wp-admin/js/custom-header.js', // Why? We should minify this.
 					'!wp-admin/js/farbtastic.js',
-					'!wp-admin/js/iris.min.js',
-					'!wp-includes/js/backbone.*',
-					'!wp-includes/js/masonry.min.js',
+					'!wp-includes/js/jquery/jquery.masonry.js',
 					'!wp-includes/js/swfobject.js',
-					'!wp-includes/js/underscore.*',
-					'!wp-includes/js/zxcvbn.min.js',
 					'!wp-includes/js/wp-embed.js' // We have extra options for this, see uglify:embed
 				]
 			},
@@ -509,22 +654,10 @@ module.exports = function(grunt) {
 					}
 				},
 				expand: true,
-				cwd: SOURCE_DIR,
+				cwd: BUILD_DIR,
 				dest: BUILD_DIR,
 				ext: '.min.js',
 				src: ['wp-includes/js/wp-embed.js']
-			},
-			media: {
-				expand: true,
-				cwd: SOURCE_DIR,
-				dest: BUILD_DIR,
-				ext: '.min.js',
-				src: [
-					'wp-includes/js/media-audiovideo.js',
-					'wp-includes/js/media-grid.js',
-					'wp-includes/js/media-models.js',
-					'wp-includes/js/media-views.js'
-				]
 			},
 			jqueryui: {
 				options: {
@@ -532,18 +665,18 @@ module.exports = function(grunt) {
 					preserveComments: /^!/
 				},
 				expand: true,
-				cwd: SOURCE_DIR,
-				dest: BUILD_DIR,
+				cwd: 'node_modules/jquery-ui/ui/',
+				dest: BUILD_DIR + 'wp-includes/js/jquery/ui/',
 				ext: '.min.js',
-				src: ['wp-includes/js/jquery/ui/*.js']
+				src: ['*.js']
 			},
 			masonry: {
 				options: {
 					// Preserve comments that start with a bang.
 					preserveComments: /^!/
 				},
-				src: SOURCE_DIR + 'wp-includes/js/jquery/jquery.masonry.js',
-				dest: SOURCE_DIR + 'wp-includes/js/jquery/jquery.masonry.min.js'
+				src: BUILD_DIR + 'wp-includes/js/jquery/jquery.masonry.js',
+				dest: BUILD_DIR + 'wp-includes/js/jquery/jquery.masonry.min.js'
 			}
 		},
 		webpack: {
@@ -714,6 +847,18 @@ module.exports = function(grunt) {
 					interval: 2000
 				}
 			},
+			js: {
+				files: [
+					SOURCE_DIR + 'js/**/*.js',
+					'webpack-dev.config.js'
+				],
+				tasks: ['build:js'],
+				options: {
+					dot: true,
+					spawn: false,
+					interval: 2000
+				}
+			},
 			config: {
 				files: [
 					'Gruntfile.js',
@@ -798,7 +943,6 @@ module.exports = function(grunt) {
 	grunt.registerTask( 'precommit:js', [
 		'webpack:prod',
 		'jshint:corejs',
-		'uglify:masonry',
 		'qunit:compiled'
 	] );
 
@@ -906,27 +1050,68 @@ module.exports = function(grunt) {
 		}
 	} );
 
+	grunt.registerTask( 'copy:js', [
+		'copy:npm-packages',
+		'copy:vendor-js',
+		'copy:admin-js',
+		'copy:includes-js'
+	] );
+
+	grunt.registerTask( 'uglify:all', [
+		'uglify:core',
+		'uglify:embed',
+		'uglify:jqueryui',
+		'uglify:masonry'
+	] );
+
+	grunt.registerTask( 'build:tinymce', [
+		'concat:tinymce',
+		'compress:tinymce',
+		'clean:tinymce'
+	] );
+
+	grunt.registerTask( 'build:npm-dist',
+		'builds the dist files for npm packages',
+		function() {
+			grunt.util.spawn({
+				cmd: 'sh',
+				args: [ 'tools/grunt/scripts/build-jquery-color.sh' ],
+				opts: {stdio: 'inherit'}
+			}, this.async());
+		}
+	);
+
+	grunt.registerTask( 'build:js', [
+		'build:npm-dist',
+		'clean:js',
+		'webpack:dev',
+		'copy:js',
+		'uglify:all',
+		'build:tinymce',
+		'concat:emoji',
+		'jsvalidate:build'
+	] );
+
 	grunt.registerTask( 'copy:all', [
 		'copy:files',
 		'copy:wp-admin-css-compat-rtl',
 		'copy:wp-admin-css-compat-min',
-		'copy:version'
+		'copy:version',
+		'copy:js'
 	] );
 
 	grunt.registerTask( 'build', [
+		'build:npm-dist',
 		'clean:all',
+		'webpack:dev',
 		'copy:all',
 		'cssmin:core',
 		'colors',
 		'rtl',
 		'cssmin:rtl',
 		'cssmin:colors',
-		'uglify:core',
-		'uglify:embed',
-		'uglify:jqueryui',
-		'concat:tinymce',
-		'compress:tinymce',
-		'clean:tinymce',
+		'uglify:all',
+		'build:tinymce',
 		'concat:emoji',
 		'includes:emoji',
 		'includes:embed',
