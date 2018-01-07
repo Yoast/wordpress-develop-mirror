@@ -94,13 +94,19 @@ module.exports = function(grunt) {
 							'**',
 							'!js/**', // JavaScript is extracted into separate copy tasks.
 							'!**/.{svn,git}/**', // Ignore version control directories.
-							'!wp-includes/version.php' // Exclude version.php
+							'!wp-includes/version.php', // Exclude version.php
+							'!index.php', '!wp-admin/index.php',
+							'!_index.php', '!wp-admin/_index.php'
 						],
 						dest: BUILD_DIR
 					},
 					{
 						src: 'wp-config-sample.php',
 						dest: BUILD_DIR
+					},
+					{
+						'build/index.php': ['src/_index.php'],
+						'build/wp-admin/index.php': ['src/wp-admin/_index.php']
 					}
 				]
 			},
