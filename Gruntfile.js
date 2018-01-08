@@ -115,6 +115,7 @@ module.exports = function(grunt) {
 					'build/wp-includes/js/backbone.min.js': ['./node_modules/backbone/backbone-min.js'],
 					'build/wp-includes/js/hoverIntent.js': ['./node_modules/jquery-hoverintent/jquery.hoverIntent.js'],
 					'build/wp-includes/js/imagesloaded.min.js': ['./node_modules/imagesloaded/imagesloaded.pkgd.min.js'],
+					'build/wp-includes/js/jquery/jquery-migrate.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.js'],
 					'build/wp-includes/js/jquery/jquery-migrate.min.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.min.js'],
 					'build/wp-includes/js/jquery/jquery.color.min.js': ['./node_modules/jquery-color/dist/jquery.color.plus-names.min.js'],
 					'build/wp-includes/js/jquery/jquery.form.min.js': ['./node_modules/jquery-form/dist/jquery.form.min.js'],
@@ -134,10 +135,11 @@ module.exports = function(grunt) {
 							'**/*',
 							'!farbtastic.js',
 							'!iris.min.js',
-							'!jquery*',
 							'!deprecated/**',
 							'!README.md',
 							// Ignore unminified version of vendor lib we don't ship.
+							'!jquery/jquery.masonry.js',
+							'!jquery/jquery.table-hotkeys.js',
 							'!tinymce/tinymce.js'
 						],
 						dest: 'build/wp-includes/js/'
@@ -153,11 +155,9 @@ module.exports = function(grunt) {
 					},
 					{
 						expand: true,
-						cwd: SOURCE_DIR + 'js/_enqueues/vendor/',
+						cwd: SOURCE_DIR + 'js/_enqueues/vendor/deprecated',
 						src: [
-							'jquery*',
-							// Ignore unminified version of vendor lib we don't ship.
-							'!jquery.table-hotkeys.js'
+							'suggest*'
 						],
 						dest: 'build/wp-includes/js/jquery/'
 					},
@@ -338,7 +338,7 @@ module.exports = function(grunt) {
 			},
 			core: {
 				expand: true,
-				cwd: SOURCE_DIR,
+				cwd: BUILD_DIR,
 				dest: BUILD_DIR,
 				ext: '.min.css',
 				src: [
