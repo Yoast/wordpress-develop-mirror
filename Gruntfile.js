@@ -118,6 +118,7 @@ module.exports = function(grunt) {
 					'build/wp-includes/js/jquery/jquery-migrate.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.js'],
 					'build/wp-includes/js/jquery/jquery-migrate.min.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.min.js'],
 					'build/wp-includes/js/jquery/jquery.color.min.js': ['./node_modules/jquery-color/dist/jquery.color.plus-names.min.js'],
+					'build/wp-includes/js/jquery/jquery.form.js': ['./node_modules/jquery-form/src/jquery.form.js'],
 					'build/wp-includes/js/jquery/jquery.form.min.js': ['./node_modules/jquery-form/dist/jquery.form.min.js'],
 					'build/wp-includes/js/jquery/jquery.js': ['./node_modules/jquery/dist/jquery.min.js'],
 					'build/wp-includes/js/masonry.min.js': ['./node_modules/masonry-layout/dist/masonry.pkgd.min.js'],
@@ -139,7 +140,6 @@ module.exports = function(grunt) {
 							'!README.md',
 							// Ignore unminified version of vendor lib we don't ship.
 							'!jquery/jquery.masonry.js',
-							'!jquery/jquery.table-hotkeys.js',
 							'!tinymce/tinymce.js'
 						],
 						dest: 'build/wp-includes/js/'
