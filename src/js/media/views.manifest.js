@@ -1,4 +1,4 @@
-var media = wp.media,
+var media = {},
 	$ = jQuery,
 	l10n;
 
@@ -147,3 +147,5 @@ media.view.SiteIconCropper = require( './views/site-icon-cropper.js' );
 media.view.SiteIconPreview = require( './views/site-icon-preview.js' );
 media.view.EditImage = require( './views/edit-image.js' );
 media.view.Spinner = require( './views/spinner.js' );
+
+exports = media;
