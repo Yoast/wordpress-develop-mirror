@@ -1,22 +1,19 @@
 var $ = jQuery,
 	Attachment, Attachments, l10n, media;
 
-/** @namespace wp */
-window.wp = window.wp || {};
-
 /**
  * Create and return a media frame.
  *
  * Handles the default media experience.
  *
- * @alias wp.media
+ * @alias media
  * @memberOf wp
  * @namespace
  *
  * @param  {object} attributes The properties passed to the main media controller.
- * @return {wp.media.view.MediaFrame} A media workflow.
+ * @return {media.view.MediaFrame} A media workflow.
  */
-media = wp.media = function( attributes ) {
+media = media = function( attributes ) {
 	var MediaFrame = media.view.MediaFrame,
 		frame;
 
@@ -51,10 +48,10 @@ media = wp.media = function( attributes ) {
 	return frame;
 };
 
-/** @namespace wp.media.model */
-/** @namespace wp.media.view */
-/** @namespace wp.media.controller */
-/** @namespace wp.media.frames */
+/** @namespace media.model */
+/** @namespace media.view */
+/** @namespace media.controller */
+/** @namespace media.frames */
 _.extend( media, { model: {}, view: {}, controller: {}, frames: {} });
 
 // Link any localized strings.
@@ -80,7 +77,7 @@ media.model.Selection = require( './models/selection.js' );
 /**
  * A basic equality comparator for Backbone models.
  *
- * Used to order models within a collection - @see wp.media.model.Attachments.comparator().
+ * Used to order models within a collection - @see media.model.Attachments.comparator().
  *
  * @param  {mixed}  a  The primary parameter to compare.
  * @param  {mixed}  b  The primary parameter to compare.
@@ -98,7 +95,7 @@ media.compare = function( a, b, ac, bc ) {
 	}
 };
 
-_.extend( media, /** @lends wp.media */{
+_.extend( media, /** @lends media */{
 	/**
 	 * media.template( id )
 	 *
@@ -200,11 +197,11 @@ _.extend( media, /** @lends wp.media */{
  * ========================================================================
  */
 /**
- * wp.media.attachment
+ * media.attachment
  *
  * @static
  * @param {String} id A string used to identify a model.
- * @returns {wp.media.model.Attachment}
+ * @returns {media.model.Attachment}
  */
 media.attachment = function( id ) {
 	return Attachment.get( id );
@@ -214,17 +211,17 @@ media.attachment = function( id ) {
  * A collection of all attachments that have been fetched from the server.
  *
  * @static
- * @member {wp.media.model.Attachments}
+ * @member {media.model.Attachments}
  */
 Attachments.all = new Attachments();
 
 /**
- * wp.media.query
+ * media.query
  *
  * Shorthand for creating a new Attachments Query.
  *
  * @param {object} [props]
- * @returns {wp.media.model.Attachments}
+ * @returns {media.model.Attachments}
  */
 media.query = function( props ) {
 	return new Attachments( null, {
@@ -232,7 +229,4 @@ media.query = function( props ) {
 	});
 };
 
-// Clean up. Prevents mobile browsers caching
-$(window).on('unload', function(){
-	window.wp = null;
-});
+exports = media;
