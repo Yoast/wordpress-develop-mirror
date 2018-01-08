@@ -1,16 +1,16 @@
-var media = wp.media,
+var media = {},
 	baseSettings = window._wpmejsSettings || {},
 	l10n = window._wpMediaViewsL10n || {};
 
 /**
  *
- * Defines the wp.media.mixin object.
+ * Defines the media.mixin object.
  *
  * @mixin
  *
  * @since 4.2.0
  */
-wp.media.mixin = {
+media.mixin = {
 	mejsSettings: baseSettings,
 
 	/**
@@ -91,7 +91,7 @@ wp.media.mixin = {
 		if ( this.players && this.players.length ) {
 			_.each( this.players, function (player) {
 				player.pause();
-				wp.media.mixin.removePlayer( player );
+				media.mixin.removePlayer( player );
 			} );
 			this.players = [];
 		}
@@ -103,11 +103,11 @@ wp.media.mixin = {
  *
  * @since 4.2.0
  */
-wp.media.playlist = new wp.media.collection({
+media.playlist = new media.collection({
 	tag: 'playlist',
 	editTitle : l10n.editPlaylistTitle,
 	defaults : {
-		id: wp.media.view.settings.post.id,
+		id: media.view.settings.post.id,
 		style: 'light',
 		tracklist: true,
 		tracknumbers: true,
@@ -127,11 +127,11 @@ wp.media.playlist = new wp.media.collection({
  *
  * @since 4.2.0
  */
-wp.media.audio = {
-	coerce : wp.media.coerce,
+media.audio = {
+	coerce : media.coerce,
 
 	defaults : {
-		id : wp.media.view.settings.post.id,
+		id : media.view.settings.post.id,
 		src : '',
 		loop : false,
 		autoplay : false,
@@ -145,12 +145,12 @@ wp.media.audio = {
 	 * @since 4.2.0
 	 *
 	 * @param {string} data The text to apply the shortcode on.
-	 * @returns {wp.media} The media object.
+	 * @returns {media} The media object.
 	 */
 	edit : function( data ) {
 		var frame, shortcode = wp.shortcode.next( 'audio', data ).shortcode;
 
-		frame = wp.media({
+		frame = media({
 			frame: 'audio',
 			state: 'audio-details',
 			metadata: _.defaults( shortcode.attrs.named, this.defaults )
@@ -199,11 +199,11 @@ wp.media.audio = {
  *
  * @namespace
  */
-wp.media.video = {
-	coerce : wp.media.coerce,
+media.video = {
+	coerce : media.coerce,
 
 	defaults : {
-		id : wp.media.view.settings.post.id,
+		id : media.view.settings.post.id,
 		src : '',
 		poster : '',
 		loop : false,
@@ -220,7 +220,7 @@ wp.media.video = {
 	 * @since 4.2.0
 	 *
 	 * @param {string} data The text to apply the shortcode on.
-	 * @returns {wp.media} The media object.
+	 * @returns {media} The media object.
 	 */
 	edit : function( data ) {
 		var frame,
@@ -230,7 +230,7 @@ wp.media.video = {
 		attrs = shortcode.attrs.named;
 		attrs.content = shortcode.content;
 
-		frame = wp.media({
+		frame = media({
 			frame: 'video',
 			state: 'video-details',
 			metadata: _.defaults( attrs, this.defaults )
@@ -278,3 +278,5 @@ media.view.MediaFrame.VideoDetails = require( './views/frame/video-details.js' )
 media.view.MediaDetails = require( './views/media-details.js' );
 media.view.AudioDetails = require( './views/audio-details.js' );
 media.view.VideoDetails = require( './views/video-details.js' );
+
+exports = media;
