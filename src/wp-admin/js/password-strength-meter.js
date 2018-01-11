@@ -23,7 +23,7 @@ var passwordStrength;
 		 * @param {Array} blacklist An array of words that will lower the entropy of the password.
 		 * @param {string} password2 The confirmed password.
 		 *
-		 * @returns {Number} The password strength score.
+		 * @returns {number} The password strength score.
 		 */
 		meter : function( password1, blacklist, password2 ) {
 			if ( ! $.isArray( blacklist ) )
@@ -44,7 +44,7 @@ var passwordStrength;
 		/**
 		 * Builds an array of data that should be penalized.
 		 *
-		 * Certain words need to be penalaized because it would lower the entropy of a password if they were used.
+		 * Certain words need to be penalized because it would lower the entropy of a password if they were used.
 		 * The blacklist is based on user input fields such as username, first name, email etc.
 		 *
 		 * @since 3.7.0
