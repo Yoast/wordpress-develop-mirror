@@ -710,6 +710,11 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		});
 };
 
+/**
+ * Object containing functionality regarding the comment quick editor and reply editor.
+ *
+ * @namespace
+ */
 commentReply = {
 	cid : '',
 	act : '',
@@ -754,10 +759,9 @@ commentReply = {
 	 * Adds events given jquery object.
 	 *
 	 * This function will take a jquery object, and add double-click event handlers to it.
-	 * The double-click event will toggle the comment quick editor.
+	 * The double-click event will toggle the comment edit or reply form.
 	 *
 	 * @since 3.5.0
-	 * @access private
 	 *
 	 * @param {Object[]} r The jquery objects.
 	 *
@@ -772,10 +776,9 @@ commentReply = {
 	},
 
 	/**
-	 * Toggle the comment quick editor.
+	 * Toggle the comment edit or reply form.
 	 *
 	 * @since 3.5.0
-	 * @access private
 	 *
 	 * @param {Element} el The element you want to toggle the quick editor on.
 	 *
@@ -788,10 +791,9 @@ commentReply = {
 	},
 
 	/**
-	 * Cancel quick editing a comment.
+	 * Close the comment edit or reply form and undo any changes.
 	 *
 	 * @since 3.5.0
-	 * @access private
 	 *
 	 * @returns {boolean} Always false.
 	 */
@@ -808,10 +810,9 @@ commentReply = {
 	},
 
 	/**
-	 * Close the quick editor.
+	 * Close the comment edit or reply form.
 	 *
 	 * @since 3.5.0
-	 * @access private
 	 *
 	 * @returns {void}
 	 */
@@ -847,10 +848,9 @@ commentReply = {
 	},
 
 	/**
-	 * Open te quick editor.
+	 * Open te comment edit or reply form.
 	 *
 	 * @since 3.5.0
-	 * @access private
 	 *
 	 * @param comment_id The comment id.
 	 * @param post_id The post id.
@@ -952,9 +952,11 @@ commentReply = {
 	},
 
 	/**
+	 * Submits the comment-edit or -reply form.
+	 *
 	 * @since 3.5.0
 	 *
-	 * @returns {boolean}
+	 * @returns {boolean} Always false.
 	 */
 	send : function() {
 		var post = {},
@@ -988,10 +990,14 @@ commentReply = {
 	},
 
 	/**
+	 * Shows the new or updated comment or reply.
+	 *
+	 * When the passed xml is a string, it will be considered an error.
+	 *
 	 * @since 3.5.0
 	 *
-	 * @param xml
-	 * @returns {boolean}
+	 * @param {Object} xml     Ajax response object.
+	 * @returns {boolean|void} Returns either nothing or false if an error occurred.
 	 */
 	show : function(xml) {
 		var t = this, r, c, id, bg, pid;
@@ -1057,9 +1063,12 @@ commentReply = {
 	},
 
 	/**
+	 * Shows an error for the failed comment update or reply.
+	 *
 	 * @since 3.5.0
 	 *
-	 * @param r
+	 * @param {string} r The Ajax response.
+	 * @returns {void}
 	 */
 	error : function(r) {
 		var er = r.statusText,
@@ -1078,9 +1087,12 @@ commentReply = {
 	},
 
 	/**
+	 * Opens the add comments form in the comments metabox on the post edit page.
+	 *
 	 * @since 3.5.0
 	 *
-	 * @param post_id
+	 * @param post_id The post id.
+	 * @returns {void}
 	 */
 	addcomment: function(post_id) {
 		var t = this;
@@ -1098,7 +1110,8 @@ commentReply = {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @returns {boolean}
+	 * @returns {boolean} True if the content is unchanged and otherwise whether
+	 *                    or not the user wants to cancel editing the comment.
 	 */
 	discardCommentChanges: function() {
 		var editRow = $( '#replyrow' );
@@ -1133,6 +1146,12 @@ $(document).ready(function(){
 			};
 		};
 
+		/**
+		 * Navigate to the edit window for the selected comment.
+		 *
+		 * @param {Object} event
+		 * @param current_row
+		 */
 		edit_comment = function(event, current_row) {
 			window.location = $('span.edit a', current_row).attr('href');
 		};
