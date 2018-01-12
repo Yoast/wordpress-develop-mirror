@@ -94,6 +94,6 @@ var passwordStrength;
 		}
 	};
 
-	// Backward compatability.
+	// Backward compatibility.
 	passwordStrength = wp.passwordStrength.meter;
 })(jQuery);
