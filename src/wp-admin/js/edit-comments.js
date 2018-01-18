@@ -713,6 +713,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 /**
  * Object containing functionality regarding the comment quick editor and reply editor.
  *
+ * @global
+ *
  * @namespace
  */
 commentReply = {
@@ -722,6 +724,8 @@ commentReply = {
 
 	/**
 	 * Initialize the comment reply functionality.
+	 *
+	 * @memberOf commentReply
 	 *
 	 * @since 3.5.0
 	 */
@@ -763,6 +767,8 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
+	 * @memberOf commentReply
+	 *
 	 * @param {Object[]} r The jquery objects.
 	 *
 	 * @returns {void}
@@ -780,6 +786,8 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
+	 * @memberOf commentReply
+	 *
 	 * @param {Element} el The element you want to toggle the quick editor on.
 	 *
 	 * @returns {void}
@@ -794,6 +802,8 @@ commentReply = {
 	 * Close the comment edit or reply form and undo any changes.
 	 *
 	 * @since 3.5.0
+	 *
+	 * @memberOf commentReply
 	 *
 	 * @returns {boolean} Always false.
 	 */
@@ -813,6 +823,8 @@ commentReply = {
 	 * Close the comment edit or reply form.
 	 *
 	 * @since 3.5.0
+	 *
+	 * @memberOf commentReply
 	 *
 	 * @returns {void}
 	 */
@@ -851,6 +863,8 @@ commentReply = {
 	 * Open te comment edit or reply form.
 	 *
 	 * @since 3.5.0
+	 *
+	 * @memberOf commentReply
 	 *
 	 * @param comment_id The comment id.
 	 * @param post_id The post id.
@@ -956,6 +970,8 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
+	 * @memberOf commentReply
+	 *
 	 * @returns {boolean} Always false.
 	 */
 	send : function() {
@@ -995,6 +1011,8 @@ commentReply = {
 	 * When the passed xml is a string, it will be considered an error.
 	 *
 	 * @since 3.5.0
+	 *
+	 * @memberOf commentReply
 	 *
 	 * @param {Object} xml     Ajax response object.
 	 * @returns {boolean|void} Returns either nothing or false if an error occurred.
@@ -1067,6 +1085,8 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
+	 * @memberOf commentReply
+	 *
 	 * @param {string} r The Ajax response.
 	 * @returns {void}
 	 */
@@ -1091,6 +1111,8 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
+	 * @memberOf commentReply
+	 *
 	 * @param post_id The post id.
 	 * @returns {void}
 	 */
@@ -1109,6 +1131,8 @@ commentReply = {
 	 * lost if they proceed.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @memberOf commentReply
 	 *
 	 * @returns {boolean} True if the content is unchanged and otherwise whether
 	 *                    or not the user wants to cancel editing the comment.
