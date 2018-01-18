@@ -2,6 +2,9 @@
 (function( exports, $ ){
 	var Container, focus, normalizedTransitionendEventName, api = wp.customize;
 
+	/**
+	 * The OverlayNotification object.
+	 */
 	api.OverlayNotification = api.Notification.extend(/** @lends wp.customize.OverlayNotification.prototype */{
 
 		/**
@@ -13,15 +16,17 @@
 		loading: false,
 
 		/**
-		 * A notification that is displayed in a full-screen overlay.
+		 * Initializes a notification that is displayed in a full-screen overlay.
 		 *
 		 * @constructs wp.customize.OverlayNotification
 		 * @augments   wp.customize.Notification
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param {string} code - Code.
-		 * @param {object} params - Params.
+		 * @param {string} code   The notification code.
+		 * @param {object} params Parameters to pass on to the parent class.
+		 *
+		 * @returns {void}
 		 */
 		initialize: function( code, params ) {
 			var notification = this;
@@ -33,11 +38,11 @@
 		},
 
 		/**
-		 * Render notification.
+		 * Renders the notification.
 		 *
 		 * @since 4.9.0
 		 *
-		 * @return {jQuery} Notification container.
+		 * @return {jQuery} The Notification container.
 		 */
 		render: function() {
 			var li = api.Notification.prototype.render.call( this );
@@ -46,11 +51,12 @@
 		},
 
 		/**
-		 * Stop propagation on escape key presses, but also dismiss notification if it is dismissible.
+		 * Stops event propagation on escape key presses, but also dismisses notification if it is dismissible.
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param {jQuery.Event} event - Event.
+		 * @param {jQuery.Event} event The event to check against.
+		 *
 		 * @returns {void}
 		 */
 		handleEscape: function( event ) {
@@ -64,6 +70,9 @@
 		}
 	});
 
+	/**
+	 * Extends the Notifications class to set default parameters.
+	 */
 	api.Notifications = api.Values.extend(/** @lends wp.customize.Notifications.prototype */{
 
 		/**
@@ -83,16 +92,16 @@
 		defaultConstructor: api.Notification,
 
 		/**
-		 * A collection of observable notifications.
+		 * Initializes the collection of observable notifications.
 		 *
 		 * @since 4.9.0
 		 *
 		 * @constructs wp.customize.Notifications
 		 * @augments   wp.customize.Values
 		 *
-		 * @param {object}  options - Options.
-		 * @param {jQuery}  [options.container] - Container element for notifications. This can be injected later.
-		 * @param {boolean} [options.alt] - Whether alternative style should be used when rendering notifications.
+		 * @param {object}  options             The options to pass to the parent class.
+		 * @param {jQuery}  [options.container] Container element for notifications. This can be injected later.
+		 * @param {boolean} [options.alt]       Whether alternative style should be used when rendering notifications.
 		 *
 		 * @returns {void}
 		 */
@@ -117,23 +126,28 @@
 		},
 
 		/**
-		 * Get the number of notifications added.
+		 * Gets the number of notifications added.
 		 *
 		 * @since 4.9.0
-		 * @return {number} Count of notifications.
+		 *
+		 * @return {number} Amount of added notifications.
 		 */
 		count: function() {
 			return _.size( this._value );
 		},
 
 		/**
-		 * Add notification to the collection.
+		 * Adds a notification to the collection.
+		 *
+		 * Alternatively, you can supply the notification parameter with a string, in which case the notificationObject
+		 * parameter is required.
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param {string|wp.customize.Notification} notification - Notification object to add. Alternatively code may be supplied, and in that case the second notificationObject argument must be supplied.
-		 * @param {wp.customize.Notification} [notificationObject] - Notification to add when first argument is the code string.
-		 * @returns {wp.customize.Notification} Added notification (or existing instance if it was already added).
+		 * @param {string|wp.customize.Notification} notification         Notification object or code to add.
+		 * @param {wp.customize.Notification}        [notificationObject] Notification to add when the first argument is a code string.
+		 *
+		 * @returns {wp.customize.Notification} Added notification or existing instance if it was already added.
 		 */
 		add: function( notification, notificationObject ) {
 			var collection = this, code, instance;
@@ -152,11 +166,11 @@
 		},
 
 		/**
-		 * Add notification to the collection.
+		 * Removes a notification from the collection.
 		 *
 		 * @since 4.9.0
-		 * @param {string} code - Notification code to remove.
-		 * @return {api.Notification} Added instance (or existing instance if it was already added).
+		 *
+		 * @param {string} code The notification code used to find the notification that needs to be removed.
 		 */
 		remove: function( code ) {
 			var collection = this;
@@ -165,14 +179,17 @@
 		},
 
 		/**
-		 * Get list of notifications.
+		 * Gets the list of notifications.
 		 *
-		 * Notifications may be sorted by type followed by added time.
+		 * Notifications can be sorted by type followed by how recently they were added.
+		 * By default no sorting is applied.
 		 *
 		 * @since 4.9.0
-		 * @param {object}  args - Args.
-		 * @param {boolean} [args.sort=false] - Whether to return the notifications sorted.
-		 * @return {Array.<wp.customize.Notification>} Notifications.
+		 *
+		 * @param {Object}  args              The arguments to pass along to the sorting algorithm.
+		 * @param {boolean} [args.sort=false] Whether to return the notifications sorted.
+		 *
+		 * @return {Array.<wp.customize.Notification>} List containing the notifications.
 		 */
 		get: function( args ) {
 			var collection = this, notifications, errorTypePriorities, params;
@@ -204,9 +221,10 @@
 		},
 
 		/**
-		 * Render notifications area.
+		 * Renders notifications area.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @returns {void}
 		 */
 		render: function() {
@@ -215,7 +233,7 @@
 				previousNotificationsByCode = {},
 				listElement, focusableElements;
 
-			// Short-circuit if there are no container to render into.
+			// Short-circuit if there is no container to render into.
 			if ( ! collection.container || ! collection.container.length ) {
 				return;
 			}
@@ -228,7 +246,7 @@
 				return;
 			}
 
-			// Make sure list is part of the container.
+			// Make sure the list is part of the container.
 			listElement = collection.container.children( 'ul' ).first();
 			if ( ! listElement.length ) {
 				listElement = $( '<ul></ul>' );
@@ -242,9 +260,11 @@
 				previousNotificationsByCode[ notification.code ] = notification;
 			});
 
-			// Add all notifications in the sorted order.
+			// Add all notifications in their sorted order.
 			_.each( notifications, function( notification ) {
 				var notificationContainer;
+
+				// Determine whether the notification code is different from the previous one so screen readers don't announce the same code twice.
 				if ( wp.a11y && ( ! previousNotificationsByCode[ notification.code ] || ! _.isEqual( notification.message, previousNotificationsByCode[ notification.code ].message ) ) ) {
 					wp.a11y.speak( notification.message, 'assertive' );
 				}
@@ -252,21 +272,30 @@
 				notification.container = notificationContainer;
 				listElement.append( notificationContainer ); // @todo Consider slideDown() as enhancement.
 
+				// If the notification extends an OverlayNotifcation, add it to the proper collection.
 				if ( notification.extended( api.OverlayNotification ) ) {
 					overlayNotifications.push( notification );
 				}
 			});
 			hasOverlayNotification = Boolean( overlayNotifications.length );
 
+			// If notifications are already present in the collection, check whether they extend an OverlayNotification.
 			if ( collection.previousNotifications ) {
 				hadOverlayNotification = Boolean( _.find( collection.previousNotifications, function( notification ) {
 					return notification.extended( api.OverlayNotification );
 				} ) );
 			}
 
+			// Check if the current OverlayNotifications differ from the previous ones.
 			if ( hasOverlayNotification !== hadOverlayNotification ) {
 				$( document.body ).toggleClass( 'customize-loading', hasOverlayNotification );
 				collection.container.toggleClass( 'has-overlay-notifications', hasOverlayNotification );
+
+				/*
+				* If there are OverlayNotifcations present, set the previousActiveElement and bind the constrainFocus function.
+				*
+				* If not, unbind the constrainFocus function.
+				*/
 				if ( hasOverlayNotification ) {
 					collection.previousActiveElement = document.activeElement;
 					$( document ).on( 'keydown', collection.constrainFocus );
@@ -275,6 +304,11 @@
 				}
 			}
 
+			/*
+			 * If there are OverlayNotifications, attempt to find a focusable element. If none are present, set focus to the container.
+			 *
+			 * If there are no OverlayNotifications, reset focus to the previousActiveElement.
+			 */
 			if ( hasOverlayNotification ) {
 				collection.focusContainer = overlayNotifications[ overlayNotifications.length - 1 ].container;
 				collection.focusContainer.prop( 'tabIndex', -1 );
@@ -295,11 +329,12 @@
 		},
 
 		/**
-		 * Constrain focus on focus container.
+		 * Constrains focus on the focus container.
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param {jQuery.Event} event - Event.
+		 * @param {jQuery.Event} event The event to check against.
+		 *
 		 * @returns {void}
 		 */
 		constrainFocus: function constrainFocus( event ) {
@@ -308,7 +343,8 @@
 			// Prevent keys from escaping.
 			event.stopPropagation();
 
-			if ( 9 !== event.which ) { // Tab key.
+			// Return if any other key than the tab key is pressed.
+			if ( 9 !== event.which ) {
 				return;
 			}
 
@@ -317,6 +353,11 @@
 				focusableElements = collection.focusContainer;
 			}
 
+			/*
+			 * Check whether the target of the tabbing event exists within the focusContainer. If not, set focus on the first element within the focusableElements.
+			 * If the user is currently on the last focusable element and doesn't hold shift whilst tabbing, jump back to the first focusable element.
+			 * If the user is on the first focusable element and uses shift and tab, jump to the last focusable element.
+			 */
 			if ( ! $.contains( collection.focusContainer[0], event.target ) || ! $.contains( collection.focusContainer[0], document.activeElement ) ) {
 				event.preventDefault();
 				focusableElements.first().focus();
@@ -330,12 +371,16 @@
 		}
 	});
 
+	/**
+	 * The API Setting object.
+	 */
 	api.Setting = api.Value.extend(/** @lends wp.customize.Setting.prototype */{
 
 		/**
-		 * Default params.
+		 * Default parameters.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @var {object}
 		 */
 		defaults: {
@@ -344,7 +389,7 @@
 		},
 
 		/**
-		 * A Customizer Setting.
+		 * Initializes a Customizer Setting.
 		 *
 		 * A setting is WordPress data (theme mod, option, menu, etc.) that the user can
 		 * draft changes to in the Customizer.
@@ -356,12 +401,14 @@
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param {string}  id                          - The setting ID.
-		 * @param {*}       value                       - The initial value of the setting.
-		 * @param {object}  [options={}]                - Options.
-		 * @param {string}  [options.transport=refresh] - The transport to use for previewing. Supports 'refresh' and 'postMessage'.
-		 * @param {boolean} [options.dirty=false]       - Whether the setting should be considered initially dirty.
-		 * @param {object}  [options.previewer]         - The Previewer instance to sync with. Defaults to wp.customize.previewer.
+		 * @param {string}  id                          The setting ID.
+		 * @param {*}       value                       The initial value of the setting.
+		 * @param {object}  [options={}]                The options to use within the setting.
+		 * @param {string}  [options.transport=refresh] The transport method to use for previewing. Supports 'refresh' and 'postMessage'.
+		 * @param {boolean} [options.dirty=false]       Whether the setting should initially be considered dirty.
+		 * @param {object}  [options.previewer]         The Previewer instance to sync with. Defaults to wp.customize.previewer.
+		 *
+		 * @returns {void}
 		 */
 		initialize: function( id, value, options ) {
 			var setting = this, params;
@@ -374,7 +421,7 @@
 			api.Value.prototype.initialize.call( setting, value, params );
 
 			setting.id = id;
-			setting._dirty = params.dirty; // The _dirty property is what the Customizer reads from.
+			setting._dirty = params.dirty;
 			setting.notifications = new api.Notifications();
 
 			// Whenever the setting's value changes, refresh the preview.
@@ -382,11 +429,11 @@
 		},
 
 		/**
-		 * Refresh the preview, respective of the setting's refresh policy.
+		 * Refreshes the preview, respective of the setting's refresh policy.
 		 *
 		 * If the preview hasn't sent a keep-alive message and is likely
 		 * disconnected by having navigated to a non-allowed URL, then the
-		 * refresh transport will be forced when postMessage is the transport.
+		 * refresh transport will be forced when postMessage is the transport method.
 		 * Note that postMessage does not throw an error when the recipient window
 		 * fails to match the origin window, so using try/catch around the
 		 * previewer.send() call to then fallback to refresh will not work.
@@ -412,10 +459,11 @@
 		},
 
 		/**
-		 * Find controls associated with this setting.
+		 * Finds controls associated with this setting.
 		 *
 		 * @since 4.6.0
-		 * @returns {wp.customize.Control[]} Controls associated with setting.
+		 *
+		 * @returns {wp.customize.Control[]} Controls associated with the setting.
 		 */
 		findControls: function() {
 			var setting = this, controls = [];
@@ -436,6 +484,7 @@
 	 * @alias wp.customize._latestRevision
 	 *
 	 * @since 4.7.0
+	 *
 	 * @type {number}
 	 * @protected
 	 */
@@ -447,6 +496,7 @@
 	 * @alias wp.customize._lastSavedRevision
 	 *
 	 * @since 4.7.0
+	 *
 	 * @type {number}
 	 * @protected
 	 */
@@ -458,7 +508,8 @@
 	 * @alias wp.customize._latestSettingRevisions
 	 *
 	 * @since 4.7.0
-	 * @type {object}
+	 *
+	 * @type {Object}
 	 * @protected
 	 */
 	api._latestSettingRevisions = {};
@@ -484,16 +535,17 @@
 	} );
 
 	/**
-	 * Get the dirty setting values.
+	 * Gets the dirty setting values.
 	 *
 	 * @alias wp.customize.dirtyValues
 	 *
 	 * @since 4.7.0
 	 * @access public
 	 *
-	 * @param {object} [options] Options.
-	 * @param {boolean} [options.unsaved=false] Whether only values not saved yet into a changeset will be returned (differential changes).
-	 * @returns {object} Dirty setting values.
+	 * @param {Object}  [options]               The options to use within the setting.
+	 * @param {boolean} [options.unsaved=false] Whether only values that aren't saved yet into a changeset will be returned (differential changes).
+	 *
+	 * @returns {object} The dirty setting values.
 	 */
 	api.dirtyValues = function dirtyValues( options ) {
 		var values = {};
@@ -506,7 +558,7 @@
 
 			settingRevision = api._latestSettingRevisions[ setting.id ];
 
-			// Skip including settings that have already been included in the changeset, if only requesting unsaved.
+			// Skip including settings that have already been included in the changeset, if only requesting unsaved values.
 			if ( api.state( 'changesetStatus' ).get() && ( options && options.unsaved ) && ( _.isUndefined( settingRevision ) || settingRevision <= api._lastSavedRevision ) ) {
 				return;
 			}
@@ -517,21 +569,22 @@
 	};
 
 	/**
-	 * Request updates to the changeset.
+	 * Sends a request to update to the changeset.
 	 *
 	 * @alias wp.customize.requestChangesetUpdate
 	 *
 	 * @since 4.7.0
 	 * @access public
 	 *
-	 * @param {object}  [changes] - Mapping of setting IDs to setting params each normally including a value property, or mapping to null.
-	 *                             If not provided, then the changes will still be obtained from unsaved dirty settings.
-	 * @param {object}  [args] - Additional options for the save request.
-	 * @param {boolean} [args.autosave=false] - Whether changes will be stored in autosave revision if the changeset has been promoted from an auto-draft.
-	 * @param {boolean} [args.force=false] - Send request to update even when there are no changes to submit. This can be used to request the latest status of the changeset on the server.
-	 * @param {string}  [args.title] - Title to update in the changeset. Optional.
-	 * @param {string}  [args.date] - Date to update in the changeset. Optional.
-	 * @returns {jQuery.Promise} Promise resolving with the response data.
+	 * @param {Object}  [changes]             Mapping of setting IDs to setting params which normally include a value property, or mapping to null.
+	 *                                        If not provided, then the changes will still be obtained from unsaved dirty settings.
+	 * @param {Object}  [args]                Additional options for the save request.
+	 * @param {boolean} [args.autosave=false] Whether changes will be stored in autosave revision if the changeset has been promoted from an auto-draft.
+	 * @param {boolean} [args.force=false]    Force sending a request to update even when there are no changes to submit. This can be used to request the latest status of the changeset on the server.
+	 * @param {string}  [args.title]          Title to update in the changeset.
+	 * @param {string}  [args.date]           Date to update in the changeset.
+	 *
+	 * @returns {jQuery.Promise}              Promise resolving with the response data.
 	 */
 	api.requestChangesetUpdate = function requestChangesetUpdate( changes, args ) {
 		var deferred, request, submittedChanges = {}, data, submittedArgs;
