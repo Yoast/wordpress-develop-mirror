@@ -1139,6 +1139,7 @@ $(document).ready(function(){
 		 * Creates an action that navigates to a previous or next page.
 		 *
 		 * @since 3.5.0
+		 * @access private
 		 *
 		 * @param {string} which What page to navigate to: either next or prev.
 		 *
@@ -1159,6 +1160,7 @@ $(document).ready(function(){
 		 * Navigates to the edit window for the selected comment.
 		 *
 		 * @since 3.5.0
+		 * @access private
 		 *
 		 * @param {Object} event       The event.
 		 * @param {Object} current_row A jQuery object of the selected row.
@@ -1173,6 +1175,7 @@ $(document).ready(function(){
 		 * Toggles all comments on the screen, for bulk actions.
 		 *
 		 * @since 3.5.0
+		 * @access private
 		 *
 		 * @return {void}
 		 */
@@ -1184,6 +1187,7 @@ $(document).ready(function(){
 		 * Creates a bulk action that is executed on all selected comments.
 		 *
 		 * @since 3.5.0
+		 * @access private
 		 *
 		 * @param {string} value The name of the action to execute.
 		 *
