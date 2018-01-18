@@ -1135,6 +1135,15 @@ $(document).ready(function(){
 	});
 
 	if ( typeof $.table_hotkeys != 'undefined' ) {
+		/**
+		 * Creates an action that navigates to a previous or next page.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {string} which What page to navigate to: either next or prev.
+		 *
+		 * @returns {Function} The function that executes the navigation.
+		 */
 		make_hotkeys_redirect = function(which) {
 			return function() {
 				var first_last, l;
@@ -1147,19 +1156,39 @@ $(document).ready(function(){
 		};
 
 		/**
-		 * Navigate to the edit window for the selected comment.
+		 * Navigates to the edit window for the selected comment.
 		 *
-		 * @param {Object} event
-		 * @param current_row
+		 * @since 3.5.0
+		 *
+		 * @param {Object} event       The event.
+		 * @param {Object} current_row A jQuery object of the selected row.
+		 *
+		 * @returns {void}
 		 */
 		edit_comment = function(event, current_row) {
 			window.location = $('span.edit a', current_row).attr('href');
 		};
 
+		/**
+		 * Toggles all comments on the screen, for bulk actions.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @return {void}
+		 */
 		toggle_all = function() {
 			$('#cb-select-all-1').data( 'wp-toggle', 1 ).trigger( 'click' ).removeData( 'wp-toggle' );
 		};
 
+		/**
+		 * Creates a bulk action that is executed on all selected comments.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {string} value The name of the action to execute.
+		 *
+		 * @returns {Function} The function that executes the bulk action.
+		 */
 		make_bulk = function(value) {
 			return function() {
 				var scope = $('select[name="action"]');
