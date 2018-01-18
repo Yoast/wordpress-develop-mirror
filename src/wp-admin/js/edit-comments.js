@@ -269,6 +269,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 *
 	 * @since 4.4.0
 	 *
+	 * @global
+	 *
 	 * @returns {void}
 	 */
 	setCommentsList = function() {
@@ -700,7 +702,17 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		});
 	};
 
+	/**
+	 * Globally available jQuery object referring to the comments list.
+	 *
+	 * @global
+	 */
 	theExtraList = $('#the-extra-comment-list').wpList( { alt: '', delColor: 'none', addColor: 'none' } );
+	/**
+	 * Globally available jQuery object referring to the additional comments list.
+	 *
+	 * @global
+	 */
 	theList = $('#the-comment-list').wpList( { alt: '', delBefore: delBefore, dimAfter: dimAfter, delAfter: delAfter, addColor: 'none' } )
 		.bind('wpListDelEnd', function(e, s){
 			var wpListsData = $(s.target).attr('data-wp-lists'), id = s.element.replace(/[^0-9]+/g, '');
