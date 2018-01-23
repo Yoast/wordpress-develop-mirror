@@ -81,7 +81,7 @@ module.exports = function(grunt) {
 				src: []
 			},
 			tinymce: ['<%= concat.tinymce.dest %>'],
-			qunit: ['tests/qunit/compiled.html']
+			qunit: ['tests/js/integration/compiled.html']
 		},
 		copy: {
 			files: {
@@ -308,11 +308,11 @@ module.exports = function(grunt) {
 				src: []
 			},
 			qunit: {
-				src: 'tests/qunit/index.html',
-				dest: 'tests/qunit/compiled.html',
+				src: 'tests/js/integration/index.html',
+				dest: 'tests/js/integration/compiled.html',
 				options: {
 					processContent: function( src ) {
-						return src.replace( /(\".+?\/)src(\/.+?)(?:.min)?(.js\")/g , function( match, $1, $2, $3 ) {
+						return src.replace( /(\".+?\/)build(\/.+?)(?:.min)?(.js\")/g , function( match, $1, $2, $3 ) {
 							// Don't add `.min` to files that don't have it.
 							return $1 + 'build' + $2 + ( /jquery$/.test( $2 ) ? '' : '.min' ) + $3;
 						} );
@@ -461,11 +461,11 @@ module.exports = function(grunt) {
 			},
 			tests: {
 				src: [
-					'tests/qunit/**/*.js',
-					'!tests/qunit/vendor/*',
-					'!tests/qunit/editor/**'
+					'tests/js/integration/**/*.js',
+					'!tests/js/integration/vendor/*',
+					'!tests/js/integration/editor/**'
 				],
-				options: grunt.file.readJSON('tests/qunit/.jshintrc')
+				options: grunt.file.readJSON('tests/js/integration/.jshintrc')
 			},
 			themes: {
 				expand: true,
@@ -588,8 +588,8 @@ module.exports = function(grunt) {
 		},
 		qunit: {
 			files: [
-				'tests/qunit/**/*.html',
-				'!tests/qunit/editor/**'
+				'tests/js/integration/**/*.html',
+				'!tests/js/integration/editor/**'
 			]
 		},
 		phpunit: {
@@ -883,8 +883,8 @@ module.exports = function(grunt) {
 			},
 			test: {
 				files: [
-					'tests/qunit/**',
-					'!tests/qunit/editor/**'
+					'tests/js/integration/**',
+					'!tests/js/integration/editor/**'
 				],
 				tasks: ['qunit']
 			}
