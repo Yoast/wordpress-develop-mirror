@@ -67,6 +67,9 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 	/**
 	 * Activates the library.
 	 *
+	 * Removes all event listeners if in edit mode. Creates a validator to check an attachment.
+	 * Resets library and re-enables event listeners. Activates edit mode. Calls the parent's activate method.
+	 *
 	 * @since 3.5.0
 	 *
 	 * @returns {void}
