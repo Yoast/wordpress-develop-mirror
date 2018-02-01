@@ -2,17 +2,6 @@ var Attachment = wp.media.view.Attachment,
 	l10n = wp.media.view.l10n,
 	Details;
 
-/**
- * Shows details of attachments.
- *
- * @memberOf wp.media.view.Attachment
- *
- * @class
- * @augments wp.media.view.Attachment
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
- */
 Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototype */{
 	tagName:   'div',
 	className: 'attachment-details',
@@ -39,11 +28,16 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		'click .edit-attachment':         'editAttachment',
 		'keydown':                        'toggleSelectionHandler'
 	},
-
 	/**
-	 * @constructs
+	 * Shows the details of an attachment.
 	 *
-	 * @augments wp.media.Attachment
+	 * @since 4.2.0
+	 *
+	 * @constructs wp.media.view.Attachment.Details
+	 * @augments wp.media.view.Attachment
+	 *
+	 * @param {Object} options The options of this view.
+	 * @param {boolean} options.rerenderOnModelChange Whether or not the view should rerender when the model changes.
 	 */
 	initialize: function() {
 		this.options = _.defaults( this.options, {
@@ -55,6 +49,11 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		Attachment.prototype.initialize.apply( this, arguments );
 	},
 
+	/**
+	 * Puts focus on the first text input on non-touch devices.
+	 *
+	 * @since 4.2.0
+	 */
 	initialFocus: function() {
 		if ( ! wp.media.isTouchDevice ) {
 			/*
