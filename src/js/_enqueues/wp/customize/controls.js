@@ -569,7 +569,7 @@
 	};
 
 	/**
-	 * Sends a request to update to the changeset.
+	 * Sends a request to update the changeset.
 	 *
 	 * @alias wp.customize.requestChangesetUpdate
 	 *
@@ -632,7 +632,7 @@
 			return deferred.reject( { code: 'illegal_status_in_changeset_update' } ).promise();
 		}
 
-		// Dates not beung allowed for revisions are is a technical limitation of post revisions.
+		// Dates not being allowed for revisions is a technical limitation of post revisions.
 		if ( submittedArgs.date && submittedArgs.autosave ) {
 			return deferred.reject( { code: 'illegal_autosave_with_date_gmt' } ).promise();
 		}
@@ -643,9 +643,9 @@
 			api.state( 'processing' ).set( api.state( 'processing' ).get() - 1 );
 		} );
 
-		// Ensure that if any plugins add data to save requests by extending query() that they get included here.
+		// Ensure that additional data is included if any plugin adds data to save requests (by extending query()).
 		data = api.previewer.query( { excludeCustomizedSaved: true } );
-		delete data.customized; // Being sent in customize_changeset_data instead.
+		delete data.customized; // This is being sent in customize_changeset_data instead.
 		_.extend( data, {
 			nonce: api.settings.nonce.save,
 			customize_theme: api.settings.theme.stylesheet,
@@ -707,14 +707,16 @@
 	};
 
 	/**
-	 * Watch all changes to Value properties, and bubble changes to parent Values instance
+	 * Watches all changes to Value properties, and bubbles changes to parent Values instances.
 	 *
 	 * @alias wp.customize.utils.bubbleChildValueChanges
 	 *
 	 * @since 4.1.0
 	 *
-	 * @param {wp.customize.Class} instance
+	 * @param {wp.customize.Class} instance    The customize class instance.
 	 * @param {Array}              properties  The names of the Value instances to watch.
+     *
+     * @returns {void}
 	 */
 	api.utils.bubbleChildValueChanges = function ( instance, properties ) {
 		$.each( properties, function ( i, key ) {
@@ -727,14 +729,16 @@
 	};
 
 	/**
-	 * Expand a panel, section, or control and focus on the first focusable element.
+	 * Expands a panel, section, or control and focusses on the first focusable element.
 	 *
 	 * @alias wp.customize~focus
 	 *
 	 * @since 4.1.0
 	 *
-	 * @param {Object}   [params]
-	 * @param {Function} [params.completeCallback]
+	 * @param {Object}   [params]                   Object containing the parameters using this function.
+	 * @param {Function} [params.completeCallback]  Function that gets called once the expansion is complete.
+     *
+     * @returns {void}
 	 */
 	focus = function ( params ) {
 		var construct, completeCallback, focus, focusElement;
@@ -774,17 +778,18 @@
 	};
 
 	/**
-	 * Stable sort for Panels, Sections, and Controls.
+	 * Stable sorts Panels, Sections, and Controls.
 	 *
-	 * If a.priority() === b.priority(), then sort by their respective params.instanceNumber.
+	 * If a.priority() === b.priority(), then it sorts by their respective params.instanceNumber.
 	 *
 	 * @alias wp.customize.utils.prioritySort
 	 *
 	 * @since 4.1.0
 	 *
-	 * @param {(wp.customize.Panel|wp.customize.Section|wp.customize.Control)} a
-	 * @param {(wp.customize.Panel|wp.customize.Section|wp.customize.Control)} b
-	 * @returns {Number}
+	 * @param {wp.customize.Panel|wp.customize.Section|wp.customize.Control} a The element to compare parameter b with.
+	 * @param {wp.customize.Panel|wp.customize.Section|wp.customize.Control} b The element to compare parameter a with.
+     *
+	 * @returns {number} The sorting order.
 	 */
 	api.utils.prioritySort = function ( a, b ) {
 		if ( a.priority() === b.priority() && typeof a.params.instanceNumber === 'number' && typeof b.params.instanceNumber === 'number' ) {
@@ -795,45 +800,47 @@
 	};
 
 	/**
-	 * Return whether the supplied Event object is for a keydown event but not the Enter key.
+	 * Returns whether the supplied Event object is for a keydown event and is not the Enter key.
 	 *
 	 * @alias wp.customize.utils.isKeydownButNotEnterEvent
 	 *
 	 * @since 4.1.0
 	 *
-	 * @param {jQuery.Event} event
-	 * @returns {boolean}
+	 * @param {jQuery.Event} event  The page event to check against.
+	 *
+     * @returns {boolean} Whether or not a key was pressed that isn't the Enter key.
 	 */
 	api.utils.isKeydownButNotEnterEvent = function ( event ) {
 		return ( 'keydown' === event.type && 13 !== event.which );
 	};
 
 	/**
-	 * Return whether the two lists of elements are the same and are in the same order.
+	 * Returns whether the two lists of elements are the same and are in the same order.
 	 *
 	 * @alias wp.customize.utils.areElementListsEqual
 	 *
 	 * @since 4.1.0
 	 *
-	 * @param {Array|jQuery} listA
-	 * @param {Array|jQuery} listB
-	 * @returns {boolean}
+	 * @param {Array|jQuery} listA  List of elements that need to be compared with listB.
+	 * @param {Array|jQuery} listB  List of elements that need to be compared with listA.
+	 *
+     * @returns {boolean} Whether or not both lists are equal.
 	 */
 	api.utils.areElementListsEqual = function ( listA, listB ) {
 		var equal = (
-			listA.length === listB.length && // if lists are different lengths, then naturally they are not equal
-			-1 === _.indexOf( _.map( // are there any false values in the list returned by map?
-				_.zip( listA, listB ), // pair up each element between the two lists
+			listA.length === listB.length && // If the lists have different lengths, then naturally they are not equal.
+			-1 === _.indexOf( _.map( // Determine if there are any false values in the list returned by map.
+				_.zip( listA, listB ), // Pair up each element between the two lists.
 				function ( pair ) {
-					return $( pair[0] ).is( pair[1] ); // compare to see if each pair are equal
+					return $( pair[0] ).is( pair[1] ); // Compare to see if each pair is equal.
 				}
-			), false ) // check for presence of false in map's return value
+			), false ) // Check for presence of false in map's return value.
 		);
 		return equal;
 	};
 
 	/**
-	 * Highlight the existence of a button.
+	 * Highlights the existence of a button.
 	 *
 	 * This function reminds the user of a button represented by the specified
 	 * UI element, after an optional delay. If the user focuses the element
@@ -843,15 +850,16 @@
 	 *
 	 * @since 4.9.0
 	 *
-	 * @param {jQuery} button - The element to highlight.
-	 * @param {object} [options] - Options.
-	 * @param {number} [options.delay=0] - Delay in milliseconds.
-	 * @param {jQuery} [options.focusTarget] - A target for user focus that defaults to the highlighted element.
+	 * @param {jQuery} button                  The element to highlight.
+	 * @param {Object} [options]               The options to use when highlighting a button.
+	 * @param {number} [options.delay=0]       The amount of time in milliseconds to wait before highlighting.
+	 * @param {jQuery} [options.focusTarget]   The target to focus on that defaults to the highlighted element.
 	 *                                         If the user focuses the target before the delay passes, the reminder
 	 *                                         is canceled. This option exists to accommodate compound buttons
 	 *                                         containing auxiliary UI, such as the Publish button augmented with a
 	 *                                         Settings button.
-	 * @returns {Function} An idempotent function that cancels the reminder.
+     *
+	 * @returns {Function} A function that cancels the reminder.
 	 */
 	api.utils.highlightButton = function highlightButton( button, options ) {
 		var animationClass = 'button-see-me',
@@ -890,7 +898,7 @@
 	};
 
 	/**
-	 * Get current timestamp adjusted for server clock time.
+	 * Gets the current timestamp adjusted for the server clock time.
 	 *
 	 * Same functionality as the `current_time( 'mysql', false )` function in PHP.
 	 *
@@ -898,7 +906,7 @@
 	 *
 	 * @since 4.9.0
 	 *
-	 * @returns {int} Current timestamp.
+	 * @returns {number} The current timestamp.
 	 */
 	api.utils.getCurrentTimestamp = function getCurrentTimestamp() {
 		var currentDate, currentClientTimestamp, timestampDifferential;
@@ -911,14 +919,15 @@
 	};
 
 	/**
-	 * Get remaining time of when the date is set.
+	 * Calculates the remaining time based on the passed datetime.
 	 *
 	 * @alias wp.customize.utils.getRemainingTime
 	 *
 	 * @since 4.9.0
 	 *
-	 * @param {string|int|Date} datetime - Date time or timestamp of the future date.
-	 * @return {int} remainingTime - Remaining time in milliseconds.
+	 * @param {string|number|Date} datetime The datetime or timestamp of the future date.
+	 *
+     * @return {number} The remaining time in milliseconds.
 	 */
 	api.utils.getRemainingTime = function getRemainingTime( datetime ) {
 		var millisecondsDivider = 1000, remainingTime, timestamp;
@@ -936,7 +945,7 @@
 	};
 
 	/**
-	 * Return browser supported `transitionend` event name.
+	 * Returns the browser supported `transitionend` event name.
 	 *
 	 * @since 4.7.0
 	 *
@@ -963,6 +972,9 @@
 		}
 	})();
 
+	/**
+	 * The Container object.
+	 */
 	Container = api.Class.extend(/** @lends wp.customize~Container.prototype */{
 		defaultActiveArguments: { duration: 'fast', completeCallback: $.noop },
 		defaultExpandedArguments: { duration: 'fast', completeCallback: $.noop },
@@ -978,7 +990,7 @@
 		},
 
 		/**
-		 * Base class for Panel and Section.
+		 * Intializes the base class for Panels and Sections.
 		 *
 		 * @constructs wp.customize~Container
 		 * @augments   wp.customize.Class
@@ -987,16 +999,18 @@
 		 *
 		 * @borrows wp.customize~focus as focus
 		 *
-		 * @param {string}         id - The ID for the container.
-		 * @param {object}         options - Object containing one property: params.
-		 * @param {string}         options.title - Title shown when panel is collapsed and expanded.
-		 * @param {string=}        [options.description] - Description shown at the top of the panel.
-		 * @param {number=100}     [options.priority] - The sort priority for the panel.
-		 * @param {string}         [options.templateId] - Template selector for container.
-		 * @param {string=default} [options.type] - The type of the panel. See wp.customize.panelConstructor.
-		 * @param {string=}        [options.content] - The markup to be used for the panel container. If empty, a JS template is used.
-		 * @param {boolean=true}   [options.active] - Whether the panel is active or not.
-		 * @param {object}         [options.params] - Deprecated wrapper for the above properties.
+		 * @param {string}    id                       The ID for the container.
+		 * @param {Object}    options                  The options to use within the Container object.
+		 * @param {string}    options.title            Title shown when panel is collapsed and expanded.
+		 * @param {string}    [options.description]    Description shown at the top of the panel.
+		 * @param {number}    [options.priority=100]   The sort priority for the panel.
+		 * @param {string}    [options.templateId]     Template selector for the container.
+		 * @param {string}    [options.type=default]   The type of panel. See wp.customize.panelConstructor.
+		 * @param {string}    [options.content]        The markup to be used for the panel container. If empty, a JS template is used.
+		 * @param {boolean}   [options.active=true]    Whether the panel is active or not.
+		 * @param {Object}    [options.params]         Deprecated wrapper for the above properties.
+         *
+         * @returns {void}
 		 */
 		initialize: function ( id, options ) {
 			var container = this;
@@ -1060,10 +1074,11 @@
 		},
 
 		/**
-		 * Get the element that will contain the notifications.
+		 * Gets the element that will contain the notifications.
 		 *
 		 * @since 4.9.0
-		 * @returns {jQuery} Notification container element.
+		 *
+         * @returns {jQuery} Notification container element.
 		 */
 		getNotificationsContainerElement: function() {
 			var container = this;
@@ -1071,16 +1086,17 @@
 		},
 
 		/**
-		 * Set up notifications.
+		 * Sets up the notifications.
 		 *
 		 * @since 4.9.0
-		 * @returns {void}
+         *
+         * @returns {void}
 		 */
 		setupNotifications: function() {
 			var container = this, renderNotifications;
 			container.notifications.container = container.getNotificationsContainerElement();
 
-			// Render notifications when they change and when the construct is expanded.
+			// Render the notifications when they change and when the construct is expanded.
 			renderNotifications = function() {
 				if ( container.expanded.get() ) {
 					container.notifications.render();
@@ -1092,20 +1108,27 @@
 		},
 
 		/**
+         * Fires when the class is considered DOM-ready.
+         *
+         * This function gets called when the view is rendered and added to the DOM. Can be used to bind input events.
+         *
 		 * @since 4.1.0
 		 *
 		 * @abstract
+         *
+         * @returns {void}
 		 */
 		ready: function() {},
 
 		/**
-		 * Get the child models associated with this parent, sorting them by their priority Value.
+		 * Gets the child models associated with this parent and sorts them by their priority Value.
 		 *
 		 * @since 4.1.0
 		 *
-		 * @param {String} parentType
-		 * @param {String} childType
-		 * @returns {Array}
+		 * @param {string} parentType The parent type to look for within the separate childTypes.
+		 * @param {string} childType  The childType to loop through to retrieve the model from.
+		 *
+         * @returns {Array} The child models.
 		 */
 		_children: function ( parentType, childType ) {
 			var parent = this,
