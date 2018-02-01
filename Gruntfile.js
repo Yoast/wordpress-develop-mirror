@@ -317,6 +317,9 @@ module.exports = function(grunt) {
 				dest: BUILD_DIR,
 				src: []
 			},
+			'dynamic-js': {
+				files: {}
+			},
 			qunit: {
 				src: 'tests/js/integration/index.html',
 				dest: 'tests/js/integration/compiled.html',
@@ -691,6 +694,13 @@ module.exports = function(grunt) {
 			imgareaselect: {
 				src: BUILD_DIR + 'wp-includes/js/imgareaselect/jquery.imgareaselect.js',
 				dest: BUILD_DIR + 'wp-includes/js/imgareaselect/jquery.imgareaselect.min.js'
+			},
+			dynamic: {
+				expand: true,
+				cwd: BUILD_DIR,
+				dest: BUILD_DIR,
+				ext: '.min.js',
+				src: []
 			}
 		},
 		webpack: {
@@ -748,6 +758,11 @@ module.exports = function(grunt) {
 						BUILD_DIR + 'wp-{admin,includes}/**/*.js',
 						BUILD_DIR + 'wp-content/themes/twenty*/**/*.js'
 					]
+				}
+			},
+			dynamic: {
+				files: {
+					src: []
 				}
 			}
 		},
@@ -850,7 +865,7 @@ module.exports = function(grunt) {
 			all: {
 				files: [
 					SOURCE_DIR + '**',
-					'!' + SOURCE_DIR + 'wp-includes/js/media/**',
+					'!' + SOURCE_DIR + 'js/**/*.js',
 					// Ignore version control directories.
 					'!' + SOURCE_DIR + '**/.{svn,git}/**'
 				],
@@ -861,12 +876,22 @@ module.exports = function(grunt) {
 					interval: 2000
 				}
 			},
-			js: {
+			'js-enqueues': {
+				files: [SOURCE_DIR + 'js/_enqueues/**/*.js'],
+				tasks: ['clean:dynamic', 'copy:dynamic-js', 'uglify:dynamic', 'jsvalidate:dynamic'],
+				options: {
+					dot: true,
+					spawn: false,
+					interval: 2000
+				}
+			},
+			'js-webpack': {
 				files: [
 					SOURCE_DIR + 'js/**/*.js',
+					'!' + SOURCE_DIR + 'js/_enqueues/**/*.js',
 					'webpack-dev.config.js'
 				],
-				tasks: ['build:js'],
+				tasks: ['clean:dynamic', 'webpack:dev', 'uglify:dynamic', 'jsvalidate:dynamic'],
 				options: {
 					dot: true,
 					spawn: false,
@@ -947,8 +972,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask( 'watch', function() {
 		if ( ! this.args.length || this.args.indexOf( 'webpack' ) > -1 ) {
-
-			grunt.task.run( 'webpack:dev' );
+			grunt.task.run( 'build' );
 		}
 
 		grunt.task.run( '_' + this.nameArgs );
@@ -1181,17 +1205,84 @@ module.exports = function(grunt) {
 	grunt.event.on('watch', function( action, filepath, target ) {
 		var src;
 
-		if ( [ 'all', 'rtl', 'webpack' ].indexOf( target ) === -1 ) {
+		// Only configure the dynamic tasks based on known targets.
+		if ( [ 'all', 'rtl', 'webpack', 'js-enqueues', 'js-webpack' ].indexOf( target ) === -1 ) {
 			return;
 		}
 
-		src = [ path.relative( SOURCE_DIR, filepath ) ];
+		// If the target is a file in the restructured js src.
+		if ( target === 'js-enqueues' ) {
+			var files = {};
+			var configs, dest;
+
+			// If it's a vendor file which are configured with glob matchers.
+			if ( filepath.indexOf( SOURCE_DIR + 'js/_enqueues/vendor/' ) === 0 ) {
+				// Grab the glob matchers from the copy task.
+				configs = grunt.config( [ 'copy', 'vendor-js', 'files' ] );
+
+				// For each glob matcher check if it matches and if so set the variables for our dynamic tasks.
+				for ( var i = 0; i < configs.length; i++ ) {
+					var config = configs[ i ];
+					var relative = path.relative( config.cwd, filepath );
+					var minimatch = require('minimatch');
+
+					if ( minimatch.match( config.src, relative, {} ) ) {
+						dest = config.dest + relative;
+						src = [ path.relative( BUILD_DIR, dest ) ];
+						files[ dest ] = [ filepath ];
+						break;
+					}
+				}
+			// Or if it's another file which has a straight mapping.
+			} else {
+				configs = Object.assign( {},
+					grunt.config( [ 'copy', 'admin-js', 'files' ] ),
+					grunt.config( [ 'copy', 'includes-js', 'files' ] )
+				);
+				for ( dest in configs ) {
+					// If a file in the mapping matches then set the variables for our dynamic tasks.
+					if ( configs.hasOwnProperty( dest ) && configs[ dest ][0] === './' + filepath ) {
+						files[ dest ] = configs[ dest ];
+						src = [ path.relative( BUILD_DIR, dest ) ];
+						break;
+					}
+				}
+			}
+
+			// Configure our dynamic-js copy task which uses a file mapping rather than simply copying from src to build.
+			if ( action !== 'deleted' ) {
+				grunt.config( [ 'copy', 'dynamic-js', 'files' ], files );
+			}
+		// For the webpack builds configure the jsvalidate task to only check those files build by webpack.
+		} else if ( target === 'js-webpack' ) {
+			src = [
+				'wp-includes/js/media-audiovideo.js',
+				'wp-includes/js/media-grid.js',
+				'wp-includes/js/media-models.js',
+				'wp-includes/js/media-views.js'
+			];
+		// Else simply use the path relative to the source directory.
+		} else {
+			src = [ path.relative( SOURCE_DIR, filepath ) ];
+		}
 
 		if ( action === 'deleted' ) {
+			// Clean up only those files that were deleted.
 			grunt.config( [ 'clean', 'dynamic', 'src' ], src );
 		} else {
+			// Otherwise copy over only the changed file.
 			grunt.config( [ 'copy', 'dynamic', 'src' ], src );
 
+			// For javascript also minify and validate the changed file.
+			if ( target === 'js-enqueues' ) {
+				grunt.config( [ 'uglify', 'dynamic', 'src' ], src );
+				grunt.config( [ 'jsvalidate', 'dynamic', 'files', 'src' ], src.map( function( dir ) { return  BUILD_DIR + dir; } ) );
+			}
+			// For webpack only validate the file, minification is handled by webpack itself.
+			if ( target === 'js-webpack' ) {
+				grunt.config( [ 'jsvalidate', 'dynamic', 'files', 'src' ], src.map( function( dir ) { return  BUILD_DIR + dir; } ) );
+			}
+			// For css run the rtl task on just the changed file.
 			if ( target === 'rtl' ) {
 				grunt.config( [ 'rtlcss', 'dynamic', 'src' ], src );
 			}
