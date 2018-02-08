@@ -53,6 +53,8 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 * Puts focus on the first text input on non-touch devices.
 	 *
 	 * @since 4.2.0
+	 *
+	 * @returns {void}
 	 */
 	initialFocus: function() {
 		if ( ! wp.media.isTouchDevice ) {
@@ -67,7 +69,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
+	 * Deletes an attachment after confirmation and keeps focus inside the media modal.
+	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	deleteAttachment: function( event ) {
 		event.preventDefault();
@@ -80,7 +88,12 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
+	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	trashAttachment: function( event ) {
 		var library = this.controller.library;
@@ -98,7 +111,11 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	untrashAttachment: function( event ) {
 		var library = this.controller.library;
@@ -110,7 +127,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		} );
 	},
 	/**
+	 * Sets an image's state to editable
+	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	editAttachment: function( event ) {
 		var editState = this.controller.states.get( 'edit-image' );
@@ -124,8 +147,12 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
-	 * When reverse tabbing(shift+tab) out of the right details panel, deliver
+	 * Handles reverse tabbing (shift + tab) events
+	 *
+	 * When reverse tabbing out of the right details panel, deliver
 	 * the focus to the item in the list that was being edited.
+	 *
+	 * @since 4.2.0
 	 *
 	 * @param {Object} event
 	 */
