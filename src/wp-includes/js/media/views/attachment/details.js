@@ -9,6 +9,10 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 
 	/**
 	 * Overrides the attributes method in the Attachment prototype.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @returns {Object}
 	 */
 	attributes: function() {
 		return {
@@ -28,6 +32,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		'click .edit-attachment':         'editAttachment',
 		'keydown':                        'toggleSelectionHandler'
 	},
+
 	/**
 	 * Shows the details of an attachment.
 	 *
@@ -36,8 +41,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 * @constructs wp.media.view.Attachment.Details
 	 * @augments wp.media.view.Attachment
 	 *
-	 * @param {Object} options The options of this view.
-	 * @param {boolean} options.rerenderOnModelChange Whether or not the view should rerender when the model changes.
+	 * @returns {void}
 	 */
 	initialize: function() {
 		this.options = _.defaults( this.options, {
@@ -53,6 +57,8 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 * Puts focus on the first text input on non-touch devices.
 	 *
 	 * @since 4.2.0
+	 *
+	 * @returns {void}
 	 */
 	initialFocus: function() {
 		if ( ! wp.media.isTouchDevice ) {
@@ -67,7 +73,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
+	 * Deletes an attachment after asking for confirmation.
+	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	deleteAttachment: function( event ) {
 		event.preventDefault();
@@ -80,7 +92,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
+	 * Trashes an attachment.
+	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	trashAttachment: function( event ) {
 		var library = this.controller.library;
@@ -98,7 +116,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
+	 * Untrashes an attachment.
+	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	untrashAttachment: function( event ) {
 		var library = this.controller.library;
@@ -110,7 +134,11 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		} );
 	},
 	/**
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	editAttachment: function( event ) {
 		var editState = this.controller.states.get( 'edit-image' );
@@ -127,7 +155,11 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 * When reverse tabbing(shift+tab) out of the right details panel, deliver
 	 * the focus to the item in the list that was being edited.
 	 *
+	 * @since 4.2.0
+	 *
 	 * @param {Object} event
+	 *
+	 * @returns {bool|void}
 	 */
 	toggleSelectionHandler: function( event ) {
 		if ( 'keydown' === event.type && 9 === event.keyCode && event.shiftKey && event.target === this.$( ':tabbable' ).get( 0 ) ) {
