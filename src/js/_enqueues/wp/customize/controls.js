@@ -1143,30 +1143,34 @@
 		},
 
 		/**
-		 * To override by subclass, to return whether the container has active children.
+		 * Determines whether the Container is contextually active.
+		 *
+		 * Must be overridden by subclass, to return whether the container has active children.
 		 *
 		 * @since 4.1.0
 		 *
 		 * @abstract
+		 *
+		 * @returns {void}
 		 */
 		isContextuallyActive: function () {
 			throw new Error( 'Container.isContextuallyActive() must be overridden in a subclass.' );
 		},
 
 		/**
-		 * Active state change handler.
+		 * Shows the Container if it is active, hides it if not.
 		 *
-		 * Shows the container if it is active, hides it if not.
-		 *
-		 * To override by subclass, update the container's UI to reflect the provided active state.
+		 * Must be overridden by subclass. Update the container's UI to reflect the provided active state.
 		 *
 		 * @since 4.1.0
 		 *
-		 * @param {boolean}  active - The active state to transiution to.
-		 * @param {Object}   [args] - Args.
-		 * @param {Object}   [args.duration] - The duration for the slideUp/slideDown animation.
-		 * @param {boolean}  [args.unchanged] - Whether the state is already known to not be changed, and so short-circuit with calling completeCallback early.
-		 * @param {Function} [args.completeCallback] - Function to call when the slideUp/slideDown has completed.
+		 * @param {boolean}  active						The active state to transition to.
+		 * @param {Object}   [args]						The arguments to use within the transition.
+		 * @param {Object}   [args.duration]			The duration for the slideUp/slideDown animation.
+		 * @param {boolean}  [args.unchanged]			Whether the state remains unchanged.
+		 * @param {Function} [args.completeCallback]	Function to call when the slideUp/slideDown has completed.
+		 *
+		 * @returns {void}
 		 */
 		onChangeActive: function( active, args ) {
 			var construct = this,
@@ -1183,7 +1187,7 @@
 			duration = ( 'resolved' === api.previewer.deferred.active.state() ? args.duration : 0 );
 
 			if ( construct.extended( api.Panel ) ) {
-				// If this is a panel is not currently expanded but another panel is expanded, do not animate.
+				// If this is a panel and is not currently expanded, but another panel is, do not animate.
 				api.panel.each(function ( panel ) {
 					if ( panel !== construct && panel.expanded() ) {
 						expandedOtherPanel = panel;
@@ -1222,11 +1226,15 @@
 		},
 
 		/**
+		 * Toggles the active state if the current state is different than the wanted state.
+		 *
 		 * @since 4.1.0
 		 *
-		 * @params {Boolean} active
-		 * @param {Object}   [params]
-		 * @returns {Boolean} false if state already applied
+		 * @param {boolean} active		The state to toggle to.
+		 * @param {Object}  [params]	Optional parameters that can be passed along to either onChangeActive
+		 * 								or the activeArgumentsQueue.
+		 *
+		 * @returns {boolean} True if the toggling of state was executed. Otherwise false.
 		 */
 		_toggleActive: function ( active, params ) {
 			var self = this;
@@ -1244,36 +1252,48 @@
 		},
 
 		/**
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if already active
+		 * Activates the Container.
+		 *
+		 * @param {Object} [params]	The parameters to pass along to the toggleActive function.
+		 *
+		 * @returns {boolean} True if the toggling of state was executed. Otherwise false.
 		 */
 		activate: function ( params ) {
 			return this._toggleActive( true, params );
 		},
 
 		/**
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if already inactive
+		 * Deactivates the Container.
+		 *
+		 * @param {Object} [params]	The parameters to pass along to the toggleActive function.
+		 *
+		 * @returns {boolean} True if the toggling of state was executed. Otherwise false.
 		 */
 		deactivate: function ( params ) {
 			return this._toggleActive( false, params );
 		},
 
 		/**
-		 * To override by subclass, update the container's UI to reflect the provided active state.
+		 * Is called when there's been a change in the Container's expanded state.
+		 *
+		 * Must be overridden by subclass. Update the Container's UI to reflect the provided active state.
+		 *
 		 * @abstract
+		 *
+		 * @returns {void}
 		 */
 		onChangeExpanded: function () {
 			throw new Error( 'Must override with subclass.' );
 		},
 
 		/**
-		 * Handle the toggle logic for expand/collapse.
+		 * Handles the toggle logic for expanding and collapsing the Container.
 		 *
-		 * @param {Boolean}  expanded - The new state to apply.
-		 * @param {Object}   [params] - Object containing options for expand/collapse.
-		 * @param {Function} [params.completeCallback] - Function to call when expansion/collapse is complete.
-		 * @returns {Boolean} false if state already applied or active state is false
+		 * @param {boolean}  expanded 					The new expanded / collapsed state to apply.
+		 * @param {Object}   [params] 					Object containing options for expansion/collapse.
+		 * @param {Function} [params.completeCallback]  Function to call when expansion/collapse is complete.
+		 *
+		 * @returns {boolean} False if state already applied or active state is false
 		 */
 		_toggleExpanded: function( expanded, params ) {
 			var instance = this, previousCompleteCallback;
@@ -1309,28 +1329,35 @@
 		},
 
 		/**
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if already expanded or if inactive.
+		 * Expands the Container.
+		 *
+		 * @param {Object} [params] Object containing options for expansion/collapse.
+		 *
+		 * @returns {boolean} False if already expanded or if inactive.
 		 */
 		expand: function ( params ) {
 			return this._toggleExpanded( true, params );
 		},
 
 		/**
-		 * @param {Object} [params]
-		 * @returns {Boolean} false if already collapsed.
+		 * Collapses the Container.
+		 *
+		 * @param {Object} [params] Object containing options for expansion/collapse.
+		 *
+		 * @returns {boolean} False if already collapsed.
 		 */
 		collapse: function ( params ) {
 			return this._toggleExpanded( false, params );
 		},
 
 		/**
-		 * Animate container state change if transitions are supported by the browser.
+		 * Animates the container state change if transitions are supported by the browser.
 		 *
 		 * @since 4.7.0
 		 * @private
 		 *
-		 * @param {function} completeCallback Function to be called after transition is completed.
+		 * @param {Function} completeCallback Function to be called after transition has completed.
+		 *
 		 * @returns {void}
 		 */
 		_animateChangeExpanded: function( completeCallback ) {
@@ -1393,14 +1420,16 @@
 		},
 
 		/*
-		 * is documented using @borrows in the constructor.
+		 * Is documented using @borrows in the constructor.
 		 */
 		focus: focus,
 
 		/**
-		 * Return the container html, generated from its JS template, if it exists.
+		 * Returns the container HTML, generated from its JS template, if it exists.
 		 *
 		 * @since 4.3.0
+		 *
+		 * @returns {string} The container's template or an empty set of <li>'s.
 		 */
 		getContainer: function () {
 			var template,
@@ -1422,19 +1451,18 @@
 		},
 
 		/**
-		 * Find content element which is displayed when the section is expanded.
+		 * Finds the content element which is displayed when the section is expanded.
 		 *
 		 * After a construct is initialized, the return value will be available via the `contentContainer` property.
-		 * By default the element will be related it to the parent container with `aria-owns` and detached.
-		 * Custom panels and sections (such as the `NewMenuSection`) that do not have a sliding pane should
-		 * just return the content element without needing to add the `aria-owns` element or detach it from
-		 * the container. Such non-sliding pane custom sections also need to override the `onChangeExpanded`
-		 * method to handle animating the panel/section into and out of view.
+		 * By default the element will relate it to the parent container with `aria-owns` and then be detached.
+		 *
+		 * Custom panels and sections without a sliding pane, should just return the content element .
+		 * Such non-sliding pane custom sections also need to override the `onChangeExpanded` method to handle animating
+		 * the panel/section into and out of view.
 		 *
 		 * @since 4.7.0
-		 * @access public
 		 *
-		 * @returns {jQuery} Detached content element.
+		 * @returns {jQuery} The detached content element.
 		 */
 		getContent: function() {
 			var construct = this,
@@ -1456,6 +1484,9 @@
 		}
 	});
 
+    /**
+	 * The Section object.
+     */
 	api.Section = Container.extend(/** @lends wp.customize.Section.prototype */{
 		containerType: 'section',
 		containerParent: '#customize-theme-controls',
@@ -1473,22 +1504,26 @@
 		},
 
 		/**
+		 * Initializes a Section object.
+		 *
 		 * @constructs wp.customize.Section
 		 * @augments   wp.customize~Container
 		 *
 		 * @since 4.1.0
 		 *
-		 * @param {string}         id - The ID for the section.
-		 * @param {object}         options - Options.
-		 * @param {string}         options.title - Title shown when section is collapsed and expanded.
-		 * @param {string=}        [options.description] - Description shown at the top of the section.
-		 * @param {number=100}     [options.priority] - The sort priority for the section.
-		 * @param {string=default} [options.type] - The type of the section. See wp.customize.sectionConstructor.
-		 * @param {string=}        [options.content] - The markup to be used for the section container. If empty, a JS template is used.
-		 * @param {boolean=true}   [options.active] - Whether the section is active or not.
-		 * @param {string}         options.panel - The ID for the panel this section is associated with.
-		 * @param {string=}        [options.customizeAction] - Additional context information shown before the section title when expanded.
-		 * @param {object}         [options.params] - Deprecated wrapper for the above properties.
+		 * @param {string} 	id 							The ID for the section.
+		 * @param {object} 	options 					The options to use within the Section object.
+		 * @param {string} 	options.title 				Title shown when section is collapsed and expanded.
+		 * @param {string} 	[options.description] 		Description shown at the top of the section.
+		 * @param {number} 	[options.priority=100] 		The sort priority for the section.
+		 * @param {string} 	[options.type=default] 		The type of the section. See wp.customize.sectionConstructor.
+		 * @param {string} 	[options.content] 			The markup to be used for the section container. If empty, a JS template is used.
+		 * @param {boolean}	[options.active=true] 		Whether the section is active or not.
+		 * @param {string}  options.panel 				The ID for the panel this section is associated with.
+		 * @param {string}  [options.customizeAction] 	Additional context information shown before the section title when expanded.
+		 * @param {object}  [options.params] 			Deprecated wrapper for the above properties.
+		 *
+		 * @returns {void}
 		 */
 		initialize: function ( id, options ) {
 			var section = this, params;
@@ -1522,9 +1557,11 @@
 		},
 
 		/**
-		 * Embed the container in the DOM when any parent panel is ready.
+		 * Embeds the container in the DOM when any parent panel is ready.
 		 *
 		 * @since 4.1.0
+		 *
+		 * @returns {void}
 		 */
 		embed: function () {
 			var inject,
@@ -1567,9 +1604,11 @@
 		},
 
 		/**
-		 * Add behaviors for the accordion section.
+		 * Adds behaviors for the accordion section to deal with expanding and collapsing.
 		 *
 		 * @since 4.1.0
+		 *
+		 * @returns {void}
 		 */
 		attachEvents: function () {
 			var meta, content, section = this;
@@ -1578,7 +1617,7 @@
 				return;
 			}
 
-			// Expand/Collapse accordion sections on click.
+			// Expand/collapse accordion sections on click.
 			section.container.find( '.accordion-section-title, .customize-section-back' ).on( 'click keydown', function( event ) {
 				if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
 					return;
@@ -1592,7 +1631,7 @@
 				}
 			});
 
-			// This is very similar to what is found for api.Panel.attachEvents().
+			// Handle click events on the help toggle.
 			section.container.find( '.customize-section-title .customize-help-toggle' ).on( 'click', function() {
 
 				meta = section.container.find( '.section-meta' );
@@ -1611,11 +1650,11 @@
 		},
 
 		/**
-		 * Return whether this section has any active controls.
+		 * Returns whether this section has any active controls.
 		 *
 		 * @since 4.1.0
 		 *
-		 * @returns {Boolean}
+		 * @returns {boolean} True if the section has active controls.
 		 */
 		isContextuallyActive: function () {
 			var section = this,
@@ -1630,23 +1669,25 @@
 		},
 
 		/**
-		 * Get the controls that are associated with this section, sorted by their priority Value.
+		 * Gets the controls that are associated with this section, sorted by their priority value.
 		 *
 		 * @since 4.1.0
 		 *
-		 * @returns {Array}
+		 * @returns {Array} A list of controls associated with this section.
 		 */
 		controls: function () {
 			return this._children( 'section', 'control' );
 		},
 
 		/**
-		 * Update UI to reflect expanded state.
+		 * Updates the UI to reflect the expanded state.
 		 *
 		 * @since 4.1.0
 		 *
-		 * @param {Boolean} expanded
-		 * @param {Object}  args
+		 * @param {boolean} expanded 	The current state of the Panel object.
+		 * @param {Object}  args	 	The arguments to use while updating the panel.
+		 *
+		 * @returns {void}
 		 */
 		onChangeExpanded: function ( expanded, args ) {
 			var section = this,
@@ -1663,6 +1704,7 @@
 					expand = args.completeCallback;
 				} else {
 					expand = $.proxy( function() {
+						// Animate the expansion of the panel.
 						section._animateChangeExpanded( function() {
 							sectionTitle.attr( 'tabindex', '-1' );
 							backBtn.attr( 'tabindex', '0' );
@@ -1682,6 +1724,7 @@
 					}, this );
 				}
 
+				// Collapse other panels if allowMultiple is false.
 				if ( ! args.allowMultiple ) {
 					api.section.each( function ( otherSection ) {
 						if ( otherSection !== section ) {
@@ -1691,12 +1734,14 @@
 				}
 
 				if ( section.panel() ) {
+					// Expand the panel.
 					api.panel( section.panel() ).expand({
 						duration: args.duration,
 						completeCallback: expand
 					});
 				} else {
-					if ( ! args.allowMultiple ) {
+                    // Collapse other panels if allowMultiple is false.
+                    if ( ! args.allowMultiple ) {
 						api.panel.each( function( panel ) {
 							panel.collapse();
 						});
@@ -1711,7 +1756,9 @@
 						panel.collapse();
 					}
 				}
-				section._animateChangeExpanded( function() {
+
+                // Animate the collapsing of the panel.
+                section._animateChangeExpanded( function() {
 					backBtn.attr( 'tabindex', '-1' );
 					sectionTitle.attr( 'tabindex', '0' );
 
