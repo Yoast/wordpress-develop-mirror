@@ -4099,7 +4099,9 @@ function wp_set_post_tags( $post_id = 0, $tags = '', $append = false ) {
  *
  * @param int          $post_id  Optional. The Post ID. Does not default to the ID of the global $post.
  * @param string|array $tags     Optional. An array of terms to set for the post, or a string of terms
- *                               separated by commas. Default empty.
+ *                               separated by commas. Hierarchical taxonomies must always pass IDs rather
+ *                               than names so that children with the same names but different parents
+ *                               aren't confused. Default empty.
  * @param string       $taxonomy Optional. Taxonomy name. Default 'post_tag'.
  * @param bool         $append   Optional. If true, don't delete existing terms, just add on. If false,
  *                               replace the terms with the new terms. Default false.
@@ -5720,7 +5722,7 @@ function wp_check_for_changed_slugs( $post_id, $post, $post_before ) {
  * The most logically usage of this function is redirecting changed post objects, so
  * that those that linked to an changed post will be redirected to the new post.
  *
- * @since 4.9.2
+ * @since 4.9.3
  *
  * @param int     $post_id     Post ID.
  * @param WP_Post $post        The Post Object
