@@ -93,6 +93,17 @@ module.exports = function(grunt) {
 			tinymce: ['<%= concat.tinymce.dest %>'],
 			qunit: ['tests/js/integration/compiled.html']
 		},
+		file_append: {
+			default_options: {
+				files: [
+					{
+						append: 'jQuery.noConflict();',
+				 		input: './build/wp-includes/js/jquery/jquery.js',
+				 		output: './build/wp-includes/js/jquery/jquery.js'
+					}
+				]
+			}
+		},
 		copy: {
 			files: {
 				files: [
@@ -1131,6 +1142,7 @@ module.exports = function(grunt) {
 		'clean:js',
 		'webpack:dev',
 		'copy:js',
+		'file_append',
 		'uglify:all',
 		'build:tinymce',
 		'concat:emoji',
@@ -1150,6 +1162,7 @@ module.exports = function(grunt) {
 		'clean:all',
 		'webpack:dev',
 		'copy:all',
+		'file_append',
 		'cssmin:core',
 		'colors',
 		'rtl',
