@@ -134,6 +134,8 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		} );
 	},
 	/**
+	 * Opens the edit page for a specific attachment.
+	 *
 	 * @since 4.2.0
 	 *
 	 * @param {Object} event
@@ -156,6 +158,9 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 * the focus to the item in the list that was being edited.
 	 *
 	 * @since 4.2.0
+	 *
+	 * @fires wp.media.view.Attachment.Details#attachment:details:shift-tab
+	 * @fires wp.media.view.Attachment.Details#attachment:keydown:arrow
 	 *
 	 * @param {Object} event
 	 *
