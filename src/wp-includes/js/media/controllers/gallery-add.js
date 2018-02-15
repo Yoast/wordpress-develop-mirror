@@ -83,18 +83,18 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 		}
 
 		/*
-		Accept attachments that exist in the original library and
-		that do not exist in gallery's library.
-		*/
+		 * Accept attachments that exist in the original library and
+		 * that do not exist in gallery's library.
+		 */
 		library.validator = function( attachment ) {
 			return !! this.mirroring.get( attachment.cid ) && ! edit.get( attachment.cid ) && Selection.prototype.validator.apply( this, arguments );
 		};
 
 		/*
-		Reset the library to ensure that all attachments are re-added
-		to the collection. Do so silently, as calling `observe` will
-		trigger the `reset` event.
-		*/
+		 * Reset the library to ensure that all attachments are re-added
+		 * to the collection. Do so silently, as calling `observe` will
+		 * trigger the `reset` event.
+		 */
 		library.reset( library.mirroring.models, { silent: true });
 		library.observe( edit );
 		this.editLibrary = edit;
