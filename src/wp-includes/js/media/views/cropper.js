@@ -4,25 +4,30 @@ var View = wp.media.View,
 	$ = jQuery,
 	Cropper;
 
-/**
- * wp.media.view.Cropper
- *
- * Uses the imgAreaSelect plugin to allow a user to crop an image.
- *
- * Takes imgAreaSelect options from
- * wp.customize.HeaderControl.calculateImageSelectOptions via
- * wp.customize.HeaderControl.openMM.
- *
- * @memberOf wp.media.view
- *
- * @class
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
- */
 Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 	className: 'crop-content',
 	template: wp.template('crop-content'),
+	/**
+	 * wp.media.view.Cropper
+	 *
+	 * Uses the imgAreaSelect plugin to allow a user to crop an image.
+	 *
+	 * Takes imgAreaSelect options from
+	 * wp.customize.HeaderControl.calculateImageSelectOptions via
+	 * wp.customize.HeaderControl.openMM.
+	 *
+	 * @since 3.9.0
+	 *
+	 * @augments wp.media.View
+	 * @augments wp.Backbone.View
+	 * @augments Backbone.View
+	 *
+	 * @memberOf wp.media.view
+	 *
+	 * @see   imgAreaSelect plugin
+	 * @link  https://github.com/odyniec/imgareaselect
+	 * @fires wp.media.view.Cropper#image-loaded
+	 */
 	initialize: function() {
 		_.bindAll(this, 'onImageLoad');
 	},
