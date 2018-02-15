@@ -418,7 +418,12 @@ function require_wp_db() {
 		return;
 	}
 
-	$wpdb = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+	$dbuser     = defined( 'DB_USER' ) ? DB_USER : '';
+	$dbpassword = defined( 'DB_PASSWORD' ) ? DB_PASSWORD : '';
+	$dbname     = defined( 'DB_NAME' ) ? DB_NAME : '';
+	$dbhost     = defined( 'DB_HOST' ) ? DB_HOST : '';
+
+	$wpdb = new wpdb( $dbuser, $dbpassword, $dbname, $dbhost );
 }
 
 /**
@@ -752,10 +757,14 @@ function wp_clone( $object ) {
 }
 
 /**
- * Whether the current request is for an administrative interface page.
+ * Determines whether the current request is for an administrative interface page.
  *
  * Does not check if the user is an administrator; current_user_can()
  * for checking roles and capabilities.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * Conditional Tags} article in the Theme Developer Handbook. 
  *
  * @since 1.5.1
  *
