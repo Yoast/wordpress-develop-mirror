@@ -73,11 +73,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
-	 * Deletes an attachment after asking for confirmation.
+	 * Deletes an attachment.
+	 *
+	 * Deletes an attachment after asking for confirmation. After deletion, keeps focus in the modal.
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param {Object} event
+	 * @param {MouseEvent} event A click event.
 	 *
 	 * @returns {void}
 	 */
@@ -92,11 +94,13 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 		}
 	},
 	/**
-	 * Trashes an attachment.
+	 * Sets the trash state on an attachment, or destroys it.
+	 *
+	 * If the mediaTrash setting is set to true, trashes the attachment. Otherwise, it destroys it.
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param {Object} event
+	 * @param {MouseEvent} event A click event.
 	 *
 	 * @returns {void}
 	 */
@@ -120,7 +124,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param {Object} event
+	 * @param {MouseEvent} event A click event.
 	 *
 	 * @returns {void}
 	 */
@@ -138,7 +142,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param {Object} event
+	 * @param {MouseEvent} event A click event.
 	 *
 	 * @returns {void}
 	 */
@@ -153,18 +157,19 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 			this.$el.addClass('needs-refresh');
 		}
 	},
+
 	/**
-	 * When reverse tabbing(shift+tab) out of the right details panel, deliver
+	 * When reverse tabbing(shift+tab) out of the right details panel, delivers
 	 * the focus to the item in the list that was being edited.
 	 *
 	 * @since 4.2.0
 	 *
-	 * @fires wp.media.view.Attachment.Details#attachment:details:shift-tab
-	 * @fires wp.media.view.Attachment.Details#attachment:keydown:arrow
+	 * @fires wp.media.controller.MediaLibrary#attachment:details:shift-tab
+	 * @fires wp.media.controller.MediaLibrary#attachment:keydown:arrow
 	 *
-	 * @param {Object} event
+	 * @param {KeyboardEvent} event A keyboard event.
 	 *
-	 * @returns {bool|void}
+	 * @returns {boolean|void}
 	 */
 	toggleSelectionHandler: function( event ) {
 		if ( 'keydown' === event.type && 9 === event.keyCode && event.shiftKey && event.target === this.$( ':tabbable' ).get( 0 ) ) {
