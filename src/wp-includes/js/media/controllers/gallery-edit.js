@@ -7,6 +7,8 @@ var Library = wp.media.controller.Library,
  *
  * A state for editing a gallery's images and settings.
  *
+ * @since 3.5.0
+ *
  * @memberOf wp.media.controller
  *
  * @class
@@ -14,7 +16,7 @@ var Library = wp.media.controller.Library,
  * @augments wp.media.controller.State
  * @augments Backbone.Model
  *
- * @param {object}                     [attributes]                       The attributes hash passed to the state.
+ * @param {Object}                     [attributes]                       The attributes hash passed to the state.
  * @param {string}                     [attributes.id=gallery-edit]       Unique identifier.
  * @param {string}                     [attributes.title=Edit Gallery]    Title for the state. Displays in the frame's title region.
  * @param {wp.media.model.Attachments} [attributes.library]               The collection of attachments in the gallery.
@@ -28,9 +30,9 @@ var Library = wp.media.controller.Library,
  * @param {boolean}                    [attributes.describe=true]         Whether to offer UI to describe attachments - e.g. captioning images in a gallery.
  * @param {boolean}                    [attributes.displaySettings=true]  Whether to show the attachment display settings interface.
  * @param {boolean}                    [attributes.dragInfo=true]         Whether to show instructional text about the attachments being sortable.
- * @param {int}                        [attributes.idealColumnWidth=170]  The ideal column width in pixels for attachments.
+ * @param {number}                     [attributes.idealColumnWidth=170]  The ideal column width in pixels for attachments.
  * @param {boolean}                    [attributes.editing=false]         Whether the gallery is being created, or editing an existing instance.
- * @param {int}                        [attributes.priority=60]           The priority for the state link in the media menu.
+ * @param {number}                     [attributes.priority=60]           The priority for the state link in the media menu.
  * @param {boolean}                    [attributes.syncSelection=false]   Whether the Attachments selection should be persisted from the last state.
  *                                                                        Defaults to false for this state, because the library passed in  *is* the selection.
  * @param {view}                       [attributes.AttachmentView]        The single `Attachment` view to be used in the `Attachments`.
@@ -57,7 +59,14 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	},
 
 	/**
+	 * Initializes the library.
+	 *
+	 * Creates a selection if a library isn't supplied
+	 * and creates an attachment view if no attachment view is supplied.
+	 *
 	 * @since 3.5.0
+	 *
+	 * @returns {void}
 	 */
 	initialize: function() {
 		// If we haven't been provided a `library`, create a `Selection`.
@@ -74,7 +83,13 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	},
 
 	/**
+	 * Activates the library.
+	 *
+	 * Limits the library to images, watches for uploaded attachments.
+	 *
 	 * @since 3.5.0
+	 *
+	 * @returns {void}
 	 */
 	activate: function() {
 		var library = this.get('library');
@@ -92,6 +107,8 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 
 	/**
 	 * @since 3.5.0
+	 *
+	 * @returns {void}
 	 */
 	deactivate: function() {
 		// Stop watching for uploaded attachments.
@@ -106,6 +123,8 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	 * @since 3.5.0
 	 *
 	 * @param browser
+	 *
+	 * @returns {void}
 	 */
 	gallerySettings: function( browser ) {
 		if ( ! this.get('displaySettings') ) {
