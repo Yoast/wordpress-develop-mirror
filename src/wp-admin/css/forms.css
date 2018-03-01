@@ -228,8 +228,8 @@ textarea[readonly] {
 }
 
 ::-moz-placeholder {
-   color: #72777c;
-   opacity: 1;
+	color: #72777c;
+	opacity: 1;
 }
 
 :-ms-input-placeholder {
@@ -252,11 +252,11 @@ textarea[readonly] {
 
 /* Adjust error indicator for password layout */
 .form-table .form-required.user-pass1-wrap.form-invalid td:after {
-	content: '';
+	content: "";
 }
 
 .form-table .form-required.user-pass1-wrap.form-invalid .password-input-wrapper:after {
-	content: '\f534';
+	content: "\f534";
 	font: normal 20px/1 dashicons;
 	color: #dc3232;
 	margin: 0 6px 0 -29px;
@@ -897,7 +897,7 @@ table.form-table td .updated p {
 
 .options-general-php .spinner {
 	float: none;
-	margin: 0 3px;
+	margin: -3px 3px 0;
 }
 
 .settings-php .language-install-spinner,
@@ -952,6 +952,8 @@ table.form-table td .updated p {
 
 .request-filesystem-credentials-dialog {
 	display: none;
+	/* The customizer uses visibility: hidden on the body for full-overlays. */
+	visibility: visible;
 }
 
 .request-filesystem-credentials-dialog .notification-dialog {
@@ -964,8 +966,8 @@ table.form-table td .updated p {
 }
 
 #request-filesystem-credentials-title {
-    font-size: 1.3em;
-    margin: 1em 0;
+	font-size: 1.3em;
+	margin: 1em 0;
 }
 
 .request-filesystem-credentials-form legend {
@@ -1220,7 +1222,7 @@ table.form-table td .updated p {
 	input[type="number"].small-text,
 	.form-table input[type="text"].small-text {
 		width: auto;
-		max-width: 55px;
+		max-width: 4.375em; /* 70px, enough for 4 digits to fit comfortably */
 		display: inline;
 		padding: 3px 6px;
 		margin: 0 3px;
@@ -1340,7 +1342,7 @@ table.form-table td .updated p {
 	}
 
 	.options-general-php input[type="text"].small-text {
-		max-width: 60px;
+		max-width: 6.25em;
 		margin: 0;
 	}
 }
@@ -1365,9 +1367,10 @@ table.form-table td .updated p {
 	}
 }
 
-@media only screen and (max-height: 480px) {
-	/*  Request Credentials */
-	.request-filesystem-credentials-dialog .notification-dialog{
+@media only screen and (max-height: 480px), screen and (max-width: 450px) {
+	/* Request Credentials / File Editor Warning */
+	.request-filesystem-credentials-dialog .notification-dialog,
+	.file-editor-warning .notification-dialog {
 		width: 100%;
 		height: 100%;
 		max-height: 100%;

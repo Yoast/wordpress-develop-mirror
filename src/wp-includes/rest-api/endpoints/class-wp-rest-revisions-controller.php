@@ -48,12 +48,12 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 * @param string $parent_post_type Post type of the parent.
 	 */
 	public function __construct( $parent_post_type ) {
-		$this->parent_post_type = $parent_post_type;
+		$this->parent_post_type  = $parent_post_type;
 		$this->parent_controller = new WP_REST_Posts_Controller( $parent_post_type );
-		$this->namespace = 'wp/v2';
-		$this->rest_base = 'revisions';
-		$post_type_object = get_post_type_object( $parent_post_type );
-		$this->parent_base = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
+		$this->namespace         = 'wp/v2';
+		$this->rest_base         = 'revisions';
+		$post_type_object        = get_post_type_object( $parent_post_type );
+		$this->parent_base       = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
 	}
 
 	/**
@@ -65,55 +65,59 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 */
 	public function register_routes() {
 
-		register_rest_route( $this->namespace, '/' . $this->parent_base . '/(?P<parent>[\d]+)/' . $this->rest_base, array(
-			'args' => array(
-				'parent' => array(
-					'description' => __( 'The ID for the parent of the object.' ),
-					'type'        => 'integer',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-
-		register_rest_route( $this->namespace, '/' . $this->parent_base . '/(?P<parent>[\d]+)/' . $this->rest_base . '/(?P<id>[\d]+)', array(
-			'args' => array(
-				'parent' => array(
-					'description' => __( 'The ID for the parent of the object.' ),
-					'type'        => 'integer',
-				),
-				'id' => array(
-					'description' => __( 'Unique identifier for the object.' ),
-					'type'        => 'integer',
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
-					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'type'        => 'boolean',
-						'default'     => false,
-						'description' => __( 'Required to be true, as revisions do not support trashing.' ),
+		register_rest_route(
+			$this->namespace, '/' . $this->parent_base . '/(?P<parent>[\d]+)/' . $this->rest_base, array(
+				'args'   => array(
+					'parent' => array(
+						'description' => __( 'The ID for the parent of the object.' ),
+						'type'        => 'integer',
 					),
 				),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		));
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace, '/' . $this->parent_base . '/(?P<parent>[\d]+)/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+				'args'   => array(
+					'parent' => array(
+						'description' => __( 'The ID for the parent of the object.' ),
+						'type'        => 'integer',
+					),
+					'id'     => array(
+						'description' => __( 'Unique identifier for the object.' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'type'        => 'boolean',
+							'default'     => false,
+							'description' => __( 'Required to be true, as revisions do not support trashing.' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
 	}
 
@@ -201,7 +205,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 
 		$response = array();
 		foreach ( $revisions as $revision ) {
-			$data = $this->prepare_item_for_response( $revision, $request );
+			$data       = $this->prepare_item_for_response( $revision, $request );
 			$response[] = $this->prepare_response_for_collection( $data );
 		}
 		return rest_ensure_response( $response );
@@ -288,7 +292,8 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 
 		// We don't support trashing for revisions.
 		if ( ! $force ) {
-			return new WP_Error( 'rest_trash_not_supported', __( 'Revisions do not support trashing. Set force=true to delete.' ), array( 'status' => 501 ) );
+			/* translators: %s: force=true */
+			return new WP_Error( 'rest_trash_not_supported', sprintf( __( "Revisions do not support trashing. Set '%s' to delete." ), 'force=true' ), array( 'status' => 501 ) );
 		}
 
 		$previous = $this->prepare_item_for_response( $revision, $request );
@@ -301,7 +306,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 		 * @since 4.7.0
 		 *
 		 * @param (mixed) $result The revision object (if it was deleted or moved to the trash successfully)
-		 *                        or false (failure). If the revision was moved to to the trash, $result represents
+		 *                        or false (failure). If the revision was moved to the trash, $result represents
 		 *                        its new state; if it was deleted, $result represents its state before deletion.
 		 * @param WP_REST_Request $request The request sent to the API.
 		 */
@@ -312,7 +317,12 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 		}
 
 		$response = new WP_REST_Response();
-		$response->set_data( array( 'deleted' => true, 'previous' => $previous->get_data() ) );
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			)
+		);
 		return $response;
 	}
 
@@ -369,7 +379,7 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 		if ( ! empty( $schema['properties']['guid'] ) ) {
 			$data['guid'] = array(
 				/** This filter is documented in wp-includes/post-template.php */
-				'rendered' => apply_filters( 'get_the_guid', $post->guid ),
+				'rendered' => apply_filters( 'get_the_guid', $post->guid, $post->ID ),
 				'raw'      => $post->guid,
 			);
 		}
@@ -397,9 +407,9 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
+		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
 
 		if ( ! empty( $data['parent'] ) ) {
@@ -451,56 +461,56 @@ class WP_REST_Revisions_Controller extends WP_REST_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'    => 'http://json-schema.org/schema#',
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => "{$this->parent_post_type}-revision",
 			'type'       => 'object',
 			// Base properties for every Revision.
 			'properties' => array(
-				'author'          => array(
+				'author'       => array(
 					'description' => __( 'The ID for the author of the object.' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit', 'embed' ),
 				),
-				'date'            => array(
+				'date'         => array(
 					'description' => __( "The date the object was published, in the site's timezone." ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit', 'embed' ),
 				),
-				'date_gmt'        => array(
+				'date_gmt'     => array(
 					'description' => __( 'The date the object was published, as GMT.' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'guid'            => array(
+				'guid'         => array(
 					'description' => __( 'GUID for the object, as it exists in the database.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'id'              => array(
+				'id'           => array(
 					'description' => __( 'Unique identifier for the object.' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit', 'embed' ),
 				),
-				'modified'        => array(
+				'modified'     => array(
 					'description' => __( "The date the object was last modified, in the site's timezone." ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'modified_gmt'    => array(
+				'modified_gmt' => array(
 					'description' => __( 'The date the object was last modified, as GMT.' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'parent'          => array(
+				'parent'       => array(
 					'description' => __( 'The ID for the parent of the object.' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit', 'embed' ),
-					),
-				'slug'            => array(
+				),
+				'slug'         => array(
 					'description' => __( 'An alphanumeric identifier for the object unique to its type.' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),

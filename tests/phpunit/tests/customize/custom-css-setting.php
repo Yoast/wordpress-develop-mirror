@@ -31,9 +31,11 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		parent::setUp();
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
 
-		$user_id = self::factory()->user->create( array(
-			'role' => 'administrator',
-		) );
+		$user_id = self::factory()->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 		if ( is_multisite() ) {
 			grant_super_admin( $user_id );
 		}
@@ -42,7 +44,7 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 
 		global $wp_customize;
 		$this->wp_customize = new WP_Customize_Manager();
-		$wp_customize = $this->wp_customize;
+		$wp_customize       = $this->wp_customize;
 
 		do_action( 'customize_register', $this->wp_customize );
 		$this->setting = new WP_Customize_Custom_CSS_Setting( $this->wp_customize, 'custom_css[' . get_stylesheet() . ']' );
@@ -117,22 +119,26 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$this->assertNull( wp_get_custom_css_post( $this->setting->stylesheet ) );
 		$this->assertNull( wp_get_custom_css_post( 'twentyten' ) );
 
-		$original_css = 'body { color: black; }';
-		$post_id = $this->factory()->post->create( array(
-			'post_title' => $this->setting->stylesheet,
-			'post_name' => $this->setting->stylesheet,
-			'post_content' => $original_css,
-			'post_status' => 'publish',
-			'post_type' => 'custom_css',
-		) );
-		$twentyten_css = 'body { color: red; }';
-		$twentyten_post_id = $this->factory()->post->create( array(
-			'post_title' => 'twentyten',
-			'post_name' => 'twentyten',
-			'post_content' => $twentyten_css,
-			'post_status' => 'publish',
-			'post_type' => 'custom_css',
-		) );
+		$original_css      = 'body { color: black; }';
+		$post_id           = $this->factory()->post->create(
+			array(
+				'post_title'   => $this->setting->stylesheet,
+				'post_name'    => $this->setting->stylesheet,
+				'post_content' => $original_css,
+				'post_status'  => 'publish',
+				'post_type'    => 'custom_css',
+			)
+		);
+		$twentyten_css     = 'body { color: red; }';
+		$twentyten_post_id = $this->factory()->post->create(
+			array(
+				'post_title'   => 'twentyten',
+				'post_name'    => 'twentyten',
+				'post_content' => $twentyten_css,
+				'post_status'  => 'publish',
+				'post_type'    => 'custom_css',
+			)
+		);
 		$twentyten_setting = new WP_Customize_Custom_CSS_Setting( $this->wp_customize, 'custom_css[twentyten]' );
 
 		remove_theme_mod( 'custom_css_post_id' );
@@ -162,10 +168,12 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$this->assertEquals( $previewed_css, wp_get_custom_css( $this->setting->stylesheet ) );
 
 		// Make sure that wp_update_custom_css_post() works as expected for updates.
-		$r = wp_update_custom_css_post( 'body { color:red; }', array(
-			'stylesheet' => $this->setting->stylesheet,
-			'preprocessed' => "body\n\tcolor:red;",
-		) );
+		$r = wp_update_custom_css_post(
+			'body { color:red; }', array(
+				'stylesheet'   => $this->setting->stylesheet,
+				'preprocessed' => "body\n\tcolor:red;",
+			)
+		);
 		$this->assertInstanceOf( 'WP_Post', $r );
 		$this->assertEquals( $post_id, $r->ID );
 		$this->assertEquals( 'body { color:red; }', get_post( $r )->post_content );
@@ -176,9 +184,11 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$this->assertEquals( '', get_post( $r )->post_content_filtered );
 
 		// Make sure that wp_update_custom_css_post() works as expected for insertion.
-		$r = wp_update_custom_css_post( 'body { background:black; }', array(
-			'stylesheet' => 'other',
-		) );
+		$r = wp_update_custom_css_post(
+			'body { background:black; }', array(
+				'stylesheet' => 'other',
+			)
+		);
 		$this->assertInstanceOf( 'WP_Post', $r );
 		$this->assertEquals( 'other', get_post( $r )->post_name );
 		$this->assertEquals( 'body { background:black; }', get_post( $r )->post_content );
@@ -201,20 +211,24 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 	 */
 	function test_custom_css_revision_saved() {
 		$inserted_css = 'body { background: black; }';
-		$updated_css = 'body { background: red; }';
+		$updated_css  = 'body { background: red; }';
 
-		$post = wp_update_custom_css_post( $inserted_css, array(
-			'stylesheet' => 'testtheme',
-		) );
+		$post = wp_update_custom_css_post(
+			$inserted_css, array(
+				'stylesheet' => 'testtheme',
+			)
+		);
 
 		$this->assertSame( $inserted_css, $post->post_content );
 		$revisions = array_values( wp_get_post_revisions( $post ) );
 		$this->assertCount( 1, $revisions );
 		$this->assertSame( $inserted_css, $revisions[0]->post_content );
 
-		wp_update_custom_css_post( $updated_css, array(
-			'stylesheet' => 'testtheme',
-		) );
+		wp_update_custom_css_post(
+			$updated_css, array(
+				'stylesheet' => 'testtheme',
+			)
+		);
 
 		$revisions = array_values( wp_get_post_revisions( $post ) );
 		$this->assertCount( 2, $revisions );
@@ -255,13 +269,15 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$this->setting->default = '/*default*/';
 		$this->assertEquals( '/*default*//*filtered*/', $this->setting->value() );
 
-		$this->factory()->post->create( array(
-			'post_title' => $this->setting->stylesheet,
-			'post_name' => $this->setting->stylesheet,
-			'post_content' => '/*custom*/',
-			'post_status' => 'publish',
-			'post_type' => 'custom_css',
-		) );
+		$this->factory()->post->create(
+			array(
+				'post_title'   => $this->setting->stylesheet,
+				'post_name'    => $this->setting->stylesheet,
+				'post_content' => '/*custom*/',
+				'post_status'  => 'publish',
+				'post_type'    => 'custom_css',
+			)
+		);
 		remove_theme_mod( 'custom_css_post_id' );
 		$this->assertEquals( '/*custom*//*filtered*/', $this->setting->value() );
 
@@ -290,18 +306,20 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 	 */
 	function test_update_filter() {
 		$original_css = 'body { color:red; }';
-		$post_id = $this->factory()->post->create( array(
-			'post_title' => $this->setting->stylesheet,
-			'post_name' => $this->setting->stylesheet,
-			'post_content' => $original_css,
-			'post_status' => 'publish',
-			'post_type' => 'custom_css',
-		) );
+		$post_id      = $this->factory()->post->create(
+			array(
+				'post_title'   => $this->setting->stylesheet,
+				'post_name'    => $this->setting->stylesheet,
+				'post_content' => $original_css,
+				'post_status'  => 'publish',
+				'post_type'    => 'custom_css',
+			)
+		);
 
 		$overridden_css = 'body { color:green; }';
 		$this->wp_customize->set_post_value( $this->setting->id, $overridden_css );
 
-		$post = get_post( $post_id );
+		$post           = get_post( $post_id );
 		$original_title = $post->post_title;
 
 		add_filter( 'update_custom_css_data', array( $this, 'filter_update_custom_css_data' ), 10, 3 );
@@ -330,9 +348,9 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 		$this->assertEquals( $args['css'], $data['css'] );
 		$this->assertEquals( $args['preprocessed'], $data['preprocessed'] );
 
-		$data['css'] .= '/* filtered post_content */';
+		$data['css']         .= '/* filtered post_content */';
 		$data['preprocessed'] = '/* filtered post_content_filtered */';
-		$data['post_title'] = 'Ignored';
+		$data['post_title']   = 'Ignored';
 		return $data;
 	}
 
@@ -352,85 +370,12 @@ class Test_WP_Customize_Custom_CSS_Setting extends WP_UnitTestCase {
 
 		// Basic, valid CSS throws no errors.
 		$basic_css = 'body { background: #f00; } h1.site-title { font-size: 36px; } a:hover { text-decoration: none; } input[type="text"] { padding: 1em; }';
-		$result = $this->setting->validate( $basic_css );
+		$result    = $this->setting->validate( $basic_css );
 		$this->assertTrue( $result );
 
-		// Check for Unclosed Comment.
-		$unclosed_comment = $basic_css . ' /* This is a comment. ';
-		$result = $this->setting->validate( $unclosed_comment );
-		$this->assertTrue( array_key_exists( 'unclosed_comment', $result->errors ) );
-
-		// Check for Unopened Comment.
-		$unclosed_comment = $basic_css . ' This is a comment.*/';
-		$result = $this->setting->validate( $unclosed_comment );
-		$this->assertTrue( array_key_exists( 'imbalanced_comments', $result->errors ) );
-
-		// Check for Unclosed Curly Brackets.
-		$unclosed_curly_bracket = $basic_css . '  a.link { text-decoration: none;';
-		$result = $this->setting->validate( $unclosed_curly_bracket );
-		$this->assertTrue( array_key_exists( 'imbalanced_curly_brackets', $result->errors ) );
-
-		// Check for Unopened Curly Brackets.
-		$unopened_curly_bracket = $basic_css . '  a.link text-decoration: none; }';
-		$result = $this->setting->validate( $unopened_curly_bracket );
-		$this->assertTrue( array_key_exists( 'imbalanced_curly_brackets', $result->errors ) );
-
-		// Check for Unclosed Braces.
-		$unclosed_brace = $basic_css . '  input[type="text" { color: #f00; } ';
-		$result = $this->setting->validate( $unclosed_brace );
-		$this->assertTrue( array_key_exists( 'imbalanced_braces', $result->errors ) );
-
-		// Check for Unopened Braces.
-		$unopened_brace = $basic_css . ' inputtype="text"] { color: #f00; } ';
-		$result = $this->setting->validate( $unopened_brace );
-		$this->assertTrue( array_key_exists( 'imbalanced_braces', $result->errors ) );
-
-		// Check for Imbalanced Double Quotes.
-		$imbalanced_double_quotes = $basic_css . ' div.background-image { background-image: url( "image.jpg ); } ';
-		$result = $this->setting->validate( $imbalanced_double_quotes );
-		$this->assertTrue( array_key_exists( 'unequal_double_quotes', $result->errors ) );
-
-		// Check for Unclosed Parentheses.
-		$unclosed_parentheses = $basic_css . ' div.background-image { background-image: url( "image.jpg" ; } ';
-		$result = $this->setting->validate( $unclosed_parentheses );
-		$this->assertTrue( array_key_exists( 'imbalanced_parentheses', $result->errors ) );
-
-		// Check for Unopened Parentheses.
-		$unopened_parentheses = $basic_css . ' div.background-image { background-image: url "image.jpg" ); } ';
-		$result = $this->setting->validate( $unopened_parentheses );
-		$this->assertTrue( array_key_exists( 'imbalanced_parentheses', $result->errors ) );
-
-		// A basic Content declaration with no other errors should not throw an error.
-		$content_declaration = $basic_css . ' a:before { content: ""; display: block; }';
-		$result = $this->setting->validate( $content_declaration );
-		$this->assertTrue( $result );
-
-		// An error, along with a Content declaration will throw two errors.
-		// In this case, we're using an extra opening brace.
-		$content_declaration = $basic_css . ' a:before { content: "["; display: block; }';
-		$result = $this->setting->validate( $content_declaration );
-		$this->assertTrue( array_key_exists( 'imbalanced_braces', $result->errors ) );
-		$this->assertTrue( array_key_exists( 'possible_false_positive', $result->errors ) );
-
-		$css = 'body { background: #f00; } h1.site-title { font-size: 36px; } a:hover { text-decoration: none; } input[type="text"] { padding: 1em; } /* This is a comment */';
-		$this->assertTrue( $this->setting->validate( $css ) );
-
-		$validity = $this->setting->validate( $css . ' /* This is another comment.' );
-		$this->assertInstanceOf( 'WP_Error', $validity );
-		$this->assertContains( 'unclosed code comment', join( ' ', $validity->get_error_messages() ) );
-
-		$css = '/* This is comment one. */  /* This is comment two. */';
-		$this->assertTrue( $this->setting->validate( $css ) );
-
-		$basic_css = 'body { background: #f00; } h1.site-title { font-size: 36px; } a:hover { text-decoration: none; } input[type="text"] { padding: 1em; }';
-		$this->assertTrue( $this->setting->validate( $basic_css ) );
-
-		$css = $basic_css . ' .link:before { content: "*"; display: block; }';
-		$this->assertTrue( $this->setting->validate( $css ) );
-
-		$css .= ' ( trailing';
-		$validity = $this->setting->validate( $css );
-		$this->assertWPError( $validity );
-		$this->assertNotEmpty( $result->get_error_message( 'possible_false_positive' ) );
+		// Check for markup.
+		$unclosed_comment = $basic_css . '</style>';
+		$result           = $this->setting->validate( $unclosed_comment );
+		$this->assertTrue( array_key_exists( 'illegal_markup', $result->errors ) );
 	}
 }

@@ -1,7 +1,12 @@
+var l10n = wp.media.view.l10n,
+	EditImage;
+
 /**
  * wp.media.controller.EditImage
  *
  * A state for editing (cropping, etc.) an image.
+ *
+ * @memberOf wp.media.controller
  *
  * @class
  * @augments wp.media.controller.State
@@ -16,10 +21,7 @@
  * @param {string}                    [attributes.menu=false]         Initial mode for the menu region.
  * @param {string}                    [attributes.url]                Unused. @todo Consider removal.
  */
-var l10n = wp.media.view.l10n,
-	EditImage;
-
-EditImage = wp.media.controller.State.extend({
+EditImage = wp.media.controller.State.extend(/** @lends wp.media.controller.EditImage.prototype */{
 	defaults: {
 		id:      'edit-image',
 		title:   l10n.editImage,
@@ -30,21 +32,37 @@ EditImage = wp.media.controller.State.extend({
 	},
 
 	/**
+	 * Activates a frame for editing a featured image.
+	 *
 	 * @since 3.9.0
+	 *
+	 * @returns {void}
 	 */
 	activate: function() {
 		this.frame.on( 'toolbar:render:edit-image', _.bind( this.toolbar, this ) );
 	},
 
 	/**
+	 * Deactivates a frame for editing a featured image.
+	 *
 	 * @since 3.9.0
+	 *
+	 * @returns {void}
 	 */
 	deactivate: function() {
 		this.frame.off( 'toolbar:render:edit-image' );
 	},
 
 	/**
+	 * Adds a toolbar with a back button.
+	 *
+	 * When the back button is pressed it checks whether there is a previous state.
+	 * In case there is a previous state it sets that previous state otherwise it
+	 * closes the frame.
+	 *
 	 * @since 3.9.0
+	 *
+	 * @returns {void}
 	 */
 	toolbar: function() {
 		var frame = this.frame,

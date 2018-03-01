@@ -6,8 +6,8 @@
  */
 class Tests_Formatting_Emoji extends WP_UnitTestCase {
 
-	private $png_cdn = 'https://s.w.org/images/core/emoji/2.3/72x72/';
-	private $svn_cdn = 'https://s.w.org/images/core/emoji/2.3/svg/';
+	private $png_cdn = 'https://s.w.org/images/core/emoji/2.4/72x72/';
+	private $svn_cdn = 'https://s.w.org/images/core/emoji/2.4/svg/';
 
 	/**
 	 * @ticket 36525
@@ -62,21 +62,21 @@ class Tests_Formatting_Emoji extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @ticket 35293
+	 * @ticket 41501
 	 */
-	public function test_wp_emoji_regex_returns_regexen() {
-		$default = wp_emoji_regex();
+	public function test_wp_emoji_list_returns_data() {
+		$default = _wp_emoji_list();
 		$this->assertNotEmpty( $default );
 
-		$codepoints = wp_emoji_regex( 'codepoints' );
-		$this->assertNotEmpty( $codepoints );
-
-		$this->assertSame( $default, $codepoints );
-
-		$entities = wp_emoji_regex( 'entities' );
+		$entities = _wp_emoji_list( 'entities' );
 		$this->assertNotEmpty( $entities );
 
-		$this->assertNotSame( $default, $entities );
+		$this->assertSame( $default, $entities );
+
+		$partials = _wp_emoji_list( 'partials' );
+		$this->assertNotEmpty( $partials );
+
+		$this->assertNotSame( $default, $partials );
 	}
 
 	public function data_wp_encode_emoji() {
@@ -122,25 +122,19 @@ class Tests_Formatting_Emoji extends WP_UnitTestCase {
 			array(
 				// Simple emoji
 				'🙂',
-				'<img src="' . $this->png_cdn . '1f642.png" alt="" class="wp-smiley" style="height: 1em; max-height: 1em;" />',
+				'<img src="' . $this->png_cdn . '1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" />',
 			),
 			array(
 				// Skin tone, gender, ZWJ, emoji selector
 				'👮🏼‍♀️',
-				'<img src="' . $this->png_cdn . '1f46e-1f3fc-200d-2640-fe0f.png" alt="" class="wp-smiley" style="height: 1em; max-height: 1em;" />',
+				'<img src="' . $this->png_cdn . '1f46e-1f3fc-200d-2640-fe0f.png" alt="👮🏼‍♀️" class="wp-smiley" style="height: 1em; max-height: 1em;" />',
 			),
 			array(
 				// Unicode 10
 				'🧚',
-				'<img src="' . $this->png_cdn . '1f9da.png" alt="" class="wp-smiley" style="height: 1em; max-height: 1em;" />',
+				'<img src="' . $this->png_cdn . '1f9da.png" alt="🧚" class="wp-smiley" style="height: 1em; max-height: 1em;" />',
 			),
 		);
-
-		// Older versions of PHP don't html_entity_decode() emoji, so we need to make sure they're testing in the expected form.
-		foreach ( $data as $key => $datum ) {
-			$emoji = html_entity_decode( wp_encode_emoji( $datum[0] ) );
-			$data[ $key ][1] = str_replace( 'alt=""', 'alt="' . $emoji . '"', $datum[1] );
-		}
 
 		return $data;
 	}

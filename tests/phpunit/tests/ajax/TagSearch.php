@@ -17,10 +17,16 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * List of terms to insert on setup
+	 *
 	 * @var array
 	 */
 	private static $terms = array(
-		'chattels', 'depo', 'energumen', 'figuriste', 'habergeon', 'impropriation'
+		'chattels',
+		'depo',
+		'energumen',
+		'figuriste',
+		'habergeon',
+		'impropriation',
 	);
 
 	private static $term_ids = array();
@@ -33,6 +39,8 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * Test as an admin
+	 *
+	 * @expectedDeprecated wp_ajax_ajax_tag_search
 	 */
 	public function test_post_tag() {
 
@@ -56,6 +64,8 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * Test with no results
+	 *
+	 * @expectedDeprecated wp_ajax_ajax_tag_search
 	 */
 	public function test_no_results() {
 
@@ -64,16 +74,18 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 		// Set up a default request
 		$_GET['tax'] = 'post_tag';
-		$_GET['q']   = md5(uniqid());
+		$_GET['q']   = md5( uniqid() );
 
 		// Make the request
 		// No output, so we get a stop exception
-		$this->setExpectedException( 'WPAjaxDieStopException', '0' );
+		$this->setExpectedException( 'WPAjaxDieStopException', '' );
 		$this->_handleAjax( 'ajax-tag-search' );
 	}
 
 	/**
 	 * Test with commas
+	 *
+	 * @expectedDeprecated wp_ajax_ajax_tag_search
 	 */
 	public function test_with_comma() {
 
@@ -97,6 +109,8 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * Test as a logged out user
+	 *
+	 * @expectedDeprecated wp_ajax_ajax_tag_search
 	 */
 	public function test_logged_out() {
 
@@ -114,6 +128,8 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * Test with an invalid taxonomy type
+	 *
+	 * @expectedDeprecated wp_ajax_ajax_tag_search
 	 */
 	public function test_invalid_tax() {
 
@@ -131,6 +147,8 @@ class Tests_Ajax_TagSearch extends WP_Ajax_UnitTestCase {
 
 	/**
 	 * Test as an unprivileged user
+	 *
+	 * @expectedDeprecated wp_ajax_ajax_tag_search
 	 */
 	public function test_unprivileged_user() {
 

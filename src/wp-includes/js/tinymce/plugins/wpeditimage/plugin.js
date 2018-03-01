@@ -18,7 +18,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	} );
 
 	editor.addButton( 'wp_img_edit', {
-		tooltip: 'Edit ', // trailing space is needed, used for context
+		tooltip: 'Edit|button', // '|button' is not displayed, only used for context
 		icon: 'dashicon dashicons-edit',
 		onclick: function() {
 			editImage( editor.selection.getNode() );
@@ -331,7 +331,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	}
 
 	function hasTextContent( node ) {
-		return node && !! ( node.textContent || node.innerText );
+		return node && !! ( node.textContent || node.innerText ).replace( /\ufeff/g, '' );
 	}
 
 	// Verify HTML in captions

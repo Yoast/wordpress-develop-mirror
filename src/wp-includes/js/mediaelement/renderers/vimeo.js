@@ -6,7 +6,6 @@
  * using a variety of technologies (pure JavaScript, Flash, iframe)
  *
  * Copyright 2010-2017, John Dyer (http://j.hn/)
- * Maintained by, Rafael Miranda (rafa8626@gmail.com)
  * License: MIT
  *
  */(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -40,7 +39,7 @@ var VimeoApi = {
 
 		var parts = url.split('?');
 		url = parts[0];
-		return parseInt(url.substring(url.lastIndexOf('/') + 1));
+		return parseInt(url.substring(url.lastIndexOf('/') + 1), 10);
 	}
 };
 
@@ -257,6 +256,11 @@ var vimeoIframeRenderer = {
 				}
 			}
 
+			if (mediaElement.originalNode.muted) {
+				vimeoPlayer.setVolume(0);
+				volume = 0;
+			}
+
 			var vimeoIframe = document.getElementById(vimeo.id);
 			var events = void 0;
 
@@ -296,6 +300,9 @@ var vimeoIframeRenderer = {
 						if (mediaElement.originalNode.autoplay) {
 							var initEvent = mejs.Utils.createEvent('play', vimeo);
 							mediaElement.dispatchEvent(initEvent);
+
+							var playingEvent = mejs.Utils.createEvent('playing', vimeo);
+							mediaElement.dispatchEvent(playingEvent);
 						}
 					}
 
@@ -320,6 +327,9 @@ var vimeoIframeRenderer = {
 				ended = false;
 				var event = mejs.Utils.createEvent('play', vimeo);
 				mediaElement.dispatchEvent(event);
+
+				var playingEvent = mejs.Utils.createEvent('playing', vimeo);
+				mediaElement.dispatchEvent(playingEvent);
 			});
 			vimeoPlayer.on('pause', function () {
 				paused = true;

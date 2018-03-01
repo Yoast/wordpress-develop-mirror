@@ -1220,22 +1220,23 @@ function the_attachment_links( $id = false ) {
  * Displays a screen icon.
  *
  * @since 2.7.0
- * @since 3.8.0 Screen icons are no longer used in WordPress. This function no longer produces output.
- * @deprecated 3.8.0 Use get_screen_icon()
- * @see get_screen_icon()
+ * @deprecated 3.8.0
  */
 function screen_icon() {
+	_deprecated_function( __FUNCTION__, '3.8.0' );
 	echo get_screen_icon();
 }
 
 /**
  * Retrieves the screen icon (no longer used in 3.8+).
  *
+ * @since 3.2.0
  * @deprecated 3.8.0
  *
- * @return string
+ * @return string An HTML comment explaining that icons are no longer used.
  */
 function get_screen_icon() {
+	_deprecated_function( __FUNCTION__, '3.8.0' );
 	return '<!-- Screen icons are no longer used as of WordPress 3.8. -->';
 }
 
@@ -1489,4 +1490,85 @@ function post_form_autocomplete_off() {
 	if ( $is_safari || $is_chrome ) {
 		echo ' autocomplete="off"';
 	}
+}
+
+/**
+ * Display JavaScript on the page.
+ *
+ * @since 3.5.0
+ * @deprecated 4.9.0
+ */
+function options_permalink_add_js() {
+	?>
+	<script type="text/javascript">
+		jQuery(document).ready(function() {
+			jQuery('.permalink-structure input:radio').change(function() {
+				if ( 'custom' == this.value )
+					return;
+				jQuery('#permalink_structure').val( this.value );
+			});
+			jQuery( '#permalink_structure' ).on( 'click input', function() {
+				jQuery( '#custom_selection' ).prop( 'checked', true );
+			});
+		});
+	</script>
+	<?php
+}
+
+/**
+ * Ajax handler for tag search.
+ *
+ * @since 3.1.0
+ * @deprecated 5.0.0 Use the REST API tags endpoint instead.
+ */
+function wp_ajax_ajax_tag_search() {
+	_deprecated_function( __FUNCTION__, '5.0.0', '/wp-json/wp/v2/tags' );
+
+	if ( ! isset( $_GET['tax'] ) ) {
+		wp_die( 0 );
+	}
+
+	$taxonomy = sanitize_key( $_GET['tax'] );
+	$tax      = get_taxonomy( $taxonomy );
+	if ( ! $tax ) {
+		wp_die( 0 );
+	}
+
+	if ( ! current_user_can( $tax->cap->assign_terms ) ) {
+		wp_die( -1 );
+	}
+
+	$s = wp_unslash( $_GET['q'] );
+
+	$comma = _x( ',', 'tag delimiter' );
+	if ( ',' !== $comma ) {
+		$s = str_replace( $comma, ',', $s );
+	}
+	if ( false !== strpos( $s, ',' ) ) {
+		$s = explode( ',', $s );
+		$s = $s[ count( $s ) - 1 ];
+	}
+	$s = trim( $s );
+
+	/** This filter is documented in wp-includes/script-loader.php */
+	$term_search_min_chars = (int) apply_filters( 'term_search_min_chars', 2, $tax, $s );
+
+	/*
+	 * Require $term_search_min_chars chars for matching (default: 2)
+	 * ensure it's a non-negative, non-zero integer.
+	 */
+	if ( ( $term_search_min_chars == 0 ) || ( strlen( $s ) < $term_search_min_chars ) ) {
+		wp_die();
+	}
+
+	$results = get_terms(
+		$taxonomy, array(
+			'name__like' => $s,
+			'fields'     => 'names',
+			'hide_empty' => false,
+		)
+	);
+
+	echo join( $results, "\n" );
+	wp_die();
 }

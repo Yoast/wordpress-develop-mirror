@@ -581,11 +581,7 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 	display: block;
 	width: 30px;
 	height: 40px;
-	margin-right: 0 !important;
-	text-indent: 100%;
 	outline: none;
-	overflow: hidden;
-	white-space: nowrap;
 }
 
 .no-js.nav-menus-php .item-edit {
@@ -593,13 +589,21 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 	float: right;
 	width: auto;
 	height: auto;
-	margin-right: -10px !important;
-	padding: 12px 0;
+	margin: 12px -10px 12px 0;
+	padding: 0;
 	color: #0073aa;
 	text-decoration: underline;
 	font-size: 12px;
 	line-height: 18px;
-	text-indent: 0;
+}
+
+.no-js.nav-menus-php .item-edit .screen-reader-text {
+	position: static;
+	-webkit-clip-path: none;
+	clip-path: none;
+	width: auto;
+	height: auto;
+	margin: 0;
 }
 
 .nav-menus-php .item-edit:before {
@@ -618,7 +622,7 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 	text-indent: 1px; /* account for the dashicon alignment */
 }
 
-.nav-menus-php .item-edit:focus {
+.js.nav-menus-php .item-edit:focus {
 	box-shadow: none;
 }
 
@@ -804,10 +808,6 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 
 	ul.add-menu-item-tabs li.tabs {
 		padding: 13px 15px 14px;
-	}
-
-	.nav-menus-php .item-controls .item-type {
-		margin-top: 2px;
 	}
 
 	.nav-menus-php .customlinkdiv .howto input {

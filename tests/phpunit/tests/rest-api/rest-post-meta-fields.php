@@ -6,16 +6,16 @@
  * @subpackage REST API
  */
 
- /**
-  * @group restapi
-  */
+/**
+ * @group restapi
+ */
 class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 	protected static $wp_meta_keys_saved;
 	protected static $post_id;
 
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$wp_meta_keys_saved = $GLOBALS['wp_meta_keys'];
-		self::$post_id = $factory->post->create();
+		self::$post_id            = $factory->post->create();
 	}
 
 	public static function wpTearDownAfterClass() {
@@ -26,97 +26,121 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		register_meta( 'post', 'test_single', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'type' => 'string',
-		));
-		register_meta( 'post', 'test_multi', array(
-			'show_in_rest' => true,
-			'single' => false,
-			'type' => 'string',
-		));
-		register_meta( 'post', 'test_bad_auth', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'auth_callback' => '__return_false',
-			'type' => 'string',
-		));
-		register_meta( 'post', 'test_bad_auth_multi', array(
-			'show_in_rest' => true,
-			'single' => false,
-			'auth_callback' => '__return_false',
-			'type' => 'string',
-		));
+		register_meta(
+			'post', 'test_single', array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'string',
+			)
+		);
+		register_meta(
+			'post', 'test_multi', array(
+				'show_in_rest' => true,
+				'single'       => false,
+				'type'         => 'string',
+			)
+		);
+		register_meta(
+			'post', 'test_bad_auth', array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'auth_callback' => '__return_false',
+				'type'          => 'string',
+			)
+		);
+		register_meta(
+			'post', 'test_bad_auth_multi', array(
+				'show_in_rest'  => true,
+				'single'        => false,
+				'auth_callback' => '__return_false',
+				'type'          => 'string',
+			)
+		);
 		register_meta( 'post', 'test_no_rest', array() );
-		register_meta( 'post', 'test_rest_disabled', array(
-			'show_in_rest' => false,
-			'type' => 'string',
-		));
-		register_meta( 'post', 'test_custom_schema', array(
-			'single' => true,
-			'type' => 'integer',
-			'show_in_rest' => array(
-				'schema' => array(
-					'type' => 'number',
+		register_meta(
+			'post', 'test_rest_disabled', array(
+				'show_in_rest' => false,
+				'type'         => 'string',
+			)
+		);
+		register_meta(
+			'post', 'test_custom_schema', array(
+				'single'       => true,
+				'type'         => 'integer',
+				'show_in_rest' => array(
+					'schema' => array(
+						'type' => 'number',
+					),
 				),
-			),
-		));
-		register_meta( 'post', 'test_custom_schema_multi', array(
-			'single' => false,
-			'type' => 'integer',
-			'show_in_rest' => array(
-				'schema' => array(
-					'type' => 'number',
+			)
+		);
+		register_meta(
+			'post', 'test_custom_schema_multi', array(
+				'single'       => false,
+				'type'         => 'integer',
+				'show_in_rest' => array(
+					'schema' => array(
+						'type' => 'number',
+					),
 				),
-			),
-		));
-		register_meta( 'post', 'test_invalid_type', array(
-			'single' => true,
-			'type' => 'lalala',
-			'show_in_rest' => true,
-		));
-		register_meta( 'post', 'test_no_type', array(
-			'single' => true,
-			'type' => null,
-			'show_in_rest' => true,
-		));
+			)
+		);
+		register_meta(
+			'post', 'test_invalid_type', array(
+				'single'       => true,
+				'type'         => 'lalala',
+				'show_in_rest' => true,
+			)
+		);
+		register_meta(
+			'post', 'test_no_type', array(
+				'single'       => true,
+				'type'         => null,
+				'show_in_rest' => true,
+			)
+		);
 
-		register_meta( 'post', 'test_custom_name', array(
-			'single' => true,
-			'type' => 'string',
-			'show_in_rest' => array(
-				'name'	=> 'new_name',
-			),
-		));
+		register_meta(
+			'post', 'test_custom_name', array(
+				'single'       => true,
+				'type'         => 'string',
+				'show_in_rest' => array(
+					'name' => 'new_name',
+				),
+			)
+		);
 
-		register_meta( 'post', 'test_custom_name_multi', array(
-			'single' => false,
-			'type' => 'string',
-			'show_in_rest' => array(
-				'name'	=> 'new_name_multi',
-			),
-		));
+		register_meta(
+			'post', 'test_custom_name_multi', array(
+				'single'       => false,
+				'type'         => 'string',
+				'show_in_rest' => array(
+					'name' => 'new_name_multi',
+				),
+			)
+		);
 
 		/** @var WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new Spy_REST_Server;
-		do_action( 'rest_api_init' );
+		$wp_rest_server = new Spy_REST_Server;
+		do_action( 'rest_api_init', $wp_rest_server );
 	}
 
 	protected function grant_write_permission() {
 		// Ensure we have write permission.
-		$user = $this->factory->user->create( array(
-			'role' => 'editor',
-		));
+		$user = $this->factory->user->create(
+			array(
+				'role' => 'editor',
+			)
+		);
 		wp_set_current_user( $user );
 	}
 
 	public function test_get_value() {
 		add_post_meta( self::$post_id, 'test_single', 'testvalue' );
 
-		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
-		$response = $this->server->dispatch( $request );
+		$request  = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
 
@@ -135,7 +159,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		add_post_meta( self::$post_id, 'test_multi', 'value1' );
 		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
@@ -147,7 +171,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		// Check after an update.
 		add_post_meta( self::$post_id, 'test_multi', 'value2' );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 		$meta = (array) $data['meta'];
@@ -162,7 +186,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		add_post_meta( self::$post_id, 'test_unregistered', 'value1' );
 		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
@@ -177,7 +201,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		add_post_meta( self::$post_id, 'test_no_rest', 'for_the_wicked' );
 		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
@@ -192,7 +216,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		add_post_meta( self::$post_id, 'test_rest_disabled', 'sleepless_nights' );
 		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
@@ -201,33 +225,39 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 	}
 
 	public function test_get_value_types() {
-		register_meta( 'post', 'test_string', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'type' => 'string',
-		));
-		register_meta( 'post', 'test_number', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'type' => 'number',
-		));
-		register_meta( 'post', 'test_bool', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'type' => 'boolean',
-		));
+		register_meta(
+			'post', 'test_string', array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'string',
+			)
+		);
+		register_meta(
+			'post', 'test_number', array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'number',
+			)
+		);
+		register_meta(
+			'post', 'test_bool', array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'boolean',
+			)
+		);
 
 		/** @var WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
-		$this->server = $wp_rest_server = new Spy_REST_Server;
-		do_action( 'rest_api_init' );
+		$wp_rest_server = new Spy_REST_Server;
+		do_action( 'rest_api_init', $wp_rest_server );
 
 		add_post_meta( self::$post_id, 'test_string', 42 );
 		add_post_meta( self::$post_id, 'test_number', '42' );
 		add_post_meta( self::$post_id, 'test_bool', 1 );
 
-		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
-		$response = $this->server->dispatch( $request );
+		$request  = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
@@ -249,8 +279,8 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 	public function test_get_value_custom_name() {
 		add_post_meta( self::$post_id, 'test_custom_name', 'janet' );
 
-		$request = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
-		$response = $this->server->dispatch( $request );
+		$request  = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
 
@@ -272,7 +302,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_single' => 'test_value',
 			),
@@ -280,7 +310,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_single', false );
@@ -304,7 +334,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_single' => 'test_value',
 			),
@@ -312,7 +342,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_single', true );
@@ -340,7 +370,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_cannot_edit', $response, 401 );
 
 		// Check that the value wasn't actually updated.
@@ -362,7 +392,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_cannot_update', $response, 403 );
 		$this->assertEmpty( get_post_meta( self::$post_id, 'test_bad_auth', false ) );
 	}
@@ -390,7 +420,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$wpdb->suppress_errors = true;
 		add_filter( 'query', array( $this, 'error_insert_query' ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		remove_filter( 'query', array( $this, 'error_insert_query' ) );
 		$wpdb->show_errors = true;
 
@@ -403,7 +433,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_invalid_type' => 'test_value',
 			),
@@ -411,7 +441,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEmpty( get_post_meta( self::$post_id, 'test_invalid_type', false ) );
 	}
 
@@ -422,7 +452,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_multi' => array( 'val1' ),
 			),
@@ -430,7 +460,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_multi', false );
@@ -446,7 +476,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		);
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_multi', false );
@@ -466,7 +496,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_multi' => array( 'c', 'n' ),
 			),
@@ -474,7 +504,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_multi', false );
@@ -494,7 +524,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		wp_set_current_user( 0 );
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_multi' => array( 'val1' ),
 			),
@@ -502,7 +532,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_cannot_edit', $response, 401 );
 
 		$meta = get_post_meta( self::$post_id, 'test_multi', false );
@@ -510,15 +540,17 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 	}
 
 	public function test_set_value_invalid_value() {
-		register_meta( 'post', 'my_meta_key', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'type' => 'string',
-		));
+		register_meta(
+			'post', 'my_meta_key', array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'string',
+			)
+		);
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'my_meta_key' => array( 'c', 'n' ),
 			),
@@ -526,20 +558,22 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_invalid_param', $response, 400 );
 	}
 
 	public function test_set_value_invalid_value_multiple() {
-		register_meta( 'post', 'my_meta_key', array(
-			'show_in_rest' => true,
-			'single' => false,
-			'type' => 'string',
-		));
+		register_meta(
+			'post', 'my_meta_key', array(
+				'show_in_rest' => true,
+				'single'       => false,
+				'type'         => 'string',
+			)
+		);
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'my_meta_key' => array( array( 'a' ) ),
 			),
@@ -547,20 +581,22 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_invalid_param', $response, 400 );
 	}
 
 	public function test_set_value_sanitized() {
-		register_meta( 'post', 'my_meta_key', array(
-			'show_in_rest' => true,
-			'single' => true,
-			'type' => 'integer',
-		));
+		register_meta(
+			'post', 'my_meta_key', array(
+				'show_in_rest' => true,
+				'single'       => true,
+				'type'         => 'integer',
+			)
+		);
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'my_meta_key' => '1', // Set to a string.
 			),
@@ -568,21 +604,23 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
 		$this->assertEquals( 1, $data['meta']['my_meta_key'] );
 	}
 
 	public function test_set_value_csv() {
-		register_meta( 'post', 'my_meta_key', array(
-			'show_in_rest' => true,
-			'single' => false,
-			'type' => 'integer',
-		));
+		register_meta(
+			'post', 'my_meta_key', array(
+				'show_in_rest' => true,
+				'single'       => false,
+				'type'         => 'integer',
+			)
+		);
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'my_meta_key' => '1,2,3', // Set to a string.
 			),
@@ -590,8 +628,8 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
 		$this->assertEquals( array( 1, 2, 3 ), $data['meta']['my_meta_key'] );
 	}
 
@@ -610,7 +648,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_cannot_update', $response, 403 );
 		$this->assertEmpty( get_post_meta( self::$post_id, 'test_bad_auth_multi', false ) );
 	}
@@ -622,7 +660,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_multi' => array( 'val1' ),
 			),
@@ -638,7 +676,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$wpdb->suppress_errors = true;
 		add_filter( 'query', array( $this, 'error_insert_query' ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		remove_filter( 'query', array( $this, 'error_insert_query' ) );
 		$wpdb->show_errors = true;
 
@@ -655,7 +693,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_custom_schema' => 3,
 			),
@@ -663,7 +701,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_schema', false );
@@ -684,7 +722,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_custom_schema_multi' => array( 2 ),
 			),
@@ -692,7 +730,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_schema_multi', false );
@@ -708,7 +746,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		);
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_schema_multi', false );
@@ -728,7 +766,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'new_name' => 'janet',
 			),
@@ -736,7 +774,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_name', false );
@@ -757,7 +795,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'new_name_multi' => array( 'janet' ),
 			),
@@ -765,7 +803,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_name_multi', false );
@@ -781,7 +819,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		);
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_name_multi', false );
@@ -808,7 +846,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertErrorResponse( 'rest_invalid_param', $response, 400 );
 
@@ -838,7 +876,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_invalid_param', $response, 400 );
 
 		// The meta value should not have changed.
@@ -857,7 +895,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_multi' => array(),
 			),
@@ -873,7 +911,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$wpdb->suppress_errors = true;
 		add_filter( 'query', array( $this, 'error_delete_query' ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		remove_filter( 'query', array( $this, 'error_delete_query' ) );
 		$wpdb->show_errors = true;
 
@@ -888,7 +926,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_single' => null,
 			),
@@ -896,7 +934,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_single', false );
@@ -913,7 +951,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_bad_auth' => null,
 			),
@@ -921,7 +959,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertErrorResponse( 'rest_cannot_delete', $response, 403 );
 
 		$meta = get_post_meta( self::$post_id, 'test_bad_auth', true );
@@ -938,7 +976,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'test_single' => null,
 			),
@@ -953,7 +991,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$wpdb->suppress_errors = true;
 		add_filter( 'query', array( $this, 'error_delete_query' ) );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		remove_filter( 'query', array( $this, 'error_delete_query' ) );
 		$wpdb->show_errors = true;
 
@@ -967,7 +1005,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 
 		$this->grant_write_permission();
 
-		$data = array(
+		$data    = array(
 			'meta' => array(
 				'new_name' => null,
 			),
@@ -975,7 +1013,7 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 		$request = new WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
 		$request->set_body_params( $data );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$meta = get_post_meta( self::$post_id, 'test_custom_name', false );
@@ -983,10 +1021,10 @@ class WP_Test_REST_Post_Meta_Fields extends WP_Test_REST_TestCase {
 	}
 
 	public function test_get_schema() {
-		$request = new WP_REST_Request( 'OPTIONS', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
-		$response = $this->server->dispatch( $request );
+		$request  = new WP_REST_Request( 'OPTIONS', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$response = rest_get_server()->dispatch( $request );
 
-		$data = $response->get_data();
+		$data   = $response->get_data();
 		$schema = $data['schema'];
 
 		$this->assertArrayHasKey( 'meta', $schema['properties'] );

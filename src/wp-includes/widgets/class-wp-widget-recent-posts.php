@@ -23,8 +23,8 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 	 */
 	public function __construct() {
 		$widget_ops = array(
-			'classname' => 'widget_recent_entries',
-			'description' => __( 'Your site&#8217;s most recent Posts.' ),
+			'classname'                   => 'widget_recent_entries',
+			'description'                 => __( 'Your site&#8217;s most recent Posts.' ),
 			'customize_selective_refresh' => true,
 		);
 		parent::__construct( 'recent-posts', __( 'Recent Posts' ), $widget_ops );
@@ -51,48 +51,59 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
 		$number = ( ! empty( $instance['number'] ) ) ? absint( $instance['number'] ) : 5;
-		if ( ! $number )
+		if ( ! $number ) {
 			$number = 5;
+		}
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : false;
 
 		/**
 		 * Filters the arguments for the Recent Posts widget.
 		 *
 		 * @since 3.4.0
+		 * @since 4.9.0 Added the `$instance` parameter.
 		 *
 		 * @see WP_Query::get_posts()
 		 *
-		 * @param array $args An array of arguments used to retrieve the recent posts.
+		 * @param array $args     An array of arguments used to retrieve the recent posts.
+		 * @param array $instance Array of settings for the current widget.
 		 */
-		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
-			'posts_per_page'      => $number,
-			'no_found_rows'       => true,
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => true
-		) ) );
+		$r = new WP_Query(
+			apply_filters(
+				'widget_posts_args', array(
+					'posts_per_page'      => $number,
+					'no_found_rows'       => true,
+					'post_status'         => 'publish',
+					'ignore_sticky_posts' => true,
+				), $instance
+			)
+		);
 
-		if ($r->have_posts()) :
+		if ( ! $r->have_posts() ) {
+			return;
+		}
 		?>
 		<?php echo $args['before_widget']; ?>
-		<?php if ( $title ) {
-			echo $args['before_title'] . $title . $args['after_title'];
-		} ?>
-		<ul>
-		<?php while ( $r->have_posts() ) : $r->the_post(); ?>
-			<li>
-				<a href="<?php the_permalink(); ?>"><?php get_the_title() ? the_title() : _e( '(no title)' ); ?></a>
-			<?php if ( $show_date ) : ?>
-				<span class="post-date"><?php echo get_the_date(); ?></span>
-			<?php endif; ?>
-			</li>
-		<?php endwhile; ?>
-		</ul>
-		<?php echo $args['after_widget']; ?>
 		<?php
-		// Reset the global $the_post as this query will have stomped on it
-		wp_reset_postdata();
-
-		endif;
+		if ( $title ) {
+			echo $args['before_title'] . $title . $args['after_title'];
+		}
+		?>
+		<ul>
+			<?php foreach ( $r->posts as $recent_post ) : ?>
+				<?php
+				$post_title = get_the_title( $recent_post->ID );
+				$title      = ( ! empty( $post_title ) ) ? $post_title : __( '(no title)' );
+				?>
+				<li>
+					<a href="<?php the_permalink( $recent_post->ID ); ?>"><?php echo $title; ?></a>
+					<?php if ( $show_date ) : ?>
+						<span class="post-date"><?php echo get_the_date( '', $recent_post->ID ); ?></span>
+					<?php endif; ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		<?php
+		echo $args['after_widget'];
 	}
 
 	/**
@@ -106,9 +117,9 @@ class WP_Widget_Recent_Posts extends WP_Widget {
 	 * @return array Updated settings to save.
 	 */
 	public function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$instance['title'] = sanitize_text_field( $new_instance['title'] );
-		$instance['number'] = (int) $new_instance['number'];
+		$instance              = $old_instance;
+		$instance['title']     = sanitize_text_field( $new_instance['title'] );
+		$instance['number']    = (int) $new_instance['number'];
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
 		return $instance;
 	}

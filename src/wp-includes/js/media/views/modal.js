@@ -1,23 +1,21 @@
+var $ = jQuery,
+	Modal;
+
 /**
  * wp.media.view.Modal
  *
  * A modal view, which the media modal uses as its default container.
+ *
+ * @memberOf wp.media.view
  *
  * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-var $ = jQuery,
-	Modal;
-
-Modal = wp.media.View.extend({
+Modal = wp.media.View.extend(/** @lends wp.media.view.Modal.prototype */{
 	tagName:  'div',
 	template: wp.template('media-modal'),
-
-	attributes: {
-		tabindex: 0
-	},
 
 	events: {
 		'click .media-modal-backdrop, .media-modal-close': 'escapeHandler',
@@ -30,8 +28,7 @@ Modal = wp.media.View.extend({
 		_.defaults( this.options, {
 			container: document.body,
 			title:     '',
-			propagate: true,
-			freeze:    true
+			propagate: true
 		});
 
 		this.focusManager = new wp.media.view.FocusManager({
@@ -86,7 +83,6 @@ Modal = wp.media.View.extend({
 	 */
 	open: function() {
 		var $el = this.$el,
-			options = this.options,
 			mceEditor;
 
 		if ( $el.is(':visible') ) {
@@ -99,13 +95,6 @@ Modal = wp.media.View.extend({
 			this.attach();
 		}
 
-		// If the `freeze` option is set, record the window's scroll position.
-		if ( options.freeze ) {
-			this._freeze = {
-				scrollTop: $( window ).scrollTop()
-			};
-		}
-
 		// Disable page scrolling.
 		$( 'body' ).addClass( 'modal-open' );
 
@@ -113,7 +102,7 @@ Modal = wp.media.View.extend({
 
 		// Try to close the onscreen keyboard
 		if ( 'ontouchend' in document ) {
-			if ( ( mceEditor = window.tinymce && window.tinymce.activeEditor )  && ! mceEditor.isHidden() && mceEditor.iframeElement ) {
+			if ( ( mceEditor = window.tinymce && window.tinymce.activeEditor ) && ! mceEditor.isHidden() && mceEditor.iframeElement ) {
 				mceEditor.iframeElement.focus();
 				mceEditor.iframeElement.blur();
 
@@ -123,7 +112,8 @@ Modal = wp.media.View.extend({
 			}
 		}
 
-		this.$el.focus();
+		// Set initial focus on the content instead of this view element, to avoid page scrolling.
+		this.$( '.media-modal' ).focus();
 
 		return this.propagate('open');
 	},
@@ -133,8 +123,6 @@ Modal = wp.media.View.extend({
 	 * @returns {wp.media.view.Modal} Returns itself to allow chaining
 	 */
 	close: function( options ) {
-		var freeze = this._freeze;
-
 		if ( ! this.views.attached || ! this.$el.is(':visible') ) {
 			return this;
 		}
@@ -153,11 +141,6 @@ Modal = wp.media.View.extend({
 		}
 
 		this.propagate('close');
-
-		// If the `freeze` option is set, restore the container's scroll position.
-		if ( freeze ) {
-			$( window ).scrollTop( freeze.scrollTop );
-		}
 
 		if ( options && options.escape ) {
 			this.propagate('escape');
