@@ -13,7 +13,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		/**
 		 * @summary Forces the browser to refresh the tabbing index.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @param  {integer} i The index of the element.
 		 * @param {HTMLelement} el  The HTML element to remove the tab index from.
@@ -28,7 +28,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		/**
 		 * @summary Adds or removes the hover class on touch.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @param {bool} unbind if true removes the wp-mobile-hover class.
 		 *
@@ -64,7 +64,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		/**
 		 * @summary Removes the hover class if clicked or touched outside the adminbar.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @returns {void}
 		 */
@@ -119,7 +119,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		 *
 		 * Removes the selected class from the parents of the selected shortlink-input.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @param {event} e The click event.
 		 *
@@ -138,7 +138,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		 * Makes sure the tab index is refreshed by refreshing each ab-item
 		 * and its children.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @param {event} e The keydown event.
 		 *
@@ -174,7 +174,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		 * Makes sure the tab index is refreshed by refreshing each ab-item
 		 * and its children.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @param {event} e The keydown event.
 		 *
@@ -197,7 +197,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		/**
 		 * @summary Scrolls to top of page by clicking the adminbar.
 		 *
-		 * @since
+		 * @since 4.3.0
 		 *
 		 * @param {event} e The click event.
 		 *
@@ -218,7 +218,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 		 *
 		 * The timeout is used to fix a focus bug in WebKit.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
 		 * @param {event} e The keydown event.
 		 *
@@ -289,7 +289,10 @@ if ( typeof(jQuery) != 'undefined' ) {
 	});
 } else {
     /**
-	 * @summary
+	 * @summary Wrapper function for the adminbar.
+	 * Used if jQuery isn't available.
+	 *
+	 * @since 3.5.0
 	 *
 	 * @param {object} d The document object.
 	 * @param {object} w The window object.
@@ -300,7 +303,7 @@ if ( typeof(jQuery) != 'undefined' ) {
         /**
 		 * @summary Adds an event listener to an object.
 		 *
-		 * @since
+		 * @since 3.5.0
 		 *
          * @param {ojbect} obj The object to add the event listener to.
          * @param {string} type The type of event
@@ -318,12 +321,14 @@ if ( typeof(jQuery) != 'undefined' ) {
 		aB, hc = new RegExp('\\bhover\\b', 'g'), q = [],
 		rselected = new RegExp('\\bselected\\b', 'g'),
 
-            /**
-			 * @summary Gets the timeout ID of the given element
-			 *
-             * @param {HTMLelement} el the element
-             * @returns {*}
-             */
+	/**
+		 * @summary Gets the timeout ID of the given element
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {HTMLelement} el the element
+		 * @returns {*}
+		 */
 		getTOID = function(el) {
 			var i = q.length;
 			while ( i-- ) {
@@ -333,11 +338,20 @@ if ( typeof(jQuery) != 'undefined' ) {
 			return false;
 		},
 
+		/**
+		 * @summary Adds the hoverclass to menu items.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {HTMLelement} t the element
+		 * @returns {void}
+		 */
 		addHoverClass = function(t) {
 			var i, id, inA, hovering, ul, li,
 				ancestors = [],
 				ancestorLength = 0;
 
+			// aB is adminbar. d is document.
 			while ( t && t != aB && t != d ) {
 				if ( 'LI' == t.nodeName.toUpperCase() ) {
 					ancestors[ ancestors.length ] = t;
@@ -350,7 +364,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 				t = t.parentNode;
 			}
 
-			// Remove any selected classes.
+			// Removes any selected classes.
 			if ( hovering && hovering.parentNode ) {
 				ul = hovering.parentNode;
 				if ( ul && 'UL' == ul.nodeName.toUpperCase() ) {
@@ -363,7 +377,7 @@ if ( typeof(jQuery) != 'undefined' ) {
 				}
 			}
 
-			/* remove the hover class for any objects not in the immediate element's ancestry */
+			// Removes the hover class for any objects not in the immediate element's ancestry.
 			i = q.length;
 			while ( i-- ) {
 				inA = false;
@@ -378,6 +392,14 @@ if ( typeof(jQuery) != 'undefined' ) {
 			}
 		},
 
+			/**
+			 * @summary Removes the hoverclass from menu items.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @param {HTMLelement} t the element
+			 * @returns {void}
+			 */
 		removeHoverClass = function(t) {
 			while ( t && t != aB && t != d ) {
 				if ( 'LI' == t.nodeName.toUpperCase() ) {
@@ -392,6 +414,14 @@ if ( typeof(jQuery) != 'undefined' ) {
 			}
 		},
 
+		/**
+		 * @summary Handles the click on a shortlink in the adminbar.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {HTMLelement} t the element
+		 * @returns {boolean}
+		 */
 		clickShortlink = function(e) {
 			var i, l, node,
 				t = e.target || e.srcElement;
@@ -430,6 +460,14 @@ if ( typeof(jQuery) != 'undefined' ) {
 			return false;
 		},
 
+		/**
+		 * @summary Scrolls to the top of the page.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {HTMLelement} t the element
+		 * @returns {void}
+		 */
 		scrollToTop = function(t) {
 			var distance, speed, step, steps, timer, speed_step;
 
