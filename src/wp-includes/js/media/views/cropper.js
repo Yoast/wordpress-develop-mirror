@@ -31,24 +31,41 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 	initialize: function() {
 		_.bindAll(this, 'onImageLoad');
 	},
+	/**
+	 * @since  3.9.0
+	 * @access private
+	 */
 	ready: function() {
 		this.controller.frame.on('content:error:crop', this.onError, this);
 		this.$image = this.$el.find('.crop-image');
 		this.$image.on('load', this.onImageLoad);
 		$(window).on('resize.cropper', _.debounce(this.onImageLoad, 250));
 	},
+	/**
+	 * @since  3.9.0
+	 * @access private
+	 */
 	remove: function() {
 		$(window).off('resize.cropper');
 		this.$el.remove();
 		this.$el.off();
 		View.prototype.remove.apply(this, arguments);
 	},
+	/**
+	 * @since  3.9.0
+	 * @access private
+	 */
 	prepare: function() {
 		return {
 			title: l10n.cropYourImage,
 			url: this.options.attachment.get('url')
 		};
 	},
+
+	/**
+	 * @since  3.9.0
+	 * @access private
+	 */
 	onImageLoad: function() {
 		var imgOptions = this.controller.get('imgSelectOptions'),
 			imgSelect;
@@ -87,6 +104,14 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 		this.trigger('image-loaded');
 		imgSelect = this.controller.imgSelect = this.$image.imgAreaSelect(imgOptions);
 	},
+	/**
+	 * Creates a UploaderStatusError and adds it to the top of the .upload-errors element.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @see  wp.media.view.UploaderStatusError
+	 */
 	onError: function() {
 		var filename = this.options.attachment.get('filename');
 
