@@ -8,21 +8,16 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 	className: 'crop-content',
 	template: wp.template('crop-content'),
 	/**
-	 * wp.media.view.Cropper
-	 *
 	 * Uses the imgAreaSelect plugin to allow a user to crop an image.
 	 *
-	 * Takes imgAreaSelect options from
-	 * wp.customize.HeaderControl.calculateImageSelectOptions via
-	 * wp.customize.HeaderControl.openMM.
-	 *
 	 * @since 3.9.0
+	 * @access public
 	 *
 	 * @augments wp.media.View
 	 * @augments wp.Backbone.View
 	 * @augments Backbone.View
 	 *
-	 * @memberOf wp.media.view
+	 * @memberof wp.media.view
 	 *
 	 * @see   imgAreaSelect plugin
 	 * @link  https://github.com/odyniec/imgareaselect
@@ -32,6 +27,8 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 		_.bindAll(this, 'onImageLoad');
 	},
 	/**
+	 * Listens for image load or a resize on the window to run our onImageLoad function with a limit of once per 250ms.
+	 *
 	 * @since  3.9.0
 	 * @access private
 	 */
@@ -42,6 +39,8 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 		$(window).on('resize.cropper', _.debounce(this.onImageLoad, 250));
 	},
 	/**
+	 * Remove event listeners and our element.
+	 *
 	 * @since  3.9.0
 	 * @access private
 	 */
@@ -52,6 +51,8 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 		View.prototype.remove.apply(this, arguments);
 	},
 	/**
+	 * Prepares the title and url for our image.
+	 *
 	 * @since  3.9.0
 	 * @access private
 	 */
@@ -61,8 +62,9 @@ Cropper = View.extend(/** @lends wp.media.view.Cropper.prototype */{
 			url: this.options.attachment.get('url')
 		};
 	},
-
 	/**
+	 * Initializes the imgAreaSelect plugin and triggers the 'image-loaded' event.
+	 *
 	 * @since  3.9.0
 	 * @access private
 	 */
