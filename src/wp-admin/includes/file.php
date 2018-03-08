@@ -591,7 +591,7 @@ function wp_edit_theme_plugin_file( $args ) {
 			}
 
 			if ( ! isset( $result['message'] ) ) {
-				$message = __( 'An error has occurred.' );
+				$message = __( 'Something went wrong.' );
 			} else {
 				$message = $result['message'];
 				unset( $result['message'] );
@@ -1460,7 +1460,7 @@ function WP_Filesystem( $args = false, $context = false, $allow_relaxed_file_own
 		define( 'FS_TIMEOUT', 30 );
 	}
 
-	if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->get_error_code() ) {
+	if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
 		return false;
 	}
 
