@@ -3688,20 +3688,22 @@
 		 * @borrows wp.customize~Container#deactivate as this#deactivate
 		 * @borrows wp.customize~Container#_toggleActive as this#_toggleActive
 		 *
-		 * @param {string} id                       Unique identifier for the control instance.
-		 * @param {object} options                  Options hash for the control instance.
+		 * @since 4.1.0
+		 *
+		 * @param {string} id                       Unique identifier for the Control instance.
+		 * @param {object} options                  Options hash for the Control instance.
 		 * @param {object} options.type             Type of control (e.g. text, radio, dropdown-pages, etc.)
-		 * @param {string} [options.content]        The HTML content for the control or at least its container. This should normally be left blank and instead supplying a templateId.
-		 * @param {string} [options.templateId]     Template ID for control's content.
-		 * @param {string} [options.priority=10]    Order of priority to show the control within the section.
+		 * @param {string} [options.content]        The HTML content for the Control (or at least its container). This should normally be left blank in favor of supplying a templateId.
+		 * @param {string} [options.templateId]     Template ID for the Control's content.
+		 * @param {string} [options.priority=10]    Order of priority to show the Control within the section.
 		 * @param {string} [options.active=true]    Whether the control is active.
-		 * @param {string} options.section          The ID of the section the control belongs to.
+		 * @param {string} options.section          The ID of the section the Control belongs to.
 		 * @param {mixed}  [options.setting]        The ID of the main setting or an instance of this setting.
 		 * @param {mixed}  options.settings         An object with keys (e.g. default) that maps to setting IDs or Setting/Value objects, or an array of setting IDs or Setting/Value objects.
-		 * @param {mixed}  options.settings.default The ID of the setting the control relates to.
-		 * @param {string} options.settings.data    @todo Is this used?
-		 * @param {string} options.label            Label.
-		 * @param {string} options.description      Description.
+		 * @param {mixed}  options.settings.default The ID of the setting the Control relates to.
+		 * @param {string} options.settings.data    Settings data to be used within the Control instance. (Seems to no longer be used).
+		 * @param {string} options.label            The label for the Control.
+		 * @param {string} options.description      The description of the Control.
 		 * @param {number} [options.instanceNumber] Order in which this instance was created in relation to other instances.
 		 * @param {object} [options.params]         Deprecated wrapper for the above properties.
 		 *
@@ -3713,8 +3715,10 @@
 			control.params = _.extend(
 				{},
 				control.defaults,
-				control.params || {}, // In case sub-class already defines.
-				options.params || options || {} // The options.params property is deprecated, but it is checked first for back-compat.
+				// In case sub-class already defines.
+				control.params || {},
+				// The options.params property is deprecated, but it is checked first for back-compat.
+				options.params || options || {}
 			);
 
 			if ( ! api.Control.instanceCounter ) {
@@ -3744,11 +3748,14 @@
 			}
 
 			control.id = id;
-			control.selector = '#customize-control-' + id.replace( /\]/g, '' ).replace( /\[/g, '-' ); // Deprecated, likely dead code from time before #28709.
+
+			// Deprecated, likely dead code from time before #28709.
+			control.selector = '#customize-control-' + id.replace( /\]/g, '' ).replace( /\[/g, '-' );
 			if ( control.params.content ) {
 				control.container = $( control.params.content );
 			} else {
-				control.container = $( control.selector ); // Likely dead, per above. See #28709.
+				// Likely dead, per above. See #28709.
+				control.container = $( control.selector );
 			}
 
 			if ( control.params.templateId ) {
@@ -3805,6 +3812,13 @@
 				}
 			} );
 
+			/**
+			 * Gathers settings and maps them properly for later usage.
+			 *
+			 * @since 4.9.0
+			 *
+			 * @return {void}
+			 */
 			gatherSettings = function() {
 
 				// Fill-in all resolved settings.
@@ -3822,7 +3836,8 @@
 				// Identify the main setting.
 				control.setting = control.settings['default'] || null;
 
-				control.linkElements(); // Link initial elements present in server-rendered content.
+				// Link initial elements present in server-rendered content.
+				control.linkElements();
 				control.embed();
 			};
 
@@ -3834,16 +3849,18 @@
 
 			// After the control is embedded on the page, invoke the "ready" method.
 			control.deferred.embedded.done( function () {
-				control.linkElements(); // Link any additional elements after template is rendered by renderContent().
+				// Link any additional elements after template is rendered by renderContent().
+				control.linkElements();
 				control.setupNotifications();
 				control.ready();
 			});
 		},
 
 		/**
-		 * Link elements between settings and inputs.
+		 * Links elements between settings and inputs.
 		 *
 		 * @since 4.7.0
+		 *
 		 * @access public
 		 *
 		 * @returns {void}
@@ -3860,7 +3877,9 @@
 				if ( node.data( 'customizeSettingLinked' ) ) {
 					return;
 				}
-				node.data( 'customizeSettingLinked', true ); // Prevent re-linking element.
+
+				// Prevent re-linking element.
+				node.data( 'customizeSettingLinked', true );
 
 				if ( node.is( ':radio' ) ) {
 					name = node.prop( 'name' );
@@ -3889,21 +3908,34 @@
 		},
 
 		/**
-		 * Embed the control into the page.
+		 * Embeds the control into the page.
+		 *
+		 * @since 4.1.0
+		 *
+		 * @returns {void}
 		 */
 		embed: function () {
 			var control = this,
 				inject;
 
-			// Watch for changes to the section state
+			/**
+			 * Watches for changes to the section state.
+			 *
+			 * @since 4.1.0
+			 *
+			 * @param {string} sectionId The section's ID.
+			 *
+			 * @returns {void}
+			 */
 			inject = function ( sectionId ) {
 				var parentContainer;
 				if ( ! sectionId ) { // @todo allow a control to be embedded without a section, for instance a control embedded in the front end.
 					return;
 				}
-				// Wait for the section to be registered
+
+				// Wait for the section to be registered.
 				api.section( sectionId, function ( section ) {
-					// Wait for the section to be ready/initialized
+					// Wait for the section to be ready/initialized.
 					section.deferred.embedded.done( function () {
 						parentContainer = ( section.contentContainer.is( 'ul' ) ) ? section.contentContainer : section.contentContainer.find( 'ul:first' );
 						if ( ! control.container.parent().is( parentContainer ) ) {
@@ -3919,7 +3951,9 @@
 		},
 
 		/**
-		 * Triggered when the control's markup has been injected into the DOM.
+		 * Triggers when the control's markup has been injected into the DOM.
+		 *
+		 * @since 4.1.0
 		 *
 		 * @returns {void}
 		 */
@@ -3927,7 +3961,8 @@
 			var control = this, newItem;
 			if ( 'dropdown-pages' === control.params.type && control.params.allow_addition ) {
 				newItem = control.container.find( '.new-content-item' );
-				newItem.hide(); // Hide in JS to preserve flex display when showing.
+				// Hide in JS to preserve flex display when showing.
+				newItem.hide();
 				control.container.on( 'click', '.add-new-toggle', function( e ) {
 					$( e.currentTarget ).slideUp( 180 );
 					newItem.slideDown( 180 );
@@ -3937,7 +3972,8 @@
 					control.addNewPage();
 				});
 				control.container.on( 'keydown', '.create-item-input', function( e ) {
-					if ( 13 === e.which ) { // Enter
+					// Handle keydown event for the Enter key.
+					if ( 13 === e.which ) {
 						control.addNewPage();
 					}
 				});
@@ -3945,13 +3981,14 @@
 		},
 
 		/**
-		 * Get the element inside of a control's container that contains the validation error message.
+		 * Gets the element inside of a control's container that contains the validation error message.
 		 *
 		 * Control subclasses may override this to return the proper container to render notifications into.
 		 * Injects the notification container for existing controls that lack the necessary container,
 		 * including special handling for nav menu items and widgets.
 		 *
 		 * @since 4.6.0
+		 *
 		 * @returns {jQuery} Setting validation message element.
 		 */
 		getNotificationsContainerElement: function() {
@@ -3980,9 +4017,10 @@
 		},
 
 		/**
-		 * Set up notifications.
+		 * Sets up notifications.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @returns {void}
 		 */
 		setupNotifications: function() {
@@ -4008,6 +4046,13 @@
 				} );
 			} );
 
+			/**
+			 * Renders the notifications if the particular section is expanded.
+			 *
+			 * @since 4.9.0
+			 *
+			 * @returns {void}
+			 */
 			renderNotificationsIfVisible = function() {
 				var sectionId = control.section();
 				if ( ! sectionId || ( api.section.has( sectionId ) && api.section( sectionId ).expanded() ) ) {
@@ -4021,6 +4066,16 @@
 				control.container.toggleClass( 'has-error', 0 !== _.where( notifications, { type: 'error' } ).length );
 			} );
 
+			/**
+			 * Handles the binding and unbinding of the renderNotificationsIfVisible method.
+			 *
+			 * @since 4.9.0
+			 *
+			 * @param {string} newSectionId The new section ID.
+			 * @param {string} oldSectionId The old section ID.
+			 *
+			 * @returns {void}
+			 */
 			onSectionAssigned = function( newSectionId, oldSectionId ) {
 				if ( oldSectionId && api.section.has( oldSectionId ) ) {
 					api.section( oldSectionId ).expanded.unbind( renderNotificationsIfVisible );
