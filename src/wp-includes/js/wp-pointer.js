@@ -1,6 +1,6 @@
 /* global wpPointerL10n */
 /**
- * Pointer jQuery widget.
+ * Initializes the wp-pointer widget using jQuery UI Widget Factory.
  */
 (function($){
 	var identifier = 0,
@@ -37,6 +37,10 @@
 			document: document
 		},
 
+		/**
+		 *
+		 * @private
+		 */
 		_create: function() {
 			var positioning,
 				family;
