@@ -8,12 +8,14 @@ var Selection = wp.media.model.Selection,
  *
  * A state for selecting more images to add to a gallery.
  *
- * @memberOf wp.media.controller
+ * @since 4.2.0
  *
  * @class
  * @augments wp.media.controller.Library
  * @augments wp.media.controller.State
  * @augments Backbone.Model
+ *
+ * @memberof wp.media.controller
  *
  * @param {Object}                     [attributes]                         The attributes hash passed to the state.
  * @param {string}                     [attributes.id=gallery-library]      Unique identifier.
@@ -35,7 +37,6 @@ var Selection = wp.media.model.Selection,
  * @param {number}                     [attributes.priority=100]            The priority for the state link in the media menu.
  * @param {boolean}                    [attributes.syncSelection=false]     Whether the Attachments selection should be persisted from the last state.
  *                                                                          Defaults to false because for this state, because the library of the Edit Gallery state is the selection.
- * @since 4.2.0
  */
 GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype */{
 	defaults: _.defaults({
@@ -83,8 +84,8 @@ GalleryAdd = Library.extend(/** @lends wp.media.controller.GalleryAdd.prototype 
 		}
 
 		/*
-		 * Accept attachments that exist in the original library and
-		 * that do not exist in gallery's library.
+		 * Accept attachments that exist in the original library but
+		 * that do not exist in gallery's library yet.
 		 */
 		library.validator = function( attachment ) {
 			return !! this.mirroring.get( attachment.cid ) && ! edit.get( attachment.cid ) && Selection.prototype.validator.apply( this, arguments );
