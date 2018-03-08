@@ -30,13 +30,13 @@ class WP_Widget_Text extends WP_Widget {
 	 * @since 2.8.0
 	 */
 	public function __construct() {
-		$widget_ops = array(
-			'classname' => 'widget_text',
-			'description' => __( 'Arbitrary text.' ),
+		$widget_ops  = array(
+			'classname'                   => 'widget_text',
+			'description'                 => __( 'Arbitrary text.' ),
 			'customize_selective_refresh' => true,
 		);
 		$control_ops = array(
-			'width' => 400,
+			'width'  => 400,
 			'height' => 350,
 		);
 		parent::__construct( 'text', __( 'Text' ), $widget_ops, $control_ops );
@@ -56,6 +56,10 @@ class WP_Widget_Text extends WP_Widget {
 		$this->registered = true;
 
 		wp_add_inline_script( 'text-widgets', sprintf( 'wp.textWidgets.idBases.push( %s );', wp_json_encode( $this->id_base ) ) );
+
+		if ( $this->is_preview() ) {
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_preview_scripts' ) );
+		}
 
 		// Note that the widgets component in the customizer will also do the 'admin_print_scripts-widgets.php' action in WP_Customize_Widgets::print_scripts().
 		add_action( 'admin_print_scripts-widgets.php', array( $this, 'enqueue_admin_scripts' ) );
@@ -95,7 +99,7 @@ class WP_Widget_Text extends WP_Widget {
 			return false;
 		}
 
-		$wpautop = ! empty( $instance['filter'] );
+		$wpautop         = ! empty( $instance['filter'] );
 		$has_line_breaks = ( false !== strpos( trim( $instance['text'] ), "\n" ) );
 
 		// If auto-paragraphs are not enabled and there are line breaks, then ensure legacy mode.
@@ -116,38 +120,40 @@ class WP_Widget_Text extends WP_Widget {
 		}
 
 		$doc = new DOMDocument();
-		@$doc->loadHTML( sprintf(
-			'<!DOCTYPE html><html><head><meta charset="%s"></head><body>%s</body></html>',
-			esc_attr( get_bloginfo( 'charset' ) ),
-			$instance['text']
-		) );
+		@$doc->loadHTML(
+			sprintf(
+				'<!DOCTYPE html><html><head><meta charset="%s"></head><body>%s</body></html>',
+				esc_attr( get_bloginfo( 'charset' ) ),
+				$instance['text']
+			)
+		);
 		$body = $doc->getElementsByTagName( 'body' )->item( 0 );
 
 		// See $allowedposttags.
 		$safe_elements_attributes = array(
-			'strong' => array(),
-			'em' => array(),
-			'b' => array(),
-			'i' => array(),
-			'u' => array(),
-			's' => array(),
-			'ul' => array(),
-			'ol' => array(),
-			'li' => array(),
-			'hr' => array(),
-			'abbr' => array(),
+			'strong'  => array(),
+			'em'      => array(),
+			'b'       => array(),
+			'i'       => array(),
+			'u'       => array(),
+			's'       => array(),
+			'ul'      => array(),
+			'ol'      => array(),
+			'li'      => array(),
+			'hr'      => array(),
+			'abbr'    => array(),
 			'acronym' => array(),
-			'code' => array(),
-			'dfn' => array(),
-			'a' => array(
+			'code'    => array(),
+			'dfn'     => array(),
+			'a'       => array(
 				'href' => true,
 			),
-			'img' => array(
+			'img'     => array(
 				'src' => true,
 				'alt' => true,
 			),
 		);
-		$safe_empty_elements = array( 'img', 'hr', 'iframe' );
+		$safe_empty_elements      = array( 'img', 'hr', 'iframe' );
 
 		foreach ( $body->getElementsByTagName( '*' ) as $element ) {
 			/** @var DOMElement $element */
@@ -179,6 +185,24 @@ class WP_Widget_Text extends WP_Widget {
 	}
 
 	/**
+	 * Filter gallery shortcode attributes.
+	 *
+	 * Prevents all of a site's attachments from being shown in a gallery displayed on a
+	 * non-singular template where a $post context is not available.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param array $attrs Attributes.
+	 * @return array Attributes.
+	 */
+	public function _filter_gallery_shortcode_attrs( $attrs ) {
+		if ( ! is_singular() && empty( $attrs['id'] ) && empty( $attrs['include'] ) ) {
+			$attrs['id'] = -1;
+		}
+		return $attrs;
+	}
+
+	/**
 	 * Outputs the content for the current Text widget instance.
 	 *
 	 * @since 2.8.0
@@ -197,7 +221,7 @@ class WP_Widget_Text extends WP_Widget {
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
 		$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
-		$text = ! empty( $instance['text'] ) ? $instance['text'] : '';
+		$text                  = ! empty( $instance['text'] ) ? $instance['text'] : '';
 		$is_visual_text_widget = ( ! empty( $instance['visual'] ) && ! empty( $instance['filter'] ) );
 
 		// In 4.8.0 only, visual Text widgets get filter=content, without visual prop; upgrade instance props just-in-time.
@@ -215,18 +239,24 @@ class WP_Widget_Text extends WP_Widget {
 		 * and it applies after wpautop() to prevent corrupting HTML output added by the shortcode. When do_shortcode() is
 		 * added to 'widget_text_content' then do_shortcode() will be manually called when in legacy mode as well.
 		 */
-		$widget_text_do_shortcode_priority = has_filter( 'widget_text', 'do_shortcode' );
+		$widget_text_do_shortcode_priority       = has_filter( 'widget_text', 'do_shortcode' );
 		$should_suspend_legacy_shortcode_support = ( $is_visual_text_widget && false !== $widget_text_do_shortcode_priority );
 		if ( $should_suspend_legacy_shortcode_support ) {
 			remove_filter( 'widget_text', 'do_shortcode', $widget_text_do_shortcode_priority );
 		}
 
-		// Nullify the $post global during widget rendering to prevent shortcodes from running with the unexpected context.
-		$suspended_post = null;
-		if ( isset( $post ) ) {
-			$suspended_post = $post;
+		// Override global $post so filters (and shortcodes) apply in a consistent context.
+		$original_post = $post;
+		if ( is_singular() ) {
+			// Make sure post is always the queried object on singular queries (not from another sub-query that failed to clean up the global $post).
+			$post = get_queried_object();
+		} else {
+			// Nullify the $post global during widget rendering to prevent shortcodes from running with the unexpected context on archive queries.
 			$post = null;
 		}
+
+		// Prevent dumping out all attachments from the media library.
+		add_filter( 'shortcode_atts_gallery', array( $this, '_filter_gallery_shortcode_attrs' ) );
 
 		/**
 		 * Filters the content of the Text widget.
@@ -278,9 +308,8 @@ class WP_Widget_Text extends WP_Widget {
 		}
 
 		// Restore post global.
-		if ( isset( $suspended_post ) ) {
-			$post = $suspended_post;
-		}
+		$post = $original_post;
+		remove_filter( 'shortcode_atts_gallery', array( $this, '_filter_gallery_shortcode_attrs' ) );
 
 		// Undo suspension of legacy plugin-supplied shortcode handling.
 		if ( $should_suspend_legacy_shortcode_support ) {
@@ -328,12 +357,14 @@ class WP_Widget_Text extends WP_Widget {
 	 * @return array Settings to save or bool false to cancel saving.
 	 */
 	public function update( $new_instance, $old_instance ) {
-		$new_instance = wp_parse_args( $new_instance, array(
-			'title' => '',
-			'text' => '',
-			'filter' => false, // For back-compat.
-			'visual' => null, // Must be explicitly defined.
-		) );
+		$new_instance = wp_parse_args(
+			$new_instance, array(
+				'title'  => '',
+				'text'   => '',
+				'filter' => false, // For back-compat.
+				'visual' => null, // Must be explicitly defined.
+			)
+		);
 
 		$instance = $old_instance;
 
@@ -367,12 +398,29 @@ class WP_Widget_Text extends WP_Widget {
 	}
 
 	/**
+	 * Enqueue preview scripts.
+	 *
+	 * These scripts normally are enqueued just-in-time when a playlist shortcode is used.
+	 * However, in the customizer, a playlist shortcode may be used in a text widget and
+	 * dynamically added via selective refresh, so it is important to unconditionally enqueue them.
+	 *
+	 * @since 4.9.3
+	 */
+	public function enqueue_preview_scripts() {
+		require_once dirname( dirname( __FILE__ ) ) . '/media.php';
+
+		wp_playlist_scripts( 'audio' );
+		wp_playlist_scripts( 'video' );
+	}
+
+	/**
 	 * Loads the required scripts and styles for the widget control.
 	 *
 	 * @since 4.8.0
 	 */
 	public function enqueue_admin_scripts() {
 		wp_enqueue_editor();
+		wp_enqueue_media();
 		wp_enqueue_script( 'text-widgets' );
 		wp_add_inline_script( 'text-widgets', 'wp.textWidgets.init();', 'after' );
 	}
@@ -383,7 +431,7 @@ class WP_Widget_Text extends WP_Widget {
 	 * @since 2.8.0
 	 * @since 4.8.0 Form only contains hidden inputs which are synced with JS template.
 	 * @since 4.8.1 Restored original form to be displayed when in legacy mode.
-	 * @see WP_Widget_Visual_Text::render_control_template_scripts()
+	 * @see WP_Widget_Text::render_control_template_scripts()
 	 * @see _WP_Editors::editor()
 	 *
 	 * @param array $instance Current settings.
@@ -394,7 +442,7 @@ class WP_Widget_Text extends WP_Widget {
 			(array) $instance,
 			array(
 				'title' => '',
-				'text' => '',
+				'text'  => '',
 			)
 		);
 		?>

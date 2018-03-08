@@ -1444,7 +1444,7 @@ p.customize-section-description {
 }
 
 .customize-control-header .header-view.selected:after {
-	content: '';
+	content: "";
 	position: absolute;
 	height: auto;
 	top: 0;
@@ -2706,6 +2706,7 @@ body.adding-widget .add-new-widget:before,
 }
 
 #available-menu-items-search .search-icon:after,
+#available-widgets-filter .search-icon:after,
 .themes-filter-bar .search-icon:after {
 	content: "\f179";
 	font: normal 20px/1 dashicons;

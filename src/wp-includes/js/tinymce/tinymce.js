@@ -16386,27 +16386,6 @@ define(
   ],
 
   function (Arr, Option, Element, NodeTypes, Error, document) {
-    /*
-     * There's a lot of code here; the aim is to allow the browser to optimise constant comparisons,
-     * instead of doing object lookup feature detection on every call
-     */
-    var STANDARD = 0;
-    var MSSTANDARD = 1;
-    var WEBKITSTANDARD = 2;
-    var FIREFOXSTANDARD = 3;
-
-    var selectorType = (function () {
-      var test = document.createElement('span');
-      // As of Chrome 34 / Safari 7.1 / FireFox 34, everyone except IE has the unprefixed function.
-      // Still check for the others, but do it last.
-      return test.matches !== undefined ? STANDARD :
-             test.msMatchesSelector !== undefined ? MSSTANDARD :
-             test.webkitMatchesSelector !== undefined ? WEBKITSTANDARD :
-             test.mozMatchesSelector !== undefined ? FIREFOXSTANDARD :
-             -1;
-    })();
-
-
     var ELEMENT = NodeTypes.ELEMENT;
     var DOCUMENT = NodeTypes.DOCUMENT;
 
@@ -16416,10 +16395,10 @@ define(
 
       // As of Chrome 34 / Safari 7.1 / FireFox 34, everyone except IE has the unprefixed function.
       // Still check for the others, but do it last.
-      else if (selectorType === STANDARD) return elem.matches(selector);
-      else if (selectorType === MSSTANDARD) return elem.msMatchesSelector(selector);
-      else if (selectorType === WEBKITSTANDARD) return elem.webkitMatchesSelector(selector);
-      else if (selectorType === FIREFOXSTANDARD) return elem.mozMatchesSelector(selector);
+      else if (elem.matches !== undefined) return elem.matches(selector);
+      else if (elem.msMatchesSelector !== undefined) return elem.msMatchesSelector(selector);
+      else if (elem.webkitMatchesSelector !== undefined) return elem.webkitMatchesSelector(selector);
+      else if (elem.mozMatchesSelector !== undefined) return elem.mozMatchesSelector(selector);
       else throw new Error('Browser lacks native selectors'); // unfortunately we can't throw this on startup :(
     };
 
@@ -25419,7 +25398,7 @@ define(
 
       var getImplementation = function () {
         var theme = editor.theme;
-        return theme.getNotificationManagerImpl ? theme.getNotificationManagerImpl() : NotificationManagerImpl(editor);
+        return theme && theme.getNotificationManagerImpl ? theme.getNotificationManagerImpl() : NotificationManagerImpl(editor);
       };
 
       var getTopNotification = function () {
@@ -25431,7 +25410,9 @@ define(
       };
 
       var reposition = function () {
-        getImplementation().reposition(notifications);
+        if (notifications.length > 0) {
+		  getImplementation().reposition(notifications);
+		}
       };
 
       var addNotification = function (notification) {
@@ -28316,7 +28297,7 @@ define(
 
       var getImplementation = function () {
         var theme = editor.theme;
-        return theme.getWindowManagerImpl ? theme.getWindowManagerImpl() : WindowManagerImpl(editor);
+        return theme && theme.getWindowManagerImpl ? theme.getWindowManagerImpl() : WindowManagerImpl(editor);
       };
 
       var funcBind = function (scope, f) {
@@ -28359,7 +28340,7 @@ define(
       };
 
       var getTopWindow = function () {
-        return Option.from(windows[0]);
+        return Option.from(windows[windows.length - 1]);
       };
 
       var open = function (args, params) {
@@ -30477,8 +30458,10 @@ define(
     var getRanges = function (selection) {
       var ranges = [];
 
-      for (var i = 0; i < selection.rangeCount; i++) {
-        ranges.push(selection.getRangeAt(i));
+      if (selection) {
+        for (var i = 0; i < selection.rangeCount; i++) {
+          ranges.push(selection.getRangeAt(i));
+        }
       }
 
       return ranges;

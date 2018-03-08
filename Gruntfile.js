@@ -10,7 +10,17 @@ module.exports = function(grunt) {
 		SOURCE_DIR = 'src/',
 		BUILD_DIR = 'build/',
  		BANNER_TEXT = '/*! This file is auto-generated */',
-		autoprefixer = require( 'autoprefixer' );
+		autoprefixer = require( 'autoprefixer' ),
+		phpUnitWatchGroup = grunt.option( 'group' );
+
+	if ( 'watch:phpunit' === grunt.cli.tasks[ 0 ] && ! phpUnitWatchGroup ) {
+		grunt.log.writeln();
+		grunt.fail.fatal(
+			'Missing required parameters. Example usage: ' + '\n\n' +
+			'grunt watch:phpunit --group=community-events' + '\n' +
+			'grunt watch:phpunit --group=multisite,mail'
+		);
+	}
 
 	// Load tasks.
 	require('matchdep').filterDev(['grunt-*', '!grunt-legacy-util']).forEach( grunt.loadNpmTasks );
@@ -664,7 +674,7 @@ module.exports = function(grunt) {
 								// Convert the entities list to PHP array syntax
 								entities = '\'' + emojiArray.filter( function( val ) {
 									return val.length >= 8 ? val : false ;
-								} ).join( '\',\'' ) + '\'';
+								} ).join( '\', \'' ) + '\'';
 
 								// Create a list of all characters used by the emoji list
 								partials = partials.replace( /-/g, '\n' );
@@ -675,11 +685,11 @@ module.exports = function(grunt) {
 								// Convert the partials list to PHP array syntax
 								partials = '\'' + Array.from( partialsSet ).filter( function( val ) {
 									return val.length >= 8 ? val : false ;
-								} ).join( '\',\'' ) + '\'';
+								} ).join( '\', \'' ) + '\'';
 
 								regex = '// START: emoji arrays\n';
-								regex += '\t$entities = array(' + entities + ');\n';
-								regex += '\t$partials = array(' + partials + ');\n';
+								regex += '\t$entities = array( ' + entities + ' );\n';
+								regex += '\t$partials = array( ' + partials + ' );\n';
 								regex += '\t// END: emoji arrays';
 
 								return regex;
@@ -742,6 +752,10 @@ module.exports = function(grunt) {
 					'!tests/qunit/editor/**'
 				],
 				tasks: ['qunit']
+			},
+			phpunit: {
+				files: [ '**/*.php' ],
+				tasks: [ 'phpunit:default' ]
 			}
 		}
 	});
@@ -945,7 +959,7 @@ module.exports = function(grunt) {
 	grunt.registerMultiTask('phpunit', 'Runs PHPUnit tests, including the ajax, external-http, and multisite tests.', function() {
 		grunt.util.spawn({
 			cmd: this.data.cmd,
-			args: this.data.args,
+			args: phpUnitWatchGroup ? this.data.args.concat( [ '--group', phpUnitWatchGroup ] ) : this.data.args,
 			opts: {stdio: 'inherit'}
 		}, this.async());
 	});

@@ -154,7 +154,8 @@
 	top: 30px;
 }
 
-.media-frame #embed-url-field.invalid {
+.media-frame #embed-url-field.invalid,
+.media-widget-image-link > .link:invalid {
 	border: 1px solid #dc3232;
 }
 
@@ -176,9 +177,7 @@
 	cursor: pointer;
 }
 
-.media-widget-preview.media_image,
-.media-widget-preview.media_audio,
-.attachment-media-view {
+.media-widget-preview .placeholder {
 	background: #f1f1f1;
 }
 
@@ -189,7 +188,7 @@
 	background: transparent;
 }
 
-.media-widget-gallery-preview .gallery-item .gallery-icon { 
+.media-widget-gallery-preview .gallery-item .gallery-icon {
 	margin: 4.5%;
 }
 

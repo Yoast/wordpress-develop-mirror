@@ -31,7 +31,7 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	 * @var array
 	 */
 	protected $default_instance = array(
-		'title' => '',
+		'title'   => '',
 		'content' => '',
 	);
 
@@ -41,13 +41,13 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	 * @since 4.8.1
 	 */
 	public function __construct() {
-		$widget_ops = array(
-			'classname' => 'widget_custom_html',
-			'description' => __( 'Arbitrary HTML code.' ),
+		$widget_ops  = array(
+			'classname'                   => 'widget_custom_html',
+			'description'                 => __( 'Arbitrary HTML code.' ),
 			'customize_selective_refresh' => true,
 		);
 		$control_ops = array(
-			'width' => 400,
+			'width'  => 400,
 			'height' => 350,
 		);
 		parent::__construct( 'custom_html', __( 'Custom HTML' ), $widget_ops, $control_ops );
@@ -81,15 +81,48 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	}
 
 	/**
+	 * Filter gallery shortcode attributes.
+	 *
+	 * Prevents all of a site's attachments from being shown in a gallery displayed on a
+	 * non-singular template where a $post context is not available.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param array $attrs Attributes.
+	 * @return array Attributes.
+	 */
+	public function _filter_gallery_shortcode_attrs( $attrs ) {
+		if ( ! is_singular() && empty( $attrs['id'] ) && empty( $attrs['include'] ) ) {
+			$attrs['id'] = -1;
+		}
+		return $attrs;
+	}
+
+	/**
 	 * Outputs the content for the current Custom HTML widget instance.
 	 *
 	 * @since 4.8.1
 	 *
+	 * @global WP_Post $post
 	 * @param array $args     Display arguments including 'before_title', 'after_title',
 	 *                        'before_widget', and 'after_widget'.
 	 * @param array $instance Settings for the current Custom HTML widget instance.
 	 */
 	public function widget( $args, $instance ) {
+		global $post;
+
+		// Override global $post so filters (and shortcodes) apply in a consistent context.
+		$original_post = $post;
+		if ( is_singular() ) {
+			// Make sure post is always the queried object on singular queries (not from another sub-query that failed to clean up the global $post).
+			$post = get_queried_object();
+		} else {
+			// Nullify the $post global during widget rendering to prevent shortcodes from running with the unexpected context on archive queries.
+			$post = null;
+		}
+
+		// Prevent dumping out all attachments from the media library.
+		add_filter( 'shortcode_atts_gallery', array( $this, '_filter_gallery_shortcode_attrs' ) );
 
 		$instance = array_merge( $this->default_instance, $instance );
 
@@ -97,11 +130,13 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
 		// Prepare instance data that looks like a normal Text widget.
-		$simulated_text_widget_instance = array_merge( $instance, array(
-			'text' => isset( $instance['content'] ) ? $instance['content'] : '',
-			'filter' => false, // Because wpautop is not applied.
-			'visual' => false, // Because it wasn't created in TinyMCE.
-		) );
+		$simulated_text_widget_instance = array_merge(
+			$instance, array(
+				'text'   => isset( $instance['content'] ) ? $instance['content'] : '',
+				'filter' => false, // Because wpautop is not applied.
+				'visual' => false, // Because it wasn't created in TinyMCE.
+			)
+		);
 		unset( $simulated_text_widget_instance['content'] ); // Was moved to 'text' prop.
 
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-text.php */
@@ -117,6 +152,10 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 		 * @param WP_Widget_Custom_HTML $this     Current Custom HTML widget instance.
 		 */
 		$content = apply_filters( 'widget_custom_html_content', $content, $instance, $this );
+
+		// Restore post global.
+		$post = $original_post;
+		remove_filter( 'shortcode_atts_gallery', array( $this, '_filter_gallery_shortcode_attrs' ) );
 
 		// Inject the Text widget's container class name alongside this widget's class name for theme styling compatibility.
 		$args['before_widget'] = preg_replace( '/(?<=\sclass=["\'])/', 'widget_text ', $args['before_widget'] );
@@ -142,7 +181,7 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	 * @return array Settings to save or bool false to cancel saving.
 	 */
 	public function update( $new_instance, $old_instance ) {
-		$instance = array_merge( $this->default_instance, $old_instance );
+		$instance          = array_merge( $this->default_instance, $old_instance );
 		$instance['title'] = sanitize_text_field( $new_instance['title'] );
 		if ( current_user_can( 'unfiltered_html' ) ) {
 			$instance['content'] = $new_instance['content'];
@@ -158,13 +197,15 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	 * @since 4.9.0
 	 */
 	public function enqueue_admin_scripts() {
-		$settings = wp_enqueue_code_editor( array(
-			'type' => 'text/html',
-			'codemirror' => array(
-				'indentUnit' => 2,
-				'tabSize' => 2,
-			),
-		) );
+		$settings = wp_enqueue_code_editor(
+			array(
+				'type'       => 'text/html',
+				'codemirror' => array(
+					'indentUnit' => 2,
+					'tabSize'    => 2,
+				),
+			)
+		);
 
 		wp_enqueue_script( 'custom-html-widgets' );
 		if ( empty( $settings ) ) {
@@ -175,10 +216,11 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 		wp_add_inline_script( 'custom-html-widgets', sprintf( 'wp.customHtmlWidgets.init( %s );', wp_json_encode( $settings ) ), 'after' );
 
 		$l10n = array(
-			'errorNotice' => wp_array_slice_assoc(
+			'errorNotice' => array(
 				/* translators: %d: error count */
-				_n_noop( 'There is %d error which must be fixed before you can save.', 'There are %d errors which must be fixed before you can save.' ),
-				array( 'singular', 'plural' )
+				'singular' => _n( 'There is %d error which must be fixed before you can save.', 'There are %d errors which must be fixed before you can save.', 1 ),
+				/* translators: %d: error count */
+				'plural'   => _n( 'There is %d error which must be fixed before you can save.', 'There are %d errors which must be fixed before you can save.', 2 ), // @todo This is lacking, as some languages have a dedicated dual form. For proper handling of plurals in JS, see #20491.
 			),
 		);
 		wp_add_inline_script( 'custom-html-widgets', sprintf( 'jQuery.extend( wp.customHtmlWidgets.l10n, %s );', wp_json_encode( $l10n ) ), 'after' );
@@ -224,8 +266,8 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 			<?php if ( ! current_user_can( 'unfiltered_html' ) ) : ?>
 				<?php
 				$probably_unsafe_html = array( 'script', 'iframe', 'form', 'input', 'style' );
-				$allowed_html = wp_kses_allowed_html( 'post' );
-				$disallowed_html = array_diff( $probably_unsafe_html, array_keys( $allowed_html ) );
+				$allowed_html         = wp_kses_allowed_html( 'post' );
+				$disallowed_html      = array_diff( $probably_unsafe_html, array_keys( $allowed_html ) );
 				?>
 				<?php if ( ! empty( $disallowed_html ) ) : ?>
 					<# if ( data.codeEditorDisabled ) { #>
@@ -250,7 +292,7 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 	public static function add_help_text() {
 		$screen = get_current_screen();
 
-		$content = '<p>';
+		$content  = '<p>';
 		$content .= __( 'Use the Custom HTML widget to add arbitrary HTML code to your widget areas.' );
 		$content .= '</p>';
 
@@ -261,7 +303,8 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 				__( 'The edit field automatically highlights code syntax. You can disable this in your <a href="%1$s" %2$s>user profile%3$s</a> to work in plain text mode.' ),
 				esc_url( get_edit_profile_url() ),
 				'class="external-link" target="_blank"',
-				sprintf( '<span class="screen-reader-text"> %s</span>',
+				sprintf(
+					'<span class="screen-reader-text"> %s</span>',
 					/* translators: accessibility text */
 					__( '(opens in a new window)' )
 				)
@@ -276,10 +319,12 @@ class WP_Widget_Custom_HTML extends WP_Widget {
 			$content .= '</ul>';
 		}
 
-		$screen->add_help_tab( array(
-			'id' => 'custom_html_widget',
-			'title' => __( 'Custom HTML Widget' ),
-			'content' => $content,
-		) );
+		$screen->add_help_tab(
+			array(
+				'id'      => 'custom_html_widget',
+				'title'   => __( 'Custom HTML Widget' ),
+				'content' => $content,
+			)
+		);
 	}
 }
