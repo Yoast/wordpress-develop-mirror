@@ -20,13 +20,13 @@ In this directory you'll find vendor JavaScript packages that cannot be installe
 - deprecated/suggest: Patched by Mark Jaquith with Alexander Dick's "multiple items" patch to allow for auto-suggesting of more than one tag before submitting. See documentation in `suggest.js`.
 - farbtastic: https://github.com/mattfarina/farbtastic
 - iris: https://github.com/Automattic/Iris
-- jquery.hotkeys: https://github.com/tzuryby/jquery.hotkeys
-- jquery.masonry: Old version for BC purposes, can't include two versions with NPM. The newer version is included through NPM and built to `wp-includes/js/masonry.min.js`
-- jquery.query: https://github.com/blairmitchelmore/jquery.plugins/blob/master/jquery.query.js
-- jquery.schedule: https://github.com/rse/jquery-schedule
-- jquery.serializeobject: https://github.com/cowboy/jquery-misc/blob/master/jquery.ba-serializeobject.js
-- jquery.table-hotkeys: WP version can be downloaded at https://code.google.com/archive/p/js-hotkeys/downloads?page=2. A newer version is available at https://github.com/jeresig/jquery.hotkeys.
-- jquery.ui.touch-punch.js https://github.com/furf/jquery-ui-touch-punch/blob/master/jquery.ui.touch-punch.js
 - json2: https://github.com/douglascrockford/JSON-js
+- jquery/jquery.hotkeys: https://github.com/tzuryby/jquery.hotkeys
+- jquery/jquery.masonry: Old version for BC purposes, can't include two versions with NPM. The newer version is included through NPM and built to `wp-includes/js/masonry.min.js`
+- jquery/jquery.query: https://github.com/blairmitchelmore/jquery.plugins/blob/master/jquery.query.js
+- jquery/jquery.schedule: https://github.com/rse/jquery-schedule
+- jquery/jquery.serializeobject: https://github.com/cowboy/jquery-misc/blob/master/jquery.ba-serializeobject.js
+- jquery/jquery.table-hotkeys: WP version can be downloaded at https://code.google.com/archive/p/js-hotkeys/downloads?page=2. A newer version is available at https://github.com/jeresig/jquery.hotkeys.
+- jquery/jquery.ui.touch-punch.js https://github.com/furf/jquery-ui-touch-punch/blob/master/jquery.ui.touch-punch.js
 - swfobject: https://github.com/swfobject/swfobject
 - tw-sack: https://github.com/abritinthebay/simpleajaxcodekit
