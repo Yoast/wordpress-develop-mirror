@@ -30,3 +30,4 @@ In this directory you'll find vendor JavaScript packages that cannot be installe
 - jquery/jquery.ui.touch-punch.js https://github.com/furf/jquery-ui-touch-punch/blob/master/jquery.ui.touch-punch.js
 - swfobject: https://github.com/swfobject/swfobject
 - tw-sack: https://github.com/abritinthebay/simpleajaxcodekit
+- zxcvbn: https://github.com/dropbox/zxcvbn cannot automatically be installed as the frequency lists need to be manually ROT13 transformed.
