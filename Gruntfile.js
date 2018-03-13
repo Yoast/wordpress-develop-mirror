@@ -145,7 +145,6 @@ module.exports = function(grunt) {
 					'build/wp-includes/js/masonry.min.js': ['./node_modules/masonry-layout/dist/masonry.pkgd.min.js'],
 					'build/wp-includes/js/twemoji.js': ['./node_modules/twemoji/2/twemoji.js'],
 					'build/wp-includes/js/underscore.min.js': ['./node_modules/underscore/underscore-min.js'],
-					'build/wp-includes/js/zxcvbn.min.js': ['./node_modules/zxcvbn/dist/zxcvbn.js'],
 				}
 			},
 			'vendor-js': {

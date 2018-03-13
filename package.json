@@ -52,7 +52,6 @@
     "jquery-ui": "github:jquery/jquery-ui#1.11.4",
     "masonry-layout": "3.3.2",
     "twemoji": "2.5.1",
-    "underscore": "1.8.3",
-    "zxcvbn": "4.4.1"
+    "underscore": "1.8.3"
   }
 }
