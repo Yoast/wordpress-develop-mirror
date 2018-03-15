@@ -11,11 +11,12 @@
  *
  * @since 2.8.0
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
- * @param string $stylesheet Stylesheet of the theme to delete
- * @param string $redirect Redirect to page when complete.
- * @return void|bool|WP_Error When void, echoes content.
+ * @param string $stylesheet Stylesheet of the theme to delete.
+ * @param string $redirect   Redirect to page when complete.
+ * @return bool|null|WP_Error True on success, false if `$stylesheet` is empty, WP_Error on failure.
+ *                            Null if filesystem credentials are required to proceed.
  */
 function delete_theme( $stylesheet, $redirect = '' ) {
 	global $wp_filesystem;
@@ -60,7 +61,7 @@ function delete_theme( $stylesheet, $redirect = '' ) {
 		return new WP_Error( 'fs_unavailable', __( 'Could not access filesystem.' ) );
 	}
 
-	if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->get_error_code() ) {
+	if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
 		return new WP_Error( 'fs_error', __( 'Filesystem error.' ), $wp_filesystem->errors );
 	}
 
@@ -421,17 +422,25 @@ function get_theme_feature_list( $api = true ) {
  *         for more information on the make-up of possible return objects depending on the value of `$action`.
  */
 function themes_api( $action, $args = array() ) {
+	// include an unmodified $wp_version
+	include( ABSPATH . WPINC . '/version.php' );
 
 	if ( is_array( $args ) ) {
 		$args = (object) $args;
 	}
 
-	if ( ! isset( $args->per_page ) ) {
-		$args->per_page = 24;
+	if ( 'query_themes' == $action ) {
+		if ( ! isset( $args->per_page ) ) {
+			$args->per_page = 24;
+		}
 	}
 
 	if ( ! isset( $args->locale ) ) {
 		$args->locale = get_user_locale();
+	}
+
+	if ( ! isset( $args->wp_version ) ) {
+		$args->wp_version = substr( $wp_version, 0, 3 ); // X.y
 	}
 
 	/**
@@ -465,22 +474,24 @@ function themes_api( $action, $args = array() ) {
 	$res = apply_filters( 'themes_api', false, $action, $args );
 
 	if ( ! $res ) {
-		// include an unmodified $wp_version
-		include( ABSPATH . WPINC . '/version.php' );
+		$url = 'http://api.wordpress.org/themes/info/1.2/';
+		$url = add_query_arg(
+			array(
+				'action'  => $action,
+				'request' => $args,
+			),
+			$url
+		);
 
-		$url = $http_url = 'http://api.wordpress.org/themes/info/1.0/';
+		$http_url = $url;
 		if ( $ssl = wp_http_supports( array( 'ssl' ) ) ) {
 			$url = set_url_scheme( $url, 'https' );
 		}
 
 		$http_args = array(
 			'user-agent' => 'WordPress/' . $wp_version . '; ' . home_url( '/' ),
-			'body'       => array(
-				'action'  => $action,
-				'request' => serialize( $args ),
-			),
 		);
-		$request   = wp_remote_post( $url, $http_args );
+		$request   = wp_remote_get( $url, $http_args );
 
 		if ( $ssl && is_wp_error( $request ) ) {
 			if ( ! wp_doing_ajax() ) {
@@ -493,7 +504,7 @@ function themes_api( $action, $args = array() ) {
 					headers_sent() || WP_DEBUG ? E_USER_WARNING : E_USER_NOTICE
 				);
 			}
-			$request = wp_remote_post( $http_url, $http_args );
+			$request = wp_remote_get( $http_url, $http_args );
 		}
 
 		if ( is_wp_error( $request ) ) {
@@ -507,8 +518,11 @@ function themes_api( $action, $args = array() ) {
 				$request->get_error_message()
 			);
 		} else {
-			$res = maybe_unserialize( wp_remote_retrieve_body( $request ) );
-			if ( ! is_object( $res ) && ! is_array( $res ) ) {
+			$res = json_decode( wp_remote_retrieve_body( $request ), true );
+			if ( is_array( $res ) ) {
+				// Object casting is required in order to match the info/1.0 format.
+				$res = (object) $res;
+			} elseif ( null === $res ) {
 				$res = new WP_Error(
 					'themes_api_failed',
 					sprintf(
@@ -519,6 +533,21 @@ function themes_api( $action, $args = array() ) {
 					wp_remote_retrieve_body( $request )
 				);
 			}
+
+			if ( isset( $res->error ) ) {
+				$res = new WP_Error( 'themes_api_failed', $res->error );
+			}
+		}
+
+		// Back-compat for info/1.2 API, upgrade the theme objects in query_themes to objects.
+		if ( 'query_themes' == $action ) {
+			foreach ( $res->themes as $i => $theme ) {
+				$res->themes[ $i ] = (object) $theme;
+			}
+		}
+		// Back-compat for info/1.2 API, downgrade the feature_list result back to an array.
+		if ( 'feature_list' == $action ) {
+			$res = (array) $res;
 		}
 	}
 
@@ -716,14 +745,14 @@ function customize_themes_print_templates() {
 
 			<div class="theme-actions">
 				<# if ( data.active ) { #>
-					<button type="button" class="button button-primary customize-theme"><?php _e( 'Customize' ); ?></a>
+					<button type="button" class="button button-primary customize-theme"><?php _e( 'Customize' ); ?></button>
 				<# } else if ( 'installed' === data.type ) { #>
 					<?php if ( current_user_can( 'delete_themes' ) ) { ?>
 						<# if ( data.actions && data.actions['delete'] ) { #>
 							<a href="{{{ data.actions['delete'] }}}" data-slug="{{ data.id }}" class="button button-secondary delete-theme"><?php _e( 'Delete' ); ?></a>
 						<# } #>
 					<?php } ?>
-					<button type="button" class="button button-primary preview-theme" data-slug="{{ data.id }}"><?php _e( 'Live Preview' ); ?></span>
+					<button type="button" class="button button-primary preview-theme" data-slug="{{ data.id }}"><?php _e( 'Live Preview' ); ?></button>
 				<# } else { #>
 					<button type="button" class="button theme-install" data-slug="{{ data.id }}"><?php _e( 'Install' ); ?></button>
 					<button type="button" class="button button-primary theme-install preview" data-slug="{{ data.id }}"><?php _e( 'Install &amp; Preview' ); ?></button>

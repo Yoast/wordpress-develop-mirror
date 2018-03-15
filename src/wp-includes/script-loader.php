@@ -137,7 +137,7 @@ function wp_default_scripts( &$scripts ) {
 	did_action( 'init' ) && $scripts->localize(
 		'wp-ajax-response', 'wpAjax', array(
 			'noPerm' => __( 'Sorry, you are not allowed to do that.' ),
-			'broken' => __( 'An unidentified error has occurred.' ),
+			'broken' => __( 'Something went wrong.' ),
 		)
 	);
 
@@ -494,7 +494,8 @@ function wp_default_scripts( &$scripts ) {
 
 	$scripts->add( 'wp-codemirror', '/wp-includes/js/codemirror/codemirror.min.js', array(), '5.29.1-alpha-ee20357' );
 	$scripts->add( 'csslint', '/wp-includes/js/codemirror/csslint.js', array(), '1.0.5' );
-	$scripts->add( 'jshint', '/wp-includes/js/codemirror/jshint.js', array(), '2.9.5' );
+	$scripts->add( 'jshint', '/wp-includes/js/codemirror/fakejshint.js', array( 'esprima' ), '2.9.5' );
+	$scripts->add( 'esprima', '/wp-includes/js/codemirror/esprima.js', array(), '4.0.0' );
 	$scripts->add( 'jsonlint', '/wp-includes/js/codemirror/jsonlint.js', array(), '1.6.2' );
 	$scripts->add( 'htmlhint', '/wp-includes/js/codemirror/htmlhint.js', array(), '0.9.14-xwp' );
 	$scripts->add( 'htmlhint-kses', '/wp-includes/js/codemirror/htmlhint-kses.js', array( 'htmlhint' ) );
@@ -604,7 +605,8 @@ function wp_default_scripts( &$scripts ) {
 			'close'                   => __( 'Close' ),
 			'action'                  => __( 'Action' ),
 			'discardChanges'          => __( 'Discard changes' ),
-			'cheatin'                 => __( 'Cheatin&#8217; uh?' ),
+			'cheatin'                 => __( 'Something went wrong.' ),
+			'notAllowedHeading'       => __( 'You need a higher level of permission.' ),
 			'notAllowed'              => __( 'Sorry, you are not allowed to customize this site.' ),
 			'previewIframeTitle'      => __( 'Site Preview' ),
 			'loginIframeTitle'        => __( 'Session expired' ),
@@ -687,7 +689,7 @@ function wp_default_scripts( &$scripts ) {
 		did_action( 'init' ) && $scripts->localize(
 			'admin-tags', 'tagsl10n', array(
 				'noPerm' => __( 'Sorry, you are not allowed to do that.' ),
-				'broken' => __( 'An unidentified error has occurred.' ),
+				'broken' => __( 'Something went wrong.' ),
 			)
 		);
 
@@ -725,6 +727,17 @@ function wp_default_scripts( &$scripts ) {
 				'termSelected' => __( 'Term selected.' ),
 				'termAdded'    => __( 'Term added.' ),
 				'termRemoved'  => __( 'Term removed.' ),
+				'restURL'      => rest_url( '/wp/v2/tags' ),
+
+				/**
+				 * Filters the minimum number of characters required to fire a tag search via Ajax.
+				 *
+				 * Previous to 5.0.0, this filter passed taxonomy and search context parameters.
+				 * @since 4.0.0
+				 *
+				 * @param int         $characters The minimum number of characters required. Default 2.
+				 */
+				'minChars'     => (int) apply_filters( 'term_search_min_chars', 2 ),
 			)
 		);
 
@@ -773,14 +786,15 @@ function wp_default_scripts( &$scripts ) {
 
 		$scripts->add( 'admin-gallery', "/wp-admin/js/gallery$suffix.js", array( 'jquery-ui-sortable' ) );
 
-		$scripts->add( 'admin-widgets', "/wp-admin/js/widgets$suffix.js", array( 'jquery-ui-sortable', 'jquery-ui-draggable', 'jquery-ui-droppable' ), false, 1 );
+		$scripts->add( 'admin-widgets', "/wp-admin/js/widgets$suffix.js", array( 'jquery-ui-sortable', 'jquery-ui-draggable', 'jquery-ui-droppable', 'wp-a11y' ), false, 1 );
 		did_action( 'init' ) && $scripts->add_inline_script(
 			'admin-widgets', sprintf(
 				'wpWidgets.l10n = %s;', wp_json_encode(
 					array(
-						'save'      => __( 'Save' ),
-						'saved'     => __( 'Saved' ),
-						'saveAlert' => __( 'The changes you made will be lost if you navigate away from this page.' ),
+						'save'        => __( 'Save' ),
+						'saved'       => __( 'Saved' ),
+						'saveAlert'   => __( 'The changes you made will be lost if you navigate away from this page.' ),
+						'widgetAdded' => __( 'Widget has been added to the selected sidebar' ),
 					)
 				)
 			)
@@ -905,7 +919,7 @@ function wp_default_scripts( &$scripts ) {
 					'activateImporter'         => __( 'Run Importer' ),
 					/* translators: %s: Importer name */
 					'activateImporterLabel'    => __( 'Run %s' ),
-					'unknownError'             => __( 'An unidentified error has occurred.' ),
+					'unknownError'             => __( 'Something went wrong.' ),
 					'connectionError'          => __( 'Connection lost or the server is busy. Please try again later.' ),
 					'nonceError'               => __( 'An error has occurred. Please reload the page and try again.' ),
 					'pluginsFound'             => __( 'Number of plugins found: %d' ),

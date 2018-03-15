@@ -104,6 +104,21 @@ foreach ( array( 'content_save_pre', 'excerpt_save_pre', 'comment_save_pre', 'pr
 	add_filter( $filter, 'balanceTags', 50 );
 }
 
+// Add proper rel values for links with target.
+foreach ( array(
+	'title_save_pre',
+	'content_save_pre',
+	'excerpt_save_pre',
+	'content_filtered_save_pre',
+	'pre_comment_content',
+	'pre_term_description',
+	'pre_link_description',
+	'pre_link_notes',
+	'pre_user_description',
+) as $filter ) {
+	add_filter( $filter, 'wp_targeted_link_rel' );
+};
+
 // Format strings for display.
 foreach ( array( 'comment_author', 'term_name', 'link_name', 'link_description', 'link_notes', 'bloginfo', 'wp_title', 'widget_title' ) as $filter ) {
 	add_filter( $filter, 'wptexturize' );
@@ -124,7 +139,7 @@ foreach ( array( 'single_post_title', 'single_cat_title', 'single_tag_title', 's
 }
 
 // Format text area for display.
-foreach ( array( 'term_description', 'get_the_author_description', 'get_the_post_type_description' ) as $filter ) {
+foreach ( array( 'term_description', 'get_the_post_type_description' ) as $filter ) {
 	add_filter( $filter, 'wptexturize' );
 	add_filter( $filter, 'convert_chars' );
 	add_filter( $filter, 'wpautop' );
@@ -312,7 +327,7 @@ add_action( 'do_feed_rss2', 'do_feed_rss2', 10, 1 );
 add_action( 'do_feed_atom', 'do_feed_atom', 10, 1 );
 add_action( 'do_pings', 'do_all_pings', 10, 1 );
 add_action( 'do_robots', 'do_robots' );
-add_action( 'set_comment_cookies', 'wp_set_comment_cookies', 10, 2 );
+add_action( 'set_comment_cookies', 'wp_set_comment_cookies', 10, 3 );
 add_action( 'sanitize_comment_cookies', 'sanitize_comment_cookies' );
 add_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 add_action( 'admin_print_scripts', 'print_head_scripts', 20 );
@@ -353,6 +368,10 @@ add_action( 'end_fetch_post_thumbnail_html', '_wp_post_thumbnail_class_filter_re
 add_action( 'template_redirect', 'wp_old_slug_redirect' );
 add_action( 'post_updated', 'wp_check_for_changed_slugs', 12, 3 );
 add_action( 'attachment_updated', 'wp_check_for_changed_slugs', 12, 3 );
+
+// Redirect Old Dates
+add_action( 'post_updated',       'wp_check_for_changed_dates', 12, 3 );
+add_action( 'attachment_updated', 'wp_check_for_changed_dates', 12, 3 );
 
 // Nonce check for Post Previews
 add_action( 'init', '_show_post_preview' );

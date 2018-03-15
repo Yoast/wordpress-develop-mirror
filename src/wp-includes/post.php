@@ -651,7 +651,7 @@ function get_post_ancestors( $post ) {
  * @see sanitize_post_field()
  *
  * @param string      $field   Post field name.
- * @param int|WP_Post $post    Optional. Post ID or post object. Defaults to current post.
+ * @param int|WP_Post $post    Optional. Post ID or post object. Defaults to global $post.
  * @param string      $context Optional. How to filter the field. Accepts 'raw', 'edit', 'db',
  *                             or 'display'. Default 'display'.
  * @return string The value of the post field on success, empty string on failure.
@@ -678,11 +678,11 @@ function get_post_field( $field, $post = null, $context = 'display' ) {
  *
  * @since 2.0.0
  *
- * @param int|WP_Post $ID Optional. Post ID or post object. Default empty.
+ * @param int|WP_Post $post Optional. Post ID or post object. Defaults to global $post.
  * @return string|false The mime type on success, false on failure.
  */
-function get_post_mime_type( $ID = '' ) {
-	$post = get_post( $ID );
+function get_post_mime_type( $post = null ) {
+	$post = get_post( $post );
 
 	if ( is_object( $post ) ) {
 		return $post->post_mime_type;
@@ -692,18 +692,18 @@ function get_post_mime_type( $ID = '' ) {
 }
 
 /**
- * Retrieve the post status based on the Post ID.
+ * Retrieve the post status based on the post ID.
  *
  * If the post ID is of an attachment, then the parent post status will be given
  * instead.
  *
  * @since 2.0.0
  *
- * @param int|WP_Post $ID Optional. Post ID or post object. Default empty.
+ * @param int|WP_Post $post Optional. Post ID or post object. Defaults to global $post..
  * @return string|false Post status on success, false on failure.
  */
-function get_post_status( $ID = '' ) {
-	$post = get_post( $ID );
+function get_post_status( $post = null ) {
+	$post = get_post( $post );
 
 	if ( ! is_object( $post ) ) {
 		return false;
@@ -971,7 +971,11 @@ function is_post_type_hierarchical( $post_type ) {
 }
 
 /**
- * Check if a post type is registered.
+ * Determines whether a post type is registered.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 3.0.0
  *
@@ -1004,7 +1008,7 @@ function get_post_type( $post = null ) {
  * Retrieves a post type object by name.
  *
  * @since 3.0.0
- * @since 4.6.0 Object returned is now an instance of WP_Post_Type.
+ * @since 4.6.0 Object returned is now an instance of `WP_Post_Type`.
  *
  * @global array $wp_post_types List of post types.
  *
@@ -1067,8 +1071,8 @@ function get_post_types( $args = array(), $output = 'names', $operator = 'and' )
  * @since 3.0.0 The `show_ui` argument is now enforced on the new post screen.
  * @since 4.4.0 The `show_ui` argument is now enforced on the post type listing
  *              screen and post editing screen.
- * @since 4.6.0 Post type object returned is now an instance of WP_Post_Type.
- * @since 4.7.0 Introduced `show_in_rest`, 'rest_base' and 'rest_controller_class'
+ * @since 4.6.0 Post type object returned is now an instance of `WP_Post_Type`.
+ * @since 4.7.0 Introduced `show_in_rest`, `rest_base` and `rest_controller_class`
  *              arguments to register the post type in REST API.
  *
  * @global array $wp_post_types List of post types.
@@ -1214,7 +1218,7 @@ function register_post_type( $post_type, $args = array() ) {
 	 * Fires after a post type is registered.
 	 *
 	 * @since 3.3.0
-	 * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
+	 * @since 4.6.0 Converted the `$post_type` parameter to accept a `WP_Post_Type` object.
 	 *
 	 * @param string       $post_type        Post type.
 	 * @param WP_Post_Type $post_type_object Arguments used to register the post type.
@@ -1443,7 +1447,7 @@ function _post_type_meta_capabilities( $capabilities = null ) {
  *              and `use_featured_image` labels.
  * @since 4.4.0 Added the `archives`, `insert_into_item`, `uploaded_to_this_item`, `filter_items_list`,
  *              `items_list_navigation`, and `items_list` labels.
- * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
+ * @since 4.6.0 Converted the `$post_type` parameter to accept a `WP_Post_Type` object.
  * @since 4.7.0 Added the `view_items` and `attributes` labels.
  *
  * @access private
@@ -1712,7 +1716,7 @@ function set_post_type( $post_id = 0, $post_type = 'post' ) {
  *
  * @since 4.4.0
  * @since 4.5.0 Added the ability to pass a post type name in addition to object.
- * @since 4.6.0 Converted the `$post_type` parameter to accept a WP_Post_Type object.
+ * @since 4.6.0 Converted the `$post_type` parameter to accept a `WP_Post_Type` object.
  *
  * @param string|WP_Post_Type $post_type Post type name or object.
  * @return bool Whether the post type should be considered viewable.
@@ -1981,10 +1985,14 @@ function get_post_custom_values( $key = '', $post_id = 0 ) {
 }
 
 /**
- * Check if post is sticky.
+ * Determines whether a post is sticky.
  *
  * Sticky posts should remain at the top of The Loop. If the post ID is not
  * given, then The Loop ID for the current post will be used.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.7.0
  *
@@ -3304,8 +3312,16 @@ function wp_insert_post( $postarr, $wp_error = false ) {
 		}
 	}
 
-	// Don't allow contributors to set the post slug for pending review posts.
-	if ( 'pending' == $post_status && ! current_user_can( 'publish_posts' ) ) {
+	/*
+	 * Don't allow contributors to set the post slug for pending review posts.
+	 *
+	 * For new posts check the primitive capability, for updates check the meta capability.
+	 */
+	$post_type_object = get_post_type_object( $post_type );
+
+	if ( ! $update && 'pending' === $post_status && ! current_user_can( $post_type_object->cap->publish_posts ) ) {
+		$post_name = '';
+	} elseif ( $update && 'pending' === $post_status && ! current_user_can( 'publish_post', $post_ID ) ) {
 		$post_name = '';
 	}
 
@@ -3798,7 +3814,7 @@ function wp_update_post( $postarr = array(), $wp_error = false ) {
 	}
 
 	if ( $postarr['post_type'] == 'attachment' ) {
-		return wp_insert_attachment( $postarr );
+		return wp_insert_attachment( $postarr, false, 0, $wp_error );
 	}
 
 	return wp_insert_post( $postarr, $wp_error );
@@ -4091,7 +4107,9 @@ function wp_set_post_tags( $post_id = 0, $tags = '', $append = false ) {
  *
  * @param int          $post_id  Optional. The Post ID. Does not default to the ID of the global $post.
  * @param string|array $tags     Optional. An array of terms to set for the post, or a string of terms
- *                               separated by commas. Default empty.
+ *                               separated by commas. Hierarchical taxonomies must always pass IDs rather
+ *                               than names so that children with the same names but different parents
+ *                               aren't confused. Default empty.
  * @param string       $taxonomy Optional. Taxonomy name. Default 'post_tag'.
  * @param bool         $append   Optional. If true, don't delete existing terms, just add on. If false,
  *                               replace the terms with the new terms. Default false.
@@ -4238,8 +4256,8 @@ function wp_transition_post_status( $new_status, $old_status, $post ) {
  * Add a URL to those already pinged.
  *
  * @since 1.5.0
- * @since 4.7.0 $post_id can be a WP_Post object.
- * @since 4.7.0 $uri can be an array of URIs.
+ * @since 4.7.0 `$post_id` can be a WP_Post object.
+ * @since 4.7.0 `$uri` can be an array of URIs.
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
@@ -4320,7 +4338,7 @@ function get_enclosed( $post_id ) {
  *
  * @since 1.5.0
  *
- * @since 4.7.0 $post_id can be a WP_Post object.
+ * @since 4.7.0 `$post_id` can be a WP_Post object.
  *
  * @param int|WP_Post $post_id Post ID or object.
  * @return array
@@ -4348,7 +4366,7 @@ function get_pung( $post_id ) {
  * Retrieve URLs that need to be pinged.
  *
  * @since 1.5.0
- * @since 4.7.0 $post_id can be a WP_Post object.
+ * @since 4.7.0 `$post_id` can be a WP_Post object.
  *
  * @param int|WP_Post $post_id Post Object or ID
  * @return array
@@ -5035,7 +5053,11 @@ function get_pages( $args = array() ) {
 //
 
 /**
- * Check if the attachment URI is local one and is really an attachment.
+ * Determines whether an attachment URI is local and really an attachment.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.0.0
  *
@@ -5510,7 +5532,11 @@ function wp_attachment_is( $type, $post = null ) {
 }
 
 /**
- * Checks if the attachment is an image.
+ * Determines whether an attachment is an image.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.1.0
  * @since 4.2.0 Modified into wrapper for wp_attachment_is() and
@@ -5696,6 +5722,47 @@ function wp_check_for_changed_slugs( $post_id, $post, $post_before ) {
 	// If the new slug was used previously, delete it from the list.
 	if ( in_array( $post->post_name, $old_slugs ) ) {
 		delete_post_meta( $post_id, '_wp_old_slug', $post->post_name );
+	}
+}
+
+/**
+ * Check for changed dates for published post objects and save the old date.
+ *
+ * The function is used when a post object of any type is updated,
+ * by comparing the current and previous post objects.
+ *
+ * If the date was changed and not already part of the old dates then it will be
+ * added to the post meta field ('_wp_old_date') for storing old dates for that
+ * post.
+ *
+ * The most logically usage of this function is redirecting changed post objects, so
+ * that those that linked to an changed post will be redirected to the new post.
+ *
+ * @since 4.9.3
+ *
+ * @param int     $post_id     Post ID.
+ * @param WP_Post $post        The Post Object
+ * @param WP_Post $post_before The Previous Post Object
+ */
+function wp_check_for_changed_dates( $post_id, $post, $post_before ) {
+	$previous_date = date( 'Y-m-d', strtotime( $post_before->post_date ) );
+	$new_date = date( 'Y-m-d', strtotime( $post->post_date ) );
+	// Don't bother if it hasn't changed.
+	if ( $new_date == $previous_date ) {
+		return;
+	}
+	// We're only concerned with published, non-hierarchical objects.
+	if ( ! ( 'publish' === $post->post_status || ( 'attachment' === get_post_type( $post ) && 'inherit' === $post->post_status ) ) || is_post_type_hierarchical( $post->post_type ) ) {
+		return;
+	}
+	$old_dates = (array) get_post_meta( $post_id, '_wp_old_date' );
+	// If we haven't added this old date before, add it now.
+	if ( ! empty( $previous_date ) && ! in_array( $previous_date, $old_dates ) ) {
+		add_post_meta( $post_id, '_wp_old_date', $previous_date );
+	}
+	// If the new slug was used previously, delete it from the list.
+	if ( in_array( $new_date, $old_dates ) ) {
+		delete_post_meta( $post_id, '_wp_old_date', $new_date );
 	}
 }
 
@@ -6243,16 +6310,15 @@ function _publish_post_hook( $post_id ) {
 }
 
 /**
- * Return the post's parent's post_ID
+ * Return the post's parent post ID.
  *
  * @since 3.1.0
  *
- * @param int $post_ID
- *
+ * @param int|WP_Post $post Post ID or post object. Defaults to global $post.
  * @return int|false Post parent ID, otherwise false.
  */
-function wp_get_post_parent_id( $post_ID ) {
-	$post = get_post( $post_ID );
+function wp_get_post_parent_id( $post ) {
+	$post = get_post( $post );
 	if ( ! $post || is_wp_error( $post ) ) {
 		return false;
 	}

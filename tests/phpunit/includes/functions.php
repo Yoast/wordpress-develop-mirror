@@ -1,8 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ) . '/class-basic-object.php';
-require_once dirname( __FILE__ ) . '/class-basic-subclass.php';
-
 /**
  * Resets various `$_SERVER` variables that can get altered during tests.
  */
@@ -181,6 +178,13 @@ function _upload_dir_https( $uploads ) {
 	$uploads['baseurl'] = str_replace( 'http://', 'https://', $uploads['baseurl'] );
 
 	return $uploads;
+}
+
+/**
+ * Use the Spy_REST_Server class for the REST server.
+ */
+function _wp_rest_server_class_filter() {
+	return 'Spy_REST_Server';
 }
 
 // Skip `setcookie` calls in auth_cookie functions due to warning:

@@ -412,7 +412,11 @@ function get_the_excerpt( $post = null ) {
 }
 
 /**
- * Whether the post has a custom excerpt.
+ * Determines whether the post has a custom excerpt.
+ * 
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.3.0
  *
@@ -862,6 +866,7 @@ function post_password_required( $post = null ) {
  * Quicktag one or more times). This tag must be within The Loop.
  *
  * @since 1.2.0
+ * @since 5.0.0 Added the `aria_current` argument.
  *
  * @global int $page
  * @global int $numpages
@@ -877,6 +882,8 @@ function post_password_required( $post = null ) {
  *                                          Also prepended to the current item, which is not linked. Default empty.
  *     @type string       $link_after       HTML or text to append to each Pages link inside the `<a>` tag.
  *                                          Also appended to the current item, which is not linked. Default empty.
+ *     @type string       $aria_current     The value for the aria-current attribute. Possible values are 'page',
+ *                                          'step', 'location', 'date', 'time', 'true', 'false'. Default is 'page'.
  *     @type string       $next_or_number   Indicates whether page numbers should be used. Valid values are number
  *                                          and next. Default is 'number'.
  *     @type string       $separator        Text between pagination links. Default is ' '.
@@ -893,10 +900,11 @@ function wp_link_pages( $args = '' ) {
 	global $page, $numpages, $multipage, $more;
 
 	$defaults = array(
-		'before'           => '<p>' . __( 'Pages:' ),
+		'before'           => '<p class="post-nav-links">' . __( 'Pages:' ),
 		'after'            => '</p>',
 		'link_before'      => '',
 		'link_after'       => '',
+		'aria_current'     => 'page',
 		'next_or_number'   => 'number',
 		'separator'        => ' ',
 		'nextpagelink'     => __( 'Next page' ),
@@ -924,6 +932,8 @@ function wp_link_pages( $args = '' ) {
 				$link = $r['link_before'] . str_replace( '%', $i, $r['pagelink'] ) . $r['link_after'];
 				if ( $i != $page || ! $more && 1 == $page ) {
 					$link = _wp_link_page( $i ) . $link . '</a>';
+				} elseif ( $i === $page ) {
+					$link = '<span class="post-page-numbers current" aria-current="' . esc_attr( $r['aria_current'] ) . '">' . $link . '</span>';
 				}
 				/**
 				 * Filters the HTML output of individual page number links.
@@ -1017,7 +1027,7 @@ function _wp_link_page( $i ) {
 		$url = get_preview_post_link( $post, $query_args, $url );
 	}
 
-	return '<a href="' . esc_url( $url ) . '">';
+	return '<a href="' . esc_url( $url ) . '" class="post-page-numbers">';
 }
 
 //
@@ -1045,7 +1055,7 @@ function post_custom( $key = '' ) {
 }
 
 /**
- * Display list of post custom fields.
+ * Display a list of post custom fields.
  *
  * @since 1.2.0
  *
@@ -1093,14 +1103,16 @@ function the_meta() {
 //
 
 /**
- * Retrieve or display list of pages as a dropdown (select list).
+ * Retrieve or display a list of pages as a dropdown (select list).
  *
  * @since 2.1.0
  * @since 4.2.0 The `$value_field` argument was added.
  * @since 4.3.0 The `$class` argument was added.
  *
+ * @see get_pages()
+ *
  * @param array|string $args {
- *     Optional. Array or string of arguments to generate a pages drop-down element.
+ *     Optional. Array or string of arguments to generate a page dropdown. See `get_pages()` for additional arguments.
  *
  *     @type int          $depth                 Maximum depth. Default 0.
  *     @type int          $child_of              Page ID to retrieve child pages of. Default 0.
@@ -1180,7 +1192,7 @@ function wp_dropdown_pages( $args = '' ) {
 }
 
 /**
- * Retrieve or display list of pages (or hierarchical post type items) in list (li) format.
+ * Retrieve or display a list of pages (or hierarchical post type items) in list (li) format.
  *
  * @since 1.5.0
  * @since 4.7.0 Added the `item_spacing` argument.
@@ -1190,7 +1202,7 @@ function wp_dropdown_pages( $args = '' ) {
  * @global WP_Query $wp_query
  *
  * @param array|string $args {
- *     Array or string of arguments. Optional.
+ *     Optional. Array or string of arguments to generate a list of pages. See `get_pages()` for additional arguments.
  *
  *     @type int          $child_of     Display only the sub-pages of a single page by ID. Default 0 (all pages).
  *     @type string       $authors      Comma-separated list of author IDs. Default empty (all authors).
@@ -1318,7 +1330,7 @@ function wp_list_pages( $args = '' ) {
  * @since 4.7.0 Added the `item_spacing` argument.
  *
  * @param array|string $args {
- *     Optional. Arguments to generate a page menu. See wp_list_pages() for additional arguments.
+ *     Optional. Array or string of arguments to generate a page menu. See `wp_list_pages()` for additional arguments.
  *
  *     @type string          $sort_column  How to sort the list of pages. Accepts post column names.
  *                                         Default 'menu_order, post_title'.
@@ -1333,7 +1345,8 @@ function wp_list_pages( $args = '' ) {
  *     @type string          $link_after   The HTML or text to append to $show_home text. Default empty.
  *     @type string          $before       The HTML or text to prepend to the menu. Default is '<ul>'.
  *     @type string          $after        The HTML or text to append to the menu. Default is '</ul>'.
- *     @type string          $item_spacing Whether to preserve whitespace within the menu's HTML. Accepts 'preserve' or 'discard'. Default 'discard'.
+ *     @type string          $item_spacing Whether to preserve whitespace within the menu's HTML. Accepts 'preserve'
+ *                                         or 'discard'. Default 'discard'.
  *     @type Walker          $walker       Walker instance to use for listing pages. Default empty (Walker_Page).
  * }
  * @return string|void HTML menu
@@ -1680,12 +1693,16 @@ function get_the_password_form( $post = 0 ) {
 }
 
 /**
- * Whether currently in a page template.
+ * Determines whether currently in a page template.
  *
  * This template tag allows you to determine if you are in a page template.
  * You can optionally provide a template name or array of template names
  * and then the check will be specific to that template.
- *
+ * 
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * Conditional Tags} article in the Theme Developer Handbook.
+ * 
  * @since 2.5.0
  * @since 4.2.0 The `$template` parameter was changed to also accept an array of page templates.
  * @since 4.7.0 Now works with any post type, not just pages.
@@ -1847,7 +1864,7 @@ function wp_post_revision_title_expanded( $revision, $link = true ) {
 }
 
 /**
- * Display list of a post's revisions.
+ * Display a list of a post's revisions.
  *
  * Can output either a UL with edit links or a TABLE with diff interface, and
  * restore action links.

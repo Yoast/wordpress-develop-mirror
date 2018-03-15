@@ -357,8 +357,9 @@ if ( post_type_supports( $post_type, 'author' ) && current_user_can( $post_type_
  *
  * @since 3.0.0
  *
- * @param string  $post_type Post type.
- * @param WP_Post $post      Post object.
+ * @param string                    $post_type Post type for posts, 'comment' for comments,
+ *                                             'link' for links.
+ * @param WP_Post|WP_Comment|object $post      Post, comment, or link object.
  */
 do_action( 'add_meta_boxes', $post_type, $post );
 
@@ -380,9 +381,11 @@ do_action( "add_meta_boxes_{$post_type}", $post );
  *
  * @since 3.0.0
  *
- * @param string  $post_type Post type of the post.
- * @param string  $context   string  Meta box context.
- * @param WP_Post $post      Post object.
+ * @param string                $post_type Post type for posts, 'dashboard' for dashboard widgets,
+ *                                         'link' for links.
+ * @param string                $context   Meta box context. Accepts 'normal', 'advanced', 'side'.
+ * @param WP_Post|string|object $post      Post object for posts, empty string for dashboard widgets,
+ *                                         link object for links.
  */
 do_action( 'do_meta_boxes', $post_type, 'normal', $post );
 /** This action is documented in wp-admin/edit-form-advanced.php */
@@ -412,7 +415,7 @@ if ( 'post' == $post_type ) {
 	$title_and_editor .= '<p>' . __( '<strong>Post editor</strong> &mdash; Enter the text for your post. There are two modes of editing: Visual and Text. Choose the mode by clicking on the appropriate tab.' ) . '</p>';
 	$title_and_editor .= '<p>' . __( 'Visual mode gives you an editor that is similar to a word processor. Click the Toolbar Toggle button to get a second row of controls.' ) . '</p>';
 	$title_and_editor .= '<p>' . __( 'The Text mode allows you to enter HTML along with your post text. Note that &lt;p&gt; and &lt;br&gt; tags are converted to line breaks when switching to the Text editor to make it less cluttered. When you type, a single line break can be used instead of typing &lt;br&gt;, and two line breaks instead of paragraph tags. The line breaks are converted back to tags automatically.' ) . '</p>';
-	$title_and_editor .= '<p>' . __( 'You can insert media files by clicking the icons above the post editor and following the directions. You can align or edit images using the inline formatting toolbar available in Visual mode.' ) . '</p>';
+	$title_and_editor .= '<p>' . __( 'You can insert media files by clicking the button above the post editor and following the directions. You can align or edit images using the inline formatting toolbar available in Visual mode.' ) . '</p>';
 	$title_and_editor .= '<p>' . __( 'You can enable distraction-free writing mode using the icon to the right. This feature is not available for old browsers or devices with small screens, and requires that the full-height editor be enabled in Screen Options.' ) . '</p>';
 	$title_and_editor .= '<p>' . __( 'Keyboard users: When you&#8217;re working in the visual editor, you can use <kbd>Alt + F10</kbd> to access the toolbar.' ) . '</p>';
 

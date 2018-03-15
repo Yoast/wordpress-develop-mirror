@@ -656,6 +656,8 @@ if ( $this->is_trash && current_user_can( get_post_type_object( $this->screen->p
 	 * @param int $level
 	 */
 	private function _display_rows( $posts, $level = 0 ) {
+		$post_type = $this->screen->post_type;
+
 		// Create array of post IDs.
 		$post_ids = array();
 
@@ -663,7 +665,9 @@ if ( $this->is_trash && current_user_can( get_post_type_object( $this->screen->p
 			$post_ids[] = $a_post->ID;
 		}
 
-		$this->comment_pending_count = get_pending_comments_num( $post_ids );
+		if ( post_type_supports( $post_type, 'comments' ) ) {
+			$this->comment_pending_count = get_pending_comments_num( $post_ids );
+		}
 
 		foreach ( $posts as $post ) {
 			$this->single_row( $post, $level );
@@ -1263,7 +1267,7 @@ if ( $this->is_trash && current_user_can( get_post_type_object( $this->screen->p
 				__( 'Edit' )
 			);
 			$actions['inline hide-if-no-js'] = sprintf(
-				'<a href="#" class="editinline" aria-label="%s">%s</a>',
+				'<button type="button" class="button-link editinline" aria-label="%s" aria-expanded="false">%s</button>',
 				/* translators: %s: post title */
 				esc_attr( sprintf( __( 'Quick edit &#8220;%s&#8221; inline' ), $title ) ),
 				__( 'Quick&nbsp;Edit' )

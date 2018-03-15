@@ -287,7 +287,7 @@ function wp_update_plugins( $extra_stats = array() ) {
 			break;
 		default:
 			if ( $doing_cron ) {
-				$timeout = 0;
+				$timeout = 2 * HOUR_IN_SECONDS;
 			} else {
 				$timeout = 12 * HOUR_IN_SECONDS;
 			}
@@ -474,7 +474,11 @@ function wp_update_themes( $extra_stats = array() ) {
 			$timeout = HOUR_IN_SECONDS;
 			break;
 		default:
-			$timeout = $doing_cron ? 0 : 12 * HOUR_IN_SECONDS;
+			if ( $doing_cron ) {
+				$timeout = 2 * HOUR_IN_SECONDS;
+			} else {
+				$timeout = 12 * HOUR_IN_SECONDS;
+			}
 	}
 
 	$time_not_changed = isset( $last_update->last_checked ) && $timeout > ( time() - $last_update->last_checked );
@@ -661,15 +665,15 @@ function wp_get_update_data() {
 	$counts['total'] = $counts['plugins'] + $counts['themes'] + $counts['wordpress'] + $counts['translations'];
 	$titles          = array();
 	if ( $counts['wordpress'] ) {
-		/* translators: 1: Number of updates available to WordPress */
+		/* translators: %d: number of updates available to WordPress */
 		$titles['wordpress'] = sprintf( __( '%d WordPress Update' ), $counts['wordpress'] );
 	}
 	if ( $counts['plugins'] ) {
-		/* translators: 1: Number of updates available to plugins */
+		/* translators: %d: number of updates available to plugins */
 		$titles['plugins'] = sprintf( _n( '%d Plugin Update', '%d Plugin Updates', $counts['plugins'] ), $counts['plugins'] );
 	}
 	if ( $counts['themes'] ) {
-		/* translators: 1: Number of updates available to themes */
+		/* translators: %d: number of updates available to themes */
 		$titles['themes'] = sprintf( _n( '%d Theme Update', '%d Theme Updates', $counts['themes'] ), $counts['themes'] );
 	}
 	if ( $counts['translations'] ) {

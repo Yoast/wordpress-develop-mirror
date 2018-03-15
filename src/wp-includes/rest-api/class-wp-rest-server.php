@@ -459,7 +459,6 @@ class WP_REST_Server {
 	 * direct output.
 	 *
 	 * @since 4.4.0
-	 * @static
 	 *
 	 * @param WP_REST_Response $response Response to extract links from.
 	 * @return array Map of link relation to list of link hashes.
@@ -492,7 +491,6 @@ class WP_REST_Server {
 	 * direct output.
 	 *
 	 * @since 4.5.0
-	 * @static
 	 *
 	 * @param WP_REST_Response $response Response to extract links from.
 	 * @return array Map of link relation to list of link hashes.
@@ -915,7 +913,7 @@ class WP_REST_Server {
 						if ( is_wp_error( $permission ) ) {
 							$response = $permission;
 						} elseif ( false === $permission || null === $permission ) {
-							$response = new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to do that.' ), array( 'status' => 403 ) );
+							$response = new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to do that.' ), array( 'status' => rest_authorization_required_code() ) );
 						}
 					}
 				}
