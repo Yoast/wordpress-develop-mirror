@@ -19,7 +19,7 @@ var tagBox, array_unique_noempty;
 	 *
 	 * @param {Array} array The array to filter through.
 	 *
-	 * @returns {Array} A new array containing only the unique items.
+	 * @return {Array} A new array containing only the unique items.
 	 */
 	array_unique_noempty = function( array ) {
 		var out = [];
@@ -58,7 +58,7 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @param {string} tags The tags that need to be cleaned up.
 		 *
-		 * @returns {string} The cleaned up tags.
+		 * @return {string} The cleaned up tags.
 		 */
 		clean : function( tags ) {
 			if ( ',' !== tagDelimiter ) {
@@ -82,7 +82,7 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @param {Object} el The tag element to retrieve the ID from.
 		 *
-		 * @returns {boolean} Always returns false.
+		 * @return {boolean} Always returns false.
 		 */
 		parseTags : function(el) {
 			var id = el.id,
@@ -116,7 +116,7 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @param {Object} el The container HTML element.
 		 *
-		 * @returns {void}
+		 * @return {void}
 		 */
 		quickClicks : function( el ) {
 			var thetags = $('.the-tags', el),
@@ -141,7 +141,7 @@ var tagBox, array_unique_noempty;
 			 * @param {string} key The key value of the current tag.
 			 * @param {string} val The value of the current tag.
 			 *
-			 * @returns {void}
+			 * @return {void}
 			 */
 			$.each( current_tags, function( key, val ) {
 				var listItem, xbutton;
@@ -176,7 +176,7 @@ var tagBox, array_unique_noempty;
 					 *
 					 * @param {Event} e The window event to handle.
 					 *
-					 * @returns {void}
+					 * @return {void}
 					 */
 					xbutton.on( 'click keypress', function( e ) {
 						// On click or when using the Enter/Spacebar keys.
@@ -219,7 +219,7 @@ var tagBox, array_unique_noempty;
 		 * @param {Object|boolean} a Is either a link from the tag cloud or a hard set boolean value.
 		 * @param {Number|boolean} f Determines whether or not focus should be applied to the input field.
 		 *
-		 * @returns {boolean} Always returns false.
+		 * @return {boolean} Always returns false.
 		 */
 		flushTags : function( el, a, f ) {
 			var tagsval, newtags, text,
@@ -268,7 +268,7 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @param {string} id The ID to extract the indice from.
 		 *
-		 * @returns {void}
+		 * @return {void}
 		 */
 		get : function( id ) {
 			var tax = id.substr( id.indexOf('-') + 1 );
@@ -284,7 +284,7 @@ var tagBox, array_unique_noempty;
 			 * @param {number|string} r The response message from the AJAX call. Can be numeric or a string.
 			 * @param {string} stat The status code of the response.
 			 *
-			 * @returns {void}
+			 * @return {void}
 			 */
 			$.post( ajaxurl, { 'action': 'get-tagcloud', 'tax': tax }, function( r, stat ) {
 				if ( 0 === r || 'success' != stat ) {
@@ -298,7 +298,7 @@ var tagBox, array_unique_noempty;
 				 *
 				 * @since 4.2.0
 				 *
-				 * @returns {boolean} Always returns false.
+				 * @return {boolean} Always returns false.
 				 */
 				$( 'a', r ).click( function() {
 					tagBox.userAction = 'add';
@@ -322,7 +322,7 @@ var tagBox, array_unique_noempty;
 		 *
 		 * @since 4.7.0
 		 *
-		 * @returns {void}
+		 * @return {void}
 		 */
 		screenReadersMessage: function() {
 			var message;
@@ -351,7 +351,7 @@ var tagBox, array_unique_noempty;
 		 * @since 4.2.0
 		 * @memberOf tagBox
 		 *
-		 * @returns {void}
+		 * @return {void}
 		 */
 		init : function() {
 			var ajaxtag = $('div.ajaxtag');
@@ -374,7 +374,7 @@ var tagBox, array_unique_noempty;
 			 *
 			 * @param {Event} event The window event to handle.
 			 *
-			 * @returns {void}
+			 * @return {void}
 			 */
 			$( 'input.newtag', ajaxtag ).keypress( function( event ) {
 				if ( 13 == event.which ) {
@@ -397,7 +397,7 @@ var tagBox, array_unique_noempty;
 			 *
 			 * @since 4.2.0
 			 *
-			 * @returns {void}
+			 * @return {void}
 			 */
 			$('#post').submit(function(){
 				$('div.tagsdiv').each( function() {
@@ -412,7 +412,7 @@ var tagBox, array_unique_noempty;
 			 *
 			 * @since 4.2.0
 			 *
-			 * @returns {void}
+			 * @return {void}
 			 */
 			$('.tagcloud-link').click(function() {
 				// On the first click, fetch the tag cloud and insert it in the DOM.
