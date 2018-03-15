@@ -86,6 +86,8 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	 * Activates the library.
 	 *
 	 * Limits the library to images, watches for uploaded attachments.
+	 * Watches for the browse event on the frame and binds it to
+	 * gallerySettings.
 	 *
 	 * @since 3.5.0
 	 *
@@ -106,6 +108,10 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	},
 
 	/**
+	 * Deactivates the library.
+	 *
+	 * Stops watching for uploaded attachments and browse events.
+	 *
 	 * @since 3.5.0
 	 *
 	 * @returns {void}
@@ -120,9 +126,11 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	},
 
 	/**
+	 * Adds the gallery settings to the side bar and adds a reverse button to the toolbar.
+	 *
 	 * @since 3.5.0
 	 *
-	 * @param browser
+	 * @param {wp.media.view.Frame} browser
 	 *
 	 * @returns {void}
 	 */
