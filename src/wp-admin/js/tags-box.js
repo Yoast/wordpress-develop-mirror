@@ -372,7 +372,7 @@ var tagBox, array_unique_noempty;
 			 *
 			 * @since 4.2.0
 			 *
-			 * @param {Event} e The window event to handle.
+			 * @param {Event} event The window event to handle.
 			 *
 			 * @returns {void}
 			 */
