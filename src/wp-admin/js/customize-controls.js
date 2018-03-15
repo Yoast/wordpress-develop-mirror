@@ -4094,15 +4094,17 @@
 		},
 
 		/**
-		 * Render notifications.
-		 *
 		 * Renders the `control.notifications` into the control's container.
-		 * Control subclasses may override this method to do their own handling
-		 * of rendering notifications.
+		 *
+		 * Control subclasses may override this method to do their own handling of rendering notifications.
 		 *
 		 * @deprecated in favor of `control.notifications.render()`
+		 *
 		 * @since 4.6.0
+		 *
 		 * @this {wp.customize.Control}
+		 *
+		 * @returns {void}
 		 */
 		renderNotifications: function() {
 			var control = this, container, notifications, hasError = false;
@@ -4143,9 +4145,13 @@
 		},
 
 		/**
-		 * Normal controls do not expand, so just expand its parent
+		 * Expands the parent of normal controls.
 		 *
-		 * @param {Object} [params]
+		 * @since 4.0.0
+		 *
+		 * @param {Object} [params] The parameters to use during the expansion.
+		 *
+		 * @returns {void}
 		 */
 		expand: function ( params ) {
 			api.section( this.section() ).expand( params );
@@ -4157,16 +4163,19 @@
 		focus: focus,
 
 		/**
-		 * Update UI in response to a change in the control's active state.
+		 * Updates the UI in response to a change in the control's active state.
+		 *
 		 * This does not change the active state, it merely handles the behavior
 		 * for when it does change.
 		 *
 		 * @since 4.1.0
 		 *
-		 * @param {Boolean}  active
-		 * @param {Object}   args
-		 * @param {Number}   args.duration
-		 * @param {Function} args.completeCallback
+		 * @param {boolean}  active                 Whether the state of the control is active.
+		 * @param {Object}   args                   The arguments to pass along to the slideDown or slideUp animation.
+		 * @param {number}   args.duration          The duration of the animation.
+		 * @param {Function} args.completeCallback  The function to call once the animation is complete.
+		 *
+		 * @returns {void}
 		 */
 		onChangeActive: function ( active, args ) {
 			if ( args.unchanged ) {
@@ -4177,7 +4186,7 @@
 			}
 
 			if ( ! $.contains( document, this.container[0] ) ) {
-				// jQuery.fn.slideUp is not hiding an element if it is not in the DOM
+				// jQuery.fn.slideUp is not hiding an element if it is not in the DOM.
 				this.container.toggle( active );
 				if ( args.completeCallback ) {
 					args.completeCallback();
@@ -4197,21 +4206,29 @@
 		},
 
 		/*
-		 * Documented using @borrows in the constructor
+		 * Documented using @borrows in the constructor.
 		 */
 		activate: Container.prototype.activate,
 
 		/*
-		 * Documented using @borrows in the constructor
+		 * Documented using @borrows in the constructor.
 		 */
 		deactivate: Container.prototype.deactivate,
 
 		/*
-		 * Documented using @borrows in the constructor
+		 * Documented using @borrows in the constructor.
 		 */
 		_toggleActive: Container.prototype._toggleActive,
 
-		// @todo This function appears to be dead code and can be removed.
+		/**
+		 * Initializes the drop-down element.
+		 *
+		 * @todo This function appears to be dead code and can be removed.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @returns {void}
+		 */
 		dropdownInit: function() {
 			var control      = this,
 				statuses     = this.container.find('.dropdown-status'),
@@ -4225,7 +4242,7 @@
 					}
 				};
 
-			// Support the .dropdown class to open/close complex elements
+			// Support the .dropdown class to open/close complex elements.
 			this.container.on( 'click keydown', '.dropdown', function( event ) {
 				if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
 					return;
@@ -4241,7 +4258,7 @@
 					control.container.parent().parent().find( 'li.library-selected' ).focus();
 				}
 
-				// Don't want to fire focus and click at same time
+				// Don't want to fire focus and click at same time.
 				toggleFreeze = true;
 				setTimeout(function () {
 					toggleFreeze = false;
@@ -4253,11 +4270,13 @@
 		},
 
 		/**
-		 * Render the control from its JS template, if it exists.
+		 * Renders the control from its JS template, if it exists.
 		 *
 		 * The control's container must already exist in the DOM.
 		 *
 		 * @since 4.1.0
+		 *
+		 * @returns {void}
 		 */
 		renderContent: function () {
 			var control = this, template, standardTypes, templateId, sectionId;
@@ -4311,10 +4330,12 @@
 		},
 
 		/**
-		 * Add a new page to a dropdown-pages control reusing menus code for this.
+		 * Adds a new page to a dropdown-pages control reusing menus code for this.
 		 *
 		 * @since 4.7.0
+		 *
 		 * @access private
+		 *
 		 * @returns {void}
 		 */
 		addNewPage: function () {
@@ -4346,10 +4367,10 @@
 			promise.done( function( data ) {
 				var availableItem, $content, itemTemplate;
 
-				// Prepare the new page as an available menu item.
-				// See api.Menus.submitNew().
+				// Prepare the new page as an available menu item. See api.Menus.submitNew().
 				availableItem = new api.Menus.AvailableItemModel( {
-					'id': 'post-' + data.post_id, // Used for available menu item Backbone models.
+					// Used for available menu item Backbone models.
+					'id': 'post-' + data.post_id,
 					'title': title,
 					'type': 'post_type',
 					'type_label': api.Menus.data.l10n.page_label,
@@ -4366,7 +4387,9 @@
 
 				// Focus the select control.
 				select.focus();
-				control.setting.set( String( data.post_id ) ); // Triggers a preview refresh and updates the setting.
+
+				// Trigger a preview refresh and updates the setting.
+				control.setting.set( String( data.post_id ) );
 
 				// Reset the create page form.
 				container.slideUp( 180 );
@@ -4381,10 +4404,21 @@
 	/**
 	 * A colorpicker control.
 	 *
+	 * @since 3.5.0
+	 *
 	 * @class    wp.customize.ColorControl
 	 * @augments wp.customize.Control
+	 *
+	 * @returns {void}
 	 */
 	api.ColorControl = api.Control.extend(/** @lends wp.customize.ColorControl.prototype */{
+		/**
+		 * Sets up internal event bindings when the control's DOM structure is ready.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @returns {void}
+		 */
 		ready: function() {
 			var control = this,
 				isHueSlider = this.params.mode === 'hue',
@@ -4435,7 +4469,9 @@
 				if ( pickerContainer.hasClass( 'wp-picker-active' ) ) {
 					picker.wpColorPicker( 'close' );
 					control.container.find( '.wp-color-result' ).focus();
-					event.stopPropagation(); // Prevent section from being collapsed.
+
+					// Prevent section from being collapsed.
+					event.stopPropagation();
 				}
 			} );
 		}
@@ -4444,14 +4480,20 @@
 	/**
 	 * A control that implements the media modal.
 	 *
+	 * @since 4.1.0
+	 *
 	 * @class    wp.customize.MediaControl
 	 * @augments wp.customize.Control
+	 *
+	 * @returns {void}
 	 */
 	api.MediaControl = api.Control.extend(/** @lends wp.customize.MediaControl.prototype */{
-
 		/**
-		 * When the control's DOM structure is ready,
-		 * set up internal event bindings.
+		 * Sets up internal event bindings when the control's DOM structure is ready.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @returns {void}
 		 */
 		ready: function() {
 			var control = this;
@@ -4467,7 +4509,7 @@
 			control.container.on( 'click keydown', '.remove-button', control.removeFile );
 			control.container.on( 'click keydown', '.remove-button', control.cleanupPlayer );
 
-			// Resize the player controls when it becomes visible (ie when section is expanded)
+			// Resize the player controls when the section becomes visible.
 			api.section( control.section() ).container
 				.on( 'expanded', function() {
 					if ( control.player ) {
@@ -4479,7 +4521,7 @@
 				});
 
 			/**
-			 * Set attachment data and render content.
+			 * Sets attachment data and renders content.
 			 *
 			 * Note that BackgroundImage.prototype.ready applies this ready method
 			 * to itself. Since BackgroundImage is an UploadControl, the value
@@ -4488,7 +4530,11 @@
 			 * and it is the responsibility of the UploadControl to set the control's
 			 * attachmentData before calling the renderContent method.
 			 *
-			 * @param {number|string} value Attachment
+			 * @since 4.6.0
+			 *
+			 * @param {number|string} value The attachment to set.
+			 *
+			 * @returns {void}
 			 */
 			function setAttachmentDataAndRenderContent( value ) {
 				var hasAttachmentData = $.Deferred();
@@ -4521,23 +4567,41 @@
 				} );
 			}
 
-			// Ensure attachment data is initially set (for dynamically-instantiated controls).
+			// Ensure attachment data is initially set for dynamically-instantiated controls.
 			setAttachmentDataAndRenderContent( control.setting() );
 
 			// Update the attachment data and re-render the control when the setting changes.
 			control.setting.bind( setAttachmentDataAndRenderContent );
 		},
 
+		/**
+		 * Pauses the player.
+		 *
+		 * @since 4.2.0
+		 *
+		 * @returns {void}
+		 */
 		pausePlayer: function () {
 			this.player && this.player.pause();
 		},
 
+		/**
+		 * Removes the player.
+		 *
+		 * @since 4.2.0
+		 *
+		 * @returns {void}
+		 */
 		cleanupPlayer: function () {
 			this.player && wp.media.mixin.removePlayer( this.player );
 		},
 
 		/**
-		 * Open the media modal.
+		 * Opens the media modal.
+		 *
+		 * @since 4.1.0
+		 *
+		 * @returns {void}
 		 */
 		openFrame: function( event ) {
 			if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
@@ -4554,7 +4618,11 @@
 		},
 
 		/**
-		 * Create a media modal select frame, and store it so the instance can be reused when needed.
+		 * Creates a media modal select frame, and stores it so the instance can be reused when needed.
+		 *
+		 * @since 4.1.0
+		 *
+		 * @returns {void}
 		 */
 		initFrame: function() {
 			this.frame = wp.media({
@@ -4571,7 +4639,7 @@
 				]
 			});
 
-			// When a file is selected, run a callback.
+			// Run a callback when a file is selected.
 			this.frame.on( 'select', this.select );
 		},
 
