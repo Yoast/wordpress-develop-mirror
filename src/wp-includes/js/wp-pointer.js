@@ -38,6 +38,7 @@
 		},
 
 		/**
+		 * Sets up the basic html structure for the wp-pointer.
 		 *
 		 * @private
 		 */
@@ -63,6 +64,18 @@
 				.appendTo( this.options.document.body );
 		},
 
+		/**
+		 * Set options for the wp-pointer class.
+		 *
+		 * Changes to the document option will transfer the pointer to the body of the new document specified in the value.
+		 * Changes to the pointerClass option will remove the current class and add the class specified in the value.
+		 * Changes to the position option will call the reposition function.
+		 * Changes to the content option will call the update function.
+		 *
+		 * @param {string} key The key of the option set.
+		 * @param {*} value The value to set to the option key.
+		 * @private
+		 */
 		_setOption: function( key, value ) {
 			var o   = this.options,
 				tip = this.pointer;
@@ -98,6 +111,11 @@
 			return this.pointer;
 		},
 
+		/**
+		 * Updates the content of the pointer.
+		 *
+		 * @param event
+		 */
 		update: function( event ) {
 			var self = this,
 				o    = this.options,
@@ -149,6 +167,9 @@
 			this.reposition();
 		},
 
+		/**
+		 * Repositions the pointer, and calls the class's repoint function.
+		 */
 		reposition: function() {
 			var position;
 
@@ -170,6 +191,9 @@
 			this.repoint();
 		},
 
+		/**
+		 * Sets the new edge of the object, and renames the arrow class.
+		 */
 		repoint: function() {
 			var o = this.options,
 				edge;
