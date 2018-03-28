@@ -21,6 +21,7 @@ In this directory you'll find vendor JavaScript packages that cannot be installe
 - farbtastic: https://github.com/mattfarina/farbtastic
 - iris: https://github.com/Automattic/Iris
 - json2: https://github.com/douglascrockford/JSON-js
+- jquery/jquery.color: https://github.com/jquery/jquery-color. Package is on NPM but not published by maintainer.
 - jquery/jquery.hotkeys: https://github.com/tzuryby/jquery.hotkeys
 - jquery/jquery.masonry: Old version for BC purposes, can't include two versions with NPM. The newer version is included through NPM and built to `wp-includes/js/masonry.min.js`
 - jquery/jquery.query: https://github.com/blairmitchelmore/jquery.plugins/blob/master/jquery.query.js
