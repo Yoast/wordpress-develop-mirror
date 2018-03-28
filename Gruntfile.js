@@ -138,7 +138,6 @@ module.exports = function(grunt) {
 					'build/wp-includes/js/imagesloaded.min.js': ['./node_modules/imagesloaded/imagesloaded.pkgd.min.js'],
 					'build/wp-includes/js/jquery/jquery-migrate.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.js'],
 					'build/wp-includes/js/jquery/jquery-migrate.min.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.min.js'],
-					'build/wp-includes/js/jquery/jquery.color.min.js': ['./node_modules/jquery-color/dist/jquery.color.plus-names.min.js'],
 					'build/wp-includes/js/jquery/jquery.form.js': ['./node_modules/jquery-form/src/jquery.form.js'],
 					'build/wp-includes/js/jquery/jquery.form.min.js': ['./node_modules/jquery-form/dist/jquery.form.min.js'],
 					'build/wp-includes/js/jquery/jquery.js': ['./node_modules/jquery/dist/jquery.min.js'],
@@ -1131,19 +1130,7 @@ module.exports = function(grunt) {
 		'clean:tinymce'
 	] );
 
-	grunt.registerTask( 'build:npm-dist',
-		'builds the dist files for npm packages',
-		function() {
-			grunt.util.spawn({
-				cmd: 'sh',
-				args: [ 'tools/grunt/scripts/build-jquery-color.sh' ],
-				opts: {stdio: 'inherit'}
-			}, this.async());
-		}
-	);
-
 	grunt.registerTask( 'build:js', [
-		'build:npm-dist',
 		'clean:js',
 		'webpack:dev',
 		'copy:js',
@@ -1163,7 +1150,6 @@ module.exports = function(grunt) {
 	] );
 
 	grunt.registerTask( 'build', [
-		'build:npm-dist',
 		'clean:all',
 		'webpack:dev',
 		'copy:all',
