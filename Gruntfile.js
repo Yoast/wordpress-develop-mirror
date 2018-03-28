@@ -665,7 +665,6 @@ module.exports = function(grunt) {
 					'!**/*.min.js',
 					'!wp-admin/js/custom-header.js', // Why? We should minify this.
 					'!wp-admin/js/farbtastic.js',
-					'!wp-includes/js/jquery/jquery.masonry.js',
 					'!wp-includes/js/swfobject.js',
 					'!wp-includes/js/wp-embed.js' // We have extra options for this, see uglify:embed
 				]
@@ -693,6 +692,7 @@ module.exports = function(grunt) {
 				ext: '.min.js',
 				src: ['*.js']
 			},
+<<<<<<< HEAD
 			masonry: {
 				options: {
 					// Preserve comments that start with a bang.
@@ -705,6 +705,8 @@ module.exports = function(grunt) {
 				src: BUILD_DIR + 'wp-includes/js/imgareaselect/jquery.imgareaselect.js',
 				dest: BUILD_DIR + 'wp-includes/js/imgareaselect/jquery.imgareaselect.min.js'
 			},
+=======
+>>>>>>> masonry minified is directly copied from node_modules
 			dynamic: {
 				expand: true,
 				cwd: BUILD_DIR,
@@ -1114,9 +1116,13 @@ module.exports = function(grunt) {
 	grunt.registerTask( 'uglify:all', [
 		'uglify:core',
 		'uglify:embed',
+<<<<<<< HEAD
 		'uglify:jqueryui',
 		'uglify:masonry',
 		'uglify:imgareaselect'
+=======
+		'uglify:jqueryui'
+>>>>>>> masonry minified is directly copied from node_modules
 	] );
 
 	grunt.registerTask( 'build:tinymce', [
