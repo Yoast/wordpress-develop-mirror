@@ -114,7 +114,7 @@
 		/**
 		 * Updates the content of the pointer.
 		 *
-		 * @param event
+		 * @param {event} event
 		 */
 		update: function( event ) {
 			var self = this,
@@ -146,8 +146,17 @@
 		},
 
 		/**
+		 * Updates the content and calls reposition on the pointer
+		 *
 		 * Update is separated into two functions to allow events to defer
 		 * updating the pointer (e.g. fetch content with ajax, etc).
+		 *
+		 * @private
+		 *
+		 * @param {event}   event
+		 * @param {content} content
+		 *
+		 * @returns void
 		 */
 		_update: function( event, content ) {
 			var buttons,
@@ -167,7 +176,8 @@
 			this.reposition();
 		},
 
-		/**
+		 /**
+		  *
 		 * Repositions the pointer, and calls the class's repoint function.
 		 */
 		reposition: function() {
