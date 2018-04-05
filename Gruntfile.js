@@ -133,7 +133,7 @@ module.exports = function(grunt) {
 			},
 			'npm-packages': {
 				files: {
-					'build/wp-includes/js/backbone.min.js': ['./node_modules/backbone/backbone-min.js'],
+					'build/wp-includes/js/backbone.js': ['./node_modules/backbone/backbone.js'],
 					'build/wp-includes/js/hoverIntent.js': ['./node_modules/jquery-hoverintent/jquery.hoverIntent.js'],
 					'build/wp-includes/js/imagesloaded.min.js': ['./node_modules/imagesloaded/imagesloaded.pkgd.min.js'],
 					'build/wp-includes/js/jquery/jquery-migrate.js': ['./node_modules/jquery-migrate/dist/jquery-migrate.js'],
