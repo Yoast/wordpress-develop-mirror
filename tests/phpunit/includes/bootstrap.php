@@ -32,6 +32,10 @@ if ( ! is_readable( $config_file_path ) ) {
 require_once $config_file_path;
 require_once dirname( __FILE__ ) . '/functions.php';
 
+if ( file_exists( ABSPATH . '_index.php' ) ) {
+	exit( 'Please configure ABSPATH to point to the `build` directory instead of the `src` directory.' );
+}
+
 tests_reset__SERVER();
 
 define( 'WP_TESTS_TABLE_PREFIX', $table_prefix );
