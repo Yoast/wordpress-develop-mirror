@@ -102,11 +102,21 @@
 			}
 		},
 
+		/**
+		 * Takes the pointer element out of the DOM and destroys the widget and all associated bindings
+		 *
+		 * @returns {void}
+		 */
 		destroy: function() {
 			this.pointer.remove();
 			$.Widget.prototype.destroy.call( this );
 		},
 
+		/**
+		 * Returns the pointer element
+		 *
+		 * @returns {object} Pointer The pointer object
+		 */
 		widget: function() {
 			return this.pointer;
 		},
@@ -177,9 +187,10 @@
 		},
 
 		 /**
+		  * Repositions the pointer, and calls the class's repoint function.
 		  *
-		 * Repositions the pointer, and calls the class's repoint function.
-		 */
+		  * @returns {void}
+		  */
 		reposition: function() {
 			var position;
 
@@ -203,6 +214,8 @@
 
 		/**
 		 * Sets the new edge of the object, and renames the arrow class.
+		 *
+		 * @returns {void}
 		 */
 		repoint: function() {
 			var o = this.options,
@@ -220,6 +233,13 @@
 			this.pointer.addClass( 'wp-pointer-' + edge );
 		},
 
+		/**
+		 * Processes the position for the pointer relative to the target element
+		 *
+		 * @param position
+		 * @return {object} result  An object containing position related data
+		 * @private
+		 */
 		_processPosition: function( position ) {
 			var opposite = {
 					top: 'bottom',
