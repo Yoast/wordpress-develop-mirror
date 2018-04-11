@@ -691,21 +691,10 @@ module.exports = function(grunt) {
 				ext: '.min.js',
 				src: ['*.js']
 			},
-<<<<<<< HEAD
-			masonry: {
-				options: {
-					// Preserve comments that start with a bang.
-					preserveComments: /^!/
-				},
-				src: BUILD_DIR + 'wp-includes/js/jquery/jquery.masonry.js',
-				dest: BUILD_DIR + 'wp-includes/js/jquery/jquery.masonry.min.js'
-			},
 			imgareaselect: {
 				src: BUILD_DIR + 'wp-includes/js/imgareaselect/jquery.imgareaselect.js',
 				dest: BUILD_DIR + 'wp-includes/js/imgareaselect/jquery.imgareaselect.min.js'
 			},
-=======
->>>>>>> masonry minified is directly copied from node_modules
 			dynamic: {
 				expand: true,
 				cwd: BUILD_DIR,
@@ -1115,13 +1104,8 @@ module.exports = function(grunt) {
 	grunt.registerTask( 'uglify:all', [
 		'uglify:core',
 		'uglify:embed',
-<<<<<<< HEAD
 		'uglify:jqueryui',
-		'uglify:masonry',
 		'uglify:imgareaselect'
-=======
-		'uglify:jqueryui'
->>>>>>> masonry minified is directly copied from node_modules
 	] );
 
 	grunt.registerTask( 'build:tinymce', [
