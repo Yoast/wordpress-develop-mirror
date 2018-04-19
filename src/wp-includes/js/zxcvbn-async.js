@@ -1,4 +1,8 @@
 /* global _zxcvbnSettings */
+/**
+ * Loads the zxcvbnSettings asynchronously by inserting async script tag before
+ * the first one.
+ */
 (function() {
   var async_load = function() {
     var first, s;
