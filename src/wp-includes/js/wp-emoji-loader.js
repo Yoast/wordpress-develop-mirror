@@ -1,18 +1,20 @@
 ( function( window, document, settings ) {
 	var src, ready, ii, tests;
 
-	/*
-	 * Create a canvas element for testing native browser support
-	 * of emoji.
-	 */
+
+	 //Create a canvas element for testing native browser support of emoji.
 	var canvas = document.createElement( 'canvas' );
 	var context = canvas.getContext && canvas.getContext( '2d' );
 
 	/**
 	 * Check if two sets of Emoji characters render the same.
 	 *
-	 * @param set1 array Set of Emoji characters.
-	 * @param set2 array Set of Emoji characters.
+	 * @ignore
+	 *
+	 * @since 4.9.0
+	 *
+	 * @param {array} set1 Set of Emoji characters.
+	 * @param {array} set2 Set of Emoji characters.
 	 * @returns {boolean} True if the two sets render the same.
 	 */
 	function emojiSetsRenderIdentically( set1, set2 ) {
@@ -32,13 +34,17 @@
 	}
 
 	/**
-	 * Detect if the browser supports rendering emoji or flag emoji. Flag emoji are a single glyph
-	 * made of two characters, so some browsers (notably, Firefox OS X) don't support them.
+	 * Detect if the browser supports rendering emoji or flag emoji.
+	 *
+	 * Flag emoji are a single glyph made of two characters,
+	 * so some browsers (notably, Firefox OS X) don't support them.
+	 *
+	 * @ignore
 	 *
 	 * @since 4.2.0
 	 *
-	 * @param type {String} Whether to test for support of "flag" or "emoji".
-	 * @return {Boolean} True if the browser can render emoji, false if it cannot.
+	 * @param {string} type Whether to test for support of "flag" or "emoji".
+	 * @return {boolean} True if the browser can render emoji, false if it cannot.
 	 */
 	function browserSupportsEmoji( type ) {
 		var isIdentical;
@@ -103,7 +109,16 @@
 
 		return false;
 	}
-
+	/**
+	 * Adds a script to the head of the document.
+	 *
+	 * @ignore
+	 *
+	 * @since 4.2.0
+	 *
+	 * @param {object} src The path where the script is located.
+	 * @return {void}
+	 */
 	function addScript( src ) {
 		var script = document.createElement( 'script' );
 
@@ -114,11 +129,13 @@
 
 	tests = Array( 'flag', 'emoji' );
 
+	// Defines the initial values to the supports prop of settings.
 	settings.supports = {
 		everything: true,
 		everythingExceptFlag: true
 	};
 
+	// Tests the browser support for flag emojis and other emojis, and adjusts the support settings accordingly.
 	for( ii = 0; ii < tests.length; ii++ ) {
 		settings.supports[ tests[ ii ] ] = browserSupportsEmoji( tests[ ii ] );
 
@@ -131,11 +148,13 @@
 
 	settings.supports.everythingExceptFlag = settings.supports.everythingExceptFlag && ! settings.supports.flag;
 
+	// Sets DOMReady to false and assigns a ready function to settings.
 	settings.DOMReady = false;
 	settings.readyCallback = function() {
 		settings.DOMReady = true;
 	};
 
+	//
 	if ( ! settings.supports.everything ) {
 		ready = function() {
 			settings.readyCallback();
