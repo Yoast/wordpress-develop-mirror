@@ -1,3 +1,6 @@
+/**
+ * Wrap the jQuery UI Dialog open function to fix the TinyMCE focus.
+ */
 ( function($) {
 	$.widget('wp.wpdialog', $.ui.dialog, {
 		open: function() {
@@ -10,6 +13,7 @@
 			this._super();
 			// WebKit leaves focus in the TinyMCE editor unless we shift focus.
 			this.element.focus();
+			// Add refresh event.
 			this._trigger('refresh');
 		}
 	});
