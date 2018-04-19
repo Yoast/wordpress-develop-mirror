@@ -130,7 +130,7 @@ GalleryEdit = Library.extend(/** @lends wp.media.controller.GalleryEdit.prototyp
 	 *
 	 * @since 3.5.0
 	 *
-	 * @param {wp.media.view.Frame} browser
+	 * @param {wp.media.view.Frame} browser The file browser.
 	 *
 	 * @returns {void}
 	 */
