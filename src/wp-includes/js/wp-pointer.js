@@ -124,6 +124,9 @@
 		/**
 		 * Updates the content of the pointer.
 		 *
+		 * The content is updated to what content is in options, which can
+		 * either be a string or a callback function.
+		 *
 		 * @param {event} event
 		 */
 		update: function( event ) {
@@ -276,6 +279,13 @@
 			return result;
 		},
 
+		/**
+		 * Opens the widget pointer
+		 *
+		 * Only opens the widget pointer in case it is closed and not disabled,
+		 * and calls 'update' before doing so
+		 * @param event
+		 */
 		open: function( event ) {
 			var self = this,
 				o    = this.options;
