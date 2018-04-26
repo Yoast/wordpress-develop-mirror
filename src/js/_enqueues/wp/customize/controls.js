@@ -4803,6 +4803,8 @@
 
 		/**
 		 * Sets up internal event bindings when the control's DOM structure is ready.
+		 *
+		 * @return {void}
 		 */
 		ready: function() {
 			api.UploadControl.prototype.ready.apply( this, arguments );
@@ -4836,14 +4838,18 @@
 	 *
 	 * @class    wp.customize.BackgroundPositionControl
 	 * @augments wp.customize.Control
+	 * @inheritDoc
+	 *
+	 * @memberOf wp.customize
 	 */
 	api.BackgroundPositionControl = api.Control.extend(/** @lends wp.customize.BackgroundPositionControl.prototype */{
 
 		/**
-		 * Set up control UI once embedded in DOM and settings are created.
+		 * Sets up the control UI once it's embedded in the DOM and settings are created.
 		 *
 		 * @since 4.7.0
-		 * @access public
+		 *
+		 * @return {void}
 		 */
 		ready: function() {
 			var control = this, updateRadios;
@@ -4865,7 +4871,8 @@
 			control.settings.x.bind( updateRadios );
 			control.settings.y.bind( updateRadios );
 
-			updateRadios(); // Set initial UI.
+			// Set initial UI.
+			updateRadios();
 		}
 	} );
 
@@ -4874,11 +4881,18 @@
 	 *
 	 * @class    wp.customize.CroppedImageControl
 	 * @augments wp.customize.MediaControl
+	 * @inheritDoc
+	 *
+	 * @memberOf wp.customize
 	 */
 	api.CroppedImageControl = api.MediaControl.extend(/** @lends wp.customize.CroppedImageControl.prototype */{
 
 		/**
-		 * Open the media modal to the library state.
+		 * Opens the media modal to the library state.
+		 *
+		 * @since 4.3.0
+		 *
+		 * @return {void}
 		 */
 		openFrame: function( event ) {
 			if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
@@ -4890,7 +4904,11 @@
 		},
 
 		/**
-		 * Create a media modal select frame, and store it so the instance can be reused when needed.
+		 * Creates a media modal select frame and stores it so the instance can be reused when needed.
+		 *
+		 * @since 4.3.0
+		 *
+		 * @return {void}
 		 */
 		initFrame: function() {
 			var l10n = _wpMediaViewsL10n;
@@ -4923,8 +4941,12 @@
 		},
 
 		/**
-		 * After an image is selected in the media modal, switch to the cropper
-		 * state if the image isn't the right size.
+		 * Switches to the cropper state if an image has been selected in the media modal.
+		 * This only happens if the image isn't the right size.
+		 *
+		 * @since 4.3.0
+		 *
+		 * @return {void}
 		 */
 		onSelect: function() {
 			var attachment = this.frame.state().get( 'selection' ).first().toJSON();
@@ -4938,9 +4960,13 @@
 		},
 
 		/**
-		 * After the image has been cropped, apply the cropped image data to the setting.
+		 * Applies the cropped image data to the setting once cropping is complete.
 		 *
-		 * @param {object} croppedImage Cropped attachment data.
+		 * @since 4.3.0
+		 *
+		 * @param {Object} croppedImage The cropped attachment data.
+		 *
+		 * @return {void}
 		 */
 		onCropped: function( croppedImage ) {
 			this.setImageFromAttachment( croppedImage );
@@ -4951,9 +4977,12 @@
 		 * control-specific data, to be fed to the imgAreaSelect plugin in
 		 * wp.media.view.Cropper.
 		 *
-		 * @param {wp.media.model.Attachment} attachment
-		 * @param {wp.media.controller.Cropper} controller
-		 * @return {Object} Options
+		 * @since 4.3.0
+		 *
+		 * @param {wp.media.model.Attachment}   attachment The attachment image data.
+		 * @param {wp.media.controller.Cropper} controller The controller containing the imgAreaSelect plugin.
+		 *
+		 * @return {Object} The computed set of options.
 		 */
 		calculateImageSelectOptions: function( attachment, controller ) {
 			var control    = controller.get( 'control' ),
@@ -5014,15 +5043,18 @@
 		},
 
 		/**
-		 * Return whether the image must be cropped, based on required dimensions.
+		 * Returns whether the image must be cropped, based on required dimensions.
 		 *
-		 * @param {bool} flexW
-		 * @param {bool} flexH
-		 * @param {int}  dstW
-		 * @param {int}  dstH
-		 * @param {int}  imgW
-		 * @param {int}  imgH
-		 * @return {bool}
+		 * @since 4.3.0
+		 *
+		 * @param {boolean} flexW   Whether or not the width is flexible.
+		 * @param {boolean} flexH   Whether or not the height is flexible.
+		 * @param {int}     dstW    The destination width.
+		 * @param {int}     dstH    The destination height.
+		 * @param {int}     imgW    The current image width.
+		 * @param {int}     imgH    The current image height.
+		 *
+		 * @return {boolean} Whether or not the image should be cropped.
 		 */
 		mustBeCropped: function( flexW, flexH, dstW, dstH, imgW, imgH ) {
 			if ( true === flexW && true === flexH ) {
@@ -5049,7 +5081,11 @@
 		},
 
 		/**
-		 * If cropping was skipped, apply the image data directly to the setting.
+		 * Applies the image data directly to the setting if cropping was skipped.
+		 *
+		 * @since 4.3.0
+		 *
+		 * @return {void}
 		 */
 		onSkippedCrop: function() {
 			var attachment = this.frame.state().get( 'selection' ).first().toJSON();
@@ -5057,9 +5093,13 @@
 		},
 
 		/**
-		 * Updates the setting and re-renders the control UI.
+		 * Updates the setting and re-renders the control UI based on passed the attachment.
 		 *
-		 * @param {object} attachment
+		 * @since 4.3.0
+		 *
+		 * @param {Object} attachment The attachment to set the image from.
+		 *
+		 * @return {void}
 		 */
 		setImageFromAttachment: function( attachment ) {
 			this.params.attachment = attachment;
@@ -5074,11 +5114,19 @@
 	 *
 	 * @class    wp.customize.SiteIconControl
 	 * @augments wp.customize.CroppedImageControl
+	 *
+	 * @inheritDoc
+	 *
+	 * @memberOf wp.customize
 	 */
 	api.SiteIconControl = api.CroppedImageControl.extend(/** @lends wp.customize.SiteIconControl.prototype */{
 
 		/**
-		 * Create a media modal select frame, and store it so the instance can be reused when needed.
+		 * Creates a media modal select frame and stores it so the instance can be reused when needed.
+		 *
+		 * @since 4.3.0
+		 *
+		 * @return {void}
 		 */
 		initFrame: function() {
 			var l10n = _wpMediaViewsL10n;
@@ -5111,8 +5159,12 @@
 		},
 
 		/**
-		 * After an image is selected in the media modal, switch to the cropper
-		 * state if the image isn't the right size.
+		 * Switches to the cropper state if an image has been selected in the media modal.
+		 * This only happens if the image isn't the right size.
+		 *
+		 * @since 4.3.0
+		 *
+		 * @return {void}
 		 */
 		onSelect: function() {
 			var attachment = this.frame.state().get( 'selection' ).first().toJSON(),
@@ -5143,9 +5195,13 @@
 		},
 
 		/**
-		 * Updates the setting and re-renders the control UI.
+		 * Updates the setting and re-renders the control UI based on passed the attachment.
 		 *
-		 * @param {object} attachment
+		 * @since 4.3.0
+		 *
+		 * @param {Object} attachment The attachment to set the image from.
+		 *
+		 * @return {void}
 		 */
 		setImageFromAttachment: function( attachment ) {
 			var sizes = [ 'site_icon-32', 'thumbnail', 'full' ], link,
@@ -5172,9 +5228,11 @@
 		},
 
 		/**
-		 * Called when the "Remove" link is clicked. Empties the setting.
+		 * Empties the setting when the "Remove" link is clicked.
 		 *
-		 * @param {object} event jQuery Event object
+		 * @param {Object} event jQuery Event object
+		 *
+		 * @return {void}
 		 */
 		removeFile: function( event ) {
 			if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
