@@ -154,12 +154,14 @@
 		settings.DOMReady = true;
 	};
 
-	//
+	// When the browser can not render everything...
 	if ( ! settings.supports.everything ) {
 		ready = function() {
 			settings.readyCallback();
 		};
 
+		// Tests whether a document.addEventListener exists. This is the case for IE < 9.
+		// On the load events set settings.DOMReady to true.
 		if ( document.addEventListener ) {
 			document.addEventListener( 'DOMContentLoaded', ready, false );
 			window.addEventListener( 'load', ready, false );
@@ -172,6 +174,7 @@
 			} );
 		}
 
+		// Adds scripts to the DOM if they are present in the settings.
 		src = settings.source || {};
 
 		if ( src.concatemoji ) {
