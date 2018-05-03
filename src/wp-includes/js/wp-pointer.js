@@ -240,7 +240,7 @@
 		 * Processes the position for the pointer relative to the target element
 		 *
 		 * @param position
-		 * @return {object} result  An object containing position related data
+		 * @returns {object} result  An object containing position related data
 		 * @private
 		 */
 		_processPosition: function( position ) {
@@ -284,7 +284,8 @@
 		 *
 		 * Only opens the widget pointer in case it is closed and not disabled,
 		 * and calls 'update' before doing so
-		 * @param event
+		 *
+		 * @param {event} event The event to use as callback on completed update
 		 */
 		open: function( event ) {
 			var self = this,
@@ -298,6 +299,13 @@
 			});
 		},
 
+		/**
+		 * Opens and shows the pointer element
+		 *
+		 * @param {event} event
+		 * @returns {void}
+		 * @private
+		 */
 		_open: function( event ) {
 			var self = this,
 				o    = this.options;
@@ -316,6 +324,12 @@
 			}));
 		},
 
+		/**
+		 * Closes and hides the pointer element
+		 *
+		 * @param {event} event
+		 * @returns {void}
+		 */
 		close: function( event ) {
 			if ( !this.active || this.options.disabled )
 				return;
@@ -331,11 +345,22 @@
 			}));
 		},
 
+		/**
+		 * Puts the pointer on top by increasing the z-index
+		 *
+		 * @returns {void}
+		 */
 		sendToTop: function() {
 			if ( this.active )
 				this.pointer.css( 'z-index', zindex++ );
 		},
 
+		/**
+		 * Toggles the element between shown and hidden
+		 *
+		 * @param {event} event
+		 * @returns {void}
+		 */
 		toggle: function( event ) {
 			if ( this.pointer.is(':hidden') )
 				this.open( event );
@@ -343,6 +368,12 @@
 				this.close( event );
 		},
 
+		/**
+		 * Extends the pointer and the widget element with the supplied parameter, which is either an element or a function
+		 *
+		 * @param extend
+		 * @private
+		 */
 		_handoff: function( extend ) {
 			return $.extend({
 				pointer: this.pointer,
