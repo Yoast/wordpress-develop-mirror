@@ -5230,6 +5230,8 @@
 		/**
 		 * Empties the setting when the "Remove" link is clicked.
 		 *
+ 		 * @since 4.3.0
+		 *
 		 * @param {Object} event jQuery Event object
 		 *
 		 * @return {void}
@@ -5248,10 +5250,24 @@
 	});
 
 	/**
+	 * A control for selecting and cropping the Site header.
+	 *
 	 * @class    wp.customize.HeaderControl
 	 * @augments wp.customize.Control
+	 *
+	 * @inheritDoc
+	 *
+	 * @memberOf wp.customize
 	 */
 	api.HeaderControl = api.Control.extend(/** @lends wp.customize.HeaderControl.prototype */{
+
+		/**
+		 * Sets up the control UI once it's embedded in the DOM and settings are created.
+		 *
+		 * @since 3.9.0
+		 *
+		 * @return {void}
+		 */
 		ready: function() {
 			this.btnRemove = $('#customize-control-header_image .actions .remove');
 			this.btnNew    = $('#customize-control-header_image .actions .new');
@@ -5283,18 +5299,17 @@
 				api.HeaderTool.DefaultsList
 			]);
 
-			// Ensure custom-header-crop Ajax requests bootstrap the Customizer to activate the previewed theme.
+			// Ensure custom-header-crop AJAX requests bootstrap the Customizer to activate the previewed theme.
 			wp.media.controller.Cropper.prototype.defaults.doCropArgs.wp_customize = 'on';
 			wp.media.controller.Cropper.prototype.defaults.doCropArgs.customize_theme = api.settings.theme.stylesheet;
 		},
 
 		/**
-		 * Returns a new instance of api.HeaderTool.ImageModel based on the currently
-		 * saved header image (if any).
+		 * Returns a new instance of api.HeaderTool.ImageModel based on the currently saved header image (if any).
 		 *
 		 * @since 4.2.0
 		 *
-		 * @return {Object} Options
+		 * @return {Object} The new ImageModel instance.
 		 */
 		getInitialHeaderImage: function() {
 			if ( ! api.get().header_image || ! api.get().header_image_data || _.contains( [ 'remove-header', 'random-default-image', 'random-uploaded-image' ], api.get().header_image ) ) {
@@ -5305,7 +5320,7 @@
 			var currentHeaderObject = _.find( _wpCustomizeHeader.uploads, function( imageObj ) {
 				return ( imageObj.attachment_id === api.get().header_image_data.attachment_id );
 			} );
-			// Fall back to raw current header image.
+			// Fall back to the raw current header image.
 			if ( ! currentHeaderObject ) {
 				currentHeaderObject = {
 					url: api.get().header_image,
@@ -5321,13 +5336,14 @@
 		},
 
 		/**
-		 * Returns a set of options, computed from the attached image data and
-		 * theme-specific data, to be fed to the imgAreaSelect plugin in
-		 * wp.media.view.Cropper.
+		 * Calculates the select options for the image to be used in the Cropper object.
 		 *
-		 * @param {wp.media.model.Attachment} attachment
-		 * @param {wp.media.controller.Cropper} controller
-		 * @return {Object} Options
+		 * @since 3.9.0
+		 *
+		 * @param {wp.media.model.Attachment}   attachment The image attachment to calculate the options for.
+		 * @param {wp.media.controller.Cropper} controller The Cropper controller to
+		 *
+		 * @return {Object} The image select options.
 		 */
 		calculateImageSelectOptions: function(attachment, controller) {
 			var xInit = parseInt(_wpCustomizeHeader.data.width, 10),
@@ -5392,11 +5408,16 @@
 
 		/**
 		 * Sets up and opens the Media Manager in order to select an image.
+		 *
 		 * Depending on both the size of the image and the properties of the
 		 * current theme, a cropping step after selection may be required or
 		 * skippable.
 		 *
-		 * @param {event} event
+		 * @since 3.9.0
+		 *
+		 * @param {event} event The event that triggered the opening of the Media Manager.
+		 *
+		 * @return {void}
 		 */
 		openMedia: function(event) {
 			var l10n = _wpMediaViewsL10n;
@@ -5432,17 +5453,22 @@
 		},
 
 		/**
-		 * After an image is selected in the media modal,
-		 * switch to the cropper state.
+		 * Switches to the cropper state after an image is selected in the media modal.
+		 *
+		 * @since 3.9.0
+		 *
+		 * @return {void}
 		 */
 		onSelect: function() {
 			this.frame.setState('cropper');
 		},
 
 		/**
-		 * After the image has been cropped, apply the cropped image data to the setting.
+		 * Applies the cropped image data to the setting after the image has been cropped,
 		 *
-		 * @param {object} croppedImage Cropped attachment data.
+		 * @since 3.9.0
+		 *
+		 * @param {Object} croppedImage The cropped attachment data.
 		 */
 		onCropped: function(croppedImage) {
 			var url = croppedImage.url,
@@ -5453,9 +5479,11 @@
 		},
 
 		/**
-		 * If cropping was skipped, apply the image data directly to the setting.
+		 * Applies the image data directly to the setting if cropping was skipped.
 		 *
-		 * @param {object} selection
+		 * @since 3.9.0
+		 *
+		 * @param {Object} selection The selected image.
 		 */
 		onSkippedCrop: function(selection) {
 			var url = selection.get('url'),
@@ -5465,14 +5493,17 @@
 		},
 
 		/**
-		 * Creates a new wp.customize.HeaderTool.ImageModel from provided
-		 * header image data and inserts it into the user-uploaded headers
-		 * collection.
+		 * Creates a new wp.customize.HeaderTool.ImageModel from the provided header image data and inserts
+		 * it into the user-uploaded headers collection.
 		 *
-		 * @param {String} url
-		 * @param {Number} attachmentId
-		 * @param {Number} width
-		 * @param {Number} height
+		 * @since 3.9.0
+		 *
+		 * @param {string} url          The URL of the image.
+		 * @param {number} attachmentId The ID of the attachment.
+		 * @param {number} width        The width of the image.
+		 * @param {number} height       The height of the image.
+		 *
+		 * @return {void}
 		 */
 		setImageFromURL: function(url, attachmentId, width, height) {
 			var choice, data = {};
