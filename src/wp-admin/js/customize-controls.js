@@ -4879,6 +4879,8 @@
 	/**
 	 * A control for selecting and cropping an image.
 	 *
+	 * @since 4.3.0
+	 *
 	 * @class    wp.customize.CroppedImageControl
 	 * @augments wp.customize.MediaControl
 	 * @inheritDoc
@@ -5112,6 +5114,8 @@
 	/**
 	 * A control for selecting and cropping Site Icons.
 	 *
+	 * @since 4.3.0
+	 *
 	 * @class    wp.customize.SiteIconControl
 	 * @augments wp.customize.CroppedImageControl
 	 *
@@ -5251,6 +5255,8 @@
 
 	/**
 	 * A control for selecting and cropping the Site header.
+	 *
+	 * @since 3.9.0
 	 *
 	 * @class    wp.customize.HeaderControl
 	 * @augments wp.customize.Control
@@ -5537,6 +5543,10 @@
 		/**
 		 * Triggers the necessary events to deselect an image which was set as
 		 * the currently selected one.
+		 *
+		 * @since 3.9.0
+		 *
+		 * @return {void}
 		 */
 		removeImage: function() {
 			api.HeaderTool.currentHeader.trigger('hide');
@@ -5546,10 +5556,16 @@
 	});
 
 	/**
-	 * wp.customize.ThemeControl
+	 * A control for managing themes.
+	 *
+	 * @since 3.9.0
 	 *
 	 * @class    wp.customize.ThemeControl
 	 * @augments wp.customize.Control
+	 *
+	 * @inheritDoc
+	 *
+	 * @memberOf wp.customize
 	 */
 	api.ThemeControl = api.Control.extend(/** @lends wp.customize.ThemeControl.prototype */{
 
@@ -5557,19 +5573,46 @@
 		screenshotRendered: false,
 
 		/**
+		 * Sets up the control UI and binds events.
+		 *
 		 * @since 4.2.0
+		 *
+		 * @return {void}
 		 */
 		ready: function() {
 			var control = this, panel = api.panel( 'themes' );
 
+			/**
+			 * Determines whether switch buttons should be disabled based on if it's possible to switch themes.
+			 *
+			 * @since 4.9.0
+			 *
+			 * @return {boolean} True if the switching themes button should be disabled.
+			 */
 			function disableSwitchButtons() {
 				return ! panel.canSwitchTheme( control.params.theme.id );
 			}
 
-			// Temporary special function since supplying SFTP credentials does not work yet. See #42184.
+			/**
+			 * Determines if the install button should be disabled or not.
+			 *
+			 * This is necessary since supplying SFTP credentials does not work yet. See #42184.
+			 *
+			 *  @since 4.9.0
+			 *
+			 * @return {boolean} True if the install button should be disabled.
+			 */
 			function disableInstallButtons() {
 				return disableSwitchButtons() || false === api.settings.theme._canInstall || true === api.settings.theme._filesystemCredentialsNeeded;
 			}
+
+			/**
+			 * Updates the preview and install buttons disabled state.
+			 *
+			 * @since 3.9.0
+			 *
+			 * @return {void}
+			 */
 			function updateButtons() {
 				control.container.find( 'button.preview, button.preview-theme' ).toggleClass( 'disabled', disableSwitchButtons() );
 				control.container.find( 'button.theme-install' ).toggleClass( 'disabled', disableInstallButtons() );
@@ -5583,7 +5626,7 @@
 				control.touchDrag = true;
 			});
 
-			// Bind details view trigger.
+			// Bind the details view trigger.
 			control.container.on( 'click keydown touchend', '.theme', function( event ) {
 				var section;
 				if ( api.utils.isKeydownButNotEnterEvent( event ) ) {
@@ -5600,7 +5643,8 @@
 					return;
 				}
 
-				event.preventDefault(); // Keep this AFTER the key filter above
+				// Keep this AFTER the key filter above to prevent further default behavior from executing.
+				event.preventDefault();
 				section = api.section( control.section() );
 				section.showDetails( control.params.theme, function() {
 
@@ -5611,6 +5655,7 @@
 				} );
 			});
 
+			// Set the screenshot once it's been rendered.
 			control.container.on( 'render-screenshot', function() {
 				var $screenshot = $( this ).find( 'img' ),
 					source = $screenshot.data( 'src' );
@@ -5623,10 +5668,12 @@
 		},
 
 		/**
-		 * Show or hide the theme based on the presence of the term in the title, description, tags, and author.
+		 * Shows or hides the theme based on the presence of the term in the title, description, tags, and author.
 		 *
 		 * @since 4.2.0
-		 * @param {Array} terms - An array of terms to search for.
+		 *
+		 * @param {Array} terms An array of terms to search for.
+		 *
 		 * @return {boolean} Whether a theme control was activated or not.
 		 */
 		filter: function( terms ) {
@@ -5638,7 +5685,7 @@
 					control.params.theme.author + ' ';
 			haystack = haystack.toLowerCase().replace( '-', ' ' );
 
-			// Back-compat for behavior in WordPress 4.2.0 to 4.8.X.
+			// Backwards-compatibility for behavior in WordPress 4.2.0 to 4.8.X.
 			if ( ! _.isArray( terms ) ) {
 				terms = [ terms ];
 			}
@@ -5653,8 +5700,12 @@
 
 				// Search for each term individually (as whole-word and partial match) and sum weighted match counts.
 				_.each( terms, function( term ) {
-					matchCount = matchCount + 2 * ( haystack.split( term + ' ' ).length - 1 ); // Whole-word, double-weighted.
-					matchCount = matchCount + haystack.split( term ).length - 1; // Partial word, to minimize empty intermediate searches while typing.
+
+					// Whole-word, double-weighted.
+					matchCount = matchCount + 2 * ( haystack.split( term + ' ' ).length - 1 );
+
+					// Partial word, to minimize empty intermediate searches while typing.
+					matchCount = matchCount + haystack.split( term ).length - 1;
 				});
 
 				// Upper limit on match ranking.
@@ -5665,17 +5716,19 @@
 
 			if ( 0 !== matchCount ) {
 				control.activate();
-				control.params.priority = 101 - matchCount; // Sort results by match count.
+				// Sort results by match count.
+				control.params.priority = 101 - matchCount;
 				return true;
 			} else {
-				control.deactivate(); // Hide control
+				// Hide control.
+				control.deactivate();
 				control.params.priority = 101;
 				return false;
 			}
 		},
 
 		/**
-		 * Rerender the theme from its JS template with the installed type.
+		 * Rerenders the theme from its JavaScript template with the installed type.
 		 *
 		 * @since 4.9.0
 		 *
@@ -5695,21 +5748,26 @@
 	});
 
 	/**
-	 * Class wp.customize.CodeEditorControl
+	 * A control for the code editor.
 	 *
 	 * @since 4.9.0
 	 *
 	 * @class    wp.customize.CodeEditorControl
 	 * @augments wp.customize.Control
+	 * @inheritDoc
+	 *
+	 * @memberOf wp.customize
 	 */
 	api.CodeEditorControl = api.Control.extend(/** @lends wp.customize.CodeEditorControl.prototype */{
 
 		/**
-		 * Initialize.
+		 * Initialize the control and binds its events.
 		 *
 		 * @since 4.9.0
-		 * @param {string} id      - Unique identifier for the control instance.
-		 * @param {object} options - Options hash for the control instance.
+		 *
+		 * @param {string} id      Unique identifier for the control instance.
+		 * @param {Object} options Options hash for the control instance.
+		 *
 		 * @return {void}
 		 */
 		initialize: function( id, options ) {
@@ -5719,7 +5777,7 @@
 			} );
 			api.Control.prototype.initialize.call( control, id, options );
 
-			// Note that rendering is debounced so the props will be used when rendering happens after add event.
+			// Rendering is debounced so the props will be used when rendering happens after the add event.
 			control.notifications.bind( 'add', function( notification ) {
 
 				// Skip if control notification is not from setting csslint_error notification.
@@ -5742,9 +5800,10 @@
 		},
 
 		/**
-		 * Initialize the editor when the containing section is ready and expanded.
+		 * Initializes the editor when the containing section is ready and expanded.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		ready: function() {
@@ -5754,7 +5813,7 @@
 				return;
 			}
 
-			// Wait to initialize editor until section is embedded and expanded.
+			// Wait to initialize the editor until the section is embedded and expanded.
 			api.section( control.section(), function( section ) {
 				section.deferred.embedded.done( function() {
 					var onceExpanded;
@@ -5774,9 +5833,10 @@
 		},
 
 		/**
-		 * Initialize editor.
+		 * Initializes the editor.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		initEditor: function() {
