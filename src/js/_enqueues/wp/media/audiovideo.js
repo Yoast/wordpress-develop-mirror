@@ -269,12 +269,12 @@ wp.media.video = {
 	}
 };
 
-media.model.PostMedia = require( './models/post-media.js' );
-media.controller.AudioDetails = require( './controllers/audio-details.js' );
-media.controller.VideoDetails = require( './controllers/video-details.js' );
-media.view.MediaFrame.MediaDetails = require( './views/frame/media-details.js' );
-media.view.MediaFrame.AudioDetails = require( './views/frame/audio-details.js' );
-media.view.MediaFrame.VideoDetails = require( './views/frame/video-details.js' );
-media.view.MediaDetails = require( './views/media-details.js' );
-media.view.AudioDetails = require( './views/audio-details.js' );
-media.view.VideoDetails = require( './views/video-details.js' );
+media.model.PostMedia = require( '../../../media/models/post-media.js' );
+media.controller.AudioDetails = require( '../../../media/controllers/audio-details.js' );
+media.controller.VideoDetails = require( '../../../media/controllers/video-details.js' );
+media.view.MediaFrame.MediaDetails = require( '../../../media/views/frame/media-details.js' );
+media.view.MediaFrame.AudioDetails = require( '../../../media/views/frame/audio-details.js' );
+media.view.MediaFrame.VideoDetails = require( '../../../media/views/frame/video-details.js' );
+media.view.MediaDetails = require( '../../../media/views/media-details.js' );
+media.view.AudioDetails = require( '../../../media/views/audio-details.js' );
+media.view.VideoDetails = require( '../../../media/views/video-details.js' );

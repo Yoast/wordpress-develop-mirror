@@ -64,12 +64,12 @@ l10n = media.model.l10n = window._wpMediaModelsL10n || {};
 media.model.settings = l10n.settings || {};
 delete l10n.settings;
 
-Attachment = media.model.Attachment = require( './models/attachment.js' );
-Attachments = media.model.Attachments = require( './models/attachments.js' );
+Attachment = media.model.Attachment = require( '../../../media/models/attachment.js' );
+Attachments = media.model.Attachments = require( '../../../media/models/attachments.js' );
 
-media.model.Query = require( './models/query.js' );
-media.model.PostImage = require( './models/post-image.js' );
-media.model.Selection = require( './models/selection.js' );
+media.model.Query = require( '../../../media/models/query.js' );
+media.model.PostImage = require( '../../../media/models/post-image.js' );
+media.model.Selection = require( '../../../media/models/selection.js' );
 
 /**
  * ========================================================================
