@@ -5883,11 +5883,13 @@
 		},
 
 		/**
-		 * Make sure editor gets focused when control is focused.
+		 * Ensures the editor gets focused when the control is focused.
 		 *
 		 * @since 4.9.0
-		 * @param {Object}   [params] - Focus params.
-		 * @param {Function} [params.completeCallback] - Function to call when expansion is complete.
+		 *
+		 * @param {Object}   [params]                   The focus parameters to use.
+		 * @param {Function} [params.completeCallback]  Function to call when expansion is complete.
+		 *
 		 * @return {void}
 		 */
 		focus: function( params ) {
@@ -5905,10 +5907,12 @@
 		},
 
 		/**
-		 * Initialize syntax-highlighting editor.
+		 * Initializes the syntax-highlighting editor.
 		 *
 		 * @since 4.9.0
-		 * @param {object} codeEditorSettings - Code editor settings.
+		 *
+		 * @param {Object} codeEditorSettings The code editor settings to use.
+		 *
 		 * @return {void}
 		 */
 		initSyntaxHighlightingEditor: function( codeEditorSettings ) {
@@ -5965,9 +5969,10 @@
 		},
 
 		/**
-		 * Handle tabbing to the field after the editor.
+		 * Handles tabbing to the field after the editor.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		onTabNext: function onTabNext() {
@@ -5983,9 +5988,10 @@
 		},
 
 		/**
-		 * Handle tabbing to the field before the editor.
+		 * Handles tabbing to the field before the editor.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		onTabPrevious: function onTabPrevious() {
@@ -6001,10 +6007,12 @@
 		},
 
 		/**
-		 * Update error notice.
+		 * Updates the error notice.
 		 *
 		 * @since 4.9.0
-		 * @param {Array} errorAnnotations - Error annotations.
+		 *
+		 * @param {Array} errorAnnotations The error annotations.
+		 *
 		 * @return {void}
 		 */
 		onUpdateErrorNotice: function onUpdateErrorNotice( errorAnnotations ) {
@@ -6025,9 +6033,10 @@
 		},
 
 		/**
-		 * Initialize plain-textarea editor when syntax highlighting is disabled.
+		 * Initializes the plain-textarea editor when syntax highlighting is disabled.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		initPlainTextareaEditor: function() {
