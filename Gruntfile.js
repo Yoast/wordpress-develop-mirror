@@ -1019,6 +1019,9 @@ module.exports = function(grunt) {
 			}
 		},
 		_watch: {
+			options: {
+				interval: 2000
+			},
 			all: {
 				files: [
 					SOURCE_DIR + '**',
@@ -1029,8 +1032,7 @@ module.exports = function(grunt) {
 				tasks: ['clean:dynamic', 'copy:dynamic'],
 				options: {
 					dot: true,
-					spawn: false,
-					interval: 2000
+					spawn: false
 				}
 			},
 			'js-enqueues': {
@@ -1038,8 +1040,7 @@ module.exports = function(grunt) {
 				tasks: ['clean:dynamic', 'copy:dynamic-js', 'uglify:dynamic', 'jsvalidate:dynamic'],
 				options: {
 					dot: true,
-					spawn: false,
-					interval: 2000
+					spawn: false
 				}
 			},
 			'js-webpack': {
@@ -1051,8 +1052,7 @@ module.exports = function(grunt) {
 				tasks: ['clean:dynamic', 'webpack:dev', 'uglify:dynamic', 'jsvalidate:dynamic'],
 				options: {
 					dot: true,
-					spawn: false,
-					interval: 2000
+					spawn: false
 				}
 			},
 			config: {
@@ -1073,8 +1073,7 @@ module.exports = function(grunt) {
 				],
 				tasks: ['rtlcss:dynamic'],
 				options: {
-					spawn: false,
-					interval: 2000
+					spawn: false
 				}
 			},
 			test: {
