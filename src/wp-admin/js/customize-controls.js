@@ -6052,17 +6052,19 @@
 				if ( escKeyCode === event.keyCode ) {
 					if ( ! $textarea.data( 'next-tab-blurs' ) ) {
 						$textarea.data( 'next-tab-blurs', true );
-						event.stopPropagation(); // Prevent collapsing the section.
+
+						// Prevent collapsing the section.
+						event.stopPropagation();
 					}
 					return;
 				}
 
-				// Short-circuit if tab key is not being pressed or if a modifier key *is* being pressed.
+				// Short-circuit if tab key is not being pressed or if a modifier key is being pressed.
 				if ( tabKeyCode !== event.keyCode || event.ctrlKey || event.altKey || event.shiftKey ) {
 					return;
 				}
 
-				// Prevent capturing Tab characters if Esc was pressed.
+				// Prevent capturing tab characters if escape was pressed.
 				if ( $textarea.data( 'next-tab-blurs' ) ) {
 					return;
 				}
