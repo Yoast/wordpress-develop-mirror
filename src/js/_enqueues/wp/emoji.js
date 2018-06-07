@@ -1,5 +1,32 @@
 
 ( function( window, settings ) {
+	/**
+	 * Replaces text with Twitter emojis.
+	 *
+	 * Description. (use period)
+	 *
+	 * @since      4.2.0
+	 * @access     private
+	 *
+	 * @class
+	 *
+	 * @see  Twitter Emoji library
+	 * @link https://github.com/twitter/twemoji
+	 * @global
+	 *
+	 * @fires   eventName
+	 * @fires   className#eventName
+	 * @listens event:eventName
+	 * @listens className~event:eventName
+	 *
+	 * @param {type}   var           Description.
+	 * @param {type}   [var]         Description of optional variable.
+	 * @param {type}   [var=default] Description of optional variable with default variable.
+	 * @param {Object} objectVar     Description.
+	 * @param {type}   objectVar.key Description of a key in the objectVar parameter.
+	 *
+	 * @return {type} Description.
+	 */
 	function wpEmoji() {
 		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
 
@@ -68,6 +95,15 @@
 						removedNodes = mutationRecords[ i ].removedNodes;
 						ii = addedNodes.length;
 
+						/*
+						 * Checks if an image has been replaced by a text element
+						 * with the same text as the alternate description of the replaced image.
+						 * (presumably because the image could not be loaded).
+						 * If it is, do nothing.
+						 *
+						 * Node type 3 is a TEXT_NODE.
+						 * See: https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
+						 */
 						if (
 							ii === 1 && removedNodes.length === 1 &&
 							addedNodes[0].nodeType === 3 &&
@@ -81,6 +117,7 @@
 						while ( ii-- ) {
 							node = addedNodes[ ii ];
 
+							// Node type 3 is a TEXT_NODE.
 							if ( node.nodeType === 3 ) {
 								if ( ! node.parentNode ) {
 									continue;
@@ -92,6 +129,8 @@
 									 * It unnecessarily splits text nodes when it encounters a HTML
 									 * template interpolation symbol ( "{{", for example ). So, we
 									 * join the text nodes back together as a work-around.
+									 *
+									 * Node type 3 is a TEXT_NODE.
 									 */
 									while( node.nextSibling && 3 === node.nextSibling.nodeType ) {
 										node.nodeValue = node.nodeValue + node.nextSibling.nodeValue;
@@ -102,6 +141,7 @@
 								node = node.parentNode;
 							}
 
+							// Node type 1 is a ELEMENT_NODE.
 							if ( ! node || node.nodeType !== 1 ||
 								( node.className && typeof node.className === 'string' && node.className.indexOf( 'wp-exclude-emoji' ) !== -1 ) ) {
 
