@@ -6087,18 +6087,22 @@
 	});
 
 	/**
-	 * Class wp.customize.DateTimeControl.
+	 * A control for date/time inputs.
 	 *
 	 * @since 4.9.0
+	 *
 	 * @class    wp.customize.DateTimeControl
 	 * @augments wp.customize.Control
+	 *
+ 	 * @memberOf wp.customize
 	 */
 	api.DateTimeControl = api.Control.extend(/** @lends wp.customize.DateTimeControl.prototype */{
 
 		/**
-		 * Initialize behaviors.
+		 * Initializes the control.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		ready: function ready() {
@@ -6156,12 +6160,13 @@
 		},
 
 		/**
-		 * Parse datetime string.
+		 * Parses the passed datetime string.
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param {string} datetime - Date/Time string. Accepts Y-m-d[ H:i[:s]] format.
-		 * @return {object|null} Returns object containing date components or null if parse error.
+		 * @param {string} datetime The date/time string. Accepts Y-m-d[ H:i[:s]] format.
+		 *
+		 * @return {Object|null} Returns an object containing date components or null if a parse error occurred.
 		 */
 		parseDateTime: function parseDateTime( datetime ) {
 			var control = this, matches, date, midDayHour = 12;
@@ -6196,10 +6201,11 @@
 		},
 
 		/**
-		 * Validates if input components have valid date and time.
+		 * Validates if input components have a valid date and time.
 		 *
 		 * @since 4.9.0
-		 * @return {boolean} If date input fields has error.
+		 *
+		 * @return {boolean} Whether the date input fields contain an error.
 		 */
 		validateInputs: function validateInputs() {
 			var control = this, components, validityInput;
@@ -6250,9 +6256,10 @@
 		},
 
 		/**
-		 * Updates number of days according to the month and year selected.
+		 * Updates the number of days according to the selected month and year.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		updateDaysForMonth: function updateDaysForMonth() {
@@ -6273,10 +6280,11 @@
 		},
 
 		/**
-		 * Populate setting value from the inputs.
+		 * Populates the setting value from the inputs.
 		 *
 		 * @since 4.9.0
-		 * @return {boolean} If setting updated.
+		 *
+		 * @return {boolean} Whether the setting was successfully updated.
 		 */
 		populateSetting: function populateSetting() {
 			var control = this, date;
@@ -6291,15 +6299,26 @@
 		},
 
 		/**
-		 * Converts input values to string in Y-m-d H:i:s format.
+		 * Converts the input values to a string in Y-m-d H:i:s format.
 		 *
 		 * @since 4.9.0
-		 * @return {string} Date string.
+		 *
+		 * @return {string} The date string.
 		 */
 		convertInputDateToString: function convertInputDateToString() {
 			var control = this, date = '', dateFormat, hourInTwentyFourHourFormat,
 				getElementValue, pad;
 
+			/**
+			 * Applies the passed padding to the passed number.
+			 *
+	 		 * @since 4.9.0
+			 *
+			 * @param {number} number   The number to add padding to.
+			 * @param {number} padding  The amount of padding to add.
+			 *
+			 * @return {number} The padded number.
+			 */
 			pad = function( number, padding ) {
 				var zeros;
 				if ( String( number ).length < padding ) {
@@ -6309,6 +6328,15 @@
 				return number;
 			};
 
+			/**
+			 * Gets the element's value.
+			 *
+			 * @since 4.9.0
+			 *
+			 * @param {string} component The component to retrieve.
+			 *
+			 * @return {number} The value of the component / element.
+			 */
 			getElementValue = function( component ) {
 				var value = parseInt( control.inputElements[ component ].get(), 10 );
 
@@ -6334,10 +6362,11 @@
 		},
 
 		/**
-		 * Check if the date is in the future.
+		 * Checks if the date is in the future.
 		 *
 		 * @since 4.9.0
-		 * @return {boolean} True if future date.
+		 *
+		 * @return {boolean} Whether or not the date is in the future.
 		 */
 		isFutureDate: function isFutureDate() {
 			var control = this;
@@ -6345,12 +6374,14 @@
 		},
 
 		/**
-		 * Convert hour in twelve hour format to twenty four hour format.
+		 * Converts hours that are in a 12-hour format, to a 24-hour format.
 		 *
 		 * @since 4.9.0
-		 * @param {string} hourInTwelveHourFormat - Hour in twelve hour format.
-		 * @param {string} meridian - Either 'am' or 'pm'.
-		 * @return {string} Hour in twenty four hour format.
+		 *
+		 * @param {string} hourInTwelveHourFormat Hour in 12-hour format.
+		 * @param {string} meridian               Either 'am' or 'pm'.
+		 *
+		 * @return {string} Hour in 24-hour format.
 		 */
 		convertHourToTwentyFourHourFormat: function convertHour( hourInTwelveHourFormat, meridian ) {
 			var hourInTwentyFourHourFormat, hour, midDayHour = 12;
@@ -6372,9 +6403,10 @@
 		},
 
 		/**
-		 * Populates date inputs in date fields.
+		 * Populates the date inputs in date fields.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {boolean} Whether the inputs were populated.
 		 */
 		populateDateInputs: function populateDateInputs() {
@@ -6387,7 +6419,9 @@
 			}
 
 			_.each( control.inputElements, function( element, component ) {
-				var value = parsed[ component ]; // This will be zero-padded string.
+
+				// This will be zero-padded string.
+				var value = parsed[ component ];
 
 				// Set month and meridian regardless of focused state since they are dropdowns.
 				if ( 'month' === component || 'meridian' === component ) {
@@ -6415,11 +6449,13 @@
 		},
 
 		/**
-		 * Toggle future date notification for date control.
+		 * Toggles the future date notification for date control.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @param {boolean} notify Add or remove the notification.
-		 * @return {wp.customize.DateTimeControl}
+		 *
+		 * @return {wp.customize.DateTimeControl} The date control.
 		 */
 		toggleFutureDateNotification: function toggleFutureDateNotification( notify ) {
 			var control = this, notificationCode, notification;
