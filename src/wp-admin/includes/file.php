@@ -175,7 +175,7 @@ function list_files( $folder = '', $levels = 100, $exclusions = array() ) {
  *
  * @since 4.9.0
  *
- * @param string $plugin Path to the main plugin file from plugins directory.
+ * @param string $plugin Path to the plugin file relative to the plugins directory.
  * @return string[] Array of editable file extensions.
  */
 function wp_get_plugin_file_editable_extensions( $plugin ) {
@@ -222,7 +222,7 @@ function wp_get_plugin_file_editable_extensions( $plugin ) {
 	 * @since 4.9.0 Added the `$plugin` parameter.
 	 *
 	 * @param string[] $editable_extensions An array of editable plugin file extensions.
-	 * @param string   $plugin              Path to the main plugin file from plugins directory.
+	 * @param string   $plugin              Path to the plugin file relative to the plugins directory.
 	 */
 	$editable_extensions = (array) apply_filters( 'editable_extensions', $editable_extensions, $plugin );
 
@@ -299,7 +299,7 @@ function wp_print_file_editor_templates() {
 				<p>
 					<?php
 					printf(
-						/* translators: %$1s is line number and %1$s is file path. */
+						/* translators: 1: line number, 2: file path */
 						__( 'Your PHP code changes were rolled back due to an error on line %1$s of file %2$s. Please fix and try saving again.' ),
 						'{{ data.line }}',
 						'{{ data.file }}'
@@ -342,7 +342,7 @@ function wp_print_file_editor_templates() {
  *     coming straight from `$_POST` and are not validated or sanitized in any way.
  *
  *     @type string $file       Relative path to file.
- *     @type string $plugin     Plugin being edited.
+ *     @type string $plugin     Path to the plugin file relative to the plugins directory.
  *     @type string $theme      Theme being edited.
  *     @type string $newcontent New content for the file.
  *     @type string $nonce      Nonce.
@@ -958,14 +958,15 @@ function wp_handle_sideload( &$file, $overrides = false, $time = null ) {
 
 
 /**
- * Downloads a URL to a local temporary file using the WordPress HTTP Class.
- * Please note, That the calling function must unlink() the file.
+ * Downloads a URL to a local temporary file using the WordPress HTTP API.
+ *
+ * Please note that the calling function must unlink() the file.
  *
  * @since 2.5.0
  *
- * @param string $url the URL of the file to download
- * @param int $timeout The timeout for the request to download the file default 300 seconds
- * @return mixed WP_Error on failure, string Filename on success.
+ * @param string $url  The URL of the file to download.
+ * @param int $timeout The timeout for the request to download the file. Default 300 seconds.
+ * @return string|WP_Error Filename on success, WP_Error on failure.
  */
 function download_url( $url, $timeout = 300 ) {
 	//WARNING: The file is not automatically deleted, The script must unlink() the file.
@@ -993,9 +994,32 @@ function download_url( $url, $timeout = 300 ) {
 		return $response;
 	}
 
-	if ( 200 != wp_remote_retrieve_response_code( $response ) ) {
+	$response_code = wp_remote_retrieve_response_code( $response );
+
+	if ( 200 != $response_code ) {
+		$data = array(
+			'code' => $response_code,
+		);
+
+		// Retrieve a sample of the response body for debugging purposes.
+		$tmpf = fopen( $tmpfname, 'rb' );
+		if ( $tmpf ) {
+			/**
+			 * Filters the maximum error response body size in `download_url()`.
+			 *
+			 * @since 5.0.0
+			 *
+			 * @see download_url()
+			 *
+			 * @param int $size The maximum error response body size. Default 1 KB.
+			 */
+			$response_size = apply_filters( 'download_url_error_max_body_size', KB_IN_BYTES );
+			$data['body']  = fread( $tmpf, $response_size );
+			fclose( $tmpf );
+		}
+
 		unlink( $tmpfname );
-		return new WP_Error( 'http_404', trim( wp_remote_retrieve_response_message( $response ) ) );
+		return new WP_Error( 'http_404', trim( wp_remote_retrieve_response_message( $response ) ), $data );
 	}
 
 	$content_md5 = wp_remote_retrieve_header( $response, 'content-md5' );
@@ -1015,9 +1039,11 @@ function download_url( $url, $timeout = 300 ) {
  *
  * @since 3.7.0
  *
- * @param string $filename The filename to check the MD5 of.
- * @param string $expected_md5 The expected MD5 of the file, either a base64 encoded raw md5, or a hex-encoded md5
- * @return bool|object WP_Error on failure, true on success, false when the MD5 format is unknown/unexpected
+ * @param string $filename     The filename to check the MD5 of.
+ * @param string $expected_md5 The expected MD5 of the file, either a base64-encoded raw md5,
+ *                             or a hex-encoded md5.
+ * @return bool|WP_Error True on success, false when the MD5 format is unknown/unexpected,
+ *                       WP_Error on failure.
  */
 function verify_file_md5( $filename, $expected_md5 ) {
 	if ( 32 == strlen( $expected_md5 ) ) {
@@ -1038,19 +1064,22 @@ function verify_file_md5( $filename, $expected_md5 ) {
 }
 
 /**
- * Unzips a specified ZIP file to a location on the Filesystem via the WordPress Filesystem Abstraction.
- * Assumes that WP_Filesystem() has already been called and set up. Does not extract a root-level __MACOSX directory, if present.
+ * Unzips a specified ZIP file to a location on the filesystem via the WordPress
+ * Filesystem Abstraction.
  *
- * Attempts to increase the PHP Memory limit to 256M before uncompressing,
- * However, The most memory required shouldn't be much larger than the Archive itself.
+ * Assumes that WP_Filesystem() has already been called and set up. Does not extract
+ * a root-level __MACOSX directory, if present.
+ *
+ * Attempts to increase the PHP memory limit to 256M before uncompressing. However,
+ * the most memory required shouldn't be much larger than the archive itself.
  *
  * @since 2.5.0
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
- * @param string $file Full path and filename of zip archive
- * @param string $to Full path on the filesystem to extract archive to
- * @return mixed WP_Error on failure, True on success
+ * @param string $file Full path and filename of ZIP archive.
+ * @param string $to   Full path on the filesystem to extract archive to.
+ * @return true|WP_Error True on success, WP_Error on failure.
  */
 function unzip_file( $file, $to ) {
 	global $wp_filesystem;
@@ -1108,19 +1137,22 @@ function unzip_file( $file, $to ) {
 }
 
 /**
- * This function should not be called directly, use unzip_file instead. Attempts to unzip an archive using the ZipArchive class.
+ * Attempts to unzip an archive using the ZipArchive class.
+ *
+ * This function should not be called directly, use `unzip_file()` instead.
+ *
  * Assumes that WP_Filesystem() has already been called and set up.
  *
  * @since 3.0.0
- * @see unzip_file
+ * @see unzip_file()
  * @access private
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
- * @param string $file Full path and filename of zip archive
- * @param string $to Full path on the filesystem to extract archive to
+ * @param string $file       Full path and filename of ZIP archive.
+ * @param string $to         Full path on the filesystem to extract archive to.
  * @param array $needed_dirs A partial list of required folders needed to be created.
- * @return mixed WP_Error on failure, True on success
+ * @return true|WP_Error True on success, WP_Error on failure.
  */
 function _unzip_file_ziparchive( $file, $to, $needed_dirs = array() ) {
 	global $wp_filesystem;
@@ -1232,19 +1264,22 @@ function _unzip_file_ziparchive( $file, $to, $needed_dirs = array() ) {
 }
 
 /**
- * This function should not be called directly, use unzip_file instead. Attempts to unzip an archive using the PclZip library.
+ * Attempts to unzip an archive using the PclZip library.
+ *
+ * This function should not be called directly, use `unzip_file()` instead.
+ *
  * Assumes that WP_Filesystem() has already been called and set up.
  *
  * @since 3.0.0
- * @see unzip_file
+ * @see unzip_file()
  * @access private
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
- * @param string $file Full path and filename of zip archive
- * @param string $to Full path on the filesystem to extract archive to
+ * @param string $file       Full path and filename of ZIP archive.
+ * @param string $to         Full path on the filesystem to extract archive to.
  * @param array $needed_dirs A partial list of required folders needed to be created.
- * @return mixed WP_Error on failure, True on success
+ * @return true|WP_Error True on success, WP_Error on failure.
  */
 function _unzip_file_pclzip( $file, $to, $needed_dirs = array() ) {
 	global $wp_filesystem;
@@ -1343,17 +1378,19 @@ function _unzip_file_pclzip( $file, $to, $needed_dirs = array() ) {
 }
 
 /**
- * Copies a directory from one location to another via the WordPress Filesystem Abstraction.
+ * Copies a directory from one location to another via the WordPress Filesystem
+ * Abstraction.
+ *
  * Assumes that WP_Filesystem() has already been called and setup.
  *
  * @since 2.5.0
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
- * @param string $from source directory
- * @param string $to destination directory
- * @param array $skip_list a list of files/folders to skip copying
- * @return mixed WP_Error on failure, True on success.
+ * @param string $from     Source directory.
+ * @param string $to       Destination directory.
+ * @param array $skip_list A list of files/folders to skip copying.
+ * @return true|WP_Error True on success, WP_Error on failure.
  */
 function copy_dir( $from, $to, $skip_list = array() ) {
 	global $wp_filesystem;
@@ -1402,6 +1439,7 @@ function copy_dir( $from, $to, $skip_list = array() ) {
 
 /**
  * Initialises and connects the WordPress Filesystem Abstraction classes.
+ *
  * This function will include the chosen transport and attempt connecting.
  *
  * Plugins may add extra transports, And force WordPress to use them by returning
@@ -1409,13 +1447,13 @@ function copy_dir( $from, $to, $skip_list = array() ) {
  *
  * @since 2.5.0
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
  * @param array|false  $args                         Optional. Connection args, These are passed directly to
  *                                                   the `WP_Filesystem_*()` classes. Default false.
  * @param string|false $context                      Optional. Context for get_filesystem_method(). Default false.
  * @param bool         $allow_relaxed_file_ownership Optional. Whether to allow Group/World writable. Default false.
- * @return null|bool false on failure, true on success.
+ * @return bool|null True on success, false on failure, null if the filesystem method class file does not exist.
  */
 function WP_Filesystem( $args = false, $context = false, $allow_relaxed_file_ownership = false ) {
 	global $wp_filesystem;
@@ -1598,7 +1636,7 @@ function get_filesystem_method( $args = array(), $context = '', $allow_relaxed_f
  *                                             the post. Default null.
  * @param bool   $allow_relaxed_file_ownership Optional. Whether to allow Group/World writable. Default false.
  *
- * @return bool False on failure, true on success.
+ * @return bool True on success, false on failure.
  */
 function request_filesystem_credentials( $form_post, $type = '', $error = false, $context = '', $extra_fields = null, $allow_relaxed_file_ownership = false ) {
 	global $pagenow;
@@ -1895,4 +1933,457 @@ function wp_print_request_filesystem_credentials_modal() {
 		</div>
 	</div>
 	<?php
+}
+
+/**
+ * Generate a single group for the personal data export report.
+ *
+ * @since 4.9.6
+ *
+ * @param array $group_data {
+ *     The group data to render.
+ *
+ *     @type string $group_label  The user-facing heading for the group, e.g. 'Comments'.
+ *     @type array  $items        {
+ *         An array of group items.
+ *
+ *         @type array  $group_item_data  {
+ *             An array of name-value pairs for the item.
+ *
+ *             @type string $name   The user-facing name of an item name-value pair, e.g. 'IP Address'.
+ *             @type string $value  The user-facing value of an item data pair, e.g. '50.60.70.0'.
+ *         }
+ *     }
+ * }
+ * @return string The HTML for this group and its items.
+ */
+function wp_privacy_generate_personal_data_export_group_html( $group_data ) {
+	$allowed_tags      = array(
+		'a' => array(
+			'href'   => array(),
+			'target' => array()
+		),
+		'br' => array()
+	);
+	$allowed_protocols = array( 'http', 'https' );
+	$group_html        = '';
+
+	$group_html .= '<h2>' . esc_html( $group_data['group_label'] ) . '</h2>';
+	$group_html .= '<div>';
+
+	foreach ( (array) $group_data['items'] as $group_item_id => $group_item_data ) {
+		$group_html .= '<table>';
+		$group_html .= '<tbody>';
+
+		foreach ( (array) $group_item_data as $group_item_datum ) {
+			$value = $group_item_datum['value'];
+			// If it looks like a link, make it a link
+			if ( false === strpos( $value, ' ' ) && ( 0 === strpos( $value, 'http://' ) || 0 === strpos( $value, 'https://' ) ) ) {
+				$value = '<a href="' . esc_url( $value ) . '">' . esc_html( $value ) . '</a>';
+			}
+
+			$group_html .= '<tr>';
+			$group_html .= '<th>' . esc_html( $group_item_datum['name'] ) . '</th>';
+			$group_html .= '<td>' . wp_kses( $value, $allowed_tags, $allowed_protocols ) . '</td>';
+			$group_html .= '</tr>';
+		}
+
+		$group_html .= '</tbody>';
+		$group_html .= '</table>';
+	}
+
+	$group_html .= '</div>';
+
+	return $group_html;
+}
+
+/**
+ * Generate the personal data export file.
+ *
+ * @since 4.9.6
+ *
+ * @param int $request_id The export request ID.
+ */
+function wp_privacy_generate_personal_data_export_file( $request_id ) {
+	if ( ! class_exists( 'ZipArchive' ) ) {
+		wp_send_json_error( __( 'Unable to generate export file. ZipArchive not available.' ) );
+	}
+
+	// Get the request data.
+	$request = wp_get_user_request_data( $request_id );
+
+	if ( ! $request || 'export_personal_data' !== $request->action_name ) {
+		wp_send_json_error( __( 'Invalid request ID when generating export file.' ) );
+	}
+
+	$email_address = $request->email;
+
+	if ( ! is_email( $email_address ) ) {
+		wp_send_json_error( __( 'Invalid email address when generating export file.' ) );
+	}
+
+	// Create the exports folder if needed.
+	$exports_dir = wp_privacy_exports_dir();
+	$exports_url = wp_privacy_exports_url();
+
+	if ( ! wp_mkdir_p( $exports_dir ) ) {
+		wp_send_json_error( __( 'Unable to create export folder.' ) );
+	}
+
+	// Protect export folder from browsing.
+	$index_pathname = $exports_dir . 'index.html';
+	if ( ! file_exists( $index_pathname ) ) {
+		$file = fopen( $index_pathname, 'w' );
+		if ( false === $file ) {
+			wp_send_json_error( __( 'Unable to protect export folder from browsing.' ) );
+		}
+		fwrite( $file, 'Silence is golden.' );
+		fclose( $file );
+	}
+
+	$stripped_email       = str_replace( '@', '-at-', $email_address );
+	$stripped_email       = sanitize_title( $stripped_email ); // slugify the email address
+	$obscura              = wp_generate_password( 32, false, false );
+	$file_basename        = 'wp-personal-data-file-' . $stripped_email . '-' . $obscura;
+	$html_report_filename = $file_basename . '.html';
+	$html_report_pathname = wp_normalize_path( $exports_dir . $html_report_filename );
+	$file = fopen( $html_report_pathname, 'w' );
+	if ( false === $file ) {
+		wp_send_json_error( __( 'Unable to open export file (HTML report) for writing.' ) );
+	}
+
+	$title = sprintf(
+		/* translators: %s: user's e-mail address */
+		__( 'Personal Data Export for %s' ),
+		$email_address
+	);
+
+	// Open HTML.
+	fwrite( $file, "<!DOCTYPE html>\n" );
+	fwrite( $file, "<html>\n" );
+
+	// Head.
+	fwrite( $file, "<head>\n" );
+	fwrite( $file, "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />\n" );
+	fwrite( $file, "<style type='text/css'>" );
+	fwrite( $file, "body { color: black; font-family: Arial, sans-serif; font-size: 11pt; margin: 15px auto; width: 860px; }" );
+	fwrite( $file, "table { background: #f0f0f0; border: 1px solid #ddd; margin-bottom: 20px; width: 100%; }" );
+	fwrite( $file, "th { padding: 5px; text-align: left; width: 20%; }" );
+	fwrite( $file, "td { padding: 5px; }" );
+	fwrite( $file, "tr:nth-child(odd) { background-color: #fafafa; }" );
+	fwrite( $file, "</style>" );
+	fwrite( $file, "<title>" );
+	fwrite( $file, esc_html( $title ) );
+	fwrite( $file, "</title>" );
+	fwrite( $file, "</head>\n" );
+
+	// Body.
+	fwrite( $file, "<body>\n" );
+
+	// Heading.
+	fwrite( $file, "<h1>" . esc_html__( 'Personal Data Export' ) . "</h1>" );
+
+	// And now, all the Groups.
+	$groups = get_post_meta( $request_id, '_export_data_grouped', true );
+
+	// First, build an "About" group on the fly for this report.
+	$about_group = array(
+		'group_label' => __( 'About' ),
+		'items'       => array(
+			'about-1' => array(
+				array(
+					'name'  => _x( 'Report generated for', 'email address' ),
+					'value' => $email_address,
+				),
+				array(
+					'name'  => _x( 'For site', 'website name' ),
+					'value' => get_bloginfo( 'name' ),
+				),
+				array(
+					'name'  => _x( 'At URL', 'website URL' ),
+					'value' => get_bloginfo( 'url' ),
+				),
+				array(
+					'name'  => _x( 'On', 'date/time' ),
+					'value' => current_time( 'mysql' ),
+				),
+			),
+		),
+	);
+
+	// Merge in the special about group.
+	$groups = array_merge( array( 'about' => $about_group ), $groups );
+
+	// Now, iterate over every group in $groups and have the formatter render it in HTML.
+	foreach ( (array) $groups as $group_id => $group_data ) {
+		fwrite( $file, wp_privacy_generate_personal_data_export_group_html( $group_data ) );
+	}
+
+	fwrite( $file, "</body>\n" );
+
+	// Close HTML.
+	fwrite( $file, "</html>\n" );
+	fclose( $file );
+
+	/*
+	 * Now, generate the ZIP.
+	 *
+	 * If an archive has already been generated, then remove it and reuse the
+	 * filename, to avoid breaking any URLs that may have been previously sent
+	 * via email.
+	 */
+	$error            = false;
+	$archive_url      = get_post_meta( $request_id, '_export_file_url', true );
+	$archive_pathname = get_post_meta( $request_id, '_export_file_path', true );
+
+	if ( empty( $archive_pathname ) || empty( $archive_url ) ) {
+		$archive_filename = $file_basename . '.zip';
+		$archive_pathname = $exports_dir . $archive_filename;
+		$archive_url      = $exports_url . $archive_filename;
+
+		update_post_meta( $request_id, '_export_file_url', $archive_url );
+		update_post_meta( $request_id, '_export_file_path', wp_normalize_path( $archive_pathname ) );
+	}
+
+	if ( ! empty( $archive_pathname ) && file_exists( $archive_pathname ) ) {
+		wp_delete_file( $archive_pathname );
+	}
+
+	$zip = new ZipArchive;
+	if ( true === $zip->open( $archive_pathname, ZipArchive::CREATE ) ) {
+		if ( ! $zip->addFile( $html_report_pathname, 'index.html' ) ) {
+			$error = __( 'Unable to add data to export file.' );
+		}
+
+		$zip->close();
+
+		if ( ! $error ) {
+			/**
+			 * Fires right after all personal data has been written to the export file.
+			 *
+			 * @since 4.9.6
+			 *
+			 * @param string $archive_pathname     The full path to the export file on the filesystem.
+			 * @param string $archive_url          The URL of the archive file.
+			 * @param string $html_report_pathname The full path to the personal data report on the filesystem.
+			 * @param int    $request_id           The export request ID.
+			 */
+			do_action( 'wp_privacy_personal_data_export_file_created', $archive_pathname, $archive_url, $html_report_pathname, $request_id );
+		}
+	} else {
+		$error = __( 'Unable to open export file (archive) for writing.' );
+	}
+
+	// And remove the HTML file.
+	unlink( $html_report_pathname );
+
+	if ( $error ) {
+		wp_send_json_error( $error );
+	}
+}
+
+/**
+ * Send an email to the user with a link to the personal data export file
+ *
+ * @since 4.9.6
+ *
+ * @param int $request_id The request ID for this personal data export.
+ * @return true|WP_Error True on success or `WP_Error` on failure.
+ */
+function wp_privacy_send_personal_data_export_email( $request_id ) {
+	// Get the request data.
+	$request = wp_get_user_request_data( $request_id );
+
+	if ( ! $request || 'export_personal_data' !== $request->action_name ) {
+		return new WP_Error( 'invalid', __( 'Invalid request ID when sending personal data export email.' ) );
+	}
+
+	/** This filter is documented in wp-includes/functions.php */
+	$expiration      = apply_filters( 'wp_privacy_export_expiration', 3 * DAY_IN_SECONDS );
+	$expiration_date = date_i18n( get_option( 'date_format' ), time() + $expiration );
+
+/* translators: Do not translate EXPIRATION, LINK, EMAIL, SITENAME, SITEURL: those are placeholders. */
+$email_text = __(
+'Howdy,
+
+Your request for an export of personal data has been completed. You may
+download your personal data by clicking on the link below. For privacy
+and security, we will automatically delete the file on ###EXPIRATION###,
+so please download it before then.
+
+###LINK###
+
+This email has been sent to ###EMAIL###.
+
+Regards,
+All at ###SITENAME###
+###SITEURL###'
+);
+
+	/**
+	 * Filters the text of the email sent with a personal data export file.
+	 *
+	 * The following strings have a special meaning and will get replaced dynamically:
+	 * ###EXPIRATION###         The date when the URL will be automatically deleted.
+	 * ###LINK###               URL of the personal data export file for the user.
+	 * ###EMAIL###              The email we are sending to.
+	 * ###SITENAME###           The name of the site.
+	 * ###SITEURL###            The URL to the site.
+	 *
+	 * @since 4.9.6
+	 *
+	 * @param string $email_text     Text in the email.
+	 * @param int    $request_id     The request ID for this personal data export.
+	 */
+	$content = apply_filters( 'wp_privacy_personal_data_email_content', $email_text, $request_id );
+
+	$email_address = $request->email;
+	$export_file_url = get_post_meta( $request_id, '_export_file_url', true );
+	$site_name = is_multisite() ? get_site_option( 'site_name' ) : get_option( 'blogname' );
+	$site_url = network_home_url();
+
+	$content = str_replace( '###EXPIRATION###', $expiration_date, $content );
+	$content = str_replace( '###LINK###', esc_url_raw( $export_file_url ), $content );
+	$content = str_replace( '###EMAIL###', $email_address, $content );
+	$content = str_replace( '###SITENAME###', wp_specialchars_decode( $site_name, ENT_QUOTES ), $content );
+	$content = str_replace( '###SITEURL###', esc_url_raw( $site_url ), $content );
+
+	$mail_success = wp_mail(
+		$email_address,
+		sprintf(
+			__( '[%s] Personal Data Export' ),
+			wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES )
+		),
+		$content
+	);
+
+	if ( ! $mail_success ) {
+		return new WP_Error( 'error', __( 'Unable to send personal data export email.' ) );
+	}
+
+	return true;
+}
+
+/**
+ * Intercept personal data exporter page ajax responses in order to assemble the personal data export file.
+ * @see wp_privacy_personal_data_export_page
+ * @since 4.9.6
+ *
+ * @param array  $response        The response from the personal data exporter for the given page.
+ * @param int    $exporter_index  The index of the personal data exporter. Begins at 1.
+ * @param string $email_address   The email address of the user whose personal data this is.
+ * @param int    $page            The page of personal data for this exporter. Begins at 1.
+ * @param int    $request_id      The request ID for this personal data export.
+ * @param bool   $send_as_email   Whether the final results of the export should be emailed to the user.
+ * @param string $exporter_key    The slug (key) of the exporter.
+ * @return array The filtered response.
+ */
+function wp_privacy_process_personal_data_export_page( $response, $exporter_index, $email_address, $page, $request_id, $send_as_email, $exporter_key ) {
+	/* Do some simple checks on the shape of the response from the exporter.
+	 * If the exporter response is malformed, don't attempt to consume it - let it
+	 * pass through to generate a warning to the user by default ajax processing.
+	 */
+	if ( ! is_array( $response ) ) {
+		return $response;
+	}
+
+	if ( ! array_key_exists( 'done', $response ) ) {
+		return $response;
+	}
+
+	if ( ! array_key_exists( 'data', $response ) ) {
+		return $response;
+	}
+
+	if ( ! is_array( $response['data'] ) ) {
+		return $response;
+	}
+
+	// Get the request data.
+	$request = wp_get_user_request_data( $request_id );
+
+	if ( ! $request || 'export_personal_data' !== $request->action_name ) {
+		wp_send_json_error( __( 'Invalid request ID when merging exporter data.' ) );
+	}
+
+	$export_data = array();
+
+	// First exporter, first page? Reset the report data accumulation array.
+	if ( 1 === $exporter_index && 1 === $page ) {
+		update_post_meta( $request_id, '_export_data_raw', $export_data );
+	} else {
+		$export_data = get_post_meta( $request_id, '_export_data_raw', true );
+	}
+
+	// Now, merge the data from the exporter response into the data we have accumulated already.
+	$export_data = array_merge( $export_data, $response['data'] );
+	update_post_meta( $request_id, '_export_data_raw', $export_data );
+
+	// If we are not yet on the last page of the last exporter, return now.
+	/** This filter is documented in wp-admin/includes/ajax-actions.php */
+	$exporters = apply_filters( 'wp_privacy_personal_data_exporters', array() );
+	$is_last_exporter = $exporter_index === count( $exporters );
+	$exporter_done = $response['done'];
+	if ( ! $is_last_exporter || ! $exporter_done ) {
+		return $response;
+	}
+
+	// Last exporter, last page - let's prepare the export file.
+
+	// First we need to re-organize the raw data hierarchically in groups and items.
+	$groups = array();
+	foreach ( (array) $export_data as $export_datum ) {
+		$group_id    = $export_datum['group_id'];
+		$group_label = $export_datum['group_label'];
+		if ( ! array_key_exists( $group_id, $groups ) ) {
+			$groups[ $group_id ] = array(
+				'group_label' => $group_label,
+				'items'       => array(),
+			);
+		}
+
+		$item_id = $export_datum['item_id'];
+		if ( ! array_key_exists( $item_id, $groups[ $group_id ]['items'] ) ) {
+			$groups[ $group_id ]['items'][ $item_id ] = array();
+		}
+
+		$old_item_data = $groups[ $group_id ]['items'][ $item_id ];
+		$merged_item_data = array_merge( $export_datum['data'], $old_item_data );
+		$groups[ $group_id ]['items'][ $item_id ] = $merged_item_data;
+	}
+
+	// Then save the grouped data into the request.
+	delete_post_meta( $request_id, '_export_data_raw' );
+	update_post_meta( $request_id, '_export_data_grouped', $groups );
+
+	/**
+	 * Generate the export file from the collected, grouped personal data.
+	 *
+	 * @since 4.9.6
+	 *
+	 * @param int $request_id The export request ID.
+	 */
+	do_action( 'wp_privacy_personal_data_export_file', $request_id );
+
+	// Clear the grouped data now that it is no longer needed.
+	delete_post_meta( $request_id, '_export_data_grouped' );
+
+	// If the destination is email, send it now.
+	if ( $send_as_email ) {
+		$mail_success = wp_privacy_send_personal_data_export_email( $request_id );
+		if ( is_wp_error( $mail_success ) ) {
+			wp_send_json_error( $mail_success->get_error_message() );
+		}
+	} else {
+		// Modify the response to include the URL of the export file so the browser can fetch it.
+		$export_file_url = get_post_meta( $request_id, '_export_file_url', true );
+		if ( ! empty( $export_file_url ) ) {
+			$response['url'] = $export_file_url;
+		}
+	}
+
+	// Update the request to completed state.
+	_wp_privacy_completed_request( $request_id );
+
+	return $response;
 }

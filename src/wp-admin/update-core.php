@@ -138,15 +138,14 @@ function dismissed_updates() {
 		$hide_text = esc_js( __( 'Hide hidden updates' ) );
 	?>
 	<script type="text/javascript">
-
-		jQuery(function($) {
-			$('dismissed-updates').show();
-			$('#show-dismissed').toggle(function(){$(this).text('<?php echo $hide_text; ?>');}, function() {$(this).text('<?php echo $show_text; ?>')});
-			$('#show-dismissed').click(function() { $('#dismissed-updates').toggle('slow');});
+		jQuery(function( $ ) {
+			$( 'dismissed-updates' ).show();
+			$( '#show-dismissed' ).toggle( function() { $( this ).text( '<?php echo $hide_text; ?>' ).attr( 'aria-expanded', 'true' ); }, function() { $( this ).text( '<?php echo $show_text; ?>' ).attr( 'aria-expanded', 'false' ); } );
+			$( '#show-dismissed' ).click( function() { $( '#dismissed-updates' ).toggle( 'fast' ); } );
 		});
 	</script>
 	<?php
-		echo '<p class="hide-if-no-js"><a id="show-dismissed" href="#">' . __( 'Show hidden updates' ) . '</a></p>';
+		echo '<p class="hide-if-no-js"><button type="button" class="button" id="show-dismissed" aria-expanded="false">' . __( 'Show hidden updates' ) . '</button></p>';
 		echo '<ul id="dismissed-updates" class="core-updates dismissed">';
 	foreach ( (array) $dismissed as $update ) {
 		echo '<li>';
@@ -266,7 +265,7 @@ foreach ( (array) $plugins as $plugin_file => $plugin_data ) {
 	$plugin_data = (object) _get_plugin_data_markup_translate( $plugin_file, (array) $plugin_data, false, true );
 
 	$icon            = '<span class="dashicons dashicons-admin-plugins"></span>';
-	$preferred_icons = array( 'svg', '1x', '2x', 'default' );
+	$preferred_icons = array( 'svg', '2x', '1x', 'default' );
 	foreach ( $preferred_icons as $preferred_icon ) {
 		if ( ! empty( $plugin_data->update->icons[ $preferred_icon ] ) ) {
 			$icon = '<img src="' . esc_url( $plugin_data->update->icons[ $preferred_icon ] ) . '" alt="" />';
@@ -455,7 +454,7 @@ function list_translation_updates() {
  *
  * @since 2.7.0
  *
- * @global WP_Filesystem_Base $wp_filesystem Subclass
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  *
  * @param bool $reinstall
  */
@@ -642,7 +641,7 @@ if ( 'upgrade-core' == $action ) {
 	}
 
 	echo '<p>';
-	/* translators: %1 date, %2 time. */
+	/* translators: 1: date, 2: time */
 	printf( __( 'Last checked on %1$s at %2$s.' ), date_i18n( __( 'F j, Y' ), $last_update_check ), date_i18n( __( 'g:i a' ), $last_update_check ) );
 	echo ' &nbsp; <a class="button" href="' . esc_url( self_admin_url( 'update-core.php?force-check=1' ) ) . '">' . __( 'Check Again' ) . '</a>';
 	echo '</p>';

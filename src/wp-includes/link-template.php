@@ -1682,6 +1682,18 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 	$where    = '';
 	$adjacent = $previous ? 'previous' : 'next';
 
+	/**
+	 * Filters the IDs of terms excluded from adjacent post queries.
+	 *
+	 * The dynamic portion of the hook name, `$adjacent`, refers to the type
+	 * of adjacency, 'next' or 'previous'.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string $excluded_terms Array of excluded term IDs.
+	 */
+	$excluded_terms = apply_filters( "get_{$adjacent}_post_excluded_terms", $excluded_terms );
+
 	if ( $in_same_term || ! empty( $excluded_terms ) ) {
 		if ( ! empty( $excluded_terms ) && ! is_array( $excluded_terms ) ) {
 			// back-compat, $excluded_terms used to be $excluded_terms with IDs separated by " and "
@@ -1714,18 +1726,6 @@ function get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previo
 
 			$where .= ' AND tt.term_id IN (' . implode( ',', $term_array ) . ')';
 		}
-
-		/**
-		 * Filters the IDs of terms excluded from adjacent post queries.
-		 *
-		 * The dynamic portion of the hook name, `$adjacent`, refers to the type
-		 * of adjacency, 'next' or 'previous'.
-		 *
-		 * @since 4.4.0
-		 *
-		 * @param string $excluded_terms Array of excluded term IDs.
-		 */
-		$excluded_terms = apply_filters( "get_{$adjacent}_post_excluded_terms", $excluded_terms );
 
 		if ( ! empty( $excluded_terms ) ) {
 			$where .= " AND p.ID NOT IN ( SELECT tr.object_id FROM $wpdb->term_relationships tr LEFT JOIN $wpdb->term_taxonomy tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id) WHERE tt.term_id IN (" . implode( ',', array_map( 'intval', $excluded_terms ) ) . ') )';
@@ -4272,4 +4272,85 @@ function get_parent_theme_file_path( $file = '' ) {
 	 * @param string $file The requested file to search for.
 	 */
 	return apply_filters( 'parent_theme_file_path', $path, $file );
+}
+
+/**
+ * Retrieves the URL to the privacy policy page.
+ *
+ * @since 4.9.6
+ *
+ * @return string The URL to the privacy policy page. Empty string if it doesn't exist.
+ */
+function get_privacy_policy_url() {
+	$url            = '';
+	$policy_page_id = (int) get_option( 'wp_page_for_privacy_policy' );
+
+	if ( ! empty( $policy_page_id ) && get_post_status( $policy_page_id ) === 'publish' ) {
+		$url = (string) get_permalink( $policy_page_id );
+	}
+
+	/**
+	 * Filters the URL of the privacy policy page.
+	 *
+	 * @since 4.9.6
+	 *
+	 * @param string $url            The URL to the privacy policy page. Empty string
+	 *                               if it doesn't exist.
+	 * @param int    $policy_page_id The ID of privacy policy page.
+	 */
+	return apply_filters( 'privacy_policy_url', $url, $policy_page_id );
+}
+
+/**
+ * Displays the privacy policy link with formatting, when applicable.
+ *
+ * @since 4.9.6
+ *
+ * @param string $before Optional. Display before privacy policy link. Default empty.
+ * @param string $after  Optional. Display after privacy policy link. Default empty.
+ */
+function the_privacy_policy_link( $before = '', $after = '' ) {
+	echo get_the_privacy_policy_link( $before, $after );
+}
+
+/**
+ * Returns the privacy policy link with formatting, when applicable.
+ *
+ * @since 4.9.6
+ *
+ * @param string $before Optional. Display before privacy policy link. Default empty.
+ * @param string $after  Optional. Display after privacy policy link. Default empty.
+ *
+ * @return string Markup for the link and surrounding elements. Empty string if it
+ *                doesn't exist.
+ */
+function get_the_privacy_policy_link( $before = '', $after = '' ) {
+	$link               = '';
+	$privacy_policy_url = get_privacy_policy_url();
+
+	if ( $privacy_policy_url ) {
+		$link = sprintf(
+			'<a class="privacy-policy-link" href="%s">%s</a>',
+			esc_url( $privacy_policy_url ),
+			__( 'Privacy Policy' )
+		);
+	}
+
+	/**
+	 * Filters the privacy policy link.
+	 *
+	 * @since 4.9.6
+	 *
+	 * @param string $link               The privacy policy link. Empty string if it
+	 *                                   doesn't exist.
+	 * @param string $privacy_policy_url The URL of the privacy policy. Empty string
+	 *                                   if it doesn't exist.
+	 */
+	$link = apply_filters( 'the_privacy_policy_link', $link, $privacy_policy_url );
+
+	if ( $link ) {
+		return $before . $link . $after;
+	}
+
+	return '';
 }

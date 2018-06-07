@@ -307,6 +307,52 @@ As a new WordPress user, you should go to <a href=\"%s\">your dashboard</a> to d
 			)
 		);
 
+		// Privacy Policy page
+		if ( is_multisite() ) {
+			// Disable by default unless the suggested content is provided.
+			$privacy_policy_content = get_site_option( 'default_privacy_policy_content' );
+		} else {
+			if ( ! class_exists( 'WP_Privacy_Policy_Content' ) ) {
+				include_once( ABSPATH . 'wp-admin/includes/misc.php' );
+			}
+
+			$privacy_policy_content = WP_Privacy_Policy_Content::get_default_content();
+		}
+
+		if ( ! empty( $privacy_policy_content ) ) {
+			$privacy_policy_guid = get_option( 'home' ) . '/?page_id=3';
+
+			$wpdb->insert(
+				$wpdb->posts, array(
+					'post_author'           => $user_id,
+					'post_date'             => $now,
+					'post_date_gmt'         => $now_gmt,
+					'post_content'          => $privacy_policy_content,
+					'post_excerpt'          => '',
+					'comment_status'        => 'closed',
+					'post_title'            => __( 'Privacy Policy' ),
+					/* translators: Privacy Policy page slug */
+					'post_name'             => __( 'privacy-policy' ),
+					'post_modified'         => $now,
+					'post_modified_gmt'     => $now_gmt,
+					'guid'                  => $privacy_policy_guid,
+					'post_type'             => 'page',
+					'post_status'           => 'draft',
+					'to_ping'               => '',
+					'pinged'                => '',
+					'post_content_filtered' => '',
+				)
+			);
+			$wpdb->insert(
+				$wpdb->postmeta, array(
+					'post_id'    => 3,
+					'meta_key'   => '_wp_page_template',
+					'meta_value' => 'default',
+				)
+			);
+			update_option( 'wp_page_for_privacy_policy', 3 );
+		}
+
 		// Set up default widgets for default theme.
 		update_option(
 			'widget_search', array(
@@ -2133,6 +2179,13 @@ function upgrade_network() {
 			}
 		}
 	}
+
+	// 5.0
+	if ( $wp_current_db_version < 42836 ) {
+		$network_id = get_main_network_id();
+		delete_network_option( $network_id, 'site_meta_supported' );
+		is_site_meta_supported();
+	}
 }
 
 //
@@ -2386,11 +2439,11 @@ function deslash( $content ) {
  *
  * @global wpdb  $wpdb
  *
- * @param string|array $queries Optional. The query to run. Can be multiple queries
- *                              in an array, or a string of queries separated by
- *                              semicolons. Default empty.
- * @param bool         $execute Optional. Whether or not to execute the query right away.
- *                              Default true.
+ * @param string[]|string $queries Optional. The query to run. Can be multiple queries
+ *                                 in an array, or a string of queries separated by
+ *                                 semicolons. Default empty string.
+ * @param bool            $execute Optional. Whether or not to execute the query right away.
+ *                                 Default true.
  * @return array Strings containing the results of the various update queries.
  */
 function dbDelta( $queries = '', $execute = true ) {
@@ -2411,7 +2464,7 @@ function dbDelta( $queries = '', $execute = true ) {
 	 *
 	 * @since 3.3.0
 	 *
-	 * @param array $queries An array of dbDelta SQL queries.
+	 * @param string[] $queries An array of dbDelta SQL queries.
 	 */
 	$queries = apply_filters( 'dbdelta_queries', $queries );
 
@@ -2442,7 +2495,7 @@ function dbDelta( $queries = '', $execute = true ) {
 	 *
 	 * @since 3.3.0
 	 *
-	 * @param array $cqueries An array of dbDelta create SQL queries.
+	 * @param string[] $cqueries An array of dbDelta create SQL queries.
 	 */
 	$cqueries = apply_filters( 'dbdelta_create_queries', $cqueries );
 
@@ -2453,7 +2506,7 @@ function dbDelta( $queries = '', $execute = true ) {
 	 *
 	 * @since 3.3.0
 	 *
-	 * @param array $iqueries An array of dbDelta insert or update SQL queries.
+	 * @param string[] $iqueries An array of dbDelta insert or update SQL queries.
 	 */
 	$iqueries = apply_filters( 'dbdelta_insert_queries', $iqueries );
 

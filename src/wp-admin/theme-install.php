@@ -143,7 +143,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $tabs The tabs shown on the Add Themes screen. Default is 'upload'.
+	 * @param string[] $tabs Associative array of the tabs shown on the Add Themes screen. Default is 'upload'.
 	 */
 	$tabs = apply_filters( 'install_themes_tabs', array( 'upload' => __( 'Upload Theme' ) ) );
 	if ( ! empty( $tabs['upload'] ) && current_user_can( 'upload_themes' ) ) {
@@ -309,8 +309,8 @@ if ( $tab ) {
 	<div class="wp-full-overlay-sidebar">
 		<div class="wp-full-overlay-header">
 			<button class="close-full-overlay"><span class="screen-reader-text"><?php _e( 'Close' ); ?></span></button>
-			<button class="previous-theme"><span class="screen-reader-text"><?php _ex( 'Previous', 'Button label for a theme' ); ?></span></button>
-			<button class="next-theme"><span class="screen-reader-text"><?php _ex( 'Next', 'Button label for a theme' ); ?></span></button>
+			<button class="previous-theme"><span class="screen-reader-text"><?php _e( 'Previous theme' ); ?></span></button>
+			<button class="next-theme"><span class="screen-reader-text"><?php _e( 'Next theme' ); ?></span></button>
 			<# if ( data.installed ) { #>
 				<a class="button button-primary activate" href="{{ data.activate_url }}"><?php _e( 'Activate' ); ?></a>
 			<# } else { #>

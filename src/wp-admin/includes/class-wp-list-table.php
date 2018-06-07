@@ -396,7 +396,7 @@ class WP_List_Table {
 		 *
 		 * @since 3.5.0
 		 *
-		 * @param array $views An array of available list table views.
+		 * @param string[] $views An array of available list table views.
 		 */
 		$views = apply_filters( "views_{$this->screen->id}", $views );
 
@@ -447,7 +447,7 @@ class WP_List_Table {
 			 *
 			 * @since 3.5.0
 			 *
-			 * @param array $actions An array of the available bulk actions.
+			 * @param string[] $actions An array of the available bulk actions.
 			 */
 			$this->_actions = apply_filters( "bulk_actions-{$this->screen->id}", $this->_actions );
 			$two            = '';
@@ -503,8 +503,8 @@ class WP_List_Table {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param array $actions The list of actions
-	 * @param bool $always_visible Whether the actions should be always visible
+	 * @param string[] $actions        An array of action links.
+	 * @param bool     $always_visible Whether the actions should be always visible.
 	 * @return string
 	 */
 	protected function row_actions( $actions, $always_visible = false ) {
@@ -817,10 +817,10 @@ foreach ( $this->modes as $mode => $title ) {
 		}
 
 		if ( $disable_first ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&laquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&laquo;</span>';
 		} else {
 			$page_links[] = sprintf(
-				"<a class='first-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				"<a class='first-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
 				esc_url( remove_query_arg( 'paged', $current_url ) ),
 				__( 'First page' ),
 				'&laquo;'
@@ -828,10 +828,10 @@ foreach ( $this->modes as $mode => $title ) {
 		}
 
 		if ( $disable_prev ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&lsaquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&lsaquo;</span>';
 		} else {
 			$page_links[] = sprintf(
-				"<a class='prev-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				"<a class='prev-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
 				esc_url( add_query_arg( 'paged', max( 1, $current - 1 ), $current_url ) ),
 				__( 'Previous page' ),
 				'&lsaquo;'
@@ -853,10 +853,10 @@ foreach ( $this->modes as $mode => $title ) {
 		$page_links[]     = $total_pages_before . sprintf( _x( '%1$s of %2$s', 'paging' ), $html_current_page, $html_total_pages ) . $total_pages_after;
 
 		if ( $disable_next ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&rsaquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&rsaquo;</span>';
 		} else {
 			$page_links[] = sprintf(
-				"<a class='next-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				"<a class='next-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
 				esc_url( add_query_arg( 'paged', min( $total_pages, $current + 1 ), $current_url ) ),
 				__( 'Next page' ),
 				'&rsaquo;'
@@ -864,10 +864,10 @@ foreach ( $this->modes as $mode => $title ) {
 		}
 
 		if ( $disable_last ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&raquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan button disabled" aria-hidden="true">&raquo;</span>';
 		} else {
 			$page_links[] = sprintf(
-				"<a class='last-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				"<a class='last-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
 				esc_url( add_query_arg( 'paged', $total_pages, $current_url ) ),
 				__( 'Last page' ),
 				'&raquo;'

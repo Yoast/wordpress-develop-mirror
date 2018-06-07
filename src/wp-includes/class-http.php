@@ -105,7 +105,8 @@ class WP_Http {
 	 * @param string|array $args {
 	 *     Optional. Array or string of HTTP request arguments.
 	 *
-	 *     @type string       $method              Request method. Accepts 'GET', 'POST', 'HEAD', or 'PUT'.
+	 *     @type string       $method              Request method. Accepts 'GET', 'POST', 'HEAD', 'PUT', 'DELETE',
+	 *                                             'TRACE', 'OPTIONS', or 'PATCH'.
 	 *                                             Some transports technically allow others, but should not be
 	 *                                             assumed. Default 'GET'.
 	 *     @type int          $timeout             How long the connection should stay open in seconds. Default 5.
@@ -440,7 +441,7 @@ class WP_Http {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @param array $cookies List of cookies to send with the request.
+	 * @param array $cookies Array of cookies to send with the request.
 	 * @return Requests_Cookie_Jar Cookie holder object.
 	 */
 	public static function normalize_cookies( $cookies ) {

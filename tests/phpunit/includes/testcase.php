@@ -328,7 +328,7 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 			$wp_object_cache->__remoteset();
 		}
 		wp_cache_flush();
-		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites', 'site-details' ) );
+		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites', 'site-details', 'blog_meta' ) );
 		wp_cache_add_non_persistent_groups( array( 'comment', 'counts', 'plugins' ) );
 	}
 
@@ -654,11 +654,20 @@ class WP_UnitTestCase extends PHPUnit_Framework_TestCase {
 
 		$annotations = $this->getAnnotations();
 
-		if ( ! empty( $annotations['group'] ) ) {
-			if ( in_array( 'ms-required', $annotations['group'], true ) ) {
+		$groups = array();
+		if ( ! empty( $annotations['class']['group'] ) ) {
+			$groups = array_merge( $groups, $annotations['class']['group'] );
+		}
+		if ( ! empty( $annotations['method']['group'] ) ) {
+			$groups = array_merge( $groups, $annotations['method']['group'] );
+		}
+
+		if ( ! empty( $groups ) ) {
+			if ( in_array( 'ms-required', $groups, true ) ) {
 				$this->skipWithoutMultisite();
 			}
-			if ( in_array( 'ms-excluded', $annotations['group'], true ) ) {
+
+			if ( in_array( 'ms-excluded', $groups, true ) ) {
 				$this->skipWithMultisite();
 			}
 		}

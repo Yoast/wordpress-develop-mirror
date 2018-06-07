@@ -121,8 +121,8 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 		 *
 		 * @since 2.7.0
 		 *
-		 * @param array $tabs The tabs shown on the Plugin Install screen. Defaults include 'featured', 'popular',
-		 *                    'recommended', 'favorites', and 'upload'.
+		 * @param string[] $tabs The tabs shown on the Plugin Install screen. Defaults include 'featured', 'popular',
+		 *                      'recommended', 'favorites', and 'upload'.
 		 */
 		$tabs = apply_filters( 'install_plugins_tabs', $tabs );
 
@@ -131,7 +131,7 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 		 *
 		 * @since 2.7.0
 		 *
-		 * @param array $nonmenu_tabs The tabs that don't have a Menu item on the Plugin Install screen.
+		 * @param string[] $nonmenu_tabs The tabs that don't have a menu item on the Plugin Install screen.
 		 */
 		$nonmenu_tabs = apply_filters( 'install_plugins_nonmenu_tabs', $nonmenu_tabs );
 
@@ -504,25 +504,43 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 				switch ( $status['status'] ) {
 					case 'install':
 						if ( $status['url'] ) {
-							/* translators: 1: Plugin name and version. */
-							$action_links[] = '<a class="install-now button" data-slug="' . esc_attr( $plugin['slug'] ) . '" href="' . esc_url( $status['url'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Install %s now' ), $name ) ) . '" data-name="' . esc_attr( $name ) . '">' . __( 'Install Now' ) . '</a>';
+							$action_links[] = sprintf(
+								'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+								esc_attr( $plugin['slug'] ),
+								esc_url( $status['url'] ),
+								/* translators: %s: plugin name and version */
+								esc_attr( sprintf( __( 'Install %s now' ), $name ) ),
+								esc_attr( $name ),
+								__( 'Install Now' )
+							);
 						}
 						break;
 
 					case 'update_available':
 						if ( $status['url'] ) {
-							/* translators: 1: Plugin name and version */
-							$action_links[] = '<a class="update-now button aria-button-if-js" data-plugin="' . esc_attr( $status['file'] ) . '" data-slug="' . esc_attr( $plugin['slug'] ) . '" href="' . esc_url( $status['url'] ) . '" aria-label="' . esc_attr( sprintf( __( 'Update %s now' ), $name ) ) . '" data-name="' . esc_attr( $name ) . '">' . __( 'Update Now' ) . '</a>';
+							$action_links[] = sprintf(
+								'<a class="update-now button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+								esc_attr( $status['file'] ),
+								esc_attr( $plugin['slug'] ),
+								esc_url( $status['url'] ),
+								/* translators: %s: plugin name and version */
+								esc_attr( sprintf( __( 'Update %s now' ), $name ) ),
+								esc_attr( $name ),
+								__( 'Update Now' )
+							);
 						}
 						break;
 
 					case 'latest_installed':
 					case 'newer_installed':
 						if ( is_plugin_active( $status['file'] ) ) {
-							$action_links[] = '<button type="button" class="button button-disabled" disabled="disabled">' . _x( 'Active', 'plugin' ) . '</button>';
+							$action_links[] = sprintf(
+								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+								_x( 'Active', 'plugin' )
+							);
 						} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
 							$button_text = __( 'Activate' );
-							/* translators: %s: Plugin name */
+							/* translators: %s: plugin name */
 							$button_label = _x( 'Activate %s', 'plugin' );
 							$activate_url = add_query_arg(
 								array(
@@ -534,7 +552,7 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 
 							if ( is_network_admin() ) {
 								$button_text = __( 'Network Activate' );
-								/* translators: %s: Plugin name */
+								/* translators: %s: plugin name */
 								$button_label = _x( 'Network Activate %s', 'plugin' );
 								$activate_url = add_query_arg( array( 'networkwide' => 1 ), $activate_url );
 							}
@@ -546,7 +564,10 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 								$button_text
 							);
 						} else {
-							$action_links[] = '<button type="button" class="button button-disabled" disabled="disabled">' . _x( 'Installed', 'plugin' ) . '</button>';
+							$action_links[] = sprintf(
+								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+								_x( 'Installed', 'plugin' )
+							);
 						}
 						break;
 				}
@@ -557,8 +578,14 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 				'&amp;TB_iframe=true&amp;width=600&amp;height=550'
 			);
 
-			/* translators: 1: Plugin name and version. */
-			$action_links[] = '<a href="' . esc_url( $details_link ) . '" class="thickbox open-plugin-details-modal" aria-label="' . esc_attr( sprintf( __( 'More information about %s' ), $name ) ) . '" data-title="' . esc_attr( $name ) . '">' . __( 'More Details' ) . '</a>';
+			$action_links[] = sprintf(
+				'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+				esc_url( $details_link ),
+				/* translators: %s: plugin name and version */
+				esc_attr( sprintf( __( 'More information about %s' ), $name ) ),
+				esc_attr( $name ),
+				__( 'More Details' )
+			);
 
 			if ( ! empty( $plugin['icons']['svg'] ) ) {
 				$plugin_icon_url = $plugin['icons']['svg'];
@@ -575,8 +602,8 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 			 *
 			 * @since 2.7.0
 			 *
-			 * @param array $action_links An array of plugin action hyperlinks. Defaults are links to Details and Install Now.
-			 * @param array $plugin       The plugin currently being listed.
+			 * @param string[] $action_links An array of plugin action links. Defaults are links to Details and Install Now.
+			 * @param array    $plugin       The plugin currently being listed.
 			 */
 			$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin );
 
@@ -623,7 +650,11 @@ class WP_Plugin_Install_List_Table extends WP_List_Table {
 				<div class="column-downloaded">
 					<?php
 					if ( $plugin['active_installs'] >= 1000000 ) {
-						$active_installs_text = _x( '1+ Million', 'Active plugin installations' );
+						$active_installs_millions = floor( $plugin['active_installs'] / 1000000 );
+						$active_installs_text = sprintf(
+							_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations' ),
+							number_format_i18n( $active_installs_millions )
+						);
 					} elseif ( 0 == $plugin['active_installs'] ) {
 						$active_installs_text = _x( 'Less Than 10', 'Active plugin installations' );
 					} else {

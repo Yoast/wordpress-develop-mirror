@@ -173,7 +173,7 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param array $directories                  Optional. A list of directories. If any of these do
 	 *                                            not exist, a WP_Error object will be returned.
@@ -289,7 +289,7 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param string $package        Full path to the package file.
 	 * @param bool   $delete_package Optional. Whether to delete the package file after attempting
@@ -371,7 +371,7 @@ class WP_Upgrader {
 	 *
 	 * @since 4.3.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param string $remote_destination The location on the remote filesystem to be cleared
 	 * @return bool|WP_Error True upon success, WP_Error on failure.
@@ -423,7 +423,7 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem        WordPress filesystem subclass.
 	 * @global array              $wp_theme_directories
 	 *
 	 * @param array|string $args {
@@ -691,7 +691,7 @@ class WP_Upgrader {
 		 *         @type string $action               Type of action. Default 'update'.
 		 *         @type string $type                 Type of update process. Accepts 'plugin', 'theme', or 'core'.
 		 *         @type bool   $bulk                 Whether the update process is a bulk update. Default true.
-		 *         @type string $plugin               The base plugin path from the plugins directory.
+		 *         @type string $plugin               Path to the plugin file relative to the plugins directory.
 		 *         @type string $theme                The stylesheet or template name of the theme.
 		 *         @type string $language_update_type The language pack update type. Accepts 'plugin', 'theme',
 		 *                                            or 'core'.

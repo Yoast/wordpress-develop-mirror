@@ -121,6 +121,15 @@ function map_meta_cap( $cap, $user_id ) {
 					$caps[] = $post_type->cap->delete_private_posts;
 				}
 			}
+
+			/*
+			 * Setting the privacy policy page requires `manage_privacy_options`,
+			 * so deleting it should require that too.
+			 */
+			if ( (int) get_option( 'wp_page_for_privacy_policy' ) === $post->ID ) {
+				$caps = array_merge( $caps, map_meta_cap( 'manage_privacy_options', $user_id ) );
+			}
+
 			break;
 		// edit_post breaks down to edit_posts, edit_published_posts, or
 		// edit_others_posts
@@ -183,6 +192,15 @@ function map_meta_cap( $cap, $user_id ) {
 					$caps[] = $post_type->cap->edit_private_posts;
 				}
 			}
+
+			/*
+			 * Setting the privacy policy page requires `manage_privacy_options`,
+			 * so editing it should require that too.
+			 */
+			if ( (int) get_option( 'wp_page_for_privacy_policy' ) === $post->ID ) {
+				$caps = array_merge( $caps, map_meta_cap( 'manage_privacy_options', $user_id ) );
+			}
+
 			break;
 		case 'read_post':
 		case 'read_page':
@@ -314,45 +332,43 @@ function map_meta_cap( $cap, $user_id ) {
 			if ( $meta_key && $has_filter ) {
 
 				/**
-				 * Filters whether the user is allowed to edit meta.
+				 * Filters whether the user is allowed to edit meta for specific object types.
 				 *
-				 * Use the {@see auth_post_$object_type_meta_$meta_key} filter to modify capabilities for
-				 * specific object types. Return true to have the mapped meta caps from edit_{$object_type} apply.
+				 * Return true to have the mapped meta caps from `edit_{$object_type}` apply.
 				 *
 				 * The dynamic portion of the hook name, `$object_type` refers to the object type being filtered.
 				 * The dynamic portion of the hook name, `$meta_key`, refers to the meta key passed to map_meta_cap().
 				 *
-				 * @since 3.3.0 As 'auth_post_meta_{$meta_key}'.
+				 * @since 3.3.0 As `auth_post_meta_{$meta_key}`.
 				 * @since 4.6.0
 				 *
-				 * @param bool   $allowed  Whether the user can add the post meta. Default false.
-				 * @param string $meta_key The meta key.
-				 * @param int    $post_id  Post ID.
-				 * @param int    $user_id  User ID.
-				 * @param string $cap      Capability name.
-				 * @param array  $caps     User capabilities.
+				 * @param bool     $allowed   Whether the user can add the object meta. Default false.
+				 * @param string   $meta_key  The meta key.
+				 * @param int      $object_id Object ID.
+				 * @param int      $user_id   User ID.
+				 * @param string   $cap       Capability name.
+				 * @param string[] $caps      Array of the user's capabilities.
 				 */
 				$allowed = apply_filters( "auth_{$object_type}_meta_{$meta_key}", false, $meta_key, $object_id, $user_id, $cap, $caps );
 
 				/**
-				 * Filters whether the user is allowed to add post meta to a post of a given type.
+				 * Filters whether the user is allowed to edit meta for specific object types/subtypes.
 				 *
-				 * Use the {@see auth_$object_type_$sub_type_meta_$meta_key} filter to modify capabilities for
-				 * specific object types/subtypes. Return true to have the mapped meta caps from edit_{$object_type} apply.
+				 * Return true to have the mapped meta caps from `edit_{$object_type}` apply.
 				 *
 				 * The dynamic portion of the hook name, `$object_type` refers to the object type being filtered.
 				 * The dynamic portion of the hook name, `$sub_type` refers to the object subtype being filtered.
 				 * The dynamic portion of the hook name, `$meta_key`, refers to the meta key passed to map_meta_cap().
 				 *
-				 * @since 4.6.0 As 'auth_post_{$post_type}_meta_{$meta_key}'.
+				 * @since 4.6.0 As `auth_post_{$post_type}_meta_{$meta_key}`.
 				 * @since 4.7.0
 				 *
-				 * @param bool   $allowed  Whether the user can add the post meta. Default false.
-				 * @param string $meta_key The meta key.
-				 * @param int    $post_id  Post ID.
-				 * @param int    $user_id  User ID.
-				 * @param string $cap      Capability name.
-				 * @param array  $caps     User capabilities.
+				 * @param bool     $allowed   Whether the user can add the object meta. Default false.
+				 * @param string   $meta_key  The meta key.
+				 * @param int      $object_id Object ID.
+				 * @param int      $user_id   User ID.
+				 * @param string   $cap       Capability name.
+				 * @param string[] $caps      Array of the user's capabilities.
 				 */
 				$allowed = apply_filters( "auth_{$object_type}_{$sub_type}_meta_{$meta_key}", $allowed, $meta_key, $object_id, $user_id, $cap, $caps );
 
@@ -550,6 +566,18 @@ function map_meta_cap( $cap, $user_id ) {
 				$caps[] = 'manage_options';
 			}
 			break;
+		case 'upgrade_php':
+			if ( is_multisite() && ! is_super_admin( $user_id ) ) {
+				$caps[] = 'do_not_allow';
+			} else {
+				$caps[] = 'update_core';
+			}
+			break;
+		case 'export_others_personal_data':
+		case 'erase_others_personal_data':
+		case 'manage_privacy_options':
+			$caps[] = is_multisite() ? 'manage_network' : 'manage_options';
+			break;
 		default:
 			// Handle meta capabilities for custom post types.
 			global $post_type_meta_caps;
@@ -567,10 +595,10 @@ function map_meta_cap( $cap, $user_id ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array  $caps    Returns the user's actual capabilities.
-	 * @param string $cap     Capability name.
-	 * @param int    $user_id The user ID.
-	 * @param array  $args    Adds the context to the cap. Typically the object ID.
+	 * @param string[] $caps    Array of the user's capabilities.
+	 * @param string   $cap     Capability name.
+	 * @param int      $user_id The user ID.
+	 * @param array    $args    Adds the context to the cap. Typically the object ID.
 	 */
 	return apply_filters( 'map_meta_cap', $caps, $cap, $user_id, $args );
 }
@@ -907,8 +935,8 @@ function revoke_super_admin( $user_id ) {
  *
  * @since 4.9.0
  *
- * @param array $allcaps An array of all the user's capabilities.
- * @return array Filtered array of the user's capabilities.
+ * @param bool[] $allcaps An array of all the user's capabilities.
+ * @return bool[] Filtered array of the user's capabilities.
  */
 function wp_maybe_grant_install_languages_cap( $allcaps ) {
 	if ( ! empty( $allcaps['update_core'] ) || ! empty( $allcaps['install_plugins'] ) || ! empty( $allcaps['install_themes'] ) ) {

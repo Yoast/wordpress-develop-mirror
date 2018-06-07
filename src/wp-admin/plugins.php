@@ -463,7 +463,7 @@ if ( ! empty( $invalid ) ) {
 	foreach ( $invalid as $plugin_file => $error ) {
 		echo '<div id="message" class="error"><p>';
 		printf(
-			/* translators: 1: plugin file 2: error message */
+			/* translators: 1: plugin file, 2: error message */
 			__( 'The plugin %1$s has been <strong>deactivated</strong> due to an error: %2$s' ),
 			'<code>' . esc_html( $plugin_file ) . '</code>',
 			$error->get_error_message()
@@ -567,7 +567,7 @@ if ( strlen( $s ) ) {
  *
  * @since 3.0.0
  *
- * @param array $plugins_all An array containing all installed plugins.
+ * @param array[] $plugins_all An array of arrays containing information on all installed plugins.
  */
 do_action( 'pre_current_active_plugins', $plugins['all'] );
 ?>

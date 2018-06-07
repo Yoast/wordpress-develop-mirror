@@ -178,7 +178,7 @@ function create_initial_taxonomies() {
  * @param string $operator Optional. The logical operation to perform. Accepts 'and' or 'or'. 'or' means only
  *                         one element from the array needs to match; 'and' means all elements must match.
  *                         Default 'and'.
- * @return array A list of taxonomy names or objects.
+ * @return string[]|WP_Taxonomy[] An array of taxonomy names or objects.
  */
 function get_taxonomies( $args = array(), $output = 'names', $operator = 'and' ) {
 	global $wp_taxonomies;
@@ -262,9 +262,9 @@ function get_taxonomy( $taxonomy ) {
  * Determines whether the taxonomy name exists.
  *
  * Formerly is_taxonomy(), introduced in 2.3.0.
- * 
+ *
  * For more information on this and similar theme functions, check out
- * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
  * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 3.0.0
@@ -287,9 +287,9 @@ function taxonomy_exists( $taxonomy ) {
  * object, and finally returns the hierarchical value in the object.
  *
  * A false return value might also mean that the taxonomy does not exist.
- * 
+ *
  * For more information on this and similar theme functions, check out
- * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
  * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.3.0
@@ -810,27 +810,27 @@ function get_term( $term, $taxonomy = '', $output = OBJECT, $filter = 'raw' ) {
 	}
 
 	/**
-	 * Filters a term.
+	 * Filters a taxonomy term object.
 	 *
 	 * @since 2.3.0
-	 * @since 4.4.0 `$_term` can now also be a WP_Term object.
+	 * @since 4.4.0 `$_term` is now a `WP_Term` object.
 	 *
-	 * @param int|WP_Term $_term    Term object or ID.
-	 * @param string      $taxonomy The taxonomy slug.
+	 * @param WP_Term $_term    Term object.
+	 * @param string  $taxonomy The taxonomy slug.
 	 */
 	$_term = apply_filters( 'get_term', $_term, $taxonomy );
 
 	/**
-	 * Filters a taxonomy.
+	 * Filters a taxonomy term object.
 	 *
 	 * The dynamic portion of the filter name, `$taxonomy`, refers
-	 * to the taxonomy slug.
+	 * to the slug of the term's taxonomy.
 	 *
 	 * @since 2.3.0
-	 * @since 4.4.0 `$_term` can now also be a WP_Term object.
+	 * @since 4.4.0 `$_term` is now a `WP_Term` object.
 	 *
-	 * @param int|WP_Term $_term    Term object or ID.
-	 * @param string      $taxonomy The taxonomy slug.
+	 * @param WP_Term $_term    Term object.
+	 * @param string  $taxonomy The taxonomy slug.
 	 */
 	$_term = apply_filters( "get_{$taxonomy}", $_term, $taxonomy );
 
@@ -1326,9 +1326,9 @@ function has_term_meta( $term_id ) {
  * Determines whether a term exists.
  *
  * Formerly is_term(), introduced in 2.3.0.
- * 
+ *
  * For more information on this and similar theme functions, check out
- * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
  * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 3.0.0
@@ -2849,7 +2849,7 @@ function wp_update_term( $term_id, $taxonomy, $args = array() ) {
 		if ( $empty_slug || ( $parent != $term['parent'] ) ) {
 			$slug = wp_unique_term_slug( $slug, (object) $args );
 		} else {
-			/* translators: 1: Taxonomy term slug */
+			/* translators: %s: taxonomy term slug */
 			return new WP_Error( 'duplicate_term_slug', sprintf( __( 'The slug &#8220;%s&#8221; is already in use by another term.' ), $slug ) );
 		}
 	}

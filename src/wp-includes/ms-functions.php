@@ -76,12 +76,12 @@ function get_active_blog_for_user( $user_id ) {
 				}
 				$details = get_site( $blog_id );
 				if ( is_object( $details ) && $details->archived == 0 && $details->spam == 0 && $details->deleted == 0 ) {
-					$ret = $blog;
+					$ret = $details;
 					if ( get_user_meta( $user_id, 'primary_blog', true ) != $blog_id ) {
 						update_user_meta( $user_id, 'primary_blog', $blog_id );
 					}
 					if ( ! get_user_meta( $user_id, 'source_domain', true ) ) {
-						update_user_meta( $user_id, 'source_domain', $blog->domain );
+						update_user_meta( $user_id, 'source_domain', $details->domain );
 					}
 					break;
 				}
@@ -497,8 +497,9 @@ function wpmu_validate_user_signup( $user_name, $user_email ) {
 
 	$limited_email_domains = get_site_option( 'limited_email_domains' );
 	if ( is_array( $limited_email_domains ) && ! empty( $limited_email_domains ) ) {
-		$emaildomain = substr( $user_email, 1 + strpos( $user_email, '@' ) );
-		if ( ! in_array( $emaildomain, $limited_email_domains ) ) {
+		$limited_email_domains = array_map( 'strtolower', $limited_email_domains );
+		$emaildomain = strtolower( substr( $user_email, 1 + strpos( $user_email, '@' ) ) );
+		if ( ! in_array( $emaildomain, $limited_email_domains, true ) ) {
 			$errors->add( 'user_email', __( 'Sorry, that email address is not allowed!' ) );
 		}
 	}
@@ -2161,7 +2162,8 @@ function upload_is_file_too_big( $upload ) {
 	}
 
 	if ( strlen( $upload['bits'] ) > ( KB_IN_BYTES * get_site_option( 'fileupload_maxk', 1500 ) ) ) {
-		return sprintf( __( 'This file is too big. Files must be less than %d KB in size.' ) . '<br />', get_site_option( 'fileupload_maxk', 1500 ) );
+		/* translators: %s: maximum allowed file size in kilobytes */
+		return sprintf( __( 'This file is too big. Files must be less than %s KB in size.' ) . '<br />', get_site_option( 'fileupload_maxk', 1500 ) );
 	}
 
 	return $upload;
@@ -2191,8 +2193,8 @@ function signup_nonce_check( $result ) {
 		return $result;
 	}
 
-	if ( wp_create_nonce( 'signup_form_' . $_POST['signup_form_id'] ) != $_POST['_signup_form'] ) {
-		wp_die( __( 'Please try again.' ) );
+	if ( ! wp_verify_nonce( $_POST['_signup_form'], 'signup_form_' . $_POST['signup_form_id'] ) ) {
+		$result['errors']->add( 'invalid_nonce', __( 'Unable to submit this form, please try again.' ) );
 	}
 
 	return $result;

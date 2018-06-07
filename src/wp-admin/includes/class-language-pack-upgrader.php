@@ -149,17 +149,18 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 	 *
 	 * @since 3.7.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $language_updates Optional. Language pack updates. Default empty array.
-	 * @param array $args {
-	 *     Optional. Other arguments for upgrading multiple language packs. Default empty array
+	 * @param object[] $language_updates Optional. Array of language packs to update. @see wp_get_translation_updates().
+	 *                                   Default empty array.
+	 * @param array    $args {
+	 *     Other arguments for upgrading multiple language packs. Default empty array.
 	 *
 	 *     @type bool $clear_update_cache Whether to clear the update cache when done.
 	 *                                    Default true.
 	 * }
 	 * @return array|bool|WP_Error Will return an array of results, or true if there are no updates,
-	 *                                   false or WP_Error for initial errors.
+	 *                             false or WP_Error for initial errors.
 	 */
 	public function bulk_upgrade( $language_updates = array(), $args = array() ) {
 		global $wp_filesystem;
@@ -274,14 +275,12 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 		remove_action( 'upgrader_process_complete', 'wp_update_themes' );
 
 		/** This action is documented in wp-admin/includes/class-wp-upgrader.php */
-		do_action(
-			'upgrader_process_complete', $this, array(
-				'action'       => 'update',
-				'type'         => 'translation',
-				'bulk'         => true,
-				'translations' => $language_updates_results,
-			)
-		);
+		do_action( 'upgrader_process_complete', $this, array(
+			'action'       => 'update',
+			'type'         => 'translation',
+			'bulk'         => true,
+			'translations' => $language_updates_results,
+		) );
 
 		// Re-add upgrade hooks.
 		add_action( 'upgrader_process_complete', array( 'Language_Pack_Upgrader', 'async_upgrade' ), 20 );
@@ -339,7 +338,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 		if ( ! $mo || ! $po ) {
 			return new WP_Error(
 				'incompatible_archive_pomo', $this->strings['incompatible_archive'],
-				/* translators: 1: .po 2: .mo */
+				/* translators: 1: .po, 2: .mo */
 				sprintf(
 					__( 'The language pack is missing either the %1$s or %2$s files.' ),
 					'<code>.po</code>',

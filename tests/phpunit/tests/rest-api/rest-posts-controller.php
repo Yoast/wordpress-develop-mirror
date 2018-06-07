@@ -1499,6 +1499,20 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$this->check_get_post_response( $response, 'edit' );
 	}
 
+	public function test_prepare_item_limit_fields() {
+		wp_set_current_user( self::$editor_id );
+		$endpoint = new WP_REST_Posts_Controller( 'post' );
+		$request  = new WP_REST_Request( 'GET', sprintf( '/wp/v2/posts/%d', self::$post_id ) );
+		$request->set_param( 'context', 'edit' );
+		$request->set_param( '_fields', 'id,slug' );
+		$obj      = get_post( self::$post_id );
+		$response = $endpoint->prepare_item_for_response( $obj, $request );
+		$this->assertEquals( array(
+			'id',
+			'slug',
+		), array_keys( $response->get_data() ) );
+	}
+
 	public function test_create_item() {
 		wp_set_current_user( self::$editor_id );
 
@@ -3185,12 +3199,12 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 						'rendered' => '<a href="#">link</a>',
 					),
 					'content' => array(
-						'raw'      => '<a href="#" target="_blank">link</a>',
-						'rendered' => '<p><a href="#" target="_blank">link</a></p>',
+						'raw'      => '<a href="#" target="_blank" rel="noopener noreferrer">link</a>',
+						'rendered' => '<p><a href="#" target="_blank" rel="noopener noreferrer">link</a></p>',
 					),
 					'excerpt' => array(
-						'raw'      => '<a href="#" target="_blank">link</a>',
-						'rendered' => '<p><a href="#" target="_blank">link</a></p>',
+						'raw'      => '<a href="#" target="_blank" rel="noopener noreferrer">link</a>',
+						'rendered' => '<p><a href="#" target="_blank" rel="noopener noreferrer">link</a></p>',
 					),
 				),
 			),
@@ -3503,7 +3517,21 @@ class WP_Test_REST_Posts_Controller extends WP_Test_REST_Post_Type_Controller_Te
 		$this->assertEquals(
 			array(
 				'type' => 'string',
-				'enum' => array( 'publish', 'future', 'draft', 'pending', 'private', 'trash', 'auto-draft', 'inherit', 'any' ),
+				'enum' => array(
+					'publish',
+					'future',
+					'draft',
+					'pending',
+					'private',
+					'trash',
+					'auto-draft',
+					'inherit',
+					'request-pending',
+					'request-confirmed',
+					'request-failed',
+					'request-completed',
+					'any',
+				),
 			), $status_arg['items']
 		);
 	}

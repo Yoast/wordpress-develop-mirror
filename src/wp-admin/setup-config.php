@@ -59,7 +59,7 @@ if ( file_exists( ABSPATH . 'wp-config-sample.php' ) ) {
 if ( file_exists( ABSPATH . 'wp-config.php' ) ) {
 	wp_die(
 		'<p>' . sprintf(
-			/* translators: 1: wp-config.php 2: install.php */
+			/* translators: 1: wp-config.php, 2: install.php */
 			__( 'The file %1$s already exists. If you need to reset any of the configuration items in this file, please delete it first. You may try <a href="%2$s">installing now</a>.' ),
 			'<code>wp-config.php</code>',
 			'install.php'
@@ -71,7 +71,7 @@ if ( file_exists( ABSPATH . 'wp-config.php' ) ) {
 if ( @file_exists( ABSPATH . '../wp-config.php' ) && ! @file_exists( ABSPATH . '../wp-settings.php' ) ) {
 	wp_die(
 		'<p>' . sprintf(
-			/* translators: 1: wp-config.php 2: install.php */
+			/* translators: 1: wp-config.php, 2: install.php */
 			__( 'The file %1$s already exists one level above your WordPress installation. If you need to reset any of the configuration items in this file, please delete it first. You may try <a href="%2$s">installing now</a>.' ),
 			'<code>wp-config.php</code>',
 			'install.php'
@@ -273,12 +273,12 @@ switch ( $step ) {
 		$tryagain_link = '</p><p class="step"><a href="' . $step_1 . '" onclick="javascript:history.go(-1);return false;" class="button button-large">' . __( 'Try again' ) . '</a>';
 
 		if ( empty( $prefix ) ) {
-			wp_die( __( '<strong>ERROR</strong>: "Table Prefix" must not be empty.' . $tryagain_link ) );
+			wp_die( __( '<strong>ERROR</strong>: "Table Prefix" must not be empty.' ) . $tryagain_link );
 		}
 
 		// Validate $prefix: it can only contain letters, numbers and underscores.
 		if ( preg_match( '|[^a-z0-9_]|i', $prefix ) ) {
-			wp_die( __( '<strong>ERROR</strong>: "Table Prefix" can only contain numbers, letters, and underscores.' . $tryagain_link ) );
+			wp_die( __( '<strong>ERROR</strong>: "Table Prefix" can only contain numbers, letters, and underscores.' ) . $tryagain_link );
 		}
 
 		// Test the db connection.
