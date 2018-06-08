@@ -1156,6 +1156,13 @@ module.exports = function(grunt) {
 			grunt.task.run( 'build' );
 		}
 
+		if ( 'watch:phpunit' === grunt.cli.tasks[ 0 ] || 'undefined' !== typeof grunt.option( 'phpunit' ) ) {
+			grunt.config.data._watch.phpunit = {
+				files: [ '**/*.php' ],
+				tasks: [ 'phpunit:default' ]
+			};
+		}
+
 		grunt.task.run( '_' + this.nameArgs );
 	} );
 
