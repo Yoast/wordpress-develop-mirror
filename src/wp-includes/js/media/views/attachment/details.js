@@ -8,11 +8,11 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	template:  wp.template('attachment-details'),
 
 	/**
-	 * Overrides the attributes method in the Attachment prototype.
+	 * Overrides the attributes method in the Attachment prototype and returns the attributes.
 	 *
 	 * @since 4.2.0
 	 *
-	 * @returns {Object}
+	 * @returns {Object} The tabIndex and the data id.
 	 */
 	attributes: function() {
 		return {
@@ -75,7 +75,8 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	/**
 	 * Deletes an attachment.
 	 *
-	 * Deletes an attachment after asking for confirmation. After deletion, keeps focus in the modal.
+	 * Deletes an attachment after asking for confirmation. After deletion,
+	 * keeps focus in the modal.
 	 *
 	 * @since 4.2.0
 	 *
@@ -88,15 +89,16 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 
 		if ( window.confirm( l10n.warnDelete ) ) {
 			this.model.destroy();
-			// Keep focus inside media modal
-			// after image is deleted
+			/* Keep focus inside media modal
+			 after image is deleted */
 			this.controller.modal.focusManager.focus();
 		}
 	},
 	/**
-	 * Sets the trash state on an attachment, or destroys it.
+	 * Sets the trash state on an attachment, or destroys the model itself.
 	 *
-	 * If the mediaTrash setting is set to true, trashes the attachment. Otherwise, it destroys it.
+	 * If the mediaTrash setting is set to true, trashes the attachment.
+	 * Otherwise, the model itself is destroyed.
 	 *
 	 * @since 4.2.0
 	 *
@@ -159,7 +161,7 @@ Details = Attachment.extend(/** @lends wp.media.view.Attachment.Details.prototyp
 	},
 
 	/**
-	 * When reverse tabbing(shift+tab) out of the right details panel, delivers
+	 * When reverse tabbing (shift+tab) out of the right details panel, delivers
 	 * the focus to the item in the list that was being edited.
 	 *
 	 * @since 4.2.0
