@@ -18,15 +18,14 @@
 		/**
 		 * Initializes a notification that is displayed in a full-screen overlay.
 		 *
+		 * @since 4.9.0
+		 *
 		 * @constructs wp.customize.OverlayNotification
 		 * @augments   wp.customize.Notification
-		 *
-		 * @since 4.9.0
+		 * @memberOf   wp.customize
 		 *
 		 * @param {string} code   The notification code.
 		 * @param {object} params Parameters to pass on to the parent class.
-		 *
-		 * @return {void}
 		 */
 		initialize: function( code, params ) {
 			var notification = this;
@@ -98,12 +97,11 @@
 		 *
 		 * @constructs wp.customize.Notifications
 		 * @augments   wp.customize.Values
+		 * @memberOf   wp.customize
 		 *
 		 * @param {object}  options             The options to pass to the parent class.
 		 * @param {jQuery}  [options.container] Container element for notifications. This can be injected later.
 		 * @param {boolean} [options.alt]       Whether alternative style should be used when rendering notifications.
-		 *
-		 * @return {void}
 		 */
 		initialize: function( options ) {
 			var collection = this;
@@ -394,12 +392,13 @@
 		 * A setting is WordPress data (theme mod, option, menu, etc.) that the user can
 		 * draft changes to in the Customizer.
 		 *
-		 * @see PHP class WP_Customize_Setting.
+		 * @since 3.4.0
 		 *
 		 * @constructs wp.customize.Setting
 		 * @augments   wp.customize.Value
+		 * @memberOf   wp.customize
 		 *
-		 * @since 3.4.0
+		 * @see PHP class WP_Customize_Setting.
 		 *
 		 * @param {string}  id                          The setting ID.
 		 * @param {*}       value                       The initial value of the setting.
@@ -407,8 +406,6 @@
 		 * @param {string}  [options.transport=refresh] The transport method to use for previewing. Supports 'refresh' and 'postMessage'.
 		 * @param {boolean} [options.dirty=false]       Whether the setting should initially be considered dirty.
 		 * @param {object}  [options.previewer]         The Previewer instance to sync with. Defaults to wp.customize.previewer.
-		 *
-		 * @return {void}
 		 */
 		initialize: function( id, value, options ) {
 			var setting = this, params;
@@ -992,10 +989,11 @@
 		/**
 		 * Initializes the base class for Panels and Sections.
 		 *
+		 * @since 4.1.0
+		 *
 		 * @constructs wp.customize~Container
 		 * @augments   wp.customize.Class
-		 *
-		 * @since 4.1.0
+		 * @memberOf   wp.customize
 		 *
 		 * @borrows wp.customize~focus as focus
 		 *
@@ -1009,8 +1007,6 @@
 		 * @param {string}    [options.content]        The markup to be used for the panel container. If empty, a JS template is used.
 		 * @param {boolean}   [options.active=true]    Whether the panel is active or not.
 		 * @param {Object}    [options.params]         Deprecated wrapper for the above properties.
-		 *
-		 * @return {void}
 		 */
 		initialize: function ( id, options ) {
 			var container = this;
@@ -1506,10 +1502,12 @@
 		/**
 		 * Initializes a Section object.
 		 *
+		 * @since 4.1.0
+		 *
 		 * @constructs wp.customize.Section
 		 * @augments   wp.customize~Container
 		 *
-		 * @since 4.1.0
+		 * @memberOf   wp.customize
 		 *
 		 * @param {string} 	id 							The ID for the section.
 		 * @param {object} 	options 					The options to use within the Section object.
@@ -1522,8 +1520,6 @@
 		 * @param {string}  options.panel 				The ID for the panel this section is associated with.
 		 * @param {string}  [options.customizeAction] 	Additional context information shown before the section title when expanded.
 		 * @param {object}  [options.params] 			Deprecated wrapper for the above properties.
-		 *
-		 * @return {void}
 		 */
 		initialize: function ( id, options ) {
 			var section = this, params;
@@ -1810,15 +1806,15 @@
 		 *
 		 * Loads themes by category and also handles the theme-details view rendering and navigation.
 		 *
+		 * @since 4.9.0
+		 *
 		 * @constructs wp.customize.ThemesSection
 		 * @augments   wp.customize.Section
 		 *
-		 * @since 4.9.0
+		 * @memberOf   wp.customize
 		 *
 		 * @param {string} id       The ID for the section.
 		 * @param {Object} options  The options to use within the ThemesSection object.
-		 *
-		 * @return {void}
 		 */
 		initialize: function( id, options ) {
 			var section = this;
@@ -2817,12 +2813,12 @@
 		 * Creates section outside of the sidebar. There is no UI to trigger collapse/expand so
 		 * it would require custom handling.
 		 *
+		 * @since 4.9.0
+		 *
 		 * @constructs wp.customize.OuterSection
 		 * @augments   wp.customize.Section
 		 *
-		 * @since 4.9.0
-		 *
-		 * @return {void}
+		 * @memberOf   wp.customize
 		 */
 		initialize: function() {
 			var section = this;
@@ -2933,10 +2929,12 @@
 		/**
 		 * Initializes the base class for the Panel.
 		 *
+		 * @since 4.1.0
+		 *
 		 * @constructs wp.customize.Panel
 		 * @augments   wp.customize~Container
 		 *
-		 * @since 4.1.0
+		 * @memberOf   wp.customize
 		 *
 		 * @param {string}  id                     The ID for the panel.
 		 * @param {object}  options                The options to use within the Panel object.
@@ -2947,8 +2945,6 @@
 		 * @param {string}  [options.content]      The markup to be used for the panel container. If empty, a JS template is used.
 		 * @param {boolean} [options.active=true]  Whether the panel is active or not.
 		 * @param {object}  [options.params]       Deprecated wrapper for the above properties.
-		 *
-		 * @return {void}
 		 */
 		initialize: function ( id, options ) {
 			var panel = this, params;
@@ -3223,15 +3219,15 @@
 		/**
 		 * Initializes the custom section for themes that displays without the customize preview.
 		 *
+		 * @since 4.9.0
+		 *
 		 * @constructs wp.customize.ThemesPanel
 		 * @augments   wp.customize.Panel
 		 *
-		 * @since 4.9.0
+		 * @memberOf   wp.customize
 		 *
 		 * @param {string} 	id 		The ID for the panel.
 		 * @param {object} 	options The options to use within the ThemesPanel object.
-		 *
-		 * @return {void}
 		 */
 		initialize: function( id, options ) {
 			var panel = this;
@@ -3678,21 +3674,24 @@
 		 *
 		 * A control provides a UI element that allows a user to modify a Customizer Setting.
 		 *
-		 * @see PHP class WP_Customize_Control.
+		 * @since 4.1.0
 		 *
 		 * @constructs wp.customize.Control
 		 * @augments   wp.customize.Class
+		 *
+		 * @memberOf   wp.customize
+		 *
+		 * @see PHP class WP_Customize_Control.
 		 *
 		 * @borrows wp.customize~focus as this#focus
 		 * @borrows wp.customize~Container#activate as this#activate
 		 * @borrows wp.customize~Container#deactivate as this#deactivate
 		 * @borrows wp.customize~Container#_toggleActive as this#_toggleActive
 		 *
-		 * @since 4.1.0
 		 *
 		 * @param {string} id                       Unique identifier for the Control instance.
-		 * @param {object} options                  Options hash for the Control instance.
-		 * @param {object} options.type             Type of control (e.g. text, radio, dropdown-pages, etc.)
+		 * @param {Object} options                  Options hash for the Control instance.
+		 * @param {Object} options.type             Type of control (e.g. text, radio, dropdown-pages, etc.)
 		 * @param {string} [options.content]        The HTML content for the Control (or at least its container). This should normally be left blank in favor of supplying a templateId.
 		 * @param {string} [options.templateId]     Template ID for the Control's content.
 		 * @param {string} [options.priority=10]    Order of priority to show the Control within the section.
@@ -3705,9 +3704,7 @@
 		 * @param {string} options.label            The label for the Control.
 		 * @param {string} options.description      The description of the Control.
 		 * @param {number} [options.instanceNumber] Order in which this instance was created in relation to other instances.
-		 * @param {object} [options.params]         Deprecated wrapper for the above properties.
-		 *
-		 * @return {void}
+		 * @param {Object} [options.params]         Deprecated wrapper for the above properties.
 		 */
 		initialize: function( id, options ) {
 			var control = this, deferredSettingIds = [], settings, gatherSettings;
@@ -4406,10 +4403,10 @@
 	 *
 	 * @since 3.5.0
 	 *
-	 * @class    wp.customize.ColorControl
-	 * @augments wp.customize.Control
-	 *
-	 * @return {void}
+	 * @constructs wp.customize.ColorControl
+	 * @memberOf   wp.customize
+	 * @augments   wp.customize.Control
+	 * @inheritDoc
 	 */
 	api.ColorControl = api.Control.extend(/** @lends wp.customize.ColorControl.prototype */{
 		/**
@@ -4482,10 +4479,10 @@
 	 *
 	 * @since 4.1.0
 	 *
-	 * @class    wp.customize.MediaControl
-	 * @augments wp.customize.Control
-	 *
-	 * @return {void}
+	 * @constructs wp.customize.MediaControl
+	 * @augments   wp.customize.Control
+	 * @memberOf   wp.customize
+	 * @inheritDoc
 	 */
 	api.MediaControl = api.Control.extend(/** @lends wp.customize.MediaControl.prototype */{
 		/**
@@ -4645,7 +4642,7 @@
 
 		/**
 		 * Handles the selection of attachments in the media modal.
-		 * 
+		 *
 		 * If an image is selected, it also gets the additional information and sets it within the control.
 		 *
 		 * @since 4.1.0
@@ -4721,9 +4718,8 @@
 	 *
 	 * @constructs wp.customize.UploadControl
 	 * @augments   wp.customize.MediaControl
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.UploadControl = api.MediaControl.extend(/** @lends wp.customize.UploadControl.prototype */{
 
@@ -4775,11 +4771,10 @@
 	 *
 	 * @since 3.5.0
 	 *
-	 * @class    wp.customize.ImageControl
-	 * @augments wp.customize.UploadControl
+	 * @constructs wp.customize.ImageControl
+	 * @augments   wp.customize.UploadControl
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.ImageControl = api.UploadControl.extend(/** @lends wp.customize.ImageControl.prototype */{
 		/**
@@ -4793,11 +4788,10 @@
 	 *
 	 * @since 3.5.0
 	 *
-	 * @class    wp.customize.BackgroundControl
-	 * @augments wp.customize.UploadControl
+	 * @constructs wp.customize.BackgroundControl
+	 * @augments   wp.customize.UploadControl
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.BackgroundControl = api.UploadControl.extend(/** @lends wp.customize.BackgroundControl.prototype */{
 
@@ -4836,11 +4830,10 @@
 	 *
 	 * @since 4.7.0
 	 *
-	 * @class    wp.customize.BackgroundPositionControl
-	 * @augments wp.customize.Control
+	 * @constructs wp.customize.BackgroundPositionControl
+	 * @augments   wp.customize.Control
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.BackgroundPositionControl = api.Control.extend(/** @lends wp.customize.BackgroundPositionControl.prototype */{
 
@@ -4881,11 +4874,10 @@
 	 *
 	 * @since 4.3.0
 	 *
-	 * @class    wp.customize.CroppedImageControl
-	 * @augments wp.customize.MediaControl
+	 * @construct wp.customize.CroppedImageControl
+	 * @augments  wp.customize.MediaControl
+	 * @memberOf  wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.CroppedImageControl = api.MediaControl.extend(/** @lends wp.customize.CroppedImageControl.prototype */{
 
@@ -5116,12 +5108,10 @@
 	 *
 	 * @since 4.3.0
 	 *
-	 * @class    wp.customize.SiteIconControl
-	 * @augments wp.customize.CroppedImageControl
-	 *
+	 * @constructs wp.customize.SiteIconControl
+	 * @augments   wp.customize.CroppedImageControl
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.SiteIconControl = api.CroppedImageControl.extend(/** @lends wp.customize.SiteIconControl.prototype */{
 
@@ -5258,12 +5248,10 @@
 	 *
 	 * @since 3.9.0
 	 *
-	 * @class    wp.customize.HeaderControl
-	 * @augments wp.customize.Control
-	 *
+	 * @constructs wp.customize.HeaderControl
+	 * @augments   wp.customize.Control
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.HeaderControl = api.Control.extend(/** @lends wp.customize.HeaderControl.prototype */{
 
@@ -5560,12 +5548,10 @@
 	 *
 	 * @since 3.9.0
 	 *
-	 * @class    wp.customize.ThemeControl
-	 * @augments wp.customize.Control
-	 *
+	 * @constructs wp.customize.ThemeControl
+	 * @augments   wp.customize.Control
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.ThemeControl = api.Control.extend(/** @lends wp.customize.ThemeControl.prototype */{
 
@@ -5752,11 +5738,10 @@
 	 *
 	 * @since 4.9.0
 	 *
-	 * @class    wp.customize.CodeEditorControl
-	 * @augments wp.customize.Control
+	 * @constructs wp.customize.CodeEditorControl
+	 * @augments   wp.customize.Control
+	 * @memberOf   wp.customize
 	 * @inheritDoc
-	 *
-	 * @memberOf wp.customize
 	 */
 	api.CodeEditorControl = api.Control.extend(/** @lends wp.customize.CodeEditorControl.prototype */{
 
@@ -5887,8 +5872,9 @@
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param {Object}   [params]                   The focus parameters to use.
-		 * @param {Function} [params.completeCallback]  Function to call when expansion is complete.
+		 * @callback completeCallback
+		 * @param {Object}           [params]                   The focus parameters to use.
+		 * @param {completeCallback} [params.completeCallback]  Function to call when expansion is complete.
 		 *
 		 * @return {void}
 		 */
@@ -6091,10 +6077,10 @@
 	 *
 	 * @since 4.9.0
 	 *
-	 * @class    wp.customize.DateTimeControl
-	 * @augments wp.customize.Control
-	 *
- 	 * @memberOf wp.customize
+	 * @constructs wp.customize.DateTimeControl
+ 	 * @memberOf   wp.customize
+	 * @augments   wp.customize.Control
+	 * @inheritDoc
 	 */
 	api.DateTimeControl = api.Control.extend(/** @lends wp.customize.DateTimeControl.prototype */{
 
@@ -6479,9 +6465,12 @@
 	/**
 	 * Class PreviewLinkControl.
 	 *
-	 * @since 4.9.0
-	 * @class    wp.customize.PreviewLinkControl
-	 * @augments wp.customize.Control
+	 * @since    4.9.0
+	 *
+	 * @constructs wp.customize.PreviewLinkControl
+	 * @augments   wp.customize.Control
+	 * @memberOf   wp.customize
+	 * @inheritDoc
 	 */
 	api.PreviewLinkControl = api.Control.extend(/** @lends wp.customize.PreviewLinkControl.prototype */{
 
@@ -6775,6 +6764,9 @@
 	 */
 	api.notifications = new api.Notifications();
 
+	/**
+	 * The Messenger object.
+	 */
 	api.PreviewFrame = api.Messenger.extend(/** @lends wp.customize.PreviewFrame.prototype */{
 		sensitivity: null, // Will get set to api.settings.timeouts.previewFrameSensitivity.
 
@@ -6784,6 +6776,7 @@
 		 *
 		 * @constructs wp.customize.PreviewFrame
 		 * @augments   wp.customize.Messenger
+		 * @memberOf   wp.customize
 		 *
 		 * @param {object} params.container
 		 * @param {object} params.previewUrl
@@ -6815,8 +6808,9 @@
 		/**
 		 * Run the preview request.
 		 *
-		 * @param {object} deferred jQuery Deferred object to be resolved with
-		 *                          the request.
+		 * @param {object} deferred jQuery Deferred object to be resolved with the request.
+		 *
+		 * @return {void}
 		 */
 		run: function( deferred ) {
 			var previewFrame = this,
@@ -7015,16 +7009,23 @@
 		api.trigger( 'title', title );
 	};
 
+	/**
+	 * The Previewer object.
+	 */
 	api.Previewer = api.Messenger.extend(/** @lends wp.customize.Previewer.prototype */{
 		refreshBuffer: null, // Will get set to api.settings.timeouts.windowRefresh.
 
 		/**
+		 * The Previewer constructor.
+		 *
+		 * @since 3.5.0
+		 *
 		 * @constructs wp.customize.Previewer
 		 * @augments   wp.customize.Messenger
+		 * @memberOf   wp.customize
 		 *
 		 * @param {array}  params.allowedUrls
-		 * @param {string} params.container   A selector or jQuery element for the preview
-		 *                                    frame to be placed.
+		 * @param {string} params.container   A selector or jQuery element for the preview frame to be placed.
 		 * @param {string} params.form
 		 * @param {string} params.previewUrl  The URL to preview.
 		 * @param {object} options
@@ -8673,10 +8674,11 @@
 				/**
 				 * A notification that is displayed in a full-screen overlay with information about the locked changeset.
 				 *
+				 * @since 4.9.0
+				 *
 				 * @constructs wp.customize~LockedNotification
 				 * @augments   wp.customize.OverlayNotification
-				 *
-				 * @since 4.9.0
+				 * @memberOf   wp.customize
 				 *
 				 * @param {string} [code] - Code.
 				 * @param {object} [params] - Params.
