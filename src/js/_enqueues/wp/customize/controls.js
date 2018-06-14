@@ -25,7 +25,7 @@
 		 * @memberOf   wp.customize
 		 *
 		 * @param {string} code   The notification code.
-		 * @param {object} params Parameters to pass on to the parent class.
+		 * @param {Object} params Parameters to pass on to the parent class.
 		 */
 		initialize: function( code, params ) {
 			var notification = this;
@@ -86,7 +86,7 @@
 		 * The default constructor for items of the collection.
 		 *
 		 * @since 4.9.0
-		 * @type {object}
+		 * @type {Object}
 		 */
 		defaultConstructor: api.Notification,
 
@@ -99,7 +99,7 @@
 		 * @augments   wp.customize.Values
 		 * @memberOf   wp.customize
 		 *
-		 * @param {object}  options             The options to pass to the parent class.
+		 * @param {Object}  options             The options to pass to the parent class.
 		 * @param {jQuery}  [options.container] Container element for notifications. This can be injected later.
 		 * @param {boolean} [options.alt]       Whether alternative style should be used when rendering notifications.
 		 */
@@ -379,7 +379,7 @@
 		 *
 		 * @since 4.9.0
 		 *
-		 * @var {object}
+		 * @var {Object}
 		 */
 		defaults: {
 			transport: 'refresh',
@@ -402,10 +402,10 @@
 		 *
 		 * @param {string}  id                          The setting ID.
 		 * @param {*}       value                       The initial value of the setting.
-		 * @param {object}  [options={}]                The options to use within the setting.
+		 * @param {Object}  [options={}]                The options to use within the setting.
 		 * @param {string}  [options.transport=refresh] The transport method to use for previewing. Supports 'refresh' and 'postMessage'.
 		 * @param {boolean} [options.dirty=false]       Whether the setting should initially be considered dirty.
-		 * @param {object}  [options.previewer]         The Previewer instance to sync with. Defaults to wp.customize.previewer.
+		 * @param {Object}  [options.previewer]         The Previewer instance to sync with. Defaults to wp.customize.previewer.
 		 */
 		initialize: function( id, value, options ) {
 			var setting = this, params;
@@ -542,7 +542,7 @@
 	 * @param {Object}  [options]               The options to use within the setting.
 	 * @param {boolean} [options.unsaved=false] Whether only values that aren't saved yet into a changeset will be returned (differential changes).
 	 *
-	 * @return {object} The dirty setting values.
+	 * @return {Object} The dirty setting values.
 	 */
 	api.dirtyValues = function dirtyValues( options ) {
 		var values = {};
@@ -1510,7 +1510,7 @@
 		 * @memberOf   wp.customize
 		 *
 		 * @param {string} 	id 							The ID for the section.
-		 * @param {object} 	options 					The options to use within the Section object.
+		 * @param {Object} 	options 					The options to use within the Section object.
 		 * @param {string} 	options.title 				Title shown when section is collapsed and expanded.
 		 * @param {string} 	[options.description] 		Description shown at the top of the section.
 		 * @param {number} 	[options.priority=100] 		The sort priority for the section.
@@ -1519,7 +1519,7 @@
 		 * @param {boolean}	[options.active=true] 		Whether the section is active or not.
 		 * @param {string}  options.panel 				The ID for the panel this section is associated with.
 		 * @param {string}  [options.customizeAction] 	Additional context information shown before the section title when expanded.
-		 * @param {object}  [options.params] 			Deprecated wrapper for the above properties.
+		 * @param {Object}  [options.params] 			Deprecated wrapper for the above properties.
 		 */
 		initialize: function ( id, options ) {
 			var section = this, params;
@@ -2937,14 +2937,14 @@
 		 * @memberOf   wp.customize
 		 *
 		 * @param {string}  id                     The ID for the panel.
-		 * @param {object}  options                The options to use within the Panel object.
+		 * @param {Object}  options                The options to use within the Panel object.
 		 * @param {string}  options.title          Title shown when the panel is collapsed and expanded.
 		 * @param {string}  [options.description]  Description shown at the top of the panel.
 		 * @param {number}  [options.priority=100] The sort priority for the panel.
 		 * @param {string}  [options.type=default] The type of the panel. See wp.customize.panelConstructor.
 		 * @param {string}  [options.content]      The markup to be used for the panel container. If empty, a JS template is used.
 		 * @param {boolean} [options.active=true]  Whether the panel is active or not.
-		 * @param {object}  [options.params]       Deprecated wrapper for the above properties.
+		 * @param {Object}  [options.params]       Deprecated wrapper for the above properties.
 		 */
 		initialize: function ( id, options ) {
 			var panel = this, params;
@@ -3227,7 +3227,7 @@
 		 * @memberOf   wp.customize
 		 *
 		 * @param {string} 	id 		The ID for the panel.
-		 * @param {object} 	options The options to use within the ThemesPanel object.
+		 * @param {Object} 	options The options to use within the ThemesPanel object.
 		 */
 		initialize: function( id, options ) {
 			var panel = this;
@@ -3660,7 +3660,7 @@
 		 * Default params.
 		 *
 		 * @since 4.9.0
-		 * @var {object}
+		 * @var {Object}
 		 */
 		defaults: {
 			label: '',
@@ -6778,10 +6778,10 @@
 		 * @augments   wp.customize.Messenger
 		 * @memberOf   wp.customize
 		 *
-		 * @param {object} params.container
-		 * @param {object} params.previewUrl
-		 * @param {object} params.query
-		 * @param {object} options
+		 * @param {Object} params.container
+		 * @param {Object} params.previewUrl
+		 * @param {Object} params.query
+		 * @param {Object} options
 		 */
 		initialize: function( params, options ) {
 			var deferred = $.Deferred();
@@ -6808,7 +6808,7 @@
 		/**
 		 * Run the preview request.
 		 *
-		 * @param {object} deferred jQuery Deferred object to be resolved with the request.
+		 * @param {Object} deferred jQuery Deferred object to be resolved with the request.
 		 *
 		 * @return {void}
 		 */
@@ -7028,7 +7028,7 @@
 		 * @param {string} params.container   A selector or jQuery element for the preview frame to be placed.
 		 * @param {string} params.form
 		 * @param {string} params.previewUrl  The URL to preview.
-		 * @param {object} options
+		 * @param {Object} options
 		 */
 		initialize: function( params, options ) {
 			var previewer = this,
@@ -7174,11 +7174,11 @@
 		 * @since 4.7.0
 		 * @access public
 		 *
-		 * @param {object} data - Data from preview.
+		 * @param {Object} data - Data from preview.
 		 * @param {string} data.currentUrl - Current URL.
-		 * @param {object} data.activePanels - Active panels.
-		 * @param {object} data.activeSections Active sections.
-		 * @param {object} data.activeControls Active controls.
+		 * @param {Object} data.activePanels - Active panels.
+		 * @param {Object} data.activeSections Active sections.
+		 * @param {Object} data.activeControls Active controls.
 		 * @return {void}
 		 */
 		ready: function( data ) {
@@ -7481,8 +7481,8 @@
 	 * @since 4.6.0
 	 * @private
 	 *
-	 * @param {object}  args
-	 * @param {object}  args.settingValidities
+	 * @param {Object}  args
+	 * @param {Object}  args.settingValidities
 	 * @param {boolean} [args.focusInvalidControl=false]
 	 * @return {void}
 	 */
@@ -7963,9 +7963,9 @@
 			 * @since 4.7.0 Added options param.
 			 * @access public
 			 *
-			 * @param {object}  [options] Options.
+			 * @param {Object}  [options] Options.
 			 * @param {boolean} [options.excludeCustomizedSaved=false] Exclude saved settings in customized response (values pending writing to changeset).
-			 * @return {object} Query vars.
+			 * @return {Object} Query vars.
 			 */
 			query: function( options ) {
 				var queryVars = {
@@ -8001,7 +8001,7 @@
 			 * @since 3.4.0
 			 * @since 4.7.0 Added args param and return value.
 			 *
-			 * @param {object} [args] Args.
+			 * @param {Object} [args] Args.
 			 * @param {string} [args.status=publish] Status.
 			 * @param {string} [args.date] Date, in local time in MySQL format.
 			 * @param {string} [args.title] Title
@@ -8667,7 +8667,7 @@
 				/**
 				 * Lock user.
 				 *
-				 * @type {object}
+				 * @type {Object}
 				 */
 				lockUser: null,
 
@@ -8681,7 +8681,7 @@
 				 * @memberOf   wp.customize
 				 *
 				 * @param {string} [code] - Code.
-				 * @param {object} [params] - Params.
+				 * @param {Object} [params] - Params.
 				 */
 				initialize: function( code, params ) {
 					var notification = this, _code, _params;
@@ -8769,8 +8769,8 @@
 			 *
 			 * @since 4.9.0
 			 *
-			 * @param {object} [args] - Args.
-			 * @param {object} [args.lockUser] - Lock user data.
+			 * @param {Object} [args] - Args.
+			 * @param {Object} [args.lockUser] - Lock user data.
 			 * @param {boolean} [args.allowOverride=false] - Whether override is allowed.
 			 * @return {void}
 			 */
@@ -9196,7 +9196,7 @@
 			 * @since 4.7.0
 			 * @access private
 			 *
-			 * @param {object} header - Header.
+			 * @param {Object} header - Header.
 			 * @param {number} scrollTop - Scroll top.
 			 * @param {number} scrollDirection - Scroll direction, negative number being up and positive being down.
 			 * @return {void}
