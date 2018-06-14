@@ -1,4 +1,4 @@
-/* @output wp-admin/js/widgets/media-audio-widgets.js */
+/* @output wp-admin/js/widgets/media-audio-widget.js */
 
 /* eslint consistent-this: [ "error", "control" ] */
 (function( component ) {

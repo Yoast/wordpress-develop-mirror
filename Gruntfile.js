@@ -554,6 +554,8 @@ module.exports = function(grunt) {
 				dest: BUILD_DIR,
 				ext: '.min.js',
 				src: [
+					'wp-admin/js/**/*.js',
+					'wp-includes/js/*.js',
 					'wp-includes/js/plupload/*.js',
 					'wp-includes/js/mediaelement/wp-mediaelement.js',
 					'wp-includes/js/mediaelement/wp-playlist.js',
@@ -563,6 +565,10 @@ module.exports = function(grunt) {
 
 					// Exceptions
 					'!**/*.min.js',
+					'!wp-admin/js/custom-header.js', // Why? We should minify this.
+					'!wp-admin/js/farbtastic.js',
+					'!wp-includes/js/swfobject.js',
+					'!wp-includes/js/wp-embed.js' // We have extra options for this, see uglify:embed
 				]
 			},
 			embed: {
@@ -1183,7 +1189,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask( 'copy:js', [
 		'copy:npm-packages',
-		'copy:vendor-js',
+		'copy:vendor-js'
 	] );
 
 	grunt.registerTask( 'uglify:all', [
