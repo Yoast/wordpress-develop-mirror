@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-emoji.js */
+/* @output wp-includes/js/wp-emoji.js */
 
 ( function( window, settings ) {
 	function wpEmoji() {

@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-list-revisions.js */
+/* @output wp-includes/js/wp-list-revisions.js */
 
 (function(w) {
 	var init = function() {

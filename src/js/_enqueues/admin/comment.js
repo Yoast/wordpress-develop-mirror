@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/comment.js */
+/* @output wp-admin/js/comment.js */
 
 /* global postboxes, commentL10n */
 

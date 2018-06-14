@@ -3,7 +3,7 @@
  * to it.
  *
  * @since 2.7.0
- * @buildtarget wp-admin/js/media.js
+ * @output wp-admin/js/media.js
  *
  * @namespace findPosts
  *

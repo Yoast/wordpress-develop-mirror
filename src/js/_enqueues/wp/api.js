@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-api.js */
+/* @output wp-includes/js/wp-api.js */
 
 (function( window, undefined ) {
 

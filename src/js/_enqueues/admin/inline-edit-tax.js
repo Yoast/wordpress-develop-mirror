@@ -1,7 +1,7 @@
 /**
  * This file is used on the term overview page to power quick-editing terms.
  *
- * @buildtarget wp-admin/js/inline-edit-tax.js
+ * @output wp-admin/js/inline-edit-tax.js
  */
 
 /* global inlineEditL10n, ajaxurl */

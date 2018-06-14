@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/customize-controls.js */
+/* @output wp-admin/js/customize-controls.js */
 
 /* global _wpCustomizeHeader, _wpCustomizeBackground, _wpMediaViewsL10n, MediaElementPlayer, console, confirm */
 (function( exports, $ ){

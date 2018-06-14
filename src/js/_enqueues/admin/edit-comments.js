@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/edit-comments.js */
+/* @output wp-admin/js/edit-comments.js */
 
 /* global adminCommentsL10n, thousandsSeparator, list_args, QTags, ajaxurl, wpAjax */
 var setCommentsList, theList, theExtraList, commentReply;

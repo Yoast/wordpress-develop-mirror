@@ -1,7 +1,7 @@
 /**
  * @file Contains all dynamic functionality needed on post and term pages.
  *
- * @buildtarget wp-admin/js/post.js
+ * @output wp-admin/js/post.js
  */
 
  /* global postL10n, ajaxurl, wpAjax, setPostThumbnailL10n, postboxes, pagenow, tinymce, alert, deleteUserSetting */

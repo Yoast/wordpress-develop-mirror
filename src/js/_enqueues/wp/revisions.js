@@ -2,7 +2,7 @@
  * @file Revisions interface functions, Backbone classes and
  * the revisions.php document.ready bootstrap.
  *
- * @buildtarget wp-admin/js/revisions.js
+ * @output wp-admin/js/revisions.js
  */
 
 /* global isRtl */

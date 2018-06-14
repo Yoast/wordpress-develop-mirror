@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/dashboard.js */
+/* @output wp-admin/js/dashboard.js */
 
 /* global pagenow, ajaxurl, postboxes, wpActiveEditor:true */
 var ajaxWidgets, ajaxPopulateWidgets, quickPressLoad;

@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-lists.js */
+/* @output wp-includes/js/wp-lists.js */
 
 /* global ajaxurl, wpAjax */
 

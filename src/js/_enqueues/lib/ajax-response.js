@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-ajax-response.js */
+/* @output wp-includes/js/wp-ajax-response.js */
 
 var wpAjax = jQuery.extend( {
 	unserialize: function( s ) {

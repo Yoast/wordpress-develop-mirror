@@ -1,7 +1,7 @@
 /**
  * @file Functionality for the plugin install screens.
  *
- * @buildtarget wp-admin/js/plugin-install.js
+ * @output wp-admin/js/plugin-install.js
  */
 
 /* global plugininstallL10n, tb_click, tb_remove */

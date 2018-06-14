@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-util.js */
+/* @output wp-includes/js/wp-util.js */
 
 /* global _wpUtilSettings */
 

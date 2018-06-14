@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/gallery.js */
+/* @output wp-admin/js/gallery.js */
 
 /* global unescape, getUserSetting, setUserSetting */
 

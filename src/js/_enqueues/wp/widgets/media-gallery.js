@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/widgets/media-gallery-widget.js */
+/* @output wp-admin/js/widgets/media-gallery-widget.js */
 
 /* eslint consistent-this: [ "error", "control" ] */
 (function( component ) {

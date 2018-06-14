@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/media-audiovideo.js */
+/* @output wp-includes/js/media-audiovideo.js */
 
 var media = wp.media,
 	baseSettings = window._wpmejsSettings || {},

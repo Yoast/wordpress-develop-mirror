@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/tags-box.js */
+/* @output wp-admin/js/tags-box.js */
 
 /* jshint curly: false, eqeqeq: false */
 /* global ajaxurl */

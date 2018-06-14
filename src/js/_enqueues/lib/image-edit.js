@@ -2,7 +2,7 @@
  * The functions necessary for editing images.
  *
  * @since 2.9.0
- * @buildtarget wp-admin/js/image-edit.js
+ * @output wp-admin/js/image-edit.js
  */
 
  /* global imageEditL10n, ajaxurl, confirm */

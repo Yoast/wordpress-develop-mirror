@@ -2,7 +2,7 @@
  * Functions for ajaxified updates, deletions and installs inside the WordPress admin.
  *
  * @version 4.2.0
- * @buildtarget wp-admin/js/updates.js
+ * @output wp-admin/js/updates.js
  */
 
 /* global pagenow */

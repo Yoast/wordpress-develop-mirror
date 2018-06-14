@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/common.js */
+/* @output wp-admin/js/common.js */
 
 /* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
 var showNotice, adminMenu, columns, validateForm, screenMeta;

@@ -7,7 +7,7 @@
  *
  * @file
  * @since 2.5.0
- * @buildtarget wp-admin/js/media-upload.js
+ * @output wp-admin/js/media-upload.js
  *
  * @requires jQuery
  */

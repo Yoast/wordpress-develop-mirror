@@ -7,7 +7,7 @@
  * site are shown.
  *
  * @since 3.4.0
- * @buildtarget wp-admin/js/user-suggest.js
+ * @output wp-admin/js/user-suggest.js
  */
 
 /* global ajaxurl, current_site_id, isRtl */

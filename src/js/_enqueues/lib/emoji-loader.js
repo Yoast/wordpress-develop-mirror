@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-emoji-loader.js */
+/* @output wp-includes/js/wp-emoji-loader.js */
 
 ( function( window, document, settings ) {
 	var src, ready, ii, tests;

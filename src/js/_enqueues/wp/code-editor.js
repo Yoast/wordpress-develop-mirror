@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/code-editor.js */
+/* @output wp-admin/js/code-editor.js */
 
 if ( 'undefined' === typeof window.wp ) {
 	/**

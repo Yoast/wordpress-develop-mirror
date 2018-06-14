@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/widgets.js */
+/* @output wp-admin/js/widgets.js */
 
 /* global ajaxurl, isRtl */
 var wpWidgets;

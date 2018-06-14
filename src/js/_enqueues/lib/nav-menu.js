@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Administration
- * @buildtarget wp-admin/js/nav-menu.js
+ * @output wp-admin/js/nav-menu.js
  */
 
 /* global menus, postboxes, columns, isRtl, navMenuL10n, ajaxurl */

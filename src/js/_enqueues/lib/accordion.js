@@ -26,7 +26,7 @@
  * Note that any appropriate tags may be used, as long as the above classes are present.
  *
  * @since 3.6.0
- * @buildtarget wp-admin/js/accordion.js
+ * @output wp-admin/js/accordion.js
  */
 
 ( function( $ ){

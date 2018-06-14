@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/language-chooser.js */
+/* @output wp-admin/js/language-chooser.js */
 
 jQuery( function($) {
 /*

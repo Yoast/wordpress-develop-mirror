@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/media-models.js */
+/* @output wp-includes/js/media-models.js */
 
 var $ = jQuery,
 	Attachment, Attachments, l10n, media;

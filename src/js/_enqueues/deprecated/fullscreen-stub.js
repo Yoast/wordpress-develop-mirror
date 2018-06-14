@@ -3,7 +3,7 @@
  *
  * @deprecated 4.1
  * @removed 4.3.
- * @buildtarget wp-admin/js/wp-fullscreen-stub.js
+ * @output wp-admin/js/wp-fullscreen-stub.js
  */
 ( function() {
 	var noop = function(){};

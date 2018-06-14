@@ -1,7 +1,7 @@
 /**
  * Interim login dialog.
  *
- * @buildtarget wp-includes/js/wp-auth-check.js
+ * @output wp-includes/js/wp-auth-check.js
  */
 
 /* global adminpage */

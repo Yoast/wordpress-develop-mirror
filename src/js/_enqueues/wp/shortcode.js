@@ -1,7 +1,7 @@
 /**
  * Utility functions for parsing and handling shortcodes in JavaScript.
  *
- * @buildtarget wp-includes/js/shortcode.js
+ * @output wp-includes/js/shortcode.js
  */
 
 /**

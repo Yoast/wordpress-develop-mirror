@@ -17,7 +17,7 @@
  * quicktags_id string The ID of the textarea that will be the editor canvas
  * buttons string Comma separated list of the default buttons names that will be shown in that instance.
  *
- * @buildtarget wp-includes/js/quicktags.js
+ * @output wp-includes/js/quicktags.js
  */
 
 // new edit toolbar used with permission

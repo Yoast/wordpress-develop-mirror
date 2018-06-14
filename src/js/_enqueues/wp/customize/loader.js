@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/customize-loader.js */
+/* @output wp-includes/js/customize-loader.js */
 
 /* global _wpCustomizeLoaderSettings */
 

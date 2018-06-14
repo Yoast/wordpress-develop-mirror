@@ -1,7 +1,7 @@
 /*
  * Script run inside a Customizer preview frame.
  *
- * @buildtarget wp-includes/js/customize-preview.js
+ * @output wp-includes/js/customize-preview.js
  */
 (function( exports, $ ){
 	var api = wp.customize,

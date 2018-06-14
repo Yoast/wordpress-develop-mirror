@@ -4,7 +4,7 @@
  * For deleting tags it makes a request to the server to delete the tag.
  * For adding tags it makes a request to the server to add the tag.
  *
- * @buildtarget wp-admin/js/tags.js
+ * @output wp-admin/js/tags.js
  */
 
  /* global ajaxurl, wpAjax, tagsl10n, showNotice, validateForm */

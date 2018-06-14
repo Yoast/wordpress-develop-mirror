@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/color-picker.js */
+/* @output wp-admin/js/color-picker.js */
 
 /* global wpColorPickerL10n */
 ( function( $, undef ) {

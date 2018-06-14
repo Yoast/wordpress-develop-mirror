@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/widgets/custom-html-widgets.js */
+/* @output wp-admin/js/widgets/custom-html-widgets.js */
 
 /* global wp */
 /* eslint consistent-this: [ "error", "control" ] */

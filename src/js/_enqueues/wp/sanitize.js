@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/wp-sanitize.js */
+/* @output wp-includes/js/wp-sanitize.js */
 
 ( function () {
 

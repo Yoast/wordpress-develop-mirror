@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/zxcvbn-async.js */
+/* @output wp-includes/js/zxcvbn-async.js */
 
 /* global _zxcvbnSettings */
 

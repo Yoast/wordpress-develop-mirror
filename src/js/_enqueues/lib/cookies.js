@@ -1,7 +1,7 @@
 /**
  * Cookie functions.
  *
- * @buildtarget wp-includes/js/utils.js
+ * @output wp-includes/js/utils.js
  */
 
 /* global userSettings */

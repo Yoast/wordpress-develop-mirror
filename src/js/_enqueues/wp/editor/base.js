@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/editor.js */
+/* @output wp-admin/js/editor.js */
 
 window.wp = window.wp || {};
 

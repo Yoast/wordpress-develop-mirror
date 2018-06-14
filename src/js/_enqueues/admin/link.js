@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/link.js */
+/* @output wp-admin/js/link.js */
 
 /* global postboxes, deleteUserSetting, setUserSetting, getUserSetting */
 

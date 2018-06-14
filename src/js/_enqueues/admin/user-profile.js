@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/user-profile.js */
+/* @output wp-admin/js/user-profile.js */
 
 /* global ajaxurl, pwsL10n, userProfileL10n */
 (function($) {

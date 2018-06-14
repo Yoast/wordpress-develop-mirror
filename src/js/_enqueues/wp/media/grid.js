@@ -1,4 +1,4 @@
-/* @buildtarget wp-includes/js/media-grid.js */
+/* @output wp-includes/js/media-grid.js */
 
 var media = wp.media;
 

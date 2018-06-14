@@ -2,7 +2,7 @@
  * This file contains the functions needed for the inline editing of posts.
  *
  * @since 2.7.0
- * @buildtarget wp-admin/js/inline-edit-post.js
+ * @output wp-admin/js/inline-edit-post.js
  */
 
 /* global inlineEditL10n, ajaxurl, typenow */

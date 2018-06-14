@@ -2,7 +2,7 @@
  * Handles the addition of the comment form.
  *
  * @since 2.7.0
- * @buildtarget wp-includes/js/comment-reply.js
+ * @output wp-includes/js/comment-reply.js
  *
  * @namespace addComment
  *
