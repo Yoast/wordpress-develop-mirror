@@ -1,13 +1,13 @@
 /* global wpPointerL10n */
 /**
- * Pointer jQuery widget.
+ * Initializes the wp-pointer widget using jQuery UI Widget Factory.
  */
 (function($){
 	var identifier = 0,
 		zindex = 9999;
 
 	/**
-	 * @class $.widget.wp.pointer
+	 * This is the jQuery widget function.
 	 */
 	$.widget('wp.pointer',/** @lends $.widget.wp.pointer.prototype */{
 		options: {
@@ -37,6 +37,12 @@
 			document: document
 		},
 
+		/**
+		 * Constructs the wp.pointer class.
+		 *
+		 * @class   $.widget.wp.pointer
+		 * @private
+		 */
 		_create: function() {
 			var positioning,
 				family;
@@ -59,6 +65,18 @@
 				.appendTo( this.options.document.body );
 		},
 
+		/**
+		 * Set options for the wp-pointer class.
+		 *
+		 * Changes to the document option will transfer the pointer to the body of the new document specified in the value.
+		 * Changes to the pointerClass option will remove the current class and add the class specified in the value.
+		 * Changes to the position option will call the reposition function.
+		 * Changes to the content option will call the update function.
+		 *
+		 * @param {string} key   The key of the option set.
+		 * @param {*}      value The value to set to the option key.
+		 * @private
+		 */
 		_setOption: function( key, value ) {
 			var o   = this.options,
 				tip = this.pointer;
@@ -85,15 +103,31 @@
 			}
 		},
 
+		/**
+		 * Takes the pointer element out of the DOM and destroys the widget and all associated bindings
+		 */
 		destroy: function() {
 			this.pointer.remove();
 			$.Widget.prototype.destroy.call( this );
 		},
 
+		/**
+		 * Returns the pointer element
+		 *
+		 * @returns {object} Pointer The pointer object
+		 */
 		widget: function() {
 			return this.pointer;
 		},
 
+		/**
+		 * Updates the content of the pointer.
+		 *
+		 * The content is updated to what content is in options, which can
+		 * either be a string or a callback function.
+		 *
+		 * @param {Object} event The event that caused the update.
+		 */
 		update: function( event ) {
 			var self = this,
 				o    = this.options,
@@ -124,8 +158,17 @@
 		},
 
 		/**
+		 * Updates the content and calls reposition on the pointer
+		 *
 		 * Update is separated into two functions to allow events to defer
 		 * updating the pointer (e.g. fetch content with ajax, etc).
+		 *
+		 * @private
+		 *
+		 * @param {Object} event   An event object.
+		 * @param {Object} content The content object.
+		 *
+		 * @returns void
 		 */
 		_update: function( event, content ) {
 			var buttons,
@@ -145,6 +188,9 @@
 			this.reposition();
 		},
 
+		/**
+		 * Repositions the pointer, and calls the class's repoint function.
+		 */
 		reposition: function() {
 			var position;
 
@@ -166,6 +212,11 @@
 			this.repoint();
 		},
 
+		/**
+		 * Sets the new edge of the object, and renames the arrow class.
+		 *
+		 * @returns {void}
+		 */
 		repoint: function() {
 			var o = this.options,
 				edge;
@@ -182,6 +233,13 @@
 			this.pointer.addClass( 'wp-pointer-' + edge );
 		},
 
+		/**
+		 * Processes the position for the pointer relative to the target element
+		 *
+		 * @param position
+		 * @returns {Object} result  An object containing position related data
+		 * @private
+		 */
 		_processPosition: function( position ) {
 			var opposite = {
 					top: 'bottom',
@@ -218,6 +276,14 @@
 			return result;
 		},
 
+		/**
+		 * Opens the widget pointer
+		 *
+		 * Only opens the widget pointer in case it is closed and not disabled,
+		 * and calls 'update' before doing so
+		 *
+		 * @param {Object} event The event to use as callback on completed update
+		 */
 		open: function( event ) {
 			var self = this,
 				o    = this.options;
@@ -230,6 +296,12 @@
 			});
 		},
 
+		/**
+		 * Opens and shows the pointer element
+		 *
+		 * @param {Object} event An event object.
+		 * @private
+		 */
 		_open: function( event ) {
 			var self = this,
 				o    = this.options;
@@ -248,6 +320,11 @@
 			}));
 		},
 
+		/**
+		 * Closes and hides the pointer element
+		 *
+		 * @param {Object} event An event object.
+		 */
 		close: function( event ) {
 			if ( !this.active || this.options.disabled )
 				return;
@@ -263,11 +340,19 @@
 			}));
 		},
 
+		/**
+		 * Puts the pointer on top by increasing the z-index
+		 */
 		sendToTop: function() {
 			if ( this.active )
 				this.pointer.css( 'z-index', zindex++ );
 		},
 
+		/**
+		 * Toggles the element between shown and hidden
+		 *
+		 * @param {Object} event An event object.
+		 */
 		toggle: function( event ) {
 			if ( this.pointer.is(':hidden') )
 				this.open( event );
@@ -275,6 +360,15 @@
 				this.close( event );
 		},
 
+		/**
+		 * Extends the pointer and the widget element with the supplied parameter, which is either an element or a function
+		 *
+		 * @private
+		 *
+		 * @param {Object} extend The object to be merged into the original object.
+		 *
+		 * @returns {Object}      The extended object.
+		 */
 		_handoff: function( extend ) {
 			return $.extend({
 				pointer: this.pointer,
