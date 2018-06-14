@@ -1,3 +1,5 @@
+/* @buildtarget wp-includes/js/wp-backbone.js */
+
 /** @namespace wp */
 window.wp = window.wp || {};
 

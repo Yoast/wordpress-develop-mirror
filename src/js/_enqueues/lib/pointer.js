@@ -1,4 +1,7 @@
+/* @buildtarget wp-includes/js/wp-pointer.js */
+
 /* global wpPointerL10n */
+
 /**
  * Pointer jQuery widget.
  */

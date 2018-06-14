@@ -1,3 +1,4 @@
+/* @buildtarget wp-includes/js/wp-embed-template.js */
 (function ( window, document ) {
 	'use strict';
 

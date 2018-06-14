@@ -1,5 +1,10 @@
+/**
+ * Interim login dialog.
+ *
+ * @buildtarget wp-includes/js/wp-auth-check.js
+ */
+
 /* global adminpage */
-// Interim login dialog
 (function($){
 	var wrap, next;
 

@@ -1,3 +1,5 @@
+/* @buildtarget wp-includes/js/customize-models.js */
+
 /* global _wpCustomizeHeader */
 (function( $, wp ) {
 	var api = wp.customize;

@@ -1,3 +1,5 @@
+/* @buildtarget wp-includes/js/customize-selective-refresh.js */
+
 /* global jQuery, JSON, _customizePartialRefreshExports, console */
 
 /** @namespace wp.customize.selectiveRefresh */

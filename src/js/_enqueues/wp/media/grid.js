@@ -1,3 +1,5 @@
+/* @buildtarget wp-includes/js/media-grid.js */
+
 var media = wp.media;
 
 media.controller.EditAttachmentMetadata = require( '../../../media/controllers/edit-attachment-metadata.js' );

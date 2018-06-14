@@ -1,4 +1,4 @@
-/* @buildtarget wp-admin/js/link.js */
+/* @buildtarget wp-includes/js/wplink.js */
 
 var wpLink;
 

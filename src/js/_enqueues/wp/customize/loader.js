@@ -1,4 +1,7 @@
+/* @buildtarget wp-includes/js/customize-loader.js */
+
 /* global _wpCustomizeLoaderSettings */
+
 /**
  * Expose a public API that allows the customizer to be
  * loaded on any page.

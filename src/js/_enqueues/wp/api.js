@@ -1,3 +1,5 @@
+/* @buildtarget wp-includes/js/wp-api.js */
+
 (function( window, undefined ) {
 
 	'use strict';
