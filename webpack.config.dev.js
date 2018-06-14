@@ -1,24 +1,17 @@
-var path        	= require( 'path' ),
-	webpack       	= require( 'webpack' ),
-	admin_files   	= {},
-	include_files 	= {};
+var path    = require( 'path' ),
+	webpack = require( 'webpack' );
 
-include_files = {
-	'build/wp-includes/js/media-audiovideo.js': ['./src/js/_enqueues/wp/media/audiovideo.js'],
-	'build/wp-includes/js/media-audiovideo.min.js': ['./src/js/_enqueues/wp/media/audiovideo.js'],
-	'build/wp-includes/js/media-grid.js': ['./src/js/_enqueues/wp/media/grid.js'],
-	'build/wp-includes/js/media-grid.min.js': ['./src/js/_enqueues/wp/media/grid.js'],
-	'build/wp-includes/js/media-models.js': ['./src/js/_enqueues/wp/media/models.js'],
-	'build/wp-includes/js/media-models.min.js': ['./src/js/_enqueues/wp/media/models.js'],
-	'build/wp-includes/js/media-views.js': ['./src/js/_enqueues/wp/media/views.js'],
-	'build/wp-includes/js/media-views.min.js': ['./src/js/_enqueues/wp/media/views.js'],
-};
+var OutputAnnotationsPlugin = require( '../webpack-buildtarget-plugin' );
 
 module.exports = [
 	{
 		cache: true,
 		watch: false,
-		entry: Object.assign( admin_files, include_files ),
+		entry: OutputAnnotationsPlugin.generateEntries(
+			'./src/js/_enqueues/**/*.js',
+			{ ignore: './src/js/_enqueues/vendor/**/*.js' },
+			'./build/'
+		),
 		output: {
 			filename: '[name]',
 		},
