@@ -1,7 +1,6 @@
 /* @output wp-admin/js/dashboard.js */
 
 /* global pagenow, ajaxurl, postboxes, wpActiveEditor:true */
-var ajaxWidgets, ajaxPopulateWidgets, quickPressLoad;
 window.wp = window.wp || {};
 
 /**
@@ -59,7 +58,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @global
  	 */
-	ajaxWidgets = ['dashboard_primary'];
+	window.ajaxWidgets = ['dashboard_primary'];
 
 	/**
 	 * Triggers widget updates via AJAX.
@@ -72,7 +71,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @returns {void}
 	 */
-	ajaxPopulateWidgets = function(el) {
+	window.ajaxPopulateWidgets = function(el) {
 		/**
 		 * Fetch the latest representation of the widget via Ajax and show it.
 		 *
@@ -102,21 +101,21 @@ jQuery(document).ready( function($) {
 		if ( el ) {
 			el = el.toString();
 			// If the element is available as AJAX widget, show it.
-			if ( $.inArray(el, ajaxWidgets) !== -1 ) {
+			if ( $.inArray(el, window.ajaxWidgets) !== -1 ) {
 				// Show element without any delay.
 				show(0, el);
 			}
 		} else {
 			// Walk through all ajaxWidgets, loading them after each other.
-			$.each( ajaxWidgets, show );
+			$.each( window.ajaxWidgets, show );
 		}
 	};
 
 	// Initially populate ajax widgets.
-	ajaxPopulateWidgets();
+	window.ajaxPopulateWidgets();
 
 	// Register ajax widgets as postbox toggles.
-	postboxes.add_postbox_toggles(pagenow, { pbshow: ajaxPopulateWidgets } );
+	postboxes.add_postbox_toggles(pagenow, { pbshow: window.ajaxPopulateWidgets } );
 
 	/**
 	 * Control the Quick Press (Quick Draft) widget.
@@ -127,7 +126,7 @@ jQuery(document).ready( function($) {
 	 *
 	 * @returns {void}
 	 */
-	quickPressLoad = function() {
+	window.quickPressLoad = function() {
 		var act = $('#quickpost-action'), t;
 
 		// Enable the submit buttons.
@@ -147,7 +146,7 @@ jQuery(document).ready( function($) {
 				// Replace the form, and prepend the published post.
 				$('#dashboard_quick_press .inside').html( data );
 				$('#quick-press').removeClass('initial-form');
-				quickPressLoad();
+				window.quickPressLoad();
 				highlightLatestPost();
 
 				// Focus the title to allow for quickly drafting another post.
@@ -208,7 +207,7 @@ jQuery(document).ready( function($) {
 
 		autoResizeTextarea();
 	};
-	quickPressLoad();
+	window.quickPressLoad();
 
 	// Enable the dragging functionality of the widgets.
 	$( '.meta-box-sortables' ).sortable( 'option', 'containment', '#wpwrap' );

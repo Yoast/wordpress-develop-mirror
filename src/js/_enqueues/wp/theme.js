@@ -2039,9 +2039,8 @@ $( document ).ready(function() {
 })( jQuery );
 
 // Align theme browser thickbox
-var tb_position;
 jQuery(document).ready( function($) {
-	tb_position = function() {
+	window.tb_position = function() {
 		var tbWindow = $('#TB_window'),
 			width = $(window).width(),
 			H = $(window).height(),
