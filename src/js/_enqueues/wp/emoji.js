@@ -12,20 +12,8 @@
 	 *
 	 * @see  Twitter Emoji library
 	 * @link https://github.com/twitter/twemoji
-	 * @global
 	 *
-	 * @fires   eventName
-	 * @fires   className#eventName
-	 * @listens event:eventName
-	 * @listens className~event:eventName
-	 *
-	 * @param {type}   var           Description.
-	 * @param {type}   [var]         Description of optional variable.
-	 * @param {type}   [var=default] Description of optional variable with default variable.
-	 * @param {Object} objectVar     Description.
-	 * @param {type}   objectVar.key Description of a key in the objectVar parameter.
-	 *
-	 * @return {type} Description.
+	 * @return {Object} The wpEmoji parse and test functions.
 	 */
 	function wpEmoji() {
 		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
@@ -61,6 +49,10 @@
 		/**
 		 * Runs when the document load event is fired, so we can do our first parse of the page.
 		 *
+		 * Listens to all the DOM mutations and checks for added nodes that
+		 * contain emoji characters and replaces those with twitter emoji
+		 * images.
+		 *
 		 * @since 4.2.0
 		 */
 		function load() {
@@ -68,6 +60,7 @@
 				return;
 			}
 
+			// Ensure twemoji is available on the global window before proceeding.
 			if ( typeof window.twemoji === 'undefined' ) {
 				// Break if waiting for longer than 30 sec.
 				if ( count > 600 ) {
@@ -85,6 +78,7 @@
 			twemoji = window.twemoji;
 			loaded = true;
 
+			// Initialize the mutation observer, which checks all added nodes for replaceable emoji characters.
 			if ( MutationObserver ) {
 				new MutationObserver( function( mutationRecords ) {
 					var i = mutationRecords.length,
@@ -99,7 +93,7 @@
 						 * Checks if an image has been replaced by a text element
 						 * with the same text as the alternate description of the replaced image.
 						 * (presumably because the image could not be loaded).
-						 * If it is, do nothing.
+						 * If it is, do absolutely nothing.
 						 *
 						 * Node type 3 is a TEXT_NODE.
 						 * See: https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
@@ -114,6 +108,7 @@
 							return;
 						}
 
+						// Loop through all the added nodes.
 						while ( ii-- ) {
 							node = addedNodes[ ii ];
 
@@ -141,7 +136,11 @@
 								node = node.parentNode;
 							}
 
-							// Node type 1 is a ELEMENT_NODE.
+							/*
+							 * If the class name of a non-element node contains 'wp-exclude-emoji' ignore it.
+							 *
+							 * Node type 1 is an ELEMENT_NODE.
+							 */
 							if ( ! node || node.nodeType !== 1 ||
 								( node.className && typeof node.className === 'string' && node.className.indexOf( 'wp-exclude-emoji' ) !== -1 ) ) {
 
@@ -195,12 +194,17 @@
 		function parse( object, args ) {
 			var params;
 
+			/*
+			 * If the browser has full support, twemoji is not loaded or our
+			 * object is not what was expected, we do not parse anything.
+			 */
 			if ( settings.supports.everything || ! twemoji || ! object ||
 				( 'string' !== typeof object && ( ! object.childNodes || ! object.childNodes.length ) ) ) {
 
 				return object;
 			}
 
+			// Compose the params for the twitter emoji library.
 			args = args || {};
 			params = {
 				base: browserSupportsSvgAsImage() ? settings.svgUrl : settings.baseUrl,
