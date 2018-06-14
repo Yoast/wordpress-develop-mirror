@@ -5,7 +5,7 @@
  */
 
 /* global plugininstallL10n, tb_click, tb_remove */
-var tb_position;
+
 jQuery( document ).ready( function( $ ) {
 
 	var tbWindow,
@@ -18,7 +18,7 @@ jQuery( document ).ready( function( $ ) {
 		$wrap = $ ( '.wrap' ),
 		$body = $( document.body );
 
-	tb_position = function() {
+	window.tb_position = function() {
 		var width = $( window ).width(),
 			H = $( window ).height() - ( ( 792 < width ) ? 60 : 20 ),
 			W = ( 792 < width ) ? 772 : width - 20;

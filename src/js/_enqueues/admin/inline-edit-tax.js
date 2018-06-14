@@ -17,11 +17,9 @@ window.wp = window.wp || {};
  * @property {string} what The type property with a hash prefixed and a dash
  *                         suffixed.
  */
-var inlineEditTax;
-
 ( function( $, wp ) {
 
-inlineEditTax = {
+window.inlineEditTax = {
 
 	/**
 	 * Initializes the inline taxonomy editor by adding event handlers to be able to

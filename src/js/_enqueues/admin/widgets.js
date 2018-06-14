@@ -1,11 +1,11 @@
 /* @output wp-admin/js/widgets.js */
 
 /* global ajaxurl, isRtl */
-var wpWidgets;
+
 (function($) {
 	var $document = $( document );
 
-wpWidgets = {
+window.wpWidgets = {
 	/**
 	 * A closed Sidebar that gets a Widget dragged over it.
 	 *

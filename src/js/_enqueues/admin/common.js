@@ -1,7 +1,6 @@
 /* @output wp-admin/js/common.js */
 
 /* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
-var showNotice, adminMenu, columns, validateForm, screenMeta;
 
 /**
  *  Adds common WordPress functionality to the window.
@@ -21,7 +20,7 @@ var showNotice, adminMenu, columns, validateForm, screenMeta;
  * @since 2.7.0
  * @deprecated 3.3.0
  */
-adminMenu = {
+window.adminMenu = {
 	init : function() {},
 	fold : function() {},
 	restoreMenuState : function() {},
@@ -30,7 +29,7 @@ adminMenu = {
 };
 
 // Show/hide/save table columns.
-columns = {
+window.columns = {
 
 	/**
 	 * Initializes the column toggles in the screen options.
@@ -156,7 +155,7 @@ $document.ready(function(){columns.init();});
  *
  * @returns {boolean} Returns true if all required fields are not an empty string.
  */
-validateForm = function( form ) {
+window.validateForm = function( form ) {
 	return !$( form )
 		.find( '.form-required' )
 		.filter( function() { return $( ':input:visible', this ).val() === ''; } )
@@ -176,7 +175,7 @@ validateForm = function( form ) {
  *
  * @returns {void}
  */
-showNotice = {
+window.showNotice = {
 
 	/**
 	 * Shows a delete confirmation pop-up message.
@@ -217,7 +216,7 @@ showNotice = {
  *
  * @returns {void}
  */
-screenMeta = {
+window.screenMeta = {
 	element: null, // #screen-meta
 	toggles: null, // .screen-meta-toggle
 	page:    null, // #wpcontent
