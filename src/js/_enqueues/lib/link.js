@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/link.js */
+
 var wpLink;
 
 ( function( $, wpLinkL10n, wp ) {

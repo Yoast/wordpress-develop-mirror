@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/theme.js */
+
 /* global _wpThemeSettings, confirm */
 window.wp = window.wp || {};
 

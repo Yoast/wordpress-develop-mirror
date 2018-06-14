@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/link.js */
+
 /* global postboxes, deleteUserSetting, setUserSetting, getUserSetting */
 
 jQuery(document).ready( function($) {

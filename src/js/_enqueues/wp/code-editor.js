@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/code-editor.js */
+
 if ( 'undefined' === typeof window.wp ) {
 	/**
 	 * @namespace wp

@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/customize-widgets.js */
+
 /* global _wpCustomizeWidgetsSettings */
 (function( wp, $ ){
 

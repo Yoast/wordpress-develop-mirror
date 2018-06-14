@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/theme-plugin-editor.js */
+
 /* eslint no-magic-numbers: ["error", { "ignore": [-1, 0, 1] }] */
 
 if ( ! window.wp ) {

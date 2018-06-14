@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/language-chooser.js */
+
 jQuery( function($) {
 /*
  * Set the correct translation to the continue button and show a spinner

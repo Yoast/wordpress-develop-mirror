@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/widgets/custom-html-widgets.js */
+
 /* global wp */
 /* eslint consistent-this: [ "error", "control" ] */
 /* eslint no-magic-numbers: ["error", { "ignore": [0,1,-1] }] */

@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/widgets/media-image-widget.js */
+
 /* eslint consistent-this: [ "error", "control" ] */
 (function( component, $ ) {
 	'use strict';

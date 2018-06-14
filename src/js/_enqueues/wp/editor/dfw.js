@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/editor-expand.js */
+
 ( function( window, $, undefined ) {
 	'use strict';
 

@@ -1,3 +1,5 @@
+/* @buildtarget wp-admin/js/widgets/media-widgets.js */
+
 /* eslint consistent-this: [ "error", "control" ] */
 
 /**
