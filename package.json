@@ -41,9 +41,9 @@
 		"ink-docstrap": "^1.3.0",
 		"jquery-migrate": "1.4.1",
 		"matchdep": "~1.0.0",
+		"n-readlines": "1.0.0",
 		"webpack": "^3.6.0",
-		"webpack-dev-server": "^2.9.1",
-		"webpack-output-annotations-plugin": "git+https://github.com/herregroen/webpack-output-annotations-plugin.git"
+		"webpack-dev-server": "^2.9.1"
 	},
 	"dependencies": {
 		"backbone": "1.3.3",

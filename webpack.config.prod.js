@@ -1,11 +1,11 @@
 var webpack = require( 'webpack' );
-var OutputAnnotationsPlugin = require( 'webpack-output-annotations-plugin' );
+var generateEntries = require( './tools/webpack/generateEntries' );
 
 module.exports = [
 	{
 		cache: true,
 		watch: false,
-		entry: OutputAnnotationsPlugin.generateEntries({
+		entry: generateEntries({
 			pattern: './src/js/_enqueues/**/*.js',
 			globOptions: { ignore: './src/js/_enqueues/vendor/**/*.js' },
 			prefix: './build/'
