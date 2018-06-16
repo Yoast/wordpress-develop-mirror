@@ -47,7 +47,7 @@ module.exports =  function( options ) {
 	var files = glob.sync( options.pattern, options.globOptions );
 
 	for ( var i = 0; i < files.length; i++ ) {
-		var output, file = files[ i ];
+		var output, minifiedOutput, file = files[ i ];
 
 		output = getFileOutput( file );
 
@@ -57,6 +57,15 @@ module.exports =  function( options ) {
 				entries[output] = [];
 			}
 			entries[ output ].push( file );
+
+			if ( options.minify ) {
+				minifiedOutput = output.replace( '.js', '.min.js' );
+
+				if ( ! entries[ minifiedOutput ] ) {
+					entries[minifiedOutput] = [];
+				}
+				entries[ minifiedOutput ].push( file );
+			}
 		}
 	}
 

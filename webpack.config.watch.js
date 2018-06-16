@@ -1,4 +1,3 @@
-var webpack = require( 'webpack' );
 var generateEntries = require( './tools/webpack/generateEntries' );
 var minifyAssetsPlugin = require( './tools/webpack/minifyAssetsPlugin' );
 var minifyEmbedPlugin = require( './tools/webpack/minifyEmbedPlugin' );
@@ -11,7 +10,7 @@ var compressTinymcePlugin = require( './tools/webpack/compressTinymcePlugin' );
 module.exports = [
 	{
 		cache: true,
-		watch: false,
+		watch: true,
 		entry: generateEntries({
 			pattern: './src/js/_enqueues/**/*.js',
 			globOptions: { ignore: './src/js/_enqueues/vendor/**/*.js' },
@@ -20,7 +19,6 @@ module.exports = [
 		}),
 		output: { filename: '[name]' },
 		plugins: [
-			new webpack.optimize.ModuleConcatenationPlugin(),
 			minifyAssetsPlugin,
 			minifyEmbedPlugin,
 			copyPackagesPlugin,
