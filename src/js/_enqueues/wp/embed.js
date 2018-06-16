@@ -2,11 +2,13 @@
  * WordPress inline HTML embed
  *
  * @since 4.4.0
- * @output wp-includes/js/wp-embed.js
  *
  * This file cannot have ampersands in it. This is to ensure
  * it can be embedded in older versions of WordPress.
  * See https://core.trac.wordpress.org/changeset/35708.
+ *
+ * For this reason this file also will not be build by
+ * WebPack and has a custom CopyPlugin configuration to build it.
  */
 (function ( window, document ) {
 	'use strict';

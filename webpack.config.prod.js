@@ -1,7 +1,7 @@
 var webpack = require( 'webpack' );
 var generateEntries = require( './tools/webpack/generateEntries' );
 var minifyAssetsPlugin = require( './tools/webpack/minifyAssetsPlugin' );
-var minifyEmbedPlugin = require( './tools/webpack/minifyEmbedPlugin' );
+var copyEmbedPlugin = require( './tools/webpack/copyEmbedPlugin' );
 var copyPackagesPlugin = require( './tools/webpack/copyPackagesPlugin' );
 var copyVendorPlugin = require( './tools/webpack/copyVendorPlugin' );
 var concatTinymcePlugin = require( './tools/webpack/concatTinymcePlugin' );
@@ -22,7 +22,7 @@ module.exports = [
 		plugins: [
 			new webpack.optimize.ModuleConcatenationPlugin(),
 			minifyAssetsPlugin,
-			minifyEmbedPlugin,
+			copyEmbedPlugin,
 			copyPackagesPlugin,
 			copyVendorPlugin,
 			concatTinymcePlugin,

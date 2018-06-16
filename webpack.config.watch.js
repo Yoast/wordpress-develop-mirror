@@ -1,11 +1,6 @@
 var generateEntries = require( './tools/webpack/generateEntries' );
 var minifyAssetsPlugin = require( './tools/webpack/minifyAssetsPlugin' );
-var minifyEmbedPlugin = require( './tools/webpack/minifyEmbedPlugin' );
-var copyPackagesPlugin = require( './tools/webpack/copyPackagesPlugin' );
-var copyVendorPlugin = require( './tools/webpack/copyVendorPlugin' );
-var concatTinymcePlugin = require( './tools/webpack/concatTinymcePlugin' );
-var concatEmojiPlugin = require( './tools/webpack/concatEmojiPlugin' );
-var compressTinymcePlugin = require( './tools/webpack/compressTinymcePlugin' );
+var copyEmbedPlugin = require( './tools/webpack/copyEmbedPlugin' );
 
 module.exports = [
 	{
@@ -18,14 +13,6 @@ module.exports = [
 			minify: true
 		}),
 		output: { filename: '[name]' },
-		plugins: [
-			minifyAssetsPlugin,
-			minifyEmbedPlugin,
-			copyPackagesPlugin,
-			copyVendorPlugin,
-			concatTinymcePlugin,
-			concatEmojiPlugin,
-			compressTinymcePlugin
-		]
+		plugins: [ minifyAssetsPlugin ]
 	}
 ];

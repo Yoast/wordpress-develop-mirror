@@ -9,7 +9,7 @@ function getFileOutput( file ) {
 		line = line.toString().trim();
 
 		// Empty line or opening/closing of comment block.
-		if ( line === '/**' ) {
+		if ( line === '/*' || line === '/**' ) {
 			inComment = true;
 			continue;
 		}
