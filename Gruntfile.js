@@ -111,19 +111,8 @@ module.exports = function(grunt) {
 				cwd: BUILD_DIR,
 				src: []
 			},
-			tinymce: ['<%= concat.tinymce.dest %>'],
+			tinymce: ['./build/wp-includes/js/tinymce/wp-tinymce.js'],
 			qunit: ['tests/qunit/compiled.html']
-		},
-		file_append: {
-			default_options: {
-				files: [
-					{
-						append: 'jQuery.noConflict();',
-				 		input: './build/wp-includes/js/jquery/jquery.js',
-				 		output: './build/wp-includes/js/jquery/jquery.js'
-					}
-				]
-			}
 		},
 		copy: {
 			files: {
@@ -493,35 +482,6 @@ module.exports = function(grunt) {
 				args: ['--verbose', '-c', 'phpunit.xml.dist', '--group', 'restapi-jsclient']
 			}
 		},
-		uglify: {
-			options: {
-				ASCIIOnly: true,
-				screwIE8: false
-			},
-			core: {
-				expand: true,
-				cwd: BUILD_DIR,
-				dest: BUILD_DIR,
-				ext: '.min.js',
-				src: [
-					'wp-admin/js/**/*.js',
-					'wp-includes/js/*.js',
-					'wp-includes/js/plupload/*.js',
-					'wp-includes/js/mediaelement/wp-mediaelement.js',
-					'wp-includes/js/mediaelement/wp-playlist.js',
-					'wp-includes/js/mediaelement/mediaelement-migrate.js',
-					'wp-includes/js/tinymce/plugins/wordpress/plugin.js',
-					'wp-includes/js/tinymce/plugins/wp*/plugin.js',
-
-					// Exceptions
-					'!**/*.min.js',
-					'!wp-admin/js/custom-header.js', // Why? We should minify this.
-					'!wp-admin/js/farbtastic.js',
-					'!wp-includes/js/swfobject.js',
-					'!wp-includes/js/wp-embed.js' // We have extra options for this, see uglify:embed
-				]
-			}
-		},
 		webpack: {
 			prod: webpackConfig,
 			dev: webpackDevConfig,
@@ -851,8 +811,7 @@ module.exports = function(grunt) {
 			config: {
 				files: [
 					'Gruntfile.js',
-					'webpack-dev.config.js',
-					'webpack.config.js'
+					'webpack.config.*.js'
 				]
 			},
 			colors: {

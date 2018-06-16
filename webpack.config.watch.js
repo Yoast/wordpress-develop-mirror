@@ -1,6 +1,4 @@
 var generateEntries = require( './tools/webpack/generateEntries' );
-var minifyAssetsPlugin = require( './tools/webpack/minifyAssetsPlugin' );
-var copyEmbedPlugin = require( './tools/webpack/copyEmbedPlugin' );
 
 module.exports = [
 	{
@@ -10,9 +8,8 @@ module.exports = [
 			pattern: './src/js/_enqueues/**/*.js',
 			globOptions: { ignore: './src/js/_enqueues/vendor/**/*.js' },
 			prefix: './build/',
-			minify: true
+			minify: true /* Only generated minified file names */
 		}),
-		output: { filename: '[name]' },
-		plugins: [ minifyAssetsPlugin ]
+		output: { filename: '[name]' }
 	}
 ];

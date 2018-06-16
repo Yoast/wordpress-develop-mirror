@@ -1,9 +1,19 @@
 var UglifyJS = require( 'uglify-js' );
 
 module.exports = function ( options ) {
-	options = Object.assign( {}, options, { fromString: true } );
+	options = options || {};
+	options.output = Object.assign( {}, options.output, {
+		ascii_only: true,
+		ie8: true
+	} );
 
 	return function ( contents ) {
-		return UglifyJS.minify( contents.toString(), options ).code.toString();
+		var minified = UglifyJS.minify( contents.toString(), options );
+
+		if ( minified.error ) {
+			console.error( minified.error );
+		}
+
+		return minified.code.toString();
 	};
 };

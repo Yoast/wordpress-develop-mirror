@@ -32,6 +32,6 @@ module.exports = new CopyPlugin([
 		context: './node_modules/jquery-ui/ui/',
 		to: './build/wp-includes/js/jquery/ui/[name].min.js',
 		toType: 'template',
-		transform: getMinifier( { preserveComments: /^!/ } )
+		transform: getMinifier( { output: { comments: /^!/ } } )
 	}
 ]);
