@@ -838,7 +838,7 @@ module.exports = function(grunt) {
 			all: {
 				files: [
 					SOURCE_DIR + '**',
-					'!' + SOURCE_DIR + 'js/**/*.js',
+					'!' + SOURCE_DIR + 'js/**/*.js*',
 					// Ignore version control directories.
 					'!' + SOURCE_DIR + '**/.{svn,git}/**'
 				],
@@ -925,7 +925,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask( 'watch', function() {
 		if ( ! this.args.length || this.args.indexOf( 'webpack' ) > -1 ) {
-			grunt.task.run( 'prewatch' );
+			grunt.task.run( 'build' );
 		}
 
 		if ( 'watch:phpunit' === grunt.cli.tasks[ 0 ] || 'undefined' !== typeof grunt.option( 'phpunit' ) ) {
@@ -1063,12 +1063,6 @@ module.exports = function(grunt) {
 		'uglify:core'
 	] );
 
-	grunt.registerTask( 'build:tinymce', [
-		'concat:tinymce',
-		'compress:tinymce',
-		'clean:tinymce'
-	] );
-
 	grunt.registerTask( 'build:js', [
 		'clean:js',
 		'webpack:dev',
@@ -1091,21 +1085,6 @@ module.exports = function(grunt) {
 		'rtl',
 		'cssmin:rtl',
 		'cssmin:colors',
-		'includes:emoji',
-		'includes:embed',
-		'usebanner',
-		'jsvalidate:build'
-	] );
-
-	grunt.registerTask( 'prewatch', [
-		'clean:all',
-		'copy:all',
-		'cssmin:core',
-		'colors',
-		'rtl',
-		'cssmin:rtl',
-		'cssmin:colors',
-		'concat:emoji',
 		'includes:emoji',
 		'includes:embed',
 		'usebanner',
