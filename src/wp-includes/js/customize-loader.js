@@ -9,7 +9,7 @@ window.wp = window.wp || {};
 /**
  * Handles the Loader for the Customizer.
  *
- * @since todo: this
+ * @since 3.5.0
  *
  * @param {object}  exports   wp.
  * @param {object}  $         jQuery.
@@ -35,7 +35,7 @@ window.wp = window.wp || {};
 		 *
 		 * @augments wp.customize.Events
 		 *
-		 * @since todo: this
+		 * @since 3.5.0
 		 * @constructs wp.customize.Loader
 		 *
 		 * @memberof wp.customize
@@ -84,7 +84,7 @@ window.wp = window.wp || {};
 		/**
 		 * Opens the loader, and closes it when it is active.
 		 *
-		 * @since todo: dit
+		 * @since 3.5.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -104,7 +104,7 @@ window.wp = window.wp || {};
 		/**
 		 * If the fragment identifier of the url is changed, It opens or closes the loader.
 		 *
-		 * @since todo: dit
+		 * @since 3.8.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -126,7 +126,7 @@ window.wp = window.wp || {};
 		/**
 		 * Ensures the loader is saved.
 		 *
-		 * @since todo: dit
+		 * @since 4.0.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -141,7 +141,7 @@ window.wp = window.wp || {};
 		/**
 		 * Open the Customizer overlay for a specific URL.
 		 *
-		 * @since todo: dit
+		 * @since 3.5.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -201,6 +201,7 @@ window.wp = window.wp || {};
 				Loader.messenger.send( 'back' );
 			});
 
+			// If the loader is closed, navigate back to the previous page.
 			this.messenger.bind( 'close', function() {
 				if ( $.support.history ) {
 					history.back();
@@ -211,7 +212,7 @@ window.wp = window.wp || {};
 				}
 			});
 
-			// Prompt AYS dialog when navigating away
+			// Prompt AYS ("Are you sure?") dialog when navigating away
 			$( window ).on( 'beforeunload', this.beforeunload );
 
 			this.messenger.bind( 'saved', function () {
@@ -233,7 +234,7 @@ window.wp = window.wp || {};
 		/**
 		 * Opens the loader
 		 *
-		 * @since todo: dit
+		 * @since 4.0.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -255,9 +256,9 @@ window.wp = window.wp || {};
 		},
 
 		/**
-		 * Callback after the Customizer has been opened.
+		 * Adds classes to the loader when it has been opened.
 		 *
-		 * @since todo: dit
+		 * @since 3.5.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -268,9 +269,10 @@ window.wp = window.wp || {};
 		},
 
 		/**
-		 * Close the Customizer overlay.
+		 * Close the Customizer overlay after having asked the user for confirmation.
+		 * If the user did not confirm, the Customizer overlay is restored.
 		 *
-		 * @since todo: dit
+		 * @since 3.5.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -304,9 +306,10 @@ window.wp = window.wp || {};
 		},
 
 		/**
-		 * Callback after the Customizer has been closed.
+		 * Cleans up all used variables and event listeners for the Customizer overlay and returns focus
+		 * to the link that opened the overlay.
 		 *
-		 * @since todo: dit
+		 * @since 3.5.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -330,9 +333,10 @@ window.wp = window.wp || {};
 		},
 
 		/**
-		 * Removes customize-loading class from the loader body, and sets its aria-busy to false.
+		 * Removes customize-loading class from the loader body after the body has been loaded,
+		 * and sets its aria-busy to false.
 		 *
-		 * @since todo: dit
+		 * @since 3.5.0
 		 *
 		 * @memberOf wp.customize
 		 *
@@ -342,13 +346,13 @@ window.wp = window.wp || {};
 			Loader.body.removeClass( 'customize-loading' ).attr( 'aria-busy', 'false' );
 		},
 
-		 // Overlay hide/show utility methods.
+		// Overlay hide/show utility methods.
 		overlay: {
 
 			/**
 			 * Calls the 'opened' function after the loader has faded in.
 			 *
-			 * @since todo: dit
+			 * @since 3.5.0
 			 *
 			 * @return {void}
 			 */
@@ -359,7 +363,7 @@ window.wp = window.wp || {};
 			/**
 			 * Calls the 'closed' function after the loader has faded out.
 			 *
-			 * @since todo: dit
+			 * @since 3.5.0
 			 *
 			 * @return {void}
 			 */
@@ -374,7 +378,7 @@ window.wp = window.wp || {};
 	 *
 	 * Gets the loader settings from the global _wpCustomizeLoaderSettings, and initializes the loader.
 	 *
-	 * @since todo: dit
+	 * @since 3.5.0
 	 *
 	 * @return {void}
 	 */
