@@ -726,6 +726,8 @@ setCommentsList = function() {
 /**
  * Object containing functionality regarding the comment quick editor and reply editor.
  *
+ * @since 3.5.0
+ * 
  * @global
  */
 commentReply = {
