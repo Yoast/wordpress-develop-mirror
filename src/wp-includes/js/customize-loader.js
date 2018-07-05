@@ -1,12 +1,21 @@
 /* global _wpCustomizeLoaderSettings */
 /**
- * Expose a public API that allows the customizer to be
- * loaded on any page.
+ * Expose a public API that allows the customizer to be loaded on any page.
  *
  * @namespace wp
  */
 window.wp = window.wp || {};
 
+/**
+ * Handles the Loader for the Customizer.
+ *
+ * @since todo: this
+ *
+ * @param {object}  exports   wp.
+ * @param {object}  $         jQuery.
+ *
+ * @return {void}
+ */
 (function( exports, $ ){
 	var api = wp.customize,
 		Loader;
@@ -16,28 +25,30 @@ window.wp = window.wp || {};
 		hashchange: ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7)
 	});
 
-	/**
-	 * Allows the Customizer to be overlayed on any page.
-	 *
-	 * By default, any element in the body with the load-customize class will open
-	 * an iframe overlay with the URL specified.
-	 *
-	 *     e.g. <a class="load-customize" href="<?php echo wp_customize_url(); ?>">Open Customizer</a>
-	 *
-	 * @memberOf wp.customize
-	 *
-	 * @class
-	 * @augments wp.customize.Events
-	 */
 	Loader = $.extend( {}, api.Events,/** @lends wp.customize.Loader.prototype */{
 		/**
-		 * Setup the Loader; triggered on document#ready.
+		 * Sets up the Loader, triggered on document#ready.
+		 *
+		 * Allows the Customizer to be overlaid on any page. By default, any element in the body with the
+		 * load-customize class will open an iframe overlay with the URL specified.
+		 * e.g. <a class="load-customize" href="<?php echo wp_customize_url(); ?>">Open Customizer</a>
+		 *
+		 * @augments wp.customize.Events
+		 *
+		 * @since todo: this
+		 * @constructs wp.customize.Loader
+		 *
+		 * @memberof wp.customize
+		 *
+		 * @return {void}
 		 */
 		initialize: function() {
 			this.body = $( document.body );
 
-			// Ensure the loader is supported.
-			// Check for settings, postMessage support, and whether we require CORS support.
+			/*
+			 * Ensure the loader is supported. Check for settings, postMessage support,
+			 * and whether we require CORS support.
+			 */
 			if ( ! Loader.settings || ! $.support.postMessage || ( ! $.support.cors && Loader.settings.isCrossDomain ) ) {
 				return;
 			}
@@ -49,8 +60,7 @@ window.wp = window.wp || {};
 			this.bind( 'open', this.overlay.show );
 			this.bind( 'close', this.overlay.hide );
 
-			// Any element in the body with the `load-customize` class opens
-			// the Customizer.
+			// Any element in the body with the `load-customize` class opens the Customizer.
 			$('#wpbody').on( 'click', '.load-customize', function( event ) {
 				event.preventDefault();
 
@@ -71,6 +81,17 @@ window.wp = window.wp || {};
 			}
 		},
 
+		/**
+		 * Opens the loader, and closes it when it is active.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @param e The event that triggered this function.
+		 *
+		 * @return {void}
+		 */
 		popstate: function( e ) {
 			var state = e.originalEvent.state;
 			if ( state && state.customize ) {
@@ -80,9 +101,19 @@ window.wp = window.wp || {};
 			}
 		},
 
+		/**
+		 * If the fragment identifier of the url is changed, It opens or closes the loader.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @return {void}
+		 */
 		hashchange: function() {
 			var hash = window.location.toString().split('#')[1];
 
+			// If the user's location has get variable wp_customize set as 'on'.
 			if ( hash && 0 === hash.indexOf( 'wp_customize=on' ) ) {
 				Loader.open( Loader.settings.url + '?' + hash );
 			}
@@ -92,6 +123,15 @@ window.wp = window.wp || {};
 			}
 		},
 
+		/**
+		 * Ensures the loader is saved.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @return {void}
+		 */
 		beforeunload: function () {
 			if ( ! Loader.saved() ) {
 				return Loader.settings.l10n.saveAlert;
@@ -101,7 +141,13 @@ window.wp = window.wp || {};
 		/**
 		 * Open the Customizer overlay for a specific URL.
 		 *
-		 * @param  string src URL to load in the Customizer.
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @param {string} src URL to load in the Customizer.
+		 *
+		 * @return {void}
 		 */
 		open: function( src ) {
 
@@ -184,6 +230,17 @@ window.wp = window.wp || {};
 			this.trigger( 'open' );
 		},
 
+		/**
+		 * Opens the loader
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @param {string} src Url to load in the customizer
+		 *
+		 * @return {void}
+		 */
 		pushState: function ( src ) {
 			var hash = src.split( '?' )[1];
 
@@ -199,6 +256,12 @@ window.wp = window.wp || {};
 
 		/**
 		 * Callback after the Customizer has been opened.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @return {void}
 		 */
 		opened: function() {
 			Loader.body.addClass( 'customize-active full-overlay-active' ).attr( 'aria-busy', 'true' );
@@ -206,6 +269,12 @@ window.wp = window.wp || {};
 
 		/**
 		 * Close the Customizer overlay.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @return {void}
 		 */
 		close: function() {
 			var self = this, onConfirmClose;
@@ -236,6 +305,12 @@ window.wp = window.wp || {};
 
 		/**
 		 * Callback after the Customizer has been closed.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @return {void}
 		 */
 		closed: function() {
 			Loader.iframe.remove();
@@ -255,32 +330,59 @@ window.wp = window.wp || {};
 		},
 
 		/**
-		 * Callback for the `load` event on the Customizer iframe.
+		 * Removes customize-loading class from the loader body, and sets its aria-busy to false.
+		 *
+		 * @since todo: dit
+		 *
+		 * @memberOf wp.customize
+		 *
+		 * @return {void}
 		 */
 		loaded: function() {
 			Loader.body.removeClass( 'customize-loading' ).attr( 'aria-busy', 'false' );
 		},
 
-		/**
-		 * Overlay hide/show utility methods.
-		 */
+		 // Overlay hide/show utility methods.
 		overlay: {
+
+			/**
+			 * Calls the 'opened' function after the loader has faded in.
+			 *
+			 * @since todo: dit
+			 *
+			 * @return {void}
+			 */
 			show: function() {
 				this.element.fadeIn( 200, Loader.opened );
 			},
 
+			/**
+			 * Calls the 'closed' function after the loader has faded out.
+			 *
+			 * @since todo: dit
+			 *
+			 * @return {void}
+			 */
 			hide: function() {
 				this.element.fadeOut( 200, Loader.closed );
 			}
 		}
 	});
 
-	// Bootstrap the Loader on document#ready.
+	/**
+	 * Bootstrap the Loader on document#ready.
+	 *
+	 * Gets the loader settings from the global _wpCustomizeLoaderSettings, and initializes the loader.
+	 *
+	 * @since todo: dit
+	 *
+	 * @return {void}
+	 */
 	$( function() {
 		Loader.settings = _wpCustomizeLoaderSettings;
 		Loader.initialize();
 	});
 
-	// Expose the API publicly on window.wp.customize.Loader
+	// Expose the API publicly on window.wp.customize.Loader.
 	api.Loader = Loader;
 })( wp, jQuery );
