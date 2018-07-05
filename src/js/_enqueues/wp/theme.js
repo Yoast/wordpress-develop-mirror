@@ -22,9 +22,24 @@ themes.isInstall = !! themes.data.settings.isInstall;
 // Setup app structure
 _.extend( themes, { model: {}, view: {}, routes: {}, router: {}, template: wp.template });
 
-themes.Model = Backbone.Model.extend({
-	// Adds attributes to the default data coming through the .org themes api
-	// Map `id` to `slug` for shared code
+themes.Model = Backbone.Model.extend(/** @lends wp.themes.Model.prototype */{
+	/**
+	 * Initializes the Themes model.
+	 *
+	 * Adds attributes to the default data coming through the .org themes API.
+	 * Map `id` to `slug` for shared code.
+	 *
+	 * @since      3.8.0
+	 * @access     private
+	 *
+	 * @constructs wp.themes.Model
+	 * @augments   wp.themes
+	 *
+	 * @memberof wp.themes
+	 *
+	 * @see   Backbone.Model
+	 * @link  http://backbonejs.org/#Model
+	 */
 	initialize: function() {
 		var description;
 
@@ -33,14 +48,16 @@ themes.Model = Backbone.Model.extend({
 			this.set({ installed: true });
 		}
 
-		// Set the attributes
+		// Set the attributes.
 		this.set({
-			// slug is for installation, id is for existing.
+			// The slug is for installation, id is for existing.
 			id: this.get( 'slug' ) || this.get( 'id' )
 		});
 
-		// Map `section.description` to `description`
-		// as the API sometimes returns it differently
+		/*
+		 * Map `section.description` to `description` as the API sometimes
+		 * returns it differently.
+		 */
 		if ( this.has( 'sections' ) ) {
 			description = this.get( 'sections' ).description;
 			this.set({ description: description });
@@ -48,24 +65,37 @@ themes.Model = Backbone.Model.extend({
 	}
 });
 
-// Main view controller for themes.php
-// Unifies and renders all available views
 themes.view.Appearance = wp.Backbone.View.extend({
 
 	el: '#wpbody-content .wrap .theme-browser',
 
 	window: $( window ),
-	// Pagination instance
+	// Pagination instance.
 	page: 0,
 
-	// Sets up a throttler for binding to 'scroll'
+	/**
+	 * Main view controller, unifies and renders all available views.
+	 *
+	 * @since      3.8.0
+	 * @access     private
+	 *
+	 * @constructs wp.themes.view.Appearance
+	 * @augments   wp.themes.view
+	 *
+	 * @memberof wp.themes.view.Apprearance
+	 *
+	 * @see   Backbone.View
+	 * @link  http://backbonejs.org/#View
+	 *
+	 * @param {Object}        options            The view's attributes.
+	 * @param {Backbone.View} options.SearchView The theme's search view.
+	 */
 	initialize: function( options ) {
-		// Scroller checks how far the scroll position is
+		// Scroller checks how far the scroll position is.
 		_.bindAll( this, 'scroller' );
 
 		this.SearchView = options.SearchView ? options.SearchView : themes.view.Search;
-		// Bind to the scroll event and throttle
-		// the results from this.scroller
+		// Bind to the scroll event and throttle the results from this.scroller.
 		this.window.bind( 'scroll', _.throttle( this.scroller, 300 ) );
 	},
 
