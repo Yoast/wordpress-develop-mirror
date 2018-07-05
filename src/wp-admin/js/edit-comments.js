@@ -1,6 +1,7 @@
 /**
- * Contains functionality of the admin Comments page.
+ * Handles updating and editing comments.
  *
+ * @file This file contains functionality for the admin comments page.
  * @since 3.5.0
  */
 
@@ -19,9 +20,9 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param el jQuery element.
+	 * @param {jQuery} el jQuery element.
 	 *
-	 * @returns {int} The number found in the given element.
+	 * @returns {number} The number found in the given element.
 	 */
 	getCount = function(el) {
 		var n = parseInt( el.html().replace(/[^0-9]+/g, ''), 10 );
@@ -37,8 +38,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param el jQuery element.
-	 * @param n Number to be injected.
+	 * @param {jQuery} el jQuery element.
+	 * @param {number} n Number to be injected.
 	 *
 	 * @returns {void}
 	 */
@@ -64,8 +65,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param diff The amount to lower or raise the approved count with.
-	 * @param commentPostId The ID of the post to be updated.
+	 * @param {number} diff The amount to lower or raise the approved count with.
+	 * @param {number} commentPostId The ID of the post to be updated.
 	 *
 	 * @returns {void}
 	 */
@@ -82,7 +83,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 			return;
 		}
 
-		// cache selectors to not get duplicates
+		// Cache selectors to not get duplicates.
 		approved = $( 'span.' + approvedClass, postSelector );
 		noComments = $( 'span.' + noClass, postSelector );
 
@@ -116,8 +117,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param selector The jQuery selector for the element(s) to update.
-	 * @param diff The amount to lower or raise the count with.
+	 * @param {string} selector The jQuery selector for the element(s) to update.
+	 * @param {number} diff The amount to lower or raise the count with.
 	 *
 	 * @returns {void}
 	 */
@@ -137,7 +138,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param response Converts the internationalized comment to text.
+	 * @param {Object} response Converts the internationalized comment to text.
 	 *
 	 * @returns {void}
 	 */
@@ -160,7 +161,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param diff The amount to lower or raise the number of to be approved comments with.
+	 * @param {number} diff The amount to lower or raise the number of to be approved comments with.
 	 *
 	 * @returns {void}
 	 */
@@ -203,8 +204,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param diff The amount to lower or raise the pending count with.
-	 * @param commentPostId The ID of the post to be updated.
+	 * @param {number} diff The amount to lower or raise the pending count with.
+	 * @param {number} commentPostId The ID of the post to be updated.
 	 *
 	 * @returns {void}
 	 */
@@ -264,16 +265,16 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 		});
 	};
 
-	/**
-	 * Initializes the comments list.
-	 *
-	 * @since 4.4.0
-	 *
-	 * @global
-	 *
-	 * @returns {void}
-	 */
-	setCommentsList = function() {
+/**
+ * Initializes the comments list.
+ *
+ * @since 4.4.0
+ *
+ * @global
+ *
+ * @returns {void}
+ */
+setCommentsList = function() {
 	var totalInput, perPageInput, pageInput, dimAfter, delBefore, updateTotalCount, delAfter, refillTheExtraList, diff,
 		lastConfidentTime = 0;
 
@@ -287,8 +288,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param {int} total Total number of comments.
-	 * @param {int} time Unix timestamp of response.
+	 * @param {number} total Total number of comments.
+	 * @param {number} time Unix timestamp of response.
  	 * @param {boolean} setConfidentTime Update confident time if time exceeds it.
 	 *
 	 * @returns {void}
@@ -309,8 +310,8 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param {object} r Response object
-	 * @param {object} settings Setting object
+	 * @param {Object} r Response object.
+	 * @param {Object} settings Setting object.
 	 *
 	 * @return {void}
 	 */
@@ -359,10 +360,10 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 4.4.0
 	 * @access private
 	 *
-	 * @param {object} settings Settings object.
-	 * @param {element} list Comments table element.
+	 * @param {Object} settings Settings object.
+	 * @param {HTMLElement} list Comments table element.
 	 *
-	 * @returns {object} The settings object.
+	 * @returns {Object} The settings object.
 	 */
 	delBefore = function( settings, list ) {
 		var note, id, el, n, h, a, author,
@@ -424,13 +425,13 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 
 	// In admin-ajax.php, we send back the unix time stamp instead of 1 on success
 	/**
-	 * Executed after a list item is removed from the comments list
+	 * Executed after a list item is removed from the comments list.
 	 *
 	 * @since 3.5.0
 	 * @access private
 	 *
-	 * @param {object} r Response object
-	 * @param {object} settings Setting object
+	 * @param {Object} r Response object.
+	 * @param {Object} settings Setting object.
 	 *
 	 * @returns {void}
 	 */
@@ -655,7 +656,7 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
 	 * @since 3.5.0
 	 * @access private
 	 *
-	 * @param {bool} [ev] Reset the extra comments list if true.
+	 * @param {boolean} [ev] Reset the extra comments list if true.
 	 *
 	 * @returns {void}
 	 */
@@ -726,8 +727,6 @@ var getCount, updateCount, updateCountText, updatePending, updateApproved,
  * Object containing functionality regarding the comment quick editor and reply editor.
  *
  * @global
- *
- * @namespace
  */
 commentReply = {
 	cid : '',
@@ -737,7 +736,7 @@ commentReply = {
 	/**
 	 * Initialize the comment reply functionality.
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @since 3.5.0
 	 */
@@ -779,9 +778,9 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
-	 * @param {Object[]} r The jquery objects.
+	 * @param {Object} r The jquery objects.
 	 *
 	 * @returns {void}
 	 */
@@ -798,9 +797,9 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
-	 * @param {Element} el The element you want to toggle the quick editor on.
+	 * @param {HTMLElement} el The element you want to toggle the quick editor on.
 	 *
 	 * @returns {void}
 	 */
@@ -815,7 +814,7 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @returns {boolean} Always false.
 	 */
@@ -836,14 +835,14 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @returns {void}
 	 */
 	close : function() {
 		var c, replyrow = $('#replyrow');
 
-		// replyrow is not showing?
+		// Return if the replyrow is not showing.
 		if ( replyrow.parent().is('#com-reply') )
 			return;
 
@@ -876,11 +875,11 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
-	 * @param comment_id The comment id.
-	 * @param post_id The post id.
-	 * @param action The action to perform.
+	 * @param {number} comment_id The comment id.
+	 * @param {number} post_id The post id.
+	 * @param {string} action The action to perform.
 	 *
 	 * @returns {boolean} Always false.
 	 */
@@ -982,7 +981,7 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @returns {boolean} Always false.
 	 */
@@ -1024,9 +1023,10 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @param {Object} xml     Ajax response object.
+	 *
 	 * @returns {boolean|void} Returns either nothing or false if an error occurred.
 	 */
 	show : function(xml) {
@@ -1097,9 +1097,10 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @param {string} r The Ajax response.
+	 *
 	 * @returns {void}
 	 */
 	error : function(r) {
@@ -1123,9 +1124,10 @@ commentReply = {
 	 *
 	 * @since 3.5.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
-	 * @param post_id The post id.
+	 * @param {number} post_id The post id.
+	 *
 	 * @returns {void}
 	 */
 	addcomment: function(post_id) {
@@ -1144,7 +1146,7 @@ commentReply = {
 	 *
 	 * @since 4.6.0
 	 *
-	 * @memberOf commentReply
+	 * @memberof commentReply
 	 *
 	 * @returns {boolean} True if the content is unchanged and otherwise whether
 	 *                    or not the user wants to cancel editing the comment.
