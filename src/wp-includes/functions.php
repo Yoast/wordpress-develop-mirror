@@ -74,7 +74,8 @@ function current_time( $type, $gmt = 0 ) {
 }
 
 /**
- * Retrieve the date in localized format, based on timestamp.
+ * Retrieve the date in localized format, based on a sum of Unix timestamp and
+ * timezone offset in seconds.
  *
  * If the locale specifies the locale month and weekday, then the locale will
  * take over the format for the date. If it isn't, then the date format string
@@ -84,15 +85,17 @@ function current_time( $type, $gmt = 0 ) {
  *
  * @global WP_Locale $wp_locale
  *
- * @param string   $dateformatstring Format to display the date.
- * @param bool|int $unixtimestamp    Optional. Unix timestamp. Default false.
- * @param bool     $gmt              Optional. Whether to use GMT timezone. Default false.
+ * @param string   $dateformatstring      Format to display the date.
+ * @param int|bool $timestamp_with_offset Optional. A sum of Unix timestamp and timezone offset in seconds.
+ *                                        Default false.
+ * @param bool     $gmt                   Optional. Whether to use GMT timezone. Only applies if timestamp is
+ *                                        not provided. Default false.
  *
  * @return string The date, translated if locale specifies it.
  */
-function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
+function date_i18n( $dateformatstring, $timestamp_with_offset = false, $gmt = false ) {
 	global $wp_locale;
-	$i = $unixtimestamp;
+	$i = $timestamp_with_offset;
 
 	if ( false === $i ) {
 		$i = current_time( 'timestamp', $gmt );
@@ -125,6 +128,9 @@ function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
 	$timezone_formats_re = implode( '|', $timezone_formats );
 	if ( preg_match( "/$timezone_formats_re/", $dateformatstring ) ) {
 		$timezone_string = get_option( 'timezone_string' );
+		if ( false === $timestamp_with_offset && $gmt ) {
+			$timezone_string = 'UTC';
+		}
 		if ( $timezone_string ) {
 			$timezone_object = timezone_open( $timezone_string );
 			$date_object     = date_create( null, $timezone_object );
@@ -134,6 +140,36 @@ function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
 					$dateformatstring = ' ' . $dateformatstring;
 					$dateformatstring = preg_replace( "/([^\\\])$timezone_format/", "\\1" . backslashit( $formatted ), $dateformatstring );
 					$dateformatstring = substr( $dateformatstring, 1, strlen( $dateformatstring ) - 1 );
+				}
+			}
+		} else {
+			$offset = get_option( 'gmt_offset' );
+			foreach ( $timezone_formats as $timezone_format ) {
+				if ( 'I' === $timezone_format ) {
+					continue;
+				}
+
+				if ( false !== strpos( $dateformatstring, $timezone_format ) ) {
+					if ( 'Z' === $timezone_format ) {
+						$formatted = (string) ( $offset * HOUR_IN_SECONDS );
+					} else {
+						$prefix    = '';
+						$hours     = (int) $offset;
+						$separator = '';
+						$minutes   = abs( ( $offset - $hours ) * 60 );
+
+						if ( 'T' === $timezone_format ) {
+							$prefix = 'GMT';
+						} elseif ( 'e' === $timezone_format || 'P' === $timezone_format ) {
+							$separator = ':';
+						}
+
+						$formatted = sprintf( '%s%+03d%s%02d', $prefix, $hours, $separator, $minutes );
+					}
+
+					$dateformatstring = ' ' . $dateformatstring;
+					$dateformatstring = preg_replace( "/([^\\\])$timezone_format/", "\\1" . backslashit( $formatted ), $dateformatstring );
+					$dateformatstring = substr( $dateformatstring, 1 );
 				}
 			}
 		}
@@ -147,8 +183,9 @@ function date_i18n( $dateformatstring, $unixtimestamp = false, $gmt = false ) {
 	 *
 	 * @param string $j          Formatted date string.
 	 * @param string $req_format Format to display the date.
-	 * @param int    $i          Unix timestamp.
-	 * @param bool   $gmt        Whether to convert to GMT for time. Default false.
+	 * @param int    $i          A sum of Unix timestamp and timezone offset in seconds.
+	 * @param bool   $gmt        Whether to use GMT timezone. Only applies if timestamp was
+	 *                           not provided. Default false.
 	 */
 	$j = apply_filters( 'date_i18n', $j, $req_format, $i, $gmt );
 	return $j;
@@ -5847,21 +5884,21 @@ function wp_post_preview_js() {
 }
 
 /**
- * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601/RFC3339.
+ * Parses and formats a MySQL datetime (Y-m-d H:i:s) for ISO8601 (Y-m-d\TH:i:s).
  *
  * Explicitly strips timezones, as datetimes are not saved with any timezone
  * information. Including any information on the offset could be misleading.
  *
+ * Despite historical function name, the output does not conform to RFC3339 format,
+ * which must contain timezone.
+ *
  * @since 4.4.0
  *
  * @param string $date_string Date string to parse and format.
- * @return string Date formatted for ISO8601/RFC3339.
+ * @return string Date formatted for ISO8601 without time zone.
  */
 function mysql_to_rfc3339( $date_string ) {
-	$formatted = mysql2date( 'c', $date_string, false );
-
-	// Strip timezone information
-	return preg_replace( '/(?:Z|[+-]\d{2}(?::\d{2})?)$/', '', $formatted );
+	return mysql2date( 'Y-m-d\TH:i:s', $date_string, false );
 }
 
 /**
