@@ -6469,7 +6469,7 @@
 	/**
 	 * Class PreviewLinkControl.
 	 *
-	 * @since    4.9.0
+	 * @since 4.9.0
 	 *
 	 * @constructs wp.customize.PreviewLinkControl
 	 * @augments   wp.customize.Control
@@ -6483,9 +6483,10 @@
 		} ),
 
 		/**
-		 * Initialize behaviors.
+		 * Initializes the control.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		ready: function ready() {
@@ -6550,9 +6551,10 @@
 		},
 
 		/**
-		 * Updates Preview Link
+		 * Updates the Preview Link control.
 		 *
 		 * @since 4.9.0
+		 *
 		 * @return {void}
 		 */
 		updatePreviewLink: function updatePreviewLink() {
@@ -6567,10 +6569,12 @@
 		},
 
 		/**
-		 * Toggles save notification.
+		 * Toggles the save notification.
 		 *
 		 * @since 4.9.0
-		 * @param {boolean} notify Add or remove notification.
+		 *
+		 * @param {boolean} notify Whether to add or remove notification.
+		 *
 		 * @return {void}
 		 */
 		toggleSaveNotification: function toggleSaveNotification( notify ) {
@@ -6591,7 +6595,7 @@
 	});
 
 	/**
-	 * Change objects contained within the main customize object to Settings.
+	 * Changes objects contained within the main customize object to Settings.
 	 *
 	 * @alias wp.customize.defaultConstructor
 	 */
@@ -6612,8 +6616,10 @@
 	 * @since 3.4.0
 	 *
 	 * @type {Function}
-	 * @param {...string} ids - One or more ids for controls to obtain.
-	 * @param {deferredControlsCallback} [callback] - Function called when all supplied controls exist.
+	 *
+	 * @param {...string}                ids        One or more ids for controls to obtain.
+	 * @param {deferredControlsCallback} [callback] Function called when all supplied controls exist.
+	 *
 	 * @return {wp.customize.Control|undefined|jQuery.promise} Control instance or undefined (if function called with one id param), or promise resolving to requested controls.
 	 *
 	 * @example <caption>Loop over all registered controls.</caption>
@@ -6673,8 +6679,10 @@
 	 * @since 3.4.0
 	 *
 	 * @type {Function}
-	 * @param {...string} ids - One or more ids for sections to obtain.
-	 * @param {deferredSectionsCallback} [callback] - Function called when all supplied sections exist.
+	 *
+	 * @param {...string}                ids        One or more ids for sections to obtain.
+	 * @param {deferredSectionsCallback} [callback] Function called when all supplied sections exist.
+	 *
 	 * @return {wp.customize.Section|undefined|jQuery.promise} Section instance or undefined (if function called with one id param), or promise resolving to requested sections.
 	 *
 	 * @example <caption>Loop over all registered sections.</caption>
@@ -6707,8 +6715,10 @@
 	 * @since 4.0.0
 	 *
 	 * @type {Function}
-	 * @param {...string} ids - One or more ids for panels to obtain.
-	 * @param {deferredPanelsCallback} [callback] - Function called when all supplied panels exist.
+	 *
+	 * @param {...string}              ids        One or more ids for panels to obtain.
+	 * @param {deferredPanelsCallback} [callback] Function called when all supplied panels exist.
+	 *
 	 * @return {wp.customize.Panel|undefined|jQuery.promise} Panel instance or undefined (if function called with one id param), or promise resolving to requested panels.
 	 *
 	 * @example <caption>Loop over all registered panels.</caption>
@@ -6741,8 +6751,10 @@
 	 * @since 4.9.0
 	 *
 	 * @type {Function}
-	 * @param {...string} codes - One or more codes for notifications to obtain.
-	 * @param {deferredNotificationsCallback} [callback] - Function called when all supplied notifications exist.
+	 *
+	 * @param {...string}                     codes      One or more codes for notifications to obtain.
+	 * @param {deferredNotificationsCallback} [callback] Function called when all supplied notifications exist.
+	 *
 	 * @return {wp.customize.Notification|undefined|jQuery.promise} notification instance or undefined (if function called with one code param), or promise resolving to requested notifications.
 	 *
 	 * @example <caption>Check if existing notification</caption>
@@ -6769,31 +6781,31 @@
 	api.notifications = new api.Notifications();
 
 	/**
-	 * The Messenger object.
+	 * The PreviewFrame object.
 	 */
 	api.PreviewFrame = api.Messenger.extend(/** @lends wp.customize.PreviewFrame.prototype */{
-		sensitivity: null, // Will get set to api.settings.timeouts.previewFrameSensitivity.
+		// Will get set to api.settings.timeouts.previewFrameSensitivity.
+		sensitivity: null,
 
 		/**
 		 * An object that fetches a preview in the background of the document, which
-		 * allows for seamless replacement of an existing preview.
+		 * allows for seamless replacement of an existing preview frame.
 		 *
 		 * @constructs wp.customize.PreviewFrame
 		 * @augments   wp.customize.Messenger
 		 * @memberOf   wp.customize
 		 *
-		 * @param {Object} params.container
-		 * @param {Object} params.previewUrl
-		 * @param {Object} params.query
-		 * @param {Object} options
+		 * @since 3.5.0
+		 *
+		 * @param {Object}   params.container  The container element to load the preview frame into.
+		 * @param {Function} params.previewUrl Callback function to get the preview URL.
+		 * @param {Object}   params.query      The query.
+		 * @param {Object}   options           The options to use within the preview frame.
 		 */
 		initialize: function( params, options ) {
 			var deferred = $.Deferred();
 
-			/*
-			 * Make the instance of the PreviewFrame the promise object
-			 * so other objects can easily interact with it.
-			 */
+			// Make the instance of the PreviewFrame the promise object so other objects can easily interact with it.
 			deferred.promise( this );
 
 			this.container = params.container;
@@ -6810,7 +6822,9 @@
 		},
 
 		/**
-		 * Run the preview request.
+		 * Runs the preview request.
+		 *
+		 * @since 3.5.0
 		 *
 		 * @param {Object} deferred jQuery Deferred object to be resolved with the request.
 		 *
@@ -6865,20 +6879,23 @@
 				title: api.l10n.previewIframeTitle,
 				name: 'customize-' + previewFrame.channel()
 			} );
-			previewFrame.iframe.attr( 'onmousewheel', '' ); // Workaround for Safari bug. See WP Trac #38149.
+
+			// Workaround for Safari bug. See WP Trac #38149.
+			previewFrame.iframe.attr( 'onmousewheel', '' );
 
 			if ( ! hasPendingChangesetUpdate ) {
 				previewFrame.iframe.attr( 'src', urlParser.href );
 			} else {
-				previewFrame.iframe.attr( 'data-src', urlParser.href ); // For debugging purposes.
+				// For debugging purposes.
+				previewFrame.iframe.attr( 'data-src', urlParser.href );
 			}
 
 			previewFrame.iframe.appendTo( previewFrame.container );
 			previewFrame.targetWindow( previewFrame.iframe[0].contentWindow );
 
 			/*
-			 * Submit customized data in POST request to preview frame window since
-			 * there are setting value changes not yet written to changeset.
+			 * Submit customized data in a POST request to the preview frame window, since
+			 * there are changes in the settings values that are not yet written to the changeset.
 			 */
 			if ( hasPendingChangesetUpdate ) {
 				form = $( '<form>', {
@@ -6901,7 +6918,8 @@
 				} );
 				previewFrame.container.append( form );
 				form.submit();
-				form.remove(); // No need to keep the form around after submitted.
+				// No need to keep the form around after submission.
+				form.remove();
 			}
 
 			previewFrame.bind( 'iframe-loading-error', function( error ) {
@@ -6935,6 +6953,15 @@
 			});
 		},
 
+		/**
+		 * Runs the preview request.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param {Object} deferred jQuery Deferred object to be resolved with the request.
+		 *
+		 * @return {void}
+		 */
 		login: function( deferred ) {
 			var self = this,
 				reject;
@@ -6968,6 +6995,13 @@
 			});
 		},
 
+		/**
+		 * Destroys the Preview Frame.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @return {void}
+		 */
 		destroy: function() {
 			api.Messenger.prototype.destroy.call( this );
 
@@ -6983,13 +7017,15 @@
 	(function(){
 		var id = 0;
 		/**
-		 * Return an incremented ID for a preview messenger channel.
+		 * Returns an incremented ID for a preview messenger channel.
 		 *
 		 * This function is named "uuid" for historical reasons, but it is a
 		 * misnomer as it is not an actual UUID, and it is not universally unique.
 		 * This is not to be confused with `api.settings.changeset.uuid`.
 		 *
-		 * @return {string}
+ 		 * @since 3.5.0
+		 *
+		 * @return {string} The UUID.
 		 */
 		api.PreviewFrame.uuid = function() {
 			return 'preview-' + String( id++ );
@@ -6997,13 +7033,15 @@
 	}());
 
 	/**
-	 * Set the document title of the customizer.
+	 * Sets the document title of the customizer.
 	 *
 	 * @alias wp.customize.setDocumentTitle
 	 *
 	 * @since 4.1.0
 	 *
-	 * @param {string} documentTitle
+	 * @param {string} The document title to set.
+	 *
+	 * @return {void}
 	 */
 	api.setDocumentTitle = function ( documentTitle ) {
 		var tmpl, title;
@@ -7017,7 +7055,8 @@
 	 * The Previewer object.
 	 */
 	api.Previewer = api.Messenger.extend(/** @lends wp.customize.Previewer.prototype */{
-		refreshBuffer: null, // Will get set to api.settings.timeouts.windowRefresh.
+		// Will get set to api.settings.timeouts.windowRefresh.
+		refreshBuffer: null,
 
 		/**
 		 * The Previewer constructor.
@@ -7028,11 +7067,10 @@
 		 * @augments   wp.customize.Messenger
 		 * @memberOf   wp.customize
 		 *
-		 * @param {array}  params.allowedUrls
-		 * @param {string} params.container   A selector or jQuery element for the preview frame to be placed.
-		 * @param {string} params.form
+		 * @param {array}  params.allowedUrls An array of allowed URLs.
+		 * @param {string} params.container   The container element to load the preview frame into.
 		 * @param {string} params.previewUrl  The URL to preview.
-		 * @param {Object} options
+		 * @param {Object} options            The options to use within the previewer.
 		 */
 		initialize: function( params, options ) {
 			var previewer = this,
@@ -7077,13 +7115,14 @@
 			urlParser.href = previewer.origin();
 			previewer.add( 'scheme', urlParser.protocol.replace( /:$/, '' ) );
 
-			// Limit the URL to internal, front-end links.
-			//
-			// If the front end and the admin are served from the same domain, load the
-			// preview over ssl if the Customizer is being loaded over ssl. This avoids
-			// insecure content warnings. This is not attempted if the admin and front end
-			// are on different domains to avoid the case where the front end doesn't have
-			// ssl certs.
+			/*
+             * Limit the URL to internal, front-end links.
+			 *
+			 * If the front end and the admin are served from the same domain, load the
+			 * preview over ssl if the Customizer is being loaded over ssl. This avoids
+			 * insecure content warnings. This is not attempted if the admin and front end
+			 * are on different domains to avoid the case where the front end doesn't have ssl certs.
+			 */
 
 			previewer.add( 'previewUrl', params.previewUrl ).setter( function( to ) {
 				var result = null, urlParser, queryParams, parsedAllowedUrl, parsedCandidateUrls = [];
@@ -7173,16 +7212,16 @@
 		},
 
 		/**
-		 * Handle the preview receiving the ready message.
+		 * Handles the preview receiving the ready message.
 		 *
 		 * @since 4.7.0
-		 * @access public
 		 *
-		 * @param {Object} data - Data from preview.
-		 * @param {string} data.currentUrl - Current URL.
-		 * @param {Object} data.activePanels - Active panels.
-		 * @param {Object} data.activeSections Active sections.
-		 * @param {Object} data.activeControls Active controls.
+		 * @param {Object} data                Data from the preview.
+		 * @param {string} data.currentUrl     The current URL.
+		 * @param {Object} data.activePanels   Object containing the active panels.
+		 * @param {Object} data.activeSections Object containing the active sections.
+		 * @param {Object} data.activeControls Object containing the active controls.
+		 *
 		 * @return {void}
 		 */
 		ready: function( data ) {
@@ -7196,7 +7235,7 @@
 			synced['edit-shortcut-visibility'] = api.state( 'editShortcutVisibility' ).get();
 			previewer.send( 'sync', synced );
 
-			// Set the previewUrl without causing the url to set the iframe.
+			// Set the previewUrl without causing the URL to set the iframe.
 			if ( data.currentUrl ) {
 				previewer.previewUrl.unbind( previewer.refresh );
 				previewer.previewUrl.set( data.currentUrl );
@@ -7204,9 +7243,8 @@
 			}
 
 			/*
-			 * Walk over all panels, sections, and controls and set their
-			 * respective active states to true if the preview explicitly
-			 * indicates as such.
+			 * Walk over all panels, sections and controls and set their
+			 * respective active states to true if the preview explicitly indicates as such.
 			 */
 			constructs = {
 				panel: data.activePanels,
@@ -7246,12 +7284,11 @@
 		},
 
 		/**
-		 * Keep the preview alive by listening for ready and keep-alive messages.
+		 * Keeps the preview alive by listening for ready and keep-alive messages.
 		 *
 		 * If a message is not received in the allotted time then the iframe will be set back to the last known valid URL.
 		 *
 		 * @since 4.7.0
-		 * @access public
 		 *
 		 * @return {void}
 		 */
@@ -7259,18 +7296,26 @@
 			var previewer = this, keepAliveTick, timeoutId, handleMissingKeepAlive, scheduleKeepAliveCheck;
 
 			/**
-			 * Schedule a preview keep-alive check.
+			 * Schedules a preview keep-alive check.
 			 *
 			 * Note that if a page load takes longer than keepAliveCheck milliseconds,
 			 * the keep-alive messages will still be getting sent from the previous
 			 * URL.
+			 *
+			 * @since 4.7.0
+			 *
+			 * @return {void}
 			 */
 			scheduleKeepAliveCheck = function() {
 				timeoutId = setTimeout( handleMissingKeepAlive, api.settings.timeouts.keepAliveCheck );
 			};
 
 			/**
-			 * Set the previewerAlive state to true when receiving a message from the preview.
+			 * Sets the previewerAlive state to true when receiving a message from the preview.
+			 *
+			 * @since 4.7.0
+			 *
+			 * @return {void}
 			 */
 			keepAliveTick = function() {
 				api.state( 'previewerAlive' ).set( true );
@@ -7285,6 +7330,10 @@
 			 * to navigate to a non-allowed URL. Setting this state to false will force settings with a postMessage
 			 * transport to use refresh instead, causing the preview frame also to be replaced with the current
 			 * allowed preview URL.
+			 *
+			 * @since 4.7.0
+			 *
+			 * @return {void}
 			 */
 			handleMissingKeepAlive = function() {
 				api.state( 'previewerAlive' ).set( false );
@@ -7298,10 +7347,19 @@
 		/**
 		 * Query string data sent with each preview request.
 		 *
+		 * @since 3.5.0
+		 *
 		 * @abstract
 		 */
 		query: function() {},
 
+		/**
+		 * Aborts the loading of the control.
+		 *
+ 		 * @since 3.5.0
+		 *
+		 * @return {void}
+		 */
 		abort: function() {
 			if ( this.loading ) {
 				this.loading.destroy();
@@ -7310,16 +7368,16 @@
 		},
 
 		/**
-		 * Refresh the preview seamlessly.
+		 * Refreshes the preview seamlessly.
 		 *
 		 * @since 3.4.0
-		 * @access public
+		 *
 		 * @return {void}
 		 */
 		refresh: function() {
 			var previewer = this, onSettingChange;
 
-			// Display loading indicator
+			// Display loading indicator.
 			previewer.send( 'loading-initiated' );
 
 			previewer.abort();
@@ -7380,6 +7438,13 @@
 			});
 		},
 
+		/**
+		 * Adds a login and a response handler for the login process..
+		 *
+		 * @since 3.5.0
+		 *
+		 * @return {Object} The jQuery Deferred object.
+		 */
 		login: function() {
 			var previewer = this,
 				deferred, messenger, iframe;
@@ -7422,6 +7487,13 @@
 			return this._login;
 		},
 
+		/**
+		 * Adds a message to the body when someone is cheating.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @return {void}
+		 */
 		cheatin: function() {
 			$( document.body ).empty().addClass( 'cheatin' ).append(
 				'<h1>' + api.l10n.notAllowedHeading + '</h1>' +
@@ -7429,6 +7501,13 @@
 			);
 		},
 
+		/**
+		 * Refreshes the nonces.
+		 *
+		 * @since 4.2.0
+		 *
+		 * @return {Object} The jQuery Deferred object.
+		 */
 		refreshNonces: function() {
 			var request, deferred = $.Deferred();
 
@@ -7476,18 +7555,20 @@
 	};
 
 	/**
-	 * Handle setting_validities in an error response for the customize-save request.
+	 * Handles setting_validities in an error response for the customize-save request.
 	 *
 	 * Add notifications to the settings and focus on the first control that has an invalid setting.
 	 *
 	 * @alias wp.customize._handleSettingValidities
 	 *
 	 * @since 4.6.0
-	 * @private
 	 *
-	 * @param {Object}  args
-	 * @param {Object}  args.settingValidities
-	 * @param {boolean} [args.focusInvalidControl=false]
+	 * @access private
+	 *
+	 * @param {Object}  args                             The arguments object.
+	 * @param {Object}  args.settingValidities           The validation settings that need to be checked.
+	 * @param {boolean} [args.focusInvalidControl=false] Whether or not to focus on the first invalid control.
+	 *
 	 * @return {void}
 	 */
 	api._handleSettingValidities = function handleSettingValidities( args ) {
@@ -7555,13 +7636,15 @@
 	};
 
 	/**
-	 * Find all controls associated with the given settings.
+	 * Finds all controls associated with the given settings.
 	 *
 	 * @alias wp.customize.findControlsForSettings
 	 *
 	 * @since 4.6.0
-	 * @param {string[]} settingIds Setting IDs.
-	 * @return {object<string, wp.customize.Control>} Mapping setting ids to arrays of controls.
+	 *
+	 * @param {string} [settingIds] The setting IDs.
+	 *
+	 * @return {Object} Mappings of the setting ids and arrays of controls.
 	 */
 	api.findControlsForSettings = function findControlsForSettings( settingIds ) {
 		var controls = {}, settingControls;
@@ -7578,11 +7661,13 @@
 	};
 
 	/**
-	 * Sort panels, sections, controls by priorities. Hide empty sections and panels.
+	 * Sorts panels, sections and controls by priorities. Hides empty sections and panels.
 	 *
 	 * @alias wp.customize.reflowPaneContents
 	 *
 	 * @since 4.1.0
+	 *
+	 * @return {void}
 	 */
 	api.reflowPaneContents = _.bind( function () {
 
@@ -7592,10 +7677,11 @@
 			activeElement = $( document.activeElement );
 		}
 
-		// Sort the sections within each panel
+		// Sort the sections within each panel.
 		api.panel.each( function ( panel ) {
 			if ( 'themes' === panel.id ) {
-				return; // Don't reflow theme sections, as doing so moves them after the themes container.
+				// Don't reflow theme sections, as doing so moves them after the themes container.
+				return;
 			}
 
 			var sections = panel.sections(),
@@ -7610,7 +7696,7 @@
 			}
 		} );
 
-		// Sort the controls within each section
+		// Sort the controls within each section.
 		api.section.each( function ( section ) {
 			var controls = section.controls(),
 				controlContainers = _.pluck( controls, 'container' );
@@ -7626,7 +7712,7 @@
 			}
 		} );
 
-		// Sort the root panels and sections
+		// Sort the root panels and sections.
 		rootNodes.sort( api.utils.prioritySort );
 		rootHeadContainers = _.pluck( rootNodes, 'headContainer' );
 		appendContainer = $( '#customize-theme-controls .customize-pane-parent' ); // @todo This should be defined elsewhere, and to be configurable
@@ -7637,7 +7723,7 @@
 			wasReflowed = true;
 		}
 
-		// Now re-trigger the active Value callbacks to that the panels and sections can decide whether they can be rendered
+		// Now re-trigger the active Value callbacks to that the panels and sections can decide whether they can be rendered.
 		api.panel.each( function ( panel ) {
 			var value = panel.active();
 			panel.active.callbacks.fireWith( panel.active, [ value, value ] );
@@ -7647,7 +7733,7 @@
 			section.active.callbacks.fireWith( section.active, [ value, value ] );
 		} );
 
-		// Restore focus if there was a reflow and there was an active (focused) element
+		// Restore focus if there was a reflow and there was an active (focused) element.
 		if ( wasReflowed && activeElement ) {
 			activeElement.focus();
 		}
@@ -7746,9 +7832,9 @@
 			} ) );
 
 			/**
-			 * Return whether the pubish settings section should be active.
+			 * Returns whether the pubish settings section should be active.
 			 *
-			 * @return {boolean} Is section active.
+			 * @return {boolean} True if the section is active.
 			 */
 			isSectionActive = function() {
 				if ( ! api.state( 'activated' ).get() ) {
