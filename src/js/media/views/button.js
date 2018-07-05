@@ -1,12 +1,17 @@
 /**
  * wp.media.view.Button
  *
- * @memberOf wp.media.view
- *
  * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
+ *
+ * @param {Object}	[attributes]
+ * @param {string}	[attribute.tagName=button]
+ * @param {string}	[attributes.className=media-button]
+ * @param {Object}	[attributes.attributes=type:button]
+ *
+ * @memberOf wp.media.view
  */
 var Button = wp.media.View.extend(/** @lends wp.media.view.Button.prototype */{
 	tagName:    'button',
@@ -24,12 +29,14 @@ var Button = wp.media.View.extend(/** @lends wp.media.view.Button.prototype */{
 		disabled: false
 	},
 
+	/**
+	 * Create a model with the provided `defaults`.
+	 *
+	 * @member {Backbone.Model}
+	 *
+	 * @returns {void}
+	 */
 	initialize: function() {
-		/**
-		 * Create a model with the provided `defaults`.
-		 *
-		 * @member {Backbone.Model}
-		 */
 		this.model = new Backbone.Model( this.defaults );
 
 		// If any of the `options` have a key from `defaults`, apply its
@@ -71,6 +78,8 @@ var Button = wp.media.View.extend(/** @lends wp.media.view.Button.prototype */{
 	},
 	/**
 	 * @param {Object} event
+	 *
+	 * @returns {void}
 	 */
 	click: function( event ) {
 		if ( '#' === this.attributes.href ) {
