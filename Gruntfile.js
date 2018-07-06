@@ -1422,8 +1422,10 @@ module.exports = function(grunt) {
 			// If succeeded, remove it again.
 			fs.unlinkSync( './symlinktest' );
 		} catch( e ) {
-			console.warn( 'Error: failed to create a symlink on your system. Will use copy instead.' )
-			grunt.verbose.write( 'The following error occurred:', e.message );
+			grunt.verbose.error( 'Error:', e.message );
+			grunt.log.error( "Failed to delete symlinks. Falling back to copying " +
+											 "files instead. If you're on Windows, " +
+											 "running as administrator could resolve this issue.");
 		} finally {
 			grunt.task.run( 'build:all' );
 		}
