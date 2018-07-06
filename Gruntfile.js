@@ -5,7 +5,6 @@ var webpackDevConfig = require( './webpack.config.dev' );
 
 module.exports = function(grunt) {
 	var path = require('path'),
-		fs = require( 'fs' ),
 		spawn = require( 'child_process' ).spawnSync,
 		SOURCE_DIR = 'src/',
 		BUILD_DIR = 'build/',
@@ -27,14 +26,11 @@ module.exports = function(grunt) {
 			'wp-content/plugins/hello.php',
 			'wp-content/plugins/akismet/**'
 		].concat( themeFiles ),
-		cleanFiles = [
-			'build/*.php',
-			'build/*.txt',
-			'build/*.html',
-			'build/wp-includes/**', // Include everything in wp-includes.
-			'build/wp-admin/**', // Include everything in wp-admin.
-			'build/wp-content'
-		];
+		cleanFiles = [];
+
+	buildFiles.forEach( function( buildFile ) {
+		cleanFiles.push( BUILD_DIR + buildFile );
+	} );
 
 	if ( 'watch:phpunit' === grunt.cli.tasks[ 0 ] && ! phpUnitWatchGroup ) {
 		grunt.log.writeln();
@@ -138,7 +134,9 @@ module.exports = function(grunt) {
 				    cwd: SOURCE_DIR,
 				    src: [
 							'wp-admin/*',
-							'wp-content/*',
+							'wp-content/uploads/',
+							'wp-content/index.php',
+							'wp-content/plugins/*',
 							'wp-includes/*',
 							'*.php',
 							'*.txt',
@@ -1391,8 +1389,26 @@ module.exports = function(grunt) {
 		'jsvalidate:build'
 	] );
 
+	grunt.registerTask( 'clean-all', function() {
+		if ( grunt.option( 'symlink' ) === true ) {
+			// clean all symlinks
+			try {
+				var delSymlinks = require('del-symlinks');
+
+				var result = delSymlinks.sync(['./build/**']);
+				grunt.log.writeln( '>> ' + result.length + ' symlinks cleaned.' );
+			} catch ( e ) {
+				grunt.verbose.error( 'Error:', e.message );
+				grunt.fail.warn( "Failed to delete symlinks. If you're on Windows, " +
+												 "running as administrator could resolve this issue.");
+			}
+		}
+
+		grunt.task.run( 'clean:all' );
+	} );
+
 	grunt.registerTask( 'build:all', [
-		'clean:all',
+		'clean-all',
 		'webpack:dev',
 		'copy:all',
 		'file_append',
