@@ -647,6 +647,11 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 		if ( current_theme_supports( 'post-formats' ) && post_type_supports( $post->post_type, 'post-formats' ) && get_option( 'default_post_format' ) ) {
 			set_post_format( $post, get_option( 'default_post_format' ) );
 		}
+
+		// Schedule auto-draft cleanup
+		if ( ! wp_next_scheduled( 'wp_scheduled_auto_draft_delete' ) ) {
+			wp_schedule_event( time(), 'daily', 'wp_scheduled_auto_draft_delete' );
+		}
 	} else {
 		$post                 = new stdClass;
 		$post->ID             = 0;
@@ -1211,6 +1216,10 @@ function wp_edit_attachments_query_vars( $q = false ) {
 		$q['post_parent'] = 0;
 	}
 
+	if ( isset( $q['mine'] ) || ( isset( $q['attachment-filter'] ) && 'mine' == $q['attachment-filter'] ) ) {
+		$q['author'] = get_current_user_id();
+	}
+
 	// Filter query clauses to include filenames.
 	if ( isset( $q['s'] ) ) {
 		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
@@ -1267,7 +1276,7 @@ function postbox_classes( $id, $page ) {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array $classes An array of postbox classes.
+	 * @param string[] $classes An array of postbox classes.
 	 */
 	$classes = apply_filters( "postbox_classes_{$page}_{$id}", $classes );
 	return implode( ' ', $classes );

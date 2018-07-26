@@ -14,10 +14,10 @@ require( dirname( __FILE__ ) . '/wp-load.php' );
 // Redirect to https login if forced to use SSL
 if ( force_ssl_admin() && ! is_ssl() ) {
 	if ( 0 === strpos( $_SERVER['REQUEST_URI'], 'http' ) ) {
-		wp_redirect( set_url_scheme( $_SERVER['REQUEST_URI'], 'https' ) );
+		wp_safe_redirect( set_url_scheme( $_SERVER['REQUEST_URI'], 'https' ) );
 		exit();
 	} else {
-		wp_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+		wp_safe_redirect( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 		exit();
 	}
 }
@@ -28,9 +28,9 @@ if ( force_ssl_admin() && ! is_ssl() ) {
  * @param string   $title    Optional. WordPress login Page title to display in the `<title>` element.
  *                           Default 'Log In'.
  * @param string   $message  Optional. Message to display in header. Default empty.
- * @param WP_Error $wp_error Optional. The error to pass. Default empty.
+ * @param WP_Error $wp_error Optional. The error to pass. Default is a WP_Error instance.
  */
-function login_header( $title = 'Log In', $message = '', $wp_error = '' ) {
+function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
 	global $error, $interim_login, $action;
 
 	// Don't index any of these forms
@@ -38,7 +38,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = '' ) {
 
 	add_action( 'login_head', 'wp_login_viewport_meta' );
 
-	if ( empty( $wp_error ) ) {
+	if ( ! is_wp_error( $wp_error ) ) {
 		$wp_error = new WP_Error();
 	}
 
@@ -261,6 +261,7 @@ function login_footer( $input_id = '' ) {
 											printf( _x( '&larr; Back to %s', 'site' ), get_bloginfo( 'title', 'display' ) );
 	?>
 	</a></p>
+	<?php the_privacy_policy_link( '<div class="privacy-policy-page-link">', '</div>' ); ?>
 	<?php endif; ?>
 
 	</div>
@@ -427,7 +428,7 @@ if ( isset( $_GET['key'] ) ) {
 }
 
 // validate action so as to default to the login screen
-if ( ! in_array( $action, array( 'postpass', 'logout', 'lostpassword', 'retrievepassword', 'resetpass', 'rp', 'register', 'login' ), true ) && false === has_filter( 'login_form_' . $action ) ) {
+if ( ! in_array( $action, array( 'postpass', 'logout', 'lostpassword', 'retrievepassword', 'resetpass', 'rp', 'register', 'login', 'confirmaction' ), true ) && false === has_filter( 'login_form_' . $action ) ) {
 	$action = 'login';
 }
 
@@ -858,6 +859,43 @@ switch ( $action ) {
 
 		break;
 
+	case 'confirmaction' :
+		if ( ! isset( $_GET['request_id'] ) ) {
+			wp_die( __( 'Invalid request.' ) );
+		}
+
+		$request_id = (int) $_GET['request_id'];
+
+		if ( isset( $_GET['confirm_key'] ) ) {
+			$key    = sanitize_text_field( wp_unslash( $_GET['confirm_key'] ) );
+			$result = wp_validate_user_request_key( $request_id, $key );
+		} else {
+			$result = new WP_Error( 'invalid_key', __( 'Invalid key' ) );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			wp_die( $result );
+		}
+
+		/**
+		 * Fires an action hook when the account action has been confirmed by the user.
+		 *
+		 * Using this you can assume the user has agreed to perform the action by
+		 * clicking on the link in the confirmation email.
+		 *
+		 * After firing this action hook the page will redirect to wp-login a callback
+		 * redirects or exits first.
+		 *
+		 * @param int $request_id Request ID.
+		 */
+		do_action( 'user_request_action_confirmed', $request_id );
+
+		$message = _wp_privacy_account_request_confirmed_message( $request_id );
+
+		login_header( __( 'User action confirmed.' ), $message );
+		login_footer();
+		exit;
+
 	case 'login':
 	default:
 		$secure_cookie   = '';
@@ -908,7 +946,7 @@ switch ( $action ) {
 				);
 			} elseif ( isset( $_POST['testcookie'] ) && empty( $_COOKIE[ TEST_COOKIE ] ) ) {
 				// If cookies are disabled we can't log in even with a valid user+pass
-				/* translators: 1: Browser cookie documentation URL */
+				/* translators: %s: Browser cookie documentation URL */
 				$user = new WP_Error(
 					'test_cookie', sprintf(
 						__( '<strong>ERROR</strong>: Cookies are blocked or not supported by your browser. You must <a href="%s">enable cookies</a> to use WordPress.' ),

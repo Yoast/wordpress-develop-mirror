@@ -113,8 +113,6 @@ class WP_User {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
-	 *
 	 * @param int|string|stdClass|WP_User $id User's ID, a WP_User object, or a user object from the DB.
 	 * @param string $name Optional. User's username
 	 * @param int $site_id Optional Site ID, defaults to current site.
@@ -610,9 +608,9 @@ class WP_User {
 		 * @since 2.9.0
 		 * @since 3.6.0 Added $old_roles to include an array of the user's previous roles.
 		 *
-		 * @param int    $user_id   The user ID.
-		 * @param string $role      The new role.
-		 * @param array  $old_roles An array of the user's previous roles.
+		 * @param int      $user_id   The user ID.
+		 * @param string   $role      The new role.
+		 * @param string[] $old_roles An array of the user's previous roles.
 		 */
 		do_action( 'set_user_role', $this->ID, $role, $old_roles );
 	}
@@ -750,10 +748,10 @@ class WP_User {
 		 * @since 2.0.0
 		 * @since 3.7.0 Added the user object.
 		 *
-		 * @param array   $allcaps An array of all the user's capabilities.
-		 * @param array   $caps    Actual capabilities for meta capability.
-		 * @param array   $args    Optional parameters passed to has_cap(), typically object ID.
-		 * @param WP_User $user    The user object.
+		 * @param bool[]   $allcaps An array of all the user's capabilities.
+		 * @param string[] $caps    Actual capabilities for meta capability.
+		 * @param array    $args    Optional parameters passed to has_cap(), typically object ID.
+		 * @param WP_User  $user    The user object.
 		 */
 		$capabilities = apply_filters( 'user_has_cap', $this->allcaps, $caps, $args, $this );
 
@@ -792,8 +790,6 @@ class WP_User {
 	 *
 	 * @since 3.0.0
 	 * @deprecated 4.9.0 Use WP_User::for_site()
-	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param int $blog_id Optional. Site ID, defaults to current site.
 	 */

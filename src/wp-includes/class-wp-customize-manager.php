@@ -346,7 +346,7 @@ final class WP_Customize_Manager {
 		 *
 		 * @see WP_Customize_Manager::__construct()
 		 *
-		 * @param array                $components List of core components to load.
+		 * @param string[]             $components Array of core components to load.
 		 * @param WP_Customize_Manager $this       WP_Customize_Manager instance.
 		 */
 		$components = apply_filters( 'customize_loaded_components', $this->components, $this );
@@ -3094,11 +3094,11 @@ final class WP_Customize_Manager {
 	 * @see WP_Customize_Manager::save_changeset_post()
 	 * @see _wp_translate_postdata()
 	 *
-	 * @param array  $caps    Returns the user's actual capabilities.
-	 * @param string $cap     Capability name.
-	 * @param int    $user_id The user ID.
-	 * @param array  $args    Adds the context to the cap. Typically the object ID.
-	 * @return array Capabilities.
+	 * @param string[] $caps    Array of the user's capabilities.
+	 * @param string   $cap     Capability name.
+	 * @param int      $user_id The user ID.
+	 * @param array    $args    Adds the context to the cap. Typically the object ID.
+	 * @return array   Capabilities.
 	 */
 	public function grant_edit_post_capability_for_changeset( $caps, $cap, $user_id, $args ) {
 		if ( 'edit_post' === $cap && ! empty( $args[0] ) && 'customize_changeset' === get_post_type( $args[0] ) ) {
@@ -3623,7 +3623,6 @@ final class WP_Customize_Manager {
 	 *  Optional. Array of properties for the new WP_Customize_Setting. Default empty array.
 	 *
 	 *  @type string       $type                  Type of the setting. Default 'theme_mod'.
-	 *                                            Default 160.
 	 *  @type string       $capability            Capability required for the setting. Default 'edit_theme_options'
 	 *  @type string|array $theme_supports        Theme features required to support the panel. Default is none.
 	 *  @type string       $default               Default value for the setting. Default is empty string.
@@ -4245,7 +4244,7 @@ final class WP_Customize_Manager {
 				<label for="{{ elementPrefix }}customize-preview-link-input" class="screen-reader-text"><?php esc_html_e( 'Preview Link' ); ?></label>
 				<a href="" target="">
 					<span class="preview-control-element" data-component="url"></span>
-					<span class="screen-reader-text"><?php _e( '(opens in a new window)' ); ?></span>
+					<span class="screen-reader-text"><?php _e( '(opens in a new tab)' ); ?></span>
 				</a>
 				<input id="{{ elementPrefix }}customize-preview-link-input" readonly tabindex="-1" class="preview-control-element" data-component="input">
 				<button class="customize-copy-preview-link preview-control-element button button-secondary" data-component="button" data-copy-text="<?php esc_attr_e( 'Copy' ); ?>" data-copied-text="<?php esc_attr_e( 'Copied' ); ?>" ><?php esc_html_e( 'Copy' ); ?></button>
@@ -4507,7 +4506,7 @@ final class WP_Customize_Manager {
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param array $allowed_urls An array of allowed URLs.
+		 * @param string[] $allowed_urls An array of allowed URLs.
 		 */
 		$allowed_urls = array_unique( apply_filters( 'customize_allowed_urls', $allowed_urls ) );
 
@@ -4620,7 +4619,7 @@ final class WP_Customize_Manager {
 		 *
 		 * @since 4.2.0
 		 *
-		 * @param array                $nonces Array of refreshed nonces for save and
+		 * @param string[]             $nonces Array of refreshed nonces for save and
 		 *                                     preview actions.
 		 * @param WP_Customize_Manager $this   WP_Customize_Manager instance.
 		 */
@@ -5464,7 +5463,7 @@ final class WP_Customize_Manager {
 			esc_url( __( 'https://codex.wordpress.org/CSS' ) ),
 			__( 'Learn more about CSS' ),
 			/* translators: accessibility text */
-			__( '(opens in a new window)' )
+			__( '(opens in a new tab)' )
 		);
 		$section_description .= '</p>';
 
@@ -5485,7 +5484,7 @@ final class WP_Customize_Manager {
 				sprintf(
 					'<span class="screen-reader-text"> %s</span>',
 					/* translators: accessibility text */
-					__( '(opens in a new window)' )
+					__( '(opens in a new tab)' )
 				)
 			);
 			$section_description .= '</p>';

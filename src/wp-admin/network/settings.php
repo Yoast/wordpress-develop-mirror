@@ -207,7 +207,7 @@ if ( isset( $_GET['updated'] ) ) {
 					<?php
 					if ( is_subdomain_install() ) {
 						echo '<p class="description">';
-						/* translators: 1: NOBLOGREDIRECT 2: wp-config.php */
+						/* translators: 1: NOBLOGREDIRECT, 2: wp-config.php */
 						printf(
 							__( 'If registration is disabled, please set %1$s in %2$s to a URL you will redirect visitors to if they visit a non-existent site.' ),
 							'<code>NOBLOGREDIRECT</code>',
@@ -450,7 +450,7 @@ if ( isset( $_GET['updated'] ) ) {
 			 *
 			 * @since MU (3.0.0)
 			 *
-			 * @param array $admin_menus The menu items available.
+			 * @param string[] $admin_menus Associative array of the menu items available.
 			 */
 			$menu_items   = apply_filters( 'mu_menu_items', array( 'plugins' => __( 'Plugins' ) ) );
 			$fieldset_end = '';

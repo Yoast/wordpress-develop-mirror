@@ -12,12 +12,18 @@
  */
 class WP_Test_REST_Categories_Controller extends WP_Test_REST_Controller_Testcase {
 	protected static $administrator;
+	protected static $contributor;
 	protected static $subscriber;
 
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$administrator = $factory->user->create(
 			array(
 				'role' => 'administrator',
+			)
+		);
+		self::$contributor   = $factory->user->create(
+			array(
+				'role' => 'subscriber',
 			)
 		);
 		self::$subscriber    = $factory->user->create(
@@ -726,6 +732,14 @@ class WP_Test_REST_Categories_Controller extends WP_Test_REST_Controller_Testcas
 		$this->assertErrorResponse( 'rest_cannot_create', $response, 403 );
 	}
 
+	public function test_create_item_incorrect_permissions_contributor() {
+		wp_set_current_user( self::$contributor );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/categories' );
+		$request->set_param( 'name', 'Incorrect permissions' );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertErrorResponse( 'rest_cannot_create', $response, 403 );
+	}
+
 	public function test_create_item_missing_arguments() {
 		wp_set_current_user( self::$administrator );
 		$request  = new WP_REST_Request( 'POST', '/wp/v2/categories' );
@@ -880,6 +894,18 @@ class WP_Test_REST_Categories_Controller extends WP_Test_REST_Controller_Testcas
 		$data     = $response->get_data();
 
 		$this->check_taxonomy_term( $term, $data, $response->get_links() );
+	}
+
+	public function test_prepare_item_limit_fields() {
+		$request  = new WP_REST_Request;
+		$endpoint = new WP_REST_Terms_Controller( 'category' );
+		$request->set_param( '_fields', 'id,name' );
+		$term     = get_term( 1, 'category' );
+		$response = $endpoint->prepare_item_for_response( $term, $request );
+		$this->assertEquals( array(
+			'id',
+			'name',
+		), array_keys( $response->get_data() ) );
 	}
 
 	public function test_prepare_taxonomy_term_child() {

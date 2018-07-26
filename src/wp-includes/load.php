@@ -487,7 +487,7 @@ function wp_set_wpdb_vars() {
 	if ( is_wp_error( $prefix ) ) {
 		wp_load_translations_early();
 		wp_die(
-			/* translators: 1: $table_prefix 2: wp-config.php */
+			/* translators: 1: $table_prefix, 2: wp-config.php */
 			sprintf(
 				__( '<strong>ERROR</strong>: %1$s in %2$s can only contain numbers, letters, and underscores.' ),
 				'<code>$table_prefix</code>',
@@ -581,7 +581,7 @@ function wp_start_object_cache() {
 	}
 
 	if ( function_exists( 'wp_cache_add_global_groups' ) ) {
-		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
+		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites', 'blog_meta' ) );
 		wp_cache_add_non_persistent_groups( array( 'counts', 'plugins' ) );
 	}
 
@@ -608,7 +608,6 @@ function wp_not_installed() {
 
 		require( ABSPATH . WPINC . '/kses.php' );
 		require( ABSPATH . WPINC . '/pluggable.php' );
-		require( ABSPATH . WPINC . '/formatting.php' );
 
 		$link = wp_guess_url() . '/wp-admin/install.php';
 
@@ -653,14 +652,14 @@ function wp_get_mu_plugins() {
  *
  * While upgrading or installing WordPress, no plugins are returned.
  *
- * The default directory is wp-content/plugins. To change the default
+ * The default directory is `wp-content/plugins`. To change the default
  * directory manually, define `WP_PLUGIN_DIR` and `WP_PLUGIN_URL`
- * in wp-config.php.
+ * in `wp-config.php`.
  *
  * @since 3.0.0
  * @access private
  *
- * @return array Files.
+ * @return string[] $plugin_file Array of paths to plugin files relative to the plugins directory.
  */
 function wp_get_active_and_valid_plugins() {
 	$plugins        = array();
@@ -770,12 +769,12 @@ function wp_clone( $object ) {
 /**
  * Determines whether the current request is for an administrative interface page.
  *
- * Does not check if the user is an administrator; current_user_can()
+ * Does not check if the user is an administrator; use current_user_can()
  * for checking roles and capabilities.
  *
  * For more information on this and similar theme functions, check out
- * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
- * Conditional Tags} article in the Theme Developer Handbook. 
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 1.5.1
  *
@@ -798,7 +797,7 @@ function is_admin() {
  *
  * e.g. `/wp-admin/`
  *
- * Does not check if the user is an administrator; current_user_can()
+ * Does not check if the user is an administrator; use current_user_can()
  * for checking roles and capabilities.
  *
  * @since 3.1.0
@@ -822,7 +821,7 @@ function is_blog_admin() {
  *
  * e.g. `/wp-admin/network/`
  *
- * Does not check if the user is an administrator; current_user_can()
+ * Does not check if the user is an administrator; use current_user_can()
  * for checking roles and capabilities.
  *
  * @since 3.1.0
@@ -846,9 +845,8 @@ function is_network_admin() {
  *
  * e.g. `/wp-admin/user/`
  *
- * Does not inform on whether the user is an admin! Use capability
- * checks to tell if the user should be accessing a section or not
- * current_user_can().
+ * Does not check if the user is an administrator; use current_user_can()
+ * for checking roles and capabilities.
  *
  * @since 3.1.0
  *

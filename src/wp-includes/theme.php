@@ -28,7 +28,7 @@
  *     @type int   $blog_id (Multisite) The blog ID used to calculate which themes are allowed.
  *                          Defaults to 0, synonymous for the current blog.
  * }
- * @return array Array of WP_Theme objects.
+ * @return WP_Theme[] Array of WP_Theme objects.
  */
 function wp_get_themes( $args = array() ) {
 	global $wp_theme_directories;
@@ -370,7 +370,7 @@ function get_template_directory_uri() {
 function get_theme_roots() {
 	global $wp_theme_directories;
 
-	if ( count( $wp_theme_directories ) <= 1 ) {
+	if ( ! is_array( $wp_theme_directories ) || count( $wp_theme_directories ) <= 1 ) {
 		return '/themes';
 	}
 
@@ -2537,7 +2537,7 @@ function add_theme_support( $feature ) {
 		case 'title-tag':
 			// Can be called in functions.php but must happen before wp_loaded, i.e. not in header.php.
 			if ( did_action( 'wp_loaded' ) ) {
-				/* translators: 1: Theme support 2: hook name */
+				/* translators: 1: title-tag, 2: wp_loaded */
 				_doing_it_wrong(
 					"add_theme_support( 'title-tag' )", sprintf(
 						__( 'Theme support for %1$s should be registered before the %2$s hook.' ),

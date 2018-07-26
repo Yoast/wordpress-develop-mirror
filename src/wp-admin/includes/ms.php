@@ -32,13 +32,13 @@ function check_upload_size( $file ) {
 
 	$file_size = filesize( $file['tmp_name'] );
 	if ( $space_left < $file_size ) {
-		/* translators: 1: Required disk space in kilobytes */
-		$file['error'] = sprintf( __( 'Not enough space to upload. %1$s KB needed.' ), number_format( ( $file_size - $space_left ) / KB_IN_BYTES ) );
+		/* translators: %s: required disk space in kilobytes */
+		$file['error'] = sprintf( __( 'Not enough space to upload. %s KB needed.' ), number_format( ( $file_size - $space_left ) / KB_IN_BYTES ) );
 	}
 
 	if ( $file_size > ( KB_IN_BYTES * get_site_option( 'fileupload_maxk', 1500 ) ) ) {
-		/* translators: 1: Maximum allowed file size in kilobytes */
-		$file['error'] = sprintf( __( 'This file is too big. Files must be less than %1$s KB in size.' ), get_site_option( 'fileupload_maxk', 1500 ) );
+		/* translators: %s: maximum allowed file size in kilobytes */
+		$file['error'] = sprintf( __( 'This file is too big. Files must be less than %s KB in size.' ), get_site_option( 'fileupload_maxk', 1500 ) );
 	}
 
 	if ( upload_is_user_over_quota( false ) ) {
@@ -126,13 +126,20 @@ function wpmu_delete_blog( $blog_id, $drop = false ) {
 		 *
 		 * @since MU (3.0.0)
 		 *
-		 * @param array $tables  The site tables to be dropped.
-		 * @param int   $blog_id The ID of the site to drop tables for.
+		 * @param string[] $tables  Array of names of the site tables to be dropped.
+		 * @param int      $blog_id The ID of the site to drop tables for.
 		 */
 		$drop_tables = apply_filters( 'wpmu_drop_tables', $tables, $blog_id );
 
 		foreach ( (array) $drop_tables as $table ) {
 			$wpdb->query( "DROP TABLE IF EXISTS `$table`" );
+		}
+
+		if ( is_site_meta_supported() ) {
+			$blog_meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM $wpdb->blogmeta WHERE blog_id = %d ", $blog_id ) );
+			foreach ( $blog_meta_ids as $mid ) {
+				delete_metadata_by_mid( 'blog', $mid );
+			}
 		}
 
 		$wpdb->delete( $wpdb->blogs, array( 'blog_id' => $blog_id ) );
@@ -658,24 +665,24 @@ function format_code_lang( $code = '' ) {
 	 *
 	 * @since MU (3.0.0)
 	 *
-	 * @param array  $lang_codes Key/value pair of language codes where key is the short version.
-	 * @param string $code       A two-letter designation of the language.
+	 * @param string[] $lang_codes Array of key/value pairs of language codes where key is the short version.
+	 * @param string   $code       A two-letter designation of the language.
 	 */
 	$lang_codes = apply_filters( 'lang_codes', $lang_codes, $code );
 	return strtr( $code, $lang_codes );
 }
 
 /**
- * Synchronize category and post tag slugs when global terms are enabled.
+ * Synchronizes category and post tag slugs when global terms are enabled.
  *
  * @since 3.0.0
  *
- * @param object $term     The term.
- * @param string $taxonomy The taxonomy for `$term`. Should be 'category' or 'post_tag', as these are
- *                         the only taxonomies which are processed by this function; anything else
- *                         will be returned untouched.
- * @return object|array Returns `$term`, after filtering the 'slug' field with sanitize_title()
- *                      if $taxonomy is 'category' or 'post_tag'.
+ * @param WP_Term|array $term     The term.
+ * @param string        $taxonomy The taxonomy for `$term`. Should be 'category' or 'post_tag', as these are
+ *                                the only taxonomies which are processed by this function; anything else
+ *                                will be returned untouched.
+ * @return WP_Term|array Returns `$term`, after filtering the 'slug' field with `sanitize_title()`
+ *                       if `$taxonomy` is 'category' or 'post_tag'.
  */
 function sync_category_tag_slugs( $term, $taxonomy ) {
 	if ( global_terms_enabled() && ( $taxonomy == 'category' || $taxonomy == 'post_tag' ) ) {
@@ -753,8 +760,8 @@ function check_import_new_users( $permission ) {
  *
  * @since 3.0.0
  *
- * @param array  $lang_files Optional. An array of the language files. Default empty array.
- * @param string $current    Optional. The current language code. Default empty.
+ * @param string[] $lang_files Optional. An array of the language files. Default empty array.
+ * @param string   $current    Optional. The current language code. Default empty.
  */
 function mu_dropdown_languages( $lang_files = array(), $current = '' ) {
 	$flag   = false;
@@ -789,9 +796,9 @@ function mu_dropdown_languages( $lang_files = array(), $current = '' ) {
 	 *
 	 * @since MU (3.0.0)
 	 *
-	 * @param array $output     HTML output of the dropdown.
-	 * @param array $lang_files Available language files.
-	 * @param string $current   The current language code.
+	 * @param string[] $output     Array of HTML output for the dropdown.
+	 * @param string[] $lang_files Array of available language files.
+	 * @param string   $current    The current language code.
 	 */
 	$output = apply_filters( 'mu_dropdown_languages', $output, $lang_files, $current );
 

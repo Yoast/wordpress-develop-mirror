@@ -642,17 +642,29 @@ function install_plugin_information() {
 				<li>
 					<strong><?php _e( 'Requires WordPress Version:' ); ?></strong>
 					<?php
-					/* translators: %s: WordPress version */
+					/* translators: %s: version number */
 					printf( __( '%s or higher' ), $api->requires );
 					?>
 				</li>
 			<?php } if ( ! empty( $api->tested ) ) { ?>
 				<li><strong><?php _e( 'Compatible up to:' ); ?></strong> <?php echo $api->tested; ?></li>
+			<?php } if ( ! empty( $api->requires_php ) ) { ?>
+				<li>
+					<strong><?php _e( 'Requires PHP Version:' ); ?></strong>
+					<?php
+					/* translators: %s: version number */
+					printf( __( '%s or higher' ), $api->requires_php );
+					?>
+				</li>
 			<?php } if ( isset( $api->active_installs ) ) { ?>
 				<li><strong><?php _e( 'Active Installations:' ); ?></strong>
 										<?php
 										if ( $api->active_installs >= 1000000 ) {
-											_ex( '1+ Million', 'Active plugin installations' );
+											$active_installs_millions = floor( $api->active_installs / 1000000 );
+											printf(
+												_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations' ),
+												number_format_i18n( $active_installs_millions )
+											);
 										} elseif ( 0 == $api->active_installs ) {
 											_ex( 'Less Than 10', 'Active plugin installations' );
 										} else {
@@ -694,7 +706,7 @@ if ( ! empty( $api->ratings ) && array_sum( (array) $api->ratings ) > 0 ) {
 				/* translators: 1: number of stars (used to determine singular/plural), 2: number of reviews */
 				$aria_label = esc_attr(
 					sprintf(
-						_n( 'Reviews with %1$d star: %2$s. Opens in a new window.', 'Reviews with %1$d stars: %2$s. Opens in a new window.', $key ),
+						_n( 'Reviews with %1$d star: %2$s. Opens in a new tab.', 'Reviews with %1$d stars: %2$s. Opens in a new tab.', $key ),
 						$key,
 						number_format_i18n( $ratecount )
 					)
@@ -741,10 +753,35 @@ if ( ! empty( $api->contributors ) ) {
 	<?php
 	$wp_version = get_bloginfo( 'version' );
 
-	if ( ! empty( $api->tested ) && version_compare( substr( $wp_version, 0, strlen( $api->tested ) ), $api->tested, '>' ) ) {
-		echo '<div class="notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> This plugin has <strong>not been tested</strong> with your current version of WordPress.' ) . '</p></div>';
-	} elseif ( ! empty( $api->requires ) && version_compare( substr( $wp_version, 0, strlen( $api->requires ) ), $api->requires, '<' ) ) {
-		echo '<div class="notice notice-warning notice-alt"><p>' . __( '<strong>Warning:</strong> This plugin has <strong>not been marked as compatible</strong> with your version of WordPress.' ) . '</p></div>';
+	$compatible_php = ( empty( $api->requires_php ) || version_compare( substr( phpversion(), 0, strlen( $api->requires_php ) ), $api->requires_php, '>=' ) );
+	$tested_wp      = ( empty( $api->tested ) || version_compare( substr( $wp_version, 0, strlen( $api->tested ) ), $api->tested, '<=' ) );
+	$compatible_wp  = ( empty( $api->requires ) || version_compare( substr( $wp_version, 0, strlen( $api->requires ) ), $api->requires, '>=' ) );
+
+	if ( ! $compatible_php ) {
+		echo '<div class="notice notice-error notice-alt"><p>';
+		printf(
+			/* translators: "Updating PHP" page URL */
+			__( '<strong>Error:</strong> This plugin <strong>requires a newer version of PHP</strong>, so unfortunately you cannot install it. <a href="%s" target="_blank">Click here to learn more about updating PHP</a>.' ),
+			esc_url( __( 'https://wordpress.org/support/upgrade-php/' ) )
+		);
+		echo '</p></div>';
+	}
+
+	if ( ! $tested_wp ) {
+		echo '<div class="notice notice-warning notice-alt"><p>';
+		_e( '<strong>Warning:</strong> This plugin <strong>has not been tested</strong> with your current version of WordPress.' );
+		echo '</p></div>';
+	} elseif ( ! $compatible_wp ) {
+		echo '<div class="notice notice-error notice-alt"><p>';
+		_e( '<strong>Error:</strong> This plugin <strong>requires a newer version of WordPress</strong>.' );
+		if ( current_user_can( 'update_core' ) ) {
+			printf(
+				/* translators: %s: "Update WordPress" screen URL */
+				' ' . __( '<a href="%s" target="_parent">Click here to update WordPress</a>.' ),
+				self_admin_url( 'update-core.php' )
+			);
+		}
+		echo '</p></div>';
 	}
 
 	foreach ( (array) $api->sections as $section_name => $content ) {
@@ -768,7 +805,14 @@ if ( ! empty( $api->contributors ) ) {
 		switch ( $status['status'] ) {
 			case 'install':
 				if ( $status['url'] ) {
-					echo '<a data-slug="' . esc_attr( $api->slug ) . '" id="plugin_install_from_iframe" class="button button-primary right" href="' . $status['url'] . '" target="_parent">' . __( 'Install Now' ) . '</a>';
+					if ( $compatible_php && $compatible_wp ) {
+						echo '<a data-slug="' . esc_attr( $api->slug ) . '" id="plugin_install_from_iframe" class="button button-primary right" href="' . $status['url'] . '" target="_parent">' . __( 'Install Now' ) . '</a>';
+					} else {
+						printf(
+							'<button type="button" class="button button-primary button-disabled right" disabled="disabled">%s</button>',
+							_x( 'Cannot Install', 'plugin' )
+						);
+					}
 				}
 				break;
 			case 'update_available':

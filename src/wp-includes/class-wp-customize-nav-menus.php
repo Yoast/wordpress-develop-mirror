@@ -75,8 +75,8 @@ final class WP_Customize_Nav_Menus {
 	 *
 	 * @since 4.5.0
 	 *
-	 * @param array $nonces Array of nonces.
-	 * @return array $nonces Modified array of nonces.
+	 * @param string[] $nonces Array of nonces.
+	 * @return string[] $nonces Modified array of nonces.
 	 */
 	public function filter_nonces( $nonces ) {
 		$nonces['customize-menus'] = wp_create_nonce( 'customize-menus' );
@@ -324,7 +324,7 @@ final class WP_Customize_Nav_Menus {
 
 		// Prepend list of posts with nav_menus_created_posts search results on first page.
 		$nav_menus_created_posts_setting = $this->manager->get_setting( 'nav_menus_created_posts' );
-		if ( 1 === $args['pagenum'] && $nav_menus_created_posts_setting && count( $nav_menus_created_posts_setting ) > 0 ) {
+		if ( 1 === $args['pagenum'] && $nav_menus_created_posts_setting && count( $nav_menus_created_posts_setting->value() ) > 0 ) {
 			$stub_post_query = new WP_Query(
 				array_merge(
 					$query,
@@ -947,7 +947,7 @@ final class WP_Customize_Nav_Menus {
 			}
 
 			$data = array(
-				/* translators: %1$s is the post type name and %2$s is the error message. */
+				/* translators: 1: post type name, 2: error message */
 				'message' => sprintf( __( '%1$s could not be created: %2$s' ), $singular_name, $error->get_error_message() ),
 			);
 			wp_send_json_error( $data );
@@ -981,7 +981,7 @@ final class WP_Customize_Nav_Menus {
 						<button type="button" class="button-link item-add">
 							<span class="screen-reader-text">
 							<?php
-								/* translators: 1: Title of a menu item, 2: Type of a menu item */
+								/* translators: 1: title of a menu item, 2: type of a menu item */
 								printf( __( 'Add to menu: %1$s (%2$s)' ), '{{ data.title || wp.customize.Menus.data.l10n.untitled }}', '{{ data.type_label }}' );
 							?>
 							</span>

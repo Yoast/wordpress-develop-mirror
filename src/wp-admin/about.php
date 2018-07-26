@@ -11,7 +11,8 @@ require_once( dirname( __FILE__ ) . '/admin.php' );
 
 wp_enqueue_script( 'underscore' );
 
-$title = __( 'About' );
+/* translators: Page title of the About WordPress page in the admin. */
+$title = _x( 'About', 'page title' );
 
 list( $display_version ) = explode( '-', get_bloginfo( 'version' ) );
 
@@ -27,7 +28,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 			<a href="about.php" class="nav-tab nav-tab-active"><?php _e( 'What&#8217;s New' ); ?></a>
 			<a href="credits.php" class="nav-tab"><?php _e( 'Credits' ); ?></a>
 			<a href="freedoms.php" class="nav-tab"><?php _e( 'Freedoms' ); ?></a>
-			<a href="privacy.php" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
+			<a href="freedoms.php?privacy-notice" class="nav-tab"><?php _e( 'Privacy' ); ?></a>
 		</h2>
 
 		<div class="feature-section one-col">

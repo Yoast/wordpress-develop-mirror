@@ -348,7 +348,7 @@ function media_handle_upload( $file_id, $post_id, $post_data = array(), $overrid
 		}
 
 		if ( ! empty( $meta['year'] ) ) {
-			/* translators: Audio file track information. 1: Year of audio track release */
+			/* translators: Audio file track information. %d: Year of audio track release */
 			$content .= ' ' . sprintf( __( 'Released: %d.' ), $meta['year'] );
 		}
 
@@ -358,13 +358,13 @@ function media_handle_upload( $file_id, $post_id, $post_data = array(), $overrid
 				/* translators: Audio file track information. 1: Audio track number, 2: Total audio tracks */
 				$content .= ' ' . sprintf( __( 'Track %1$s of %2$s.' ), number_format_i18n( $track_number[0] ), number_format_i18n( $track_number[1] ) );
 			} else {
-				/* translators: Audio file track information. 1: Audio track number */
-				$content .= ' ' . sprintf( __( 'Track %1$s.' ), number_format_i18n( $track_number[0] ) );
+				/* translators: Audio file track information. %s: Audio track number */
+				$content .= ' ' . sprintf( __( 'Track %s.' ), number_format_i18n( $track_number[0] ) );
 			}
 		}
 
 		if ( ! empty( $meta['genre'] ) ) {
-			/* translators: Audio file genre information. 1: Audio genre name */
+			/* translators: Audio file genre information. %s: Audio genre name */
 			$content .= ' ' . sprintf( __( 'Genre: %s.' ), $meta['genre'] );
 		}
 
@@ -2609,7 +2609,7 @@ foreach ( $post_mime_types as $mime_type => $label ) {
  *
  * @since 3.1.0
  *
- * @param array $type_links An array of list items containing mime type link HTML.
+ * @param string[] $type_links An array of list items containing mime type link HTML.
  */
 echo implode( ' | </li>', apply_filters( 'media_upload_mime_type_links', $type_links ) ) . '</li>';
 unset( $type_links );
@@ -2872,7 +2872,7 @@ function media_upload_max_image_resize() {
 <p class="hide-if-no-js"><label>
 <input name="image_resize" type="checkbox" id="image_resize" value="true"<?php echo $checked; ?> />
 <?php
-	/* translators: %1$s is link start tag, %2$s is link end tag, %3$d is width, %4$d is height*/
+	/* translators: 1: link start tag, 2: link end tag, 3: width, 4: height */
 	printf( __( 'Scale images to match the large size selected in %1$simage options%2$s (%3$d &times; %4$d).' ), $a, $end, (int) get_option( 'large_size_w', '1024' ), (int) get_option( 'large_size_h', '1024' ) );
 ?>
 </label></p>
