@@ -11,8 +11,8 @@ window.wp = window.wp || {};
  *
  * @since 3.5.0
  *
- * @param {object}  exports   wp.
- * @param {object}  $         jQuery.
+ * @param {object} exports wp.
+ * @param {object} $       jQuery.
  *
  * @return {void}
  */
