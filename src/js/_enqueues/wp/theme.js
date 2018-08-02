@@ -65,7 +65,7 @@ themes.Model = Backbone.Model.extend(/** @lends wp.themes.Model.prototype */{
 	}
 });
 
-themes.view.Appearance = wp.Backbone.View.extend({
+themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.prototype */{
 
 	el: '#wpbody-content .wrap .theme-browser',
 
@@ -74,7 +74,7 @@ themes.view.Appearance = wp.Backbone.View.extend({
 	page: 0,
 
 	/**
-	 * Main view controller, unifies and renders all available views.
+	 * Appearance view for the theme.
 	 *
 	 * @since      3.8.0
 	 * @access     private
@@ -82,13 +82,13 @@ themes.view.Appearance = wp.Backbone.View.extend({
 	 * @constructs wp.themes.view.Appearance
 	 * @augments   wp.themes.view
 	 *
-	 * @memberof wp.themes.view.Apprearance
+	 * @memberof wp.themes.view.Appearance
 	 *
 	 * @see   Backbone.View
 	 * @link  http://backbonejs.org/#View
 	 *
-	 * @param {Object}        options            The view's attributes.
-	 * @param {Backbone.View} options.SearchView The theme's search view.
+	 * @param {Object}        options              The view's attributes.
+	 * @param {Backbone.View} [options.SearchView] The theme's search view.
 	 */
 	initialize: function( options ) {
 		// Scroller checks how far the scroll position is.
@@ -99,10 +99,11 @@ themes.view.Appearance = wp.Backbone.View.extend({
 		this.window.bind( 'scroll', _.throttle( this.scroller, 300 ) );
 	},
 
-	// Main render control
+	/**
+	 * Renders the appearance view.
+	 */
 	render: function() {
-		// Setup the main theme view
-		// with the current theme collection
+		// Setup the main theme view with the current theme collection.
 		this.view = new themes.view.Themes({
 			collection: this.collection,
 			parent: this
@@ -113,21 +114,22 @@ themes.view.Appearance = wp.Backbone.View.extend({
 
 		this.$el.removeClass( 'search-loading' );
 
-		// Render and append
+		// Render and append.
 		this.view.render();
 		this.$el.empty().append( this.view.el ).addClass( 'rendered' );
 	},
 
-	// Defines search element container
+	// Defines search element container.
 	searchContainer: $( '.search-form' ),
 
-	// Search input and view
-	// for current theme collection
+	/**
+	 * Renders the search input and view for current theme collection.
+	 */
 	search: function() {
 		var view,
 			self = this;
 
-		// Don't render the search if there is only one theme
+		// Don't render the search if there is only one theme.
 		if ( themes.data.themes.length === 1 ) {
 			return;
 		}
@@ -138,7 +140,7 @@ themes.view.Appearance = wp.Backbone.View.extend({
 		});
 		self.SearchView = view;
 
-		// Render and append after screen title
+		// Render and append after screen title.
 		view.render();
 		this.searchContainer
 			.append( $.parseHTML( '<label class="screen-reader-text" for="wp-filter-search-input">' + l10n.search + '</label>' ) )
@@ -148,8 +150,10 @@ themes.view.Appearance = wp.Backbone.View.extend({
 			});
 	},
 
-	// Checks when the user gets close to the bottom
-	// of the mage and triggers a theme:scroll event
+	/**
+	 * Checks when the user gets close to the bottom of the page and triggers a
+	 * theme:scroll event.
+	 */
 	scroller: function() {
 		var self = this,
 			bottom, threshold;
@@ -164,21 +168,36 @@ themes.view.Appearance = wp.Backbone.View.extend({
 	}
 });
 
-// Set up the Collection for our theme data
-// @has 'id' 'name' 'screenshot' 'author' 'authorURI' 'version' 'active' ...
-themes.Collection = Backbone.Collection.extend({
+/**
+ * Set up the Collection for our theme data.
+ *
+ * @since      3.8.0
+ * @access     private
+ *
+ * @constructs wp.themes.Collection
+ * @memberof   wp.themes
+ * @augments   wp.themes
+ * @inheritDoc
+ *
+ * @see   Backbone.Collection
+ * @link  http://backbonejs.org/#Collection
+ */
+themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.prototype */{
 
 	model: themes.Model,
 
-	// Search terms
+	// Search terms.
 	terms: '',
 
-	// Controls searching on the current theme collection
-	// and triggers an update event
+	/**
+	 * Searches on the current theme collection and triggers an update event.
+	 *
+	 * @param {string} value The terms to search for.
+	 */
 	doSearch: function( value ) {
 
-		// Don't do anything if we've already done this search
-		// Useful because the Search handler fires multiple times per keystroke
+		// Don't do anything if we've already done this search.
+		// Useful because the Search handler fires multiple times per keystroke.
 		if ( this.terms === value ) {
 			return;
 		}
