@@ -10,6 +10,7 @@
  * @param {string}	[attribute.tagName=button]
  * @param {string}	[attributes.className=media-button]
  * @param {Object}	[attributes.attributes=type:button]
+ * @param {Object}	[attributes.events=click:click]
  *
  * @memberOf wp.media.view
  */
@@ -54,6 +55,8 @@ var Button = wp.media.View.extend(/** @lends wp.media.view.Button.prototype */{
 		this.listenTo( this.model, 'change', this.render );
 	},
 	/**
+	 * Renders the button
+	 *
 	 * @returns {wp.media.view.Button} Returns itself to allow chaining
 	 */
 	render: function() {
@@ -77,7 +80,9 @@ var Button = wp.media.View.extend(/** @lends wp.media.view.Button.prototype */{
 		return this;
 	},
 	/**
-	 * @param {Object} event
+	 * Applies any arguments to the options as long as the button is not disabled.
+	 *
+	 * @param {Object} event The click event
 	 *
 	 * @returns {void}
 	 */
