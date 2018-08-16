@@ -6,11 +6,16 @@
  * @augments wp.Backbone.View
  * @augments Backbone.View
  *
- * @param {Object}	[attributes]
- * @param {string}	[attribute.tagName=button]
- * @param {string}	[attributes.className=media-button]
- * @param {Object}	[attributes.attributes=type:button]
- * @param {Object}	[attributes.events=click:click]
+ * @param {string}	[tagName=button]
+ * @param {string}	[className=media-button]
+ * @param {Object}	[attributes=type:button]
+ * @param {Object}	[events=click:click]
+ *
+ * @param {Object}  [attributes]
+ * @param {string}	[attributes.text]
+ * @param {string}	[attributes.style]
+ * @param {string}	[attributes.size=large]
+ * @param {Boolean}	[attributes.disabled=false]
  *
  * @memberOf wp.media.view
  */
