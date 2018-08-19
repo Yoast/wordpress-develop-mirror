@@ -5,7 +5,7 @@
  * @output wp-admin/js/inline-edit-post.js
  */
 
-/* global inlineEditL10n, ajaxurl, typenow */
+/* global inlineEditL10n, ajaxurl, typenow, inlineEditPost */
 
 window.wp = window.wp || {};
 

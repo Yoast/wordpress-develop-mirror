@@ -2,7 +2,7 @@
  * @output wp-admin/js/gallery.js
  */
 
-/* global unescape, getUserSetting, setUserSetting */
+/* global unescape, getUserSetting, setUserSetting, wpgallery, tinymce */
 
 jQuery(document).ready(function($) {
 	var gallerySortable, gallerySortableInit, sortIt, clearAll, w, desc = false;
@@ -88,7 +88,7 @@ jQuery(document).ready(function($) {
 	}
 });
 
-jQuery(window).unload( function () { tinymce = tinyMCE = wpgallery = null; } ); // Cleanup
+jQuery(window).unload( function () { window.tinymce = window.tinyMCE = window.wpgallery = null; } ); // Cleanup
 
 /* gallery settings */
 window.tinymce = null;

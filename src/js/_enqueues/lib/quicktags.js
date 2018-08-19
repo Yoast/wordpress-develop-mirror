@@ -24,7 +24,7 @@
 // by Alex King
 // http://www.alexking.org/
 
-/* global adminpage, wpActiveEditor, quicktagsL10n, wpLink, prompt */
+/* global adminpage, wpActiveEditor, quicktagsL10n, wpLink, prompt, edButtons */
 
 window.edButtons = [];
 

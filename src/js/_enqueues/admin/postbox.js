@@ -7,7 +7,7 @@
  * @output wp-admin/js/postbox.js
  */
 
-/* global ajaxurl, postBoxL10n */
+/* global ajaxurl, postBoxL10n, postboxes */
 
 (function($) {
 	var $document = $( document );

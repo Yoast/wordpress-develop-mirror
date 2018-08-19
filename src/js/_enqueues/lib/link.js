@@ -2,6 +2,8 @@
  * @output wp-includes/js/wplink.js
  */
 
+ /* global wpLink */
+
 ( function( $, wpLinkL10n, wp ) {
 	var editor, searchTimer, River, Query, correctedURL, linkNode,
 		emailRegexp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,63}$/i,

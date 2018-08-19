@@ -25,4 +25,4 @@ window.WPSetAsThumbnail = function( id, nonce ) {
 		}
 	}
 	);
-}
+};

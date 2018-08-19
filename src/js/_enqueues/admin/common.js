@@ -3,6 +3,7 @@
  */
 
 /* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
+/* global columns, screenMeta */
 
 /**
  *  Adds common WordPress functionality to the window.

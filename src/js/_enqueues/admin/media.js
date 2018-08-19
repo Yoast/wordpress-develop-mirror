@@ -10,7 +10,7 @@
  * @requires jQuery
  */
 
-/* global ajaxurl, attachMediaBoxL10n, _wpMediaGridSettings, showNotice */
+/* global ajaxurl, attachMediaBoxL10n, _wpMediaGridSettings, showNotice, findPosts */
 
 ( function( $ ){
 	window.findPosts = {

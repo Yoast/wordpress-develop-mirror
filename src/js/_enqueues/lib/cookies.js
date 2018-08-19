@@ -4,7 +4,7 @@
  * @output wp-includes/js/utils.js
  */
 
-/* global userSettings */
+/* global userSettings, getAllUserSettings, wpCookies, setUserSetting */
 /* exported getUserSetting, setUserSetting, deleteUserSetting */
 
 window.wpCookies = {
@@ -151,7 +151,7 @@ window.getUserSetting = function( name, def ) {
 	}
 
 	return '';
-}
+};
 
 // Both name and value must be only ASCII letters, numbers or underscore
 // and the shorter, the better (cookies can store maximum 4KB). Not suitable to store text.
@@ -186,11 +186,11 @@ window.setUserSetting = function( name, value, _del ) {
 	wpCookies.set( 'wp-settings-time-' + uid, userSettings.time, 31536000, path, '', secure );
 
 	return name;
-}
+};
 
 window.deleteUserSetting = function( name ) {
 	return setUserSetting( name, '', 1 );
-}
+};
 
 // Returns all settings as js object.
 window.getAllUserSettings = function() {
@@ -199,4 +199,4 @@ window.getAllUserSettings = function() {
 	}
 
 	return wpCookies.getHash( 'wp-settings-' + userSettings.uid ) || {};
-}
+};

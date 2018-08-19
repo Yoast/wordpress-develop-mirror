@@ -2,7 +2,7 @@
  * @output wp-admin/js/widgets.js
  */
 
-/* global ajaxurl, isRtl */
+/* global ajaxurl, isRtl, wpWidgets */
 
 (function($) {
 	var $document = $( document );

@@ -5,7 +5,8 @@
  */
 
  /* global postL10n, ajaxurl, wpAjax, setPostThumbnailL10n, postboxes, pagenow, tinymce, alert, deleteUserSetting */
- /* global theList:true, theExtraList:true, getUserSetting, setUserSetting, commentReply */
+ /* global theList:true, theExtraList:true, getUserSetting, setUserSetting, commentReply, commentsBox */
+ /* global WPSetThumbnailHTML, wptitlehint */
 
 // Backwards compatibility: prevent fatal errors.
 window.makeSlugeditClickable = window.editPermalink = function(){};

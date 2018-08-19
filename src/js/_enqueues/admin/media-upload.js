@@ -12,7 +12,7 @@
  * @requires jQuery
  */
 
-/* global tinymce, QTags */
+/* global tinymce, QTags, wpActiveEditor, tb_position */
 
 /**
  * Sends the HTML passed in the parameters to TinyMCE.

@@ -4,7 +4,7 @@
  * @output wp-admin/js/inline-edit-tax.js
  */
 
-/* global inlineEditL10n, ajaxurl */
+/* global inlineEditL10n, ajaxurl, inlineEditTax */
 
 window.wp = window.wp || {};
 

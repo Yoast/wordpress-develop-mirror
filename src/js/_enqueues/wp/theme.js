@@ -2,7 +2,7 @@
  * @output wp-admin/js/theme.js
  */
 
-/* global _wpThemeSettings, confirm */
+/* global _wpThemeSettings, confirm, tb_position */
 window.wp = window.wp || {};
 
 ( function($) {

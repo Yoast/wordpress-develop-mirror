@@ -3,7 +3,7 @@
  */
 
 /* jshint curly: false, eqeqeq: false */
-/* global ajaxurl */
+/* global ajaxurl, tagBox, array_unique_noempty */
 
 ( function( $ ) {
 	var tagDelimiter = ( window.tagsSuggestL10n && window.tagsSuggestL10n.tagDelimiter ) || ',';

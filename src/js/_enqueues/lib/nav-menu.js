@@ -9,7 +9,7 @@
  * @output wp-admin/js/nav-menu.js
  */
 
-/* global menus, postboxes, columns, isRtl, navMenuL10n, ajaxurl */
+/* global menus, postboxes, columns, isRtl, navMenuL10n, ajaxurl, wpNavMenu */
 
 (function($) {
 

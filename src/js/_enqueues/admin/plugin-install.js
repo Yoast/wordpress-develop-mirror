@@ -4,7 +4,7 @@
  * @output wp-admin/js/plugin-install.js
  */
 
-/* global plugininstallL10n, tb_click, tb_remove */
+/* global plugininstallL10n, tb_click, tb_remove, tb_position */
 
 jQuery( document ).ready( function( $ ) {
 
