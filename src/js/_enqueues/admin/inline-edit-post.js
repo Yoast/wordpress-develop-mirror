@@ -22,10 +22,9 @@ window.wp = window.wp || {};
  * @property {string} what The prefix before the post id.
  *
  */
-var inlineEditPost;
 ( function( $, wp ) {
 
-	inlineEditPost = {
+	window.inlineEditPost = {
 
 	/**
 	 * Initializes the inline and bulk post editor.

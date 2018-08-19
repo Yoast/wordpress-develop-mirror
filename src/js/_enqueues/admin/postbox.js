@@ -9,22 +9,20 @@
 
 /* global ajaxurl, postBoxL10n */
 
-/**
- * This object contains all function to handle the behaviour of the post boxes. The post boxes are the boxes you see
- * around the content on the edit page.
- *
- * @since 2.7.0
- *
- * @namespace postboxes
- *
- * @type {Object}
- */
-var postboxes;
-
 (function($) {
 	var $document = $( document );
 
-	postboxes = {
+	/**
+	 * This object contains all function to handle the behaviour of the post boxes. The post boxes are the boxes you see
+	 * around the content on the edit page.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @namespace postboxes
+	 *
+	 * @type {Object}
+	 */
+	window.postboxes = {
 
 		/**
 		 * Handles a click on either the postbox heading or the postbox open/close icon.

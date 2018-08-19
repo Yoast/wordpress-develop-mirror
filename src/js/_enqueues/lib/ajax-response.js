@@ -2,7 +2,7 @@
  * @output wp-includes/js/wp-ajax-response.js
  */
 
-var wpAjax = jQuery.extend( {
+window.wpAjax = jQuery.extend( {
 	unserialize: function( s ) {
 		var r = {}, q, pp, i, p;
 		if ( !s ) { return r; }
