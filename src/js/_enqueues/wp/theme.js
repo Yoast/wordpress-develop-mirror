@@ -196,49 +196,59 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 	 */
 	doSearch: function( value ) {
 
-		// Don't do anything if we've already done this search.
-		// Useful because the Search handler fires multiple times per keystroke.
+		/*
+		 * Don't do anything if the value has not changed since the last search.
+		 * Useful because the Search handler fires multiple times per keystroke.
+		 */
 		if ( this.terms === value ) {
 			return;
 		}
 
-		// Updates terms with the value passed
+		// Updates terms with the value passed.
 		this.terms = value;
 
-		// If we have terms, run a search...
+		// If we have terms, run a search.
 		if ( this.terms.length > 0 ) {
 			this.search( this.terms );
 		}
 
-		// If search is blank, show all themes
-		// Useful for resetting the views when you clean the input
+		/*
+		 * If search is blank, show all themes.
+		 * Useful for resetting the views when you clean the input.
+		 */
 		if ( this.terms === '' ) {
 			this.reset( themes.data.themes );
 			$( 'body' ).removeClass( 'no-results' );
 		}
 
-		// Trigger a 'themes:update' event
+		// Trigger a 'themes:update' event.
 		this.trigger( 'themes:update' );
 	},
 
-	// Performs a search within the collection
-	// @uses RegExp
+	/*
+	 * Performs a search within the collection.
+	 * @uses RegExp
+	 */
 	search: function( term ) {
 		var match, results, haystack, name, description, author;
 
-		// Start with a full collection
+		// Start with a full collection.
 		this.reset( themes.data.themes, { silent: true } );
 
-		// Escape the term string for RegExp meta characters
+		// Escape the term string for RegExp meta characters.
 		term = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
-		// Consider spaces as word delimiters and match the whole string
-		// so matching terms can be combined
+		/*
+		 * Consider spaces as word delimiters and match the whole string so
+		 * matching terms can be combined.
+		 */
 		term = term.replace( / /g, ')(?=.*' );
 		match = new RegExp( '^(?=.*' + term + ').+', 'i' );
 
-		// Find results
-		// _.filter and .test
+		/*
+		 * Search for term in the themes' name, description, author, id or tags.
+		 * Using _.filter and RegExp.test
+		 */
 		results = this.filter( function( data ) {
 			name        = data.get( 'name' ).replace( /(<([^>]+)>)/ig, '' );
 			description = data.get( 'description' ).replace( /(<([^>]+)>)/ig, '' );
@@ -246,6 +256,10 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 
 			haystack = _.union( [ name, data.get( 'id' ), description, author, data.get( 'tags' ) ] );
 
+			/*
+			 * When the search term is longer than 2 characters and it is found
+			 * in the author data, display the author name.
+			 */
 			if ( match.test( data.get( 'author' ) ) && term.length > 2 ) {
 				data.set( 'displayAuthor', true );
 			}
