@@ -29,16 +29,16 @@ themes.Model = Backbone.Model.extend(/** @lends wp.themes.Model.prototype */{
 	 * Adds attributes to the default data coming through the .org themes API.
 	 * Map `id` to `slug` for shared code.
 	 *
-	 * @since      3.8.0
-	 * @access     private
+	 * @since  3.8.0
+	 * @access private
 	 *
 	 * @constructs wp.themes.Model
 	 * @augments   wp.themes
 	 *
 	 * @memberof wp.themes
 	 *
-	 * @see   Backbone.Model
-	 * @link  http://backbonejs.org/#Model
+	 * @see  Backbone.Model
+	 * @link http://backbonejs.org/#Model
 	 */
 	initialize: function() {
 		var description;
@@ -74,18 +74,16 @@ themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.proto
 	page: 0,
 
 	/**
-	 * Appearance view for the theme.
+	 * Appearance view for the themes.
 	 *
-	 * @since      3.8.0
-	 * @access     private
+	 * @since  3.8.0
+	 * @access private
 	 *
 	 * @constructs wp.themes.view.Appearance
 	 * @augments   wp.themes.view
 	 *
-	 * @memberof wp.themes.view.Appearance
-	 *
-	 * @see   Backbone.View
-	 * @link  http://backbonejs.org/#View
+	 * @see  Backbone.View
+	 * @link http://backbonejs.org/#View
 	 *
 	 * @param {Object}        options              The view's attributes.
 	 * @param {Backbone.View} [options.SearchView] The theme's search view.
@@ -101,6 +99,13 @@ themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.proto
 
 	/**
 	 * Renders the appearance view.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.view.Appearance
+	 *
+	 * @return {void}
 	 */
 	render: function() {
 		// Setup the main theme view with the current theme collection.
@@ -119,11 +124,25 @@ themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.proto
 		this.$el.empty().append( this.view.el ).addClass( 'rendered' );
 	},
 
-	// Defines search element container.
+	/**
+	 * Defines search element container.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type {Object}
+	 */
 	searchContainer: $( '.search-form' ),
 
 	/**
 	 * Renders the search input and view for current theme collection.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.view.Appearance
+	 *
+	 * @return {void}
 	 */
 	search: function() {
 		var view,
@@ -151,8 +170,19 @@ themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.proto
 	},
 
 	/**
+	 * Checks when the user gets close to the bottom of the page.
+	 *
 	 * Checks when the user gets close to the bottom of the page and triggers a
 	 * theme:scroll event.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.view.Appearance
+	 *
+	 * @fires theme:scroll
+	 *
+	 * @return {void}
 	 */
 	scroller: function() {
 		var self = this,
@@ -171,8 +201,8 @@ themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.proto
 /**
  * Set up the Collection for our theme data.
  *
- * @since      3.8.0
- * @access     private
+ * @since  3.8.0
+ * @access private
  *
  * @constructs wp.themes.Collection
  * @memberof   wp.themes
@@ -184,15 +214,39 @@ themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.proto
  */
 themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.prototype */{
 
+	/**
+	 * Theme model.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type {Backbone.Model}
+	 */
 	model: themes.Model,
 
-	// Search terms.
+	/**
+	 * Search terms.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type {string}
+	 */
 	terms: '',
 
 	/**
 	 * Searches on the current theme collection and triggers an update event.
 	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @fires themes:update
+	 *
 	 * @param {string} value The terms to search for.
+	 *
+	 * @return {void}
 	 */
 	doSearch: function( value ) {
 
@@ -225,9 +279,19 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 		this.trigger( 'themes:update' );
 	},
 
-	/*
+	/**
 	 * Performs a search within the collection.
-	 * @uses RegExp
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @fires query:empty
+	 *
+	 * @param {string} term The terms to search for.
+	 *
+	 * @return {void}
 	 */
 	search: function( term ) {
 		var match, results, haystack, name, description, author;
@@ -235,7 +299,10 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 		// Start with a full collection.
 		this.reset( themes.data.themes, { silent: true } );
 
-		// Escape the term string for RegExp meta characters.
+		/*
+		 * Escape the term string for RegExp meta characters.
+		 * E.g. "[x].*" -> "\[x\]\.\*"
+		 */
 		term = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
 		/*
@@ -276,8 +343,31 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 		this.reset( results );
 	},
 
-	// Paginates the collection with a helper method
-	// that slices the collection
+	/**
+	 * Paginates the collection with a helper method that slices the collection.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @see  Function/class relied on
+	 * @link URL
+	 * @global
+	 *
+	 * @fires   eventName
+	 * @fires   className#eventName
+	 * @listens event:eventName
+	 * @listens className~event:eventName
+	 *
+	 * @param {type}   var           Description.
+	 * @param {type}   [var]         Description of optional variable.
+	 * @param {type}   [var=default] Description of optional variable with default variable.
+	 * @param {Object} objectVar     Description.
+	 * @param {type}   objectVar.key Description of a key in the objectVar parameter.
+	 *
+	 * @return {type} Description.
+	 */
 	paginate: function( instance ) {
 		var collection = this;
 		instance = instance || 0;
