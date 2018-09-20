@@ -351,14 +351,43 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 	 *
 	 * @memberof wp.themes.Collection
 	 *
-	 * @see  Function/class relied on
-	 * @link URL
-	 * @global
+	 * @param {number} instance The current page number.
 	 *
-	 * @fires   eventName
-	 * @fires   className#eventName
-	 * @listens event:eventName
-	 * @listens className~event:eventName
+	 * @return {wp.themes.Collection} The paginated collection.
+	 */
+	paginate: function( instance ) {
+		var collection = this;
+		instance = instance || 0;
+
+		// Themes per instance are set at 20.
+		collection = _( collection.rest( 20 * instance ) );
+		collection = _( collection.first( 20 ) );
+
+		return collection;
+	},
+
+	/**
+	 * The number of themes in this collection.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @type {number|boolean}
+	 */
+	count: false,
+
+	/**
+	 * Handles requests for more themes and caches results.
+	 *
+	 * When we are missing a cache object we fire an apiCall() which triggers events of `query:success` or `query:fail`.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @fires query:success
+	 * @fires query:fail
 	 *
 	 * @param {type}   var           Description.
 	 * @param {type}   [var]         Description of optional variable.
@@ -368,24 +397,6 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 	 *
 	 * @return {type} Description.
 	 */
-	paginate: function( instance ) {
-		var collection = this;
-		instance = instance || 0;
-
-		// Themes per instance are set at 20
-		collection = _( collection.rest( 20 * instance ) );
-		collection = _( collection.first( 20 ) );
-
-		return collection;
-	},
-
-	count: false,
-
-	// Handles requests for more themes
-	// and caches results
-	//
-	// When we are missing a cache object we fire an apiCall()
-	// which triggers events of `query:success` or `query:fail`
 	query: function( request ) {
 		/**
 		 * @static
