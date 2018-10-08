@@ -62,3 +62,10 @@ wp-tests-config.php
 
 vendor
 !/src/js/_enqueues/vendor
+src/wp-admin/js/
+src/wp-includes/js/
+src/wp-admin/css/colors/**/*.css
+src/wp-admin/css/*rtl*
+src/wp-admin/css/*.min.css
+src/wp-includes/css/*rtl*
+src/wp-includes/css/*.min.css
