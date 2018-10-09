@@ -13,6 +13,7 @@
   "author": "The WordPress Contributors",
   "license": "GPL-2.0+",
   "devDependencies": {
+    "@wordpress/custom-templated-path-webpack-plugin": "^1.1.5",
     "@wordpress/library-export-default-webpack-plugin": "^1.0.4",
     "autoprefixer": "^9.1.5",
     "copy-webpack-plugin": "^4.5.2",

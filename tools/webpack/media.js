@@ -8,7 +8,9 @@ mediaBuilds.forEach( function ( build ) {
 	mediaEntries[ build ] = './' + path + '/' + build + '.manifest.js';
 } );
 
-module.exports = function( env = { environment: "production" }, dirname ) {
+const baseDir = path.join( __dirname, '../../' );
+
+module.exports = function( env = { environment: "production", watch: false } ) {
 	const mode = env.environment;
 
 	const mediaConfig = {
@@ -16,19 +18,16 @@ module.exports = function( env = { environment: "production" }, dirname ) {
 		cache: true,
 		entry: mediaEntries,
 		output: {
-			path: path.join( dirname, 'src/wp-includes/js' ),
+			path: path.join( baseDir, 'src/wp-includes/js' ),
 			filename: 'media-[name].js'
 		},
 		optimization: {
 			// The files are minified by uglify afterwards. We could change this
 			// later, but for now prevent doing the work twice.
 			minimize: false
-		}
+		},
+		watch: env.watch,
 	};
-
-	if ( mode === 'development' ) {
-		mediaConfig.watch = true;
-	}
 
 	return mediaConfig;
 };

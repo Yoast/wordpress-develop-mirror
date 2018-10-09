@@ -5,11 +5,13 @@ const LiveReloadPlugin = require( 'webpack-livereload-plugin' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const postcss = require( 'postcss' );
 
-const { join } = require( 'path' );
+const { join, basename } = require( 'path' );
+const { get } = require( 'lodash' );
 
 /**
  * WordPress dependencies
  */
+const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 const LibraryExportDefaultPlugin = require( '@wordpress/library-export-default-webpack-plugin' );
 
 const baseDir = join( __dirname, '../../' );
@@ -31,19 +33,19 @@ function camelCaseDash( string ) {
 	);
 }
 
-module.exports = function( env = { environment: 'production' } ) {
+module.exports = function( env = { environment: 'production', watch: false } ) {
 	const mode = env.environment;
 	const suffix = mode === 'production' ? '.min': '';
 
 	const gutenbergPackages = [
-		'a11y',
 		'api-fetch',
+		'a11y',
 		'autop',
 		'blob',
 		'blocks',
 //		'block-library', // Not on npm yet.
 		'block-serialization-default-parser',
-//		'block-serialization-spec-parser', // No build-module folder.
+		'block-serialization-spec-parser',
 		'components',
 		'compose',
 		'core-data',
@@ -59,7 +61,7 @@ module.exports = function( env = { environment: 'production' } ) {
 		'hooks',
 		'html-entities',
 		'i18n',
-//		'is-shallow-equal', // No build-module folder.
+		'is-shallow-equal',
 		'keycodes',
 //		'list-reusable-blocks', // Not on npm yet.
 		'nux',
@@ -77,6 +79,7 @@ module.exports = function( env = { environment: 'production' } ) {
 		'nux',
 		'components',
 		'editor',
+		'edit-post',
 	];
 
 	const externals = {
@@ -100,11 +103,11 @@ module.exports = function( env = { environment: 'production' } ) {
 
 		entry: gutenbergPackages.reduce( ( memo, packageName ) => {
 			const name = camelCaseDash( packageName );
-			memo[ name ] = `@wordpress/${ packageName }/build-module/index.js`;
+			memo[ name ] = join( baseDir, `node_modules/@wordpress/${ packageName }` );
 			return memo;
 		}, {} ),
 		output: {
-			filename: `[name]${ suffix }.js`,
+			filename: `[basename]${ suffix }.js`,
 			path: join( baseDir, 'js/dist' ),
 			library: {
 				root: [ 'wp', '[name]' ]
@@ -137,6 +140,28 @@ module.exports = function( env = { environment: 'production' } ) {
 				'dom-ready',
 				'redux-routine',
 			].map( camelCaseDash ) ),
+			new CustomTemplatedPathPlugin( {
+				basename( path, data ) {
+					let rawRequest;
+
+					const entryModule = get( data, [ 'chunk', 'entryModule' ], {} );
+					switch ( entryModule.type ) {
+						case 'javascript/auto':
+							rawRequest = entryModule.rawRequest;
+							break;
+
+						case 'javascript/esm':
+							rawRequest = entryModule.rootModule.rawRequest;
+							break;
+					}
+
+					if ( rawRequest ) {
+						return basename( rawRequest );
+					}
+
+					return path;
+				},
+			} ),
 			new CopyWebpackPlugin(
 				packagesStyles.map( ( packageName ) => ( {
 					from: join( baseDir, `node_modules/@wordpress/${ packageName }/build-style/*.css` ),
@@ -161,6 +186,8 @@ module.exports = function( env = { environment: 'production' } ) {
 		stats: {
 			children: false,
 		},
+
+		watch: env.watch,
 	};
 
 	if ( config.mode !== 'production' ) {

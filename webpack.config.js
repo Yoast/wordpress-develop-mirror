@@ -1,9 +1,13 @@
 const mediaConfig = require( './tools/webpack/media' );
 const packagesConfig = require( './tools/webpack/packages' );
 
-module.exports = function( env = { environment: "production" } ) {
+module.exports = function( env = { environment: "production", watch: false } ) {
+	if ( ! env.watch ) {
+		env.watch = false;
+	}
+
 	const config = [
-		mediaConfig( env, __dirname ),
+		mediaConfig( env ),
 		packagesConfig( env ),
 	];
 
