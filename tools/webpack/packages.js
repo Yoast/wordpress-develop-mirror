@@ -108,7 +108,7 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 		}, {} ),
 		output: {
 			filename: `[basename]${ suffix }.js`,
-			path: join( baseDir, 'js/dist' ),
+			path: join( baseDir, 'build/js/dist' ),
 			library: {
 				root: [ 'wp', '[name]' ]
 			},

@@ -48,6 +48,7 @@
     "webpack-livereload-plugin": "^2.1.1"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
     "@wordpress/a11y": "^2.0.1",
     "@wordpress/api-fetch": "^2.0.1",
     "@wordpress/autop": "^2.0.1",
@@ -76,6 +77,10 @@
     "@wordpress/token-list": "^1.0.1",
     "@wordpress/url": "^2.0.1",
     "@wordpress/viewport": "^2.0.1",
-    "@wordpress/wordcount": "^2.0.1"
+    "@wordpress/wordcount": "^2.0.1",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2"
   }
 }
