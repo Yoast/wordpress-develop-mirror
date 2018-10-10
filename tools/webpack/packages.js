@@ -4,6 +4,7 @@
 const LiveReloadPlugin = require( 'webpack-livereload-plugin' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const postcss = require( 'postcss' );
+const UglifyJS = require( 'uglify-js' );
 
 const { join, basename } = require( 'path' );
 const { get } = require( 'lodash' );
@@ -33,11 +34,25 @@ function camelCaseDash( string ) {
 	);
 }
 
+/**
+ * Maps vendors to copy commands for the CopyWebpackPlugin.
+ *
+ * @param {Object} vendors Vendors to include in the vendor folder.
+ *
+ * @return {Object[]} Copy object suitable for the CopyWebpackPlugin.
+ */
+function mapVendorCopies( vendors ) {
+	return Object.keys( vendors ).map( ( filename ) => ( {
+		from: join( baseDir, `node_modules/${ vendors[ filename ] }` ),
+		to: join( baseDir, `build/js/dist/vendor/${ filename }` ),
+	} ) );
+}
+
 module.exports = function( env = { environment: 'production', watch: false } ) {
 	const mode = env.environment;
 	const suffix = mode === 'production' ? '.min': '';
 
-	const gutenbergPackages = [
+	const packages = [
 		'api-fetch',
 		'a11y',
 		'autop',
@@ -75,12 +90,32 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 		'wordcount',
 	];
 
-	const packagesStyles = [
-		'nux',
-		'components',
-		'editor',
-		'edit-post',
-	];
+	const vendors = {
+		'lodash.js': 'lodash/lodash.js',
+		'wp-polyfill.js': '@babel/polyfill/dist/polyfill.js',
+		'wp-polyfill-fetch.js': 'whatwg-fetch/dist/fetch.umd.js',
+		'wp-polyfill-element-closest.js': 'element-closest/element-closest.js',
+		'wp-polyfill-node-contains.js': 'polyfill-library/polyfills/Node/prototype/contains/polyfill.js',
+		'wp-polyfill-formdata.js': 'formdata-polyfill/FormData.js',
+		'moment.js': 'moment/moment.js',
+		'react.js': 'react/umd/react.development.js',
+		'react-dom.js': 'react-dom/umd/react-dom.development.js',
+	};
+
+	const minifiedVendors = {
+		'lodash.min.js': 'lodash/lodash.min.js',
+		'wp-polyfill.min.js': '@babel/polyfill/dist/polyfill.min.js',
+		'wp-polyfill-formdata.min.js': 'formdata-polyfill/formdata.min.js',
+		'moment.min.js': 'moment/min/moment.min.js',
+		'react.min.js': 'react/umd/react.production.min.js',
+		'react-dom.min.js': 'react-dom/umd/react-dom.production.min.js',
+	};
+
+	const minifyVendors = {
+		'wp-polyfill-fetch.min.js': 'whatwg-fetch/dist/fetch.umd.js',
+		'wp-polyfill-element-closest.min.js': 'element-closest/element-closest.js',
+		'wp-polyfill-node-contains.min.js': 'polyfill-library/polyfills/Node/prototype/contains/polyfill.js',
+	};
 
 	const externals = {
 		react: 'React',
@@ -92,16 +127,48 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 		'lodash-es': 'lodash',
 	};
 
-	gutenbergPackages.forEach( ( name ) => {
+	packages.forEach( ( name ) => {
 		externals[ `@wordpress/${ name }` ] = {
 			this: [ 'wp', camelCaseDash( name ) ],
 		};
 	} );
 
+	const developmentCopies = mapVendorCopies( vendors );
+	const minifiedCopies = mapVendorCopies( minifiedVendors );
+	const minifyCopies = mapVendorCopies( minifyVendors ).map( ( copyCommand ) => {
+		return {
+			...copyCommand,
+			transform: ( content ) => {
+				return UglifyJS.minify( content.toString() ).code;
+			},
+		};
+	} );
+
+	let vendorCopies = mode === "development" ? developmentCopies : [ ...minifiedCopies, ...minifyCopies ];
+
+	let cssCopies = packages.map( ( packageName ) => ( {
+		from: join( baseDir, `node_modules/@wordpress/${ packageName }/build-style/*.css` ),
+		to: join( baseDir, `build/styles/dist/${ packageName }/` ),
+		flatten: true,
+		transform: ( content ) => {
+			if ( config.mode === 'production' ) {
+				return postcss( [
+					require( 'cssnano' )( {
+						preset: 'default',
+					} ),
+				] )
+					.process( content, { from: 'src/app.css', to: 'dest/app.css' } )
+					.then( ( result ) => result.css );
+			}
+
+			return content;
+		}
+	} ) );
+
 	const config = {
 		mode,
 
-		entry: gutenbergPackages.reduce( ( memo, packageName ) => {
+		entry: packages.reduce( ( memo, packageName ) => {
 			const name = camelCaseDash( packageName );
 			memo[ name ] = join( baseDir, `node_modules/@wordpress/${ packageName }` );
 			return memo;
@@ -163,24 +230,10 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 				},
 			} ),
 			new CopyWebpackPlugin(
-				packagesStyles.map( ( packageName ) => ( {
-					from: join( baseDir, `node_modules/@wordpress/${ packageName }/build-style/*.css` ),
-					to: join( baseDir, `build/styles/dist/${ packageName }/` ),
-					flatten: true,
-					transform: ( content ) => {
-						if ( config.mode === 'production' ) {
-							return postcss( [
-								require( 'cssnano' )( {
-									preset: 'default',
-								} ),
-							] )
-								.process( content, { from: 'src/app.css', to: 'dest/app.css' } )
-								.then( ( result ) => result.css );
-						}
-
-						return content;
-					}
-				} ) ),
+				[
+					...vendorCopies,
+					...cssCopies,
+				],
 			),
 		],
 		stats: {
