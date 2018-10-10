@@ -78,9 +78,13 @@
     "@wordpress/url": "^2.0.1",
     "@wordpress/viewport": "^2.0.1",
     "@wordpress/wordcount": "^2.0.1",
+    "element-closest": "^2.0.2",
+    "formdata-polyfill": "^3.0.12",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
+    "polyfill-library": "^3.26.0-0",
     "react": "^16.5.2",
-    "react-dom": "^16.5.2"
+    "react-dom": "^16.5.2",
+    "whatwg-fetch": "^3.0.0"
   }
 }

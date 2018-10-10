@@ -165,7 +165,7 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 			new CopyWebpackPlugin(
 				packagesStyles.map( ( packageName ) => ( {
 					from: join( baseDir, `node_modules/@wordpress/${ packageName }/build-style/*.css` ),
-					to: join( baseDir, `styles/dist/${ packageName }/` ),
+					to: join( baseDir, `build/styles/dist/${ packageName }/` ),
 					flatten: true,
 					transform: ( content ) => {
 						if ( config.mode === 'production' ) {
