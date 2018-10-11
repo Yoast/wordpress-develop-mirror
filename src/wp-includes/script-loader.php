@@ -34,7 +34,28 @@ require( ABSPATH . WPINC . '/class.wp-styles.php' );
 /** WordPress Styles Functions */
 require( ABSPATH . WPINC . '/functions.wp-styles.php' );
 
+/**
+ * Registers the main TinyMCE scripts.
+ */
+function wp_register_tinymce_scripts( &$scripts ) {
+	global $tinymce_version, $concatenate_scripts, $compress_scripts;
+	$suffix     = SCRIPT_DEBUG ? '' : '.min';
+	$compressed = $compress_scripts && $concatenate_scripts && isset( $_SERVER['HTTP_ACCEPT_ENCODING'] )
+		&& false !== stripos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' );
+	// Load tinymce.js when running from /src, otherwise load wp-tinymce.js.gz (in production) or
+	// tinymce.min.js (when SCRIPT_DEBUG is true).
+	$mce_suffix = false !== strpos( get_bloginfo( 'version' ), '-src' ) ? '' : '.min';
+	if ( $compressed ) {
+		$scripts->add( 'wp-tinymce', includes_url( 'js/tinymce/' ) . 'wp-tinymce.php', array(), $tinymce_version );
+	} else {
+		$scripts->add( 'wp-tinymce-root', includes_url( 'js/tinymce/' ) . "tinymce{$mce_suffix}.js", array(), $tinymce_version );
+		$scripts->add( 'wp-tinymce', includes_url( 'js/tinymce/' ) . "plugins/compat3x/plugin{$suffix}.js", array( 'wp-tinymce-root' ), $tinymce_version );
+	}
+}
+
 function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
+	wp_register_tinymce_scripts( $scripts );
+
 	$vendor_scripts = array(
 		'react',
 		'react-dom' => array( 'react' ),
@@ -216,7 +237,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'editor' => array(
 			'jquery',
 			'lodash',
-			'tinymce-latest-lists',
+			// 'tinymce-latest-lists',
 			'wp-a11y',
 			'wp-api-fetch',
 			'wp-blob',
@@ -362,104 +383,106 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'after'
 	);
 
-	$tinymce_settings = apply_filters(
-		'tiny_mce_before_init',
-		array(
-			'plugins'          => implode(
-				',',
-				array_unique(
-					apply_filters(
-						'tiny_mce_plugins',
-						array(
-							'charmap',
-							'colorpicker',
-							'hr',
-							'lists',
-							'media',
-							'paste',
-							'tabfocus',
-							'textcolor',
-							'fullscreen',
-							'wordpress',
-							'wpautoresize',
-							'wpeditimage',
-							'wpemoji',
-							'wpgallery',
-							'wplink',
-							'wpdialogs',
-							'wptextpattern',
-							'wpview',
+	if ( did_action( 'init' ) ) {
+		$tinymce_settings = apply_filters(
+			'tiny_mce_before_init',
+			array(
+				'plugins'          => implode(
+					',',
+					array_unique(
+						apply_filters(
+							'tiny_mce_plugins',
+							array(
+								'charmap',
+								'colorpicker',
+								'hr',
+								'lists',
+								'media',
+								'paste',
+								'tabfocus',
+								'textcolor',
+								'fullscreen',
+								'wordpress',
+								'wpautoresize',
+								'wpeditimage',
+								'wpemoji',
+								'wpgallery',
+								'wplink',
+								'wpdialogs',
+								'wptextpattern',
+								'wpview',
+							)
 						)
 					)
-				)
-			),
-			'toolbar1'         => implode(
-				',',
-				array_merge(
+				),
+				'toolbar1'         => implode(
+					',',
+					array_merge(
+						apply_filters(
+							'mce_buttons',
+							array(
+								'formatselect',
+								'bold',
+								'italic',
+								'bullist',
+								'numlist',
+								'blockquote',
+								'alignleft',
+								'aligncenter',
+								'alignright',
+								'link',
+								'unlink',
+								'wp_more',
+								'spellchecker',
+								'wp_add_media',
+							),
+							'editor'
+						),
+						array( 'kitchensink' )
+					)
+				),
+				'toolbar2'         => implode(
+					',',
 					apply_filters(
-						'mce_buttons',
+						'mce_buttons_2',
 						array(
-							'formatselect',
-							'bold',
-							'italic',
-							'bullist',
-							'numlist',
-							'blockquote',
-							'alignleft',
-							'aligncenter',
-							'alignright',
-							'link',
-							'unlink',
-							'wp_more',
-							'spellchecker',
-							'wp_add_media',
+							'strikethrough',
+							'hr',
+							'forecolor',
+							'pastetext',
+							'removeformat',
+							'charmap',
+							'outdent',
+							'indent',
+							'undo',
+							'redo',
+							'wp_help',
 						),
 						'editor'
-					),
-					array( 'kitchensink' )
-				)
+					)
+				),
+				'toolbar3'         => implode( ',', apply_filters( 'mce_buttons_3', array(), 'editor' ) ),
+				'toolbar4'         => implode( ',', apply_filters( 'mce_buttons_4', array(), 'editor' ) ),
+				'external_plugins' => apply_filters( 'mce_external_plugins', array() ),
 			),
-			'toolbar2'         => implode(
-				',',
-				apply_filters(
-					'mce_buttons_2',
-					array(
-						'strikethrough',
-						'hr',
-						'forecolor',
-						'pastetext',
-						'removeformat',
-						'charmap',
-						'outdent',
-						'indent',
-						'undo',
-						'redo',
-						'wp_help',
-					),
-					'editor'
-				)
-			),
-			'toolbar3'         => implode( ',', apply_filters( 'mce_buttons_3', array(), 'editor' ) ),
-			'toolbar4'         => implode( ',', apply_filters( 'mce_buttons_4', array(), 'editor' ) ),
-			'external_plugins' => apply_filters( 'mce_external_plugins', array() ),
-		),
-		'editor'
-	);
-	if ( isset( $tinymce_settings['style_formats'] ) && is_string( $tinymce_settings['style_formats'] ) ) {
-		// Decode the options as we used to recommende json_encoding the TinyMCE settings.
-		$tinymce_settings['style_formats'] = json_decode( $tinymce_settings['style_formats'] );
+			'editor'
+		);
+		if ( isset( $tinymce_settings['style_formats'] ) && is_string( $tinymce_settings['style_formats'] ) ) {
+			// Decode the options as we used to recommende json_encoding the TinyMCE settings.
+			$tinymce_settings['style_formats'] = json_decode( $tinymce_settings['style_formats'] );
+		}
+		did_action( 'init' ) && $scripts->localize(
+			'wp-block-library',
+			'wpEditorL10n',
+			array(
+				'tinymce' => array(
+					'baseURL'  => includes_url( 'js/tinymce' ),
+					'suffix'   => SCRIPT_DEBUG ? '' : '.min',
+					'settings' => $tinymce_settings,
+				),
+			)
+		);
 	}
-	did_action( 'init' ) && $scripts->localize(
-		'wp-block-library',
-		'wpEditorL10n',
-		array(
-			'tinymce' => array(
-				'baseURL'  => includes_url( 'js/tinymce' ),
-				'suffix'   => SCRIPT_DEBUG ? '' : '.min',
-				'settings' => $tinymce_settings,
-			),
-		)
-	);
 }
 
 /**
@@ -1506,12 +1529,12 @@ function wp_default_styles( &$styles ) {
 	$styles->add_data( 'wp-edit-blocks', 'rtl', 'replace' );
 
 	$package_styles = array(
-		//'block-library' => current_theme_supports( 'wp-block-styles' ) ? array( 'wp-block-library-theme' ) : array(),
+		'block-library' => array(),
 		'components' => array(),
 		'edit-post' => array( 'wp-components', 'wp-editor', 'wp-edit-blocks', 'wp-block-library', 'wp-nux' ),
 		'editor' => array( 'wp-components', 'wp-editor-font', 'wp-nux' ),
-		'list-reusable-blocks' => array( 'components' ),
-		'nux' => array( 'components' ),
+		'list-reusable-blocks' => array( 'wp-components' ),
+		'nux' => array( 'wp-components' ),
 	);
 
 	foreach ( $package_styles as $package => $dependencies ) {
