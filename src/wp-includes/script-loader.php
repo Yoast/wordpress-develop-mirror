@@ -57,6 +57,23 @@ function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
 
 		$scripts->add( $handle, $path, $dependencies, false, 1 );
 	}
+
+	$scripts->add( 'wp-polyfill', null, array( 'wp-polyfill-ecmascript' ) );
+	did_action( 'init' ) && $scripts->add_inline_script(
+		'wp-polyfill',
+		'data',
+		wp_get_script_polyfill(
+			$scripts,
+			array(
+				'\'fetch\' in window' => 'wp-polyfill-fetch',
+				'document.contains'   => 'wp-polyfill-node-contains',
+				'window.FormData && window.FormData.prototype.keys' => 'wp-polyfill-formdata',
+				'Element.prototype.matches && Element.prototype.closest' => 'wp-polyfill-element-closest',
+			)
+		)
+	);
+
+	did_action( 'init' ) && $scripts->add_inline_script( 'lodash', 'window.lodash = _.noConflict();' );
 }
 
 /**
@@ -64,15 +81,14 @@ function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
  * browsers which fail the provided tests. The provided array is a mapping from
  * a condition to verify feature support to its polyfill script handle.
  *
- * @param array $tests Features to detect.
+ * @param WP_Scripts $scripts WP_Scripts object.
+ * @param array      $tests   Features to detect.
  * @return string Conditional polyfill inline script.
  */
-function wp_get_script_polyfill( $tests ) {
-	global $wp_scripts;
-
+function wp_get_script_polyfill( $scripts, $tests ) {
 	$polyfill = '';
 	foreach ( $tests as $test => $handle ) {
-		if ( ! array_key_exists( $handle, $wp_scripts->registered ) ) {
+		if ( ! array_key_exists( $handle, $scripts->registered ) ) {
 			continue;
 		}
 
@@ -83,7 +99,7 @@ function wp_get_script_polyfill( $tests ) {
 			// at the `document.write`. Its caveat of synchronous mid-stream
 			// blocking write is exactly the behavior we need though.
 			'document.write( \'<script src="' .
-			esc_url( $wp_scripts->registered[ $handle ]->src ) .
+			esc_url( $scripts->registered[ $handle ]->src ) .
 			'"></scr\' + \'ipt>\' );'
 		);
 	}
@@ -92,73 +108,7 @@ function wp_get_script_polyfill( $tests ) {
 }
 
 function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
-	$scripts->add( 'wp-polyfill', "/wp-includes/js/wp-polyfill$dev_suffix.js", array(), '7.0.0', 1 );
-	$scripts->add( 'lodash', "/wp-includes/js/lodash$dev_suffix.js", array(), '4.17.11', 1 );
- 	did_action( 'init' ) && $scripts->add_inline_script( 'lodash', 'window.lodash = _.noConflict();' );
-
-	$scripts->add( 'wp-api', "/wp-includes/js/wp-api$suffix.js", array( 'jquery', 'backbone', 'underscore', 'wp-api-request' ), false, 1 );
-
-
-
-	wp_register_script(
-		'wp-polyfill',
-		null,
-		array(
-			'wp-polyfill-ecmascript',
-		)
-	);
-	wp_script_add_data(
-		'wp-polyfill',
-		'data',
-		gutenberg_get_script_polyfill(
-			array(
-				'\'fetch\' in window' => 'wp-polyfill-fetch',
-				'document.contains'   => 'wp-polyfill-node-contains',
-				'window.FormData && window.FormData.prototype.keys' => 'wp-polyfill-formdata',
-				'Element.prototype.matches && Element.prototype.closest' => 'wp-polyfill-element-closest',
-			)
-		)
-	);
-
-	$packages = [
-		'api-fetch',
-		'a11y',
-		'autop',
-		'blob',
-		'blocks',
-//		'block-library', // Not on npm yet.
-		'block-serialization-default-parser',
-		'block-serialization-spec-parser',
-		'components',
-		'compose',
-		'core-data',
-		'data',
-		'date',
-		'deprecated',
-		'dom',
-		'dom-ready',
-//		'edit-post', // Not on npm yet.
-		'editor',
-		'element',
-//		'escape-html', // Not on npm yet.
-		'hooks',
-		'html-entities',
-		'i18n',
-		'is-shallow-equal',
-		'keycodes',
-//		'list-reusable-blocks', // Not on npm yet.
-		'nux',
-		'plugins',
-		'redux-routine',
-//		'rich-text', // Not on npm yet.
-		'shortcode',
-		'token-list',
-		'url',
-		'viewport',
-		'wordcount',
-	];
-
-	$packages_dependencies = [
+	$packages_dependencies = array(
 		'api-fetch' => array( 'wp-polyfill', 'wp-hooks', 'wp-i18n' ),
 		'a11y' => array( 'wp-dom-ready', 'wp-polyfill' ),
 		'autop' => array( 'wp-polyfill' ),
@@ -179,28 +129,28 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 			'lodash',
 			'wp-rich-text',
 		),
-//		'block-library' => array(
-//			'editor',
-//			'lodash',
-//			'moment',
-//			'wp-api-fetch',
-//			'wp-autop',
-//			'wp-blob',
-//			'wp-blocks',
-//			'wp-components',
-//			'wp-compose',
-//			'wp-core-data',
-//			'wp-data',
-//			'wp-editor',
-//			'wp-element',
-//			'wp-html-entities',
-//			'wp-i18n',
-//			'wp-keycodes',
-//			'wp-polyfill',
-//			'wp-url',
-//			'wp-viewport',
-//			'wp-rich-text',
-//		), // Not on npm yet.
+		'block-library' => array(
+			'editor',
+			'lodash',
+			'moment',
+			'wp-api-fetch',
+			'wp-autop',
+			'wp-blob',
+			'wp-blocks',
+			'wp-components',
+			'wp-compose',
+			'wp-core-data',
+			'wp-data',
+			'wp-editor',
+			'wp-element',
+			'wp-html-entities',
+			'wp-i18n',
+			'wp-keycodes',
+			'wp-polyfill',
+			'wp-url',
+			'wp-viewport',
+			'wp-rich-text',
+		),
 		'block-serialization-default-parser' => array(),
 		'block-serialization-spec-parser' => array( 'wp-polyfill' ),
 		'components' => array(
@@ -236,16 +186,79 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'deprecated' => array( 'wp-polyfill', 'wp-hooks' ),
 		'dom' => array( 'lodash', 'wp-polyfill', 'wp-tinymce' ),
 		'dom-ready' => array( 'wp-polyfill' ),
-//		'edit-post', // Not on npm yet.
-		'editor',
+		'edit-post' => array(
+			'jquery',
+			'lodash',
+			'postbox',
+			'media-models',
+			'media-views',
+			'wp-a11y',
+			'wp-api-fetch',
+			'wp-block-library',
+			'wp-blocks',
+			'wp-components',
+			'wp-compose',
+			'wp-core-data',
+			'wp-data',
+			'wp-deprecated',
+			'wp-dom-ready',
+			'wp-editor',
+			'wp-element',
+			'wp-embed',
+			'wp-i18n',
+			'wp-keycodes',
+			'wp-nux',
+			'wp-plugins',
+			'wp-polyfill',
+			'wp-url',
+			'wp-viewport',
+		),
+		'editor' => array(
+			'jquery',
+			'lodash',
+			'tinymce-latest-lists',
+			'wp-a11y',
+			'wp-api-fetch',
+			'wp-blob',
+			'wp-blocks',
+			'wp-components',
+			'wp-compose',
+			'wp-core-data',
+			'wp-data',
+			'wp-date',
+			'wp-deprecated',
+			'wp-dom',
+			'wp-element',
+			'wp-hooks',
+			'wp-html-entities',
+			'wp-i18n',
+			'wp-is-shallow-equal',
+			'wp-keycodes',
+			'wp-nux',
+			'wp-polyfill',
+			'wp-tinymce',
+			'wp-token-list',
+			'wp-url',
+			'wp-viewport',
+			'wp-wordcount',
+			'wp-rich-text',
+		),
 		'element' => array( 'wp-polyfill', 'react', 'react-dom', 'lodash', 'wp-escape-html' ),
-//		'escape-html' => array( 'wp-polyfill' ), // Not on npm yet.
+		'escape-html' => array( 'wp-polyfill' ),
 		'hooks' => array( 'wp-polyfill' ),
 		'html-entities' => array( 'wp-polyfill' ),
 		'i18n' => array( 'wp-polyfill' ),
 		'is-shallow-equal' => array( 'wp-polyfill' ),
 		'keycodes' => array( 'lodash', 'wp-polyfill' ),
-//		'list-reusable-blocks', // Not on npm yet.
+		'list-reusable-blocks' => array(
+			'lodash',
+			'wp-api-fetch',
+			'wp-components',
+			'wp-compose',
+			'wp-element',
+			'wp-i18n',
+			'wp-polyfill-ecmascript',
+		),
 		'nux' => array(
 			'wp-element',
 			'wp-components',
@@ -257,13 +270,13 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		),
 		'plugins' => array( 'lodash', 'wp-compose', 'wp-element', 'wp-hooks', 'wp-polyfill' ),
 		'redux-routine' => array( 'wp-polyfill' ),
-//		'rich-text' => array( 'wp-polyfill', 'wp-escape-html', 'lodash' ), // Not on npm yet.
+		'rich-text' => array( 'wp-polyfill', 'wp-escape-html', 'lodash' ),
 		'shortcode' => array( 'wp-polyfill', 'lodash' ),
 		'token-list' => array( 'lodash', 'wp-polyfill' ),
 		'url' => array( 'wp-polyfill' ),
 		'viewport' => array( 'wp-polyfill', 'wp-element', 'wp-data', 'wp-compose', 'lodash' ),
 		'wordcount' => array( 'wp-polyfill' ),
-	];
+	);
 
 	foreach ( $packages_dependencies as $package => $dependencies ) {
 		$handle  = 'wp-' . $package;
@@ -272,9 +285,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		$scripts->add( $handle, $path, $dependencies, false, 1 );
 	}
 
-	$scripts->add_inline_script( 'lodash', 'window.lodash = _.noConflict();' );
-
-	wp_add_inline_script(
+	did_action( 'init' ) && $scripts->add_inline_script(
 		'wp-api-fetch',
 		sprintf(
 			'wp.apiFetch.use( wp.apiFetch.createNonceMiddleware( "%s" ) );',
@@ -282,7 +293,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		),
 		'after'
 	);
-	wp_add_inline_script(
+	did_action( 'init' ) && $scripts->add_inline_script(
 		'wp-api-fetch',
 		sprintf(
 			'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
@@ -291,7 +302,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'after'
 	);
 
-	wp_add_inline_script(
+	did_action( 'init' ) && $scripts->add_inline_script(
 		'wp-data',
 		implode(
 			"\n",
@@ -309,7 +320,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 	);
 
 	global $wp_locale;
-	wp_add_inline_script(
+	did_action( 'init' ) && $scripts->add_inline_script(
 		'wp-date',
 		sprintf(
 			'wp.date.setSettings( %s );',
@@ -344,9 +355,110 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'after'
 	);
 
-	wp_add_inline_script(
-		'wp-components',
-		sprintf( 'wp.components.unstable__setSiteURL(%s);', json_encode( site_url() ) )
+	// Loading the old editor and its config to ensure the classic block works as expected.
+	did_action( 'init' ) && $scripts->add_inline_script(
+		'editor',
+		'window.wp.oldEditor = window.wp.editor;',
+		'after'
+	);
+
+	$tinymce_settings = apply_filters(
+		'tiny_mce_before_init',
+		array(
+			'plugins'          => implode(
+				',',
+				array_unique(
+					apply_filters(
+						'tiny_mce_plugins',
+						array(
+							'charmap',
+							'colorpicker',
+							'hr',
+							'lists',
+							'media',
+							'paste',
+							'tabfocus',
+							'textcolor',
+							'fullscreen',
+							'wordpress',
+							'wpautoresize',
+							'wpeditimage',
+							'wpemoji',
+							'wpgallery',
+							'wplink',
+							'wpdialogs',
+							'wptextpattern',
+							'wpview',
+						)
+					)
+				)
+			),
+			'toolbar1'         => implode(
+				',',
+				array_merge(
+					apply_filters(
+						'mce_buttons',
+						array(
+							'formatselect',
+							'bold',
+							'italic',
+							'bullist',
+							'numlist',
+							'blockquote',
+							'alignleft',
+							'aligncenter',
+							'alignright',
+							'link',
+							'unlink',
+							'wp_more',
+							'spellchecker',
+							'wp_add_media',
+						),
+						'editor'
+					),
+					array( 'kitchensink' )
+				)
+			),
+			'toolbar2'         => implode(
+				',',
+				apply_filters(
+					'mce_buttons_2',
+					array(
+						'strikethrough',
+						'hr',
+						'forecolor',
+						'pastetext',
+						'removeformat',
+						'charmap',
+						'outdent',
+						'indent',
+						'undo',
+						'redo',
+						'wp_help',
+					),
+					'editor'
+				)
+			),
+			'toolbar3'         => implode( ',', apply_filters( 'mce_buttons_3', array(), 'editor' ) ),
+			'toolbar4'         => implode( ',', apply_filters( 'mce_buttons_4', array(), 'editor' ) ),
+			'external_plugins' => apply_filters( 'mce_external_plugins', array() ),
+		),
+		'editor'
+	);
+	if ( isset( $tinymce_settings['style_formats'] ) && is_string( $tinymce_settings['style_formats'] ) ) {
+		// Decode the options as we used to recommende json_encoding the TinyMCE settings.
+		$tinymce_settings['style_formats'] = json_decode( $tinymce_settings['style_formats'] );
+	}
+	did_action( 'init' ) && $scripts->localize(
+		'wp-block-library',
+		'wpEditorL10n',
+		array(
+			'tinymce' => array(
+				'baseURL'  => includes_url( 'js/tinymce' ),
+				'suffix'   => SCRIPT_DEBUG ? '' : '.min',
+				'settings' => $tinymce_settings,
+			),
+		)
 	);
 }
 
@@ -954,6 +1066,7 @@ function wp_default_scripts( &$scripts ) {
 
 	$scripts->add( 'wp-api', "/wp-includes/js/wp-api$suffix.js", array( 'jquery', 'backbone', 'underscore', 'wp-api-request' ), false, 1 );
 
+	wp_default_packages_vendor( $scripts, $dev_suffix );
 	wp_default_packages_scripts( $scripts, $suffix, $dev_suffix );
 
 	if ( is_admin() ) {
@@ -1363,6 +1476,50 @@ function wp_default_styles( &$styles ) {
 		if ( $suffix ) {
 			$styles->add_data( $rtl_style, 'suffix', $suffix );
 		}
+	}
+
+	// Packages styles
+	$fonts_url = '';
+
+	/*
+	 * Translators: If there are characters in your language that are not supported
+	 * by Noto Serif, translate this to 'off'. Do not translate into your own language.
+	 */
+	if ( 'off' !== _x( 'on', 'Noto Serif font: on or off' ) ) {
+		$fonts_url = 'https://fonts.googleapis.com/css?family=Noto+Serif%3A400%2C400i%2C700%2C700i';
+	}
+	$styles->add( 'wp-editor-font', $fonts_url );
+
+	$styles->add( 'wp-block-library-theme', '/styles/dist/block-library/theme.css' );
+	$styles->add_data( 'wp-block-library-theme', 'rtl', 'replace' );
+
+	$styles->add(
+		'wp-edit-blocks',
+		'/styles/dist/block-library/editor.css',
+		array(
+			'wp-components',
+			'wp-editor',
+			// Always include visual styles so the editor never appears broken.
+			'wp-block-library-theme',
+		)
+	);
+	$styles->add_data( 'wp-edit-blocks', 'rtl', 'replace' );
+
+	$package_styles = array(
+		//'block-library' => current_theme_supports( 'wp-block-styles' ) ? array( 'wp-block-library-theme' ) : array(),
+		'components' => array(),
+		'edit-post' => array( 'wp-components', 'wp-editor', 'wp-edit-blocks', 'wp-block-library', 'wp-nux' ),
+		'editor' => array( 'wp-components', 'wp-editor-font', 'wp-nux' ),
+		'list-reusable-blocks' => array( 'components' ),
+		'nux' => array( 'components' ),
+	);
+
+	foreach ( $package_styles as $package => $dependencies ) {
+		$handle  = 'wp-' . $package;
+		$path     = '/styles/dist/' . $package . '/style.css';
+
+		$styles->add( $handle, $path, $dependencies );
+		$styles->add_data( $handle, 'rtl', 'replace' );
 	}
 }
 
