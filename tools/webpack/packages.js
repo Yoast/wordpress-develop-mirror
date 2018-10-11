@@ -58,7 +58,7 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 		'autop',
 		'blob',
 		'blocks',
-//		'block-library', // Not on npm yet.
+		'block-library',
 		'block-serialization-default-parser',
 		'block-serialization-spec-parser',
 		'components',
@@ -69,20 +69,20 @@ module.exports = function( env = { environment: 'production', watch: false } ) {
 		'deprecated',
 		'dom',
 		'dom-ready',
-//		'edit-post', // Not on npm yet.
+		'edit-post',
 		'editor',
 		'element',
-//		'escape-html', // Not on npm yet.
+		'escape-html',
 		'hooks',
 		'html-entities',
 		'i18n',
 		'is-shallow-equal',
 		'keycodes',
-//		'list-reusable-blocks', // Not on npm yet.
+		'list-reusable-blocks',
 		'nux',
 		'plugins',
 		'redux-routine',
-//		'rich-text', // Not on npm yet.
+		'rich-text',
 		'shortcode',
 		'token-list',
 		'url',
