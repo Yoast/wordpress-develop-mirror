@@ -34,6 +34,322 @@ require( ABSPATH . WPINC . '/class.wp-styles.php' );
 /** WordPress Styles Functions */
 require( ABSPATH . WPINC . '/functions.wp-styles.php' );
 
+function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
+	$vendor_scripts = array(
+		'react',
+		'react-dom' => array( 'react' ),
+		'moment',
+		'lodash',
+		'wp-polyfill-fetch',
+		'wp-polyfill-formdata',
+		'wp-polyfill-node-contains',
+		'wp-polyfill-element-closest',
+		'wp-polyfill-ecmascript',
+	);
+
+	foreach ( $vendor_scripts as $handle => $dependencies ) {
+		if ( is_string( $dependencies ) ) {
+			$handle = $dependencies;
+			$dependencies = array();
+		}
+
+		$path     = '/js/dist/vendor/' . $handle . $dev_suffix . '.js';
+
+		$scripts->add( $handle, $path, $dependencies, false, 1 );
+	}
+}
+
+/**
+ * Returns contents of an inline script used in appending polyfill scripts for
+ * browsers which fail the provided tests. The provided array is a mapping from
+ * a condition to verify feature support to its polyfill script handle.
+ *
+ * @param array $tests Features to detect.
+ * @return string Conditional polyfill inline script.
+ */
+function wp_get_script_polyfill( $tests ) {
+	global $wp_scripts;
+
+	$polyfill = '';
+	foreach ( $tests as $test => $handle ) {
+		if ( ! array_key_exists( $handle, $wp_scripts->registered ) ) {
+			continue;
+		}
+
+		$polyfill .= (
+			// Test presence of feature...
+			'( ' . $test . ' ) || ' .
+			// ...appending polyfill on any failures. Cautious viewers may balk
+			// at the `document.write`. Its caveat of synchronous mid-stream
+			// blocking write is exactly the behavior we need though.
+			'document.write( \'<script src="' .
+			esc_url( $wp_scripts->registered[ $handle ]->src ) .
+			'"></scr\' + \'ipt>\' );'
+		);
+	}
+
+	return $polyfill;
+}
+
+function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
+	$scripts->add( 'wp-polyfill', "/wp-includes/js/wp-polyfill$dev_suffix.js", array(), '7.0.0', 1 );
+	$scripts->add( 'lodash', "/wp-includes/js/lodash$dev_suffix.js", array(), '4.17.11', 1 );
+ 	did_action( 'init' ) && $scripts->add_inline_script( 'lodash', 'window.lodash = _.noConflict();' );
+
+	$scripts->add( 'wp-api', "/wp-includes/js/wp-api$suffix.js", array( 'jquery', 'backbone', 'underscore', 'wp-api-request' ), false, 1 );
+
+
+
+	wp_register_script(
+		'wp-polyfill',
+		null,
+		array(
+			'wp-polyfill-ecmascript',
+		)
+	);
+	wp_script_add_data(
+		'wp-polyfill',
+		'data',
+		gutenberg_get_script_polyfill(
+			array(
+				'\'fetch\' in window' => 'wp-polyfill-fetch',
+				'document.contains'   => 'wp-polyfill-node-contains',
+				'window.FormData && window.FormData.prototype.keys' => 'wp-polyfill-formdata',
+				'Element.prototype.matches && Element.prototype.closest' => 'wp-polyfill-element-closest',
+			)
+		)
+	);
+
+	$packages = [
+		'api-fetch',
+		'a11y',
+		'autop',
+		'blob',
+		'blocks',
+//		'block-library', // Not on npm yet.
+		'block-serialization-default-parser',
+		'block-serialization-spec-parser',
+		'components',
+		'compose',
+		'core-data',
+		'data',
+		'date',
+		'deprecated',
+		'dom',
+		'dom-ready',
+//		'edit-post', // Not on npm yet.
+		'editor',
+		'element',
+//		'escape-html', // Not on npm yet.
+		'hooks',
+		'html-entities',
+		'i18n',
+		'is-shallow-equal',
+		'keycodes',
+//		'list-reusable-blocks', // Not on npm yet.
+		'nux',
+		'plugins',
+		'redux-routine',
+//		'rich-text', // Not on npm yet.
+		'shortcode',
+		'token-list',
+		'url',
+		'viewport',
+		'wordcount',
+	];
+
+	$packages_dependencies = [
+		'api-fetch' => array( 'wp-polyfill', 'wp-hooks', 'wp-i18n' ),
+		'a11y' => array( 'wp-dom-ready', 'wp-polyfill' ),
+		'autop' => array( 'wp-polyfill' ),
+		'blob' => array( 'wp-polyfill' ),
+		'blocks' => array(
+			'wp-autop',
+			'wp-blob',
+			'wp-block-serialization-default-parser',
+			'wp-data',
+			'wp-deprecated',
+			'wp-dom',
+			'wp-element',
+			'wp-hooks',
+			'wp-i18n',
+			'wp-is-shallow-equal',
+			'wp-polyfill',
+			'wp-shortcode',
+			'lodash',
+			'wp-rich-text',
+		),
+//		'block-library' => array(
+//			'editor',
+//			'lodash',
+//			'moment',
+//			'wp-api-fetch',
+//			'wp-autop',
+//			'wp-blob',
+//			'wp-blocks',
+//			'wp-components',
+//			'wp-compose',
+//			'wp-core-data',
+//			'wp-data',
+//			'wp-editor',
+//			'wp-element',
+//			'wp-html-entities',
+//			'wp-i18n',
+//			'wp-keycodes',
+//			'wp-polyfill',
+//			'wp-url',
+//			'wp-viewport',
+//			'wp-rich-text',
+//		), // Not on npm yet.
+		'block-serialization-default-parser' => array(),
+		'block-serialization-spec-parser' => array( 'wp-polyfill' ),
+		'components' => array(
+			'lodash',
+			'moment',
+			'wp-a11y',
+			'wp-api-fetch',
+			'wp-compose',
+			'wp-deprecated',
+			'wp-dom',
+			'wp-element',
+			'wp-hooks',
+			'wp-html-entities',
+			'wp-i18n',
+			'wp-is-shallow-equal',
+			'wp-keycodes',
+			'wp-polyfill',
+			'wp-url',
+			'wp-rich-text',
+		),
+		'compose' => array( 'lodash', 'wp-element', 'wp-is-shallow-equal', 'wp-polyfill' ),
+		'core-data' => array( 'wp-data', 'wp-api-fetch', 'wp-polyfill', 'wp-url', 'lodash' ),
+		'data' => array(
+			'lodash',
+			'wp-compose',
+			'wp-deprecated',
+			'wp-element',
+			'wp-is-shallow-equal',
+			'wp-polyfill',
+			'wp-redux-routine',
+		),
+		'date' => array( 'moment', 'wp-polyfill' ),
+		'deprecated' => array( 'wp-polyfill', 'wp-hooks' ),
+		'dom' => array( 'lodash', 'wp-polyfill', 'wp-tinymce' ),
+		'dom-ready' => array( 'wp-polyfill' ),
+//		'edit-post', // Not on npm yet.
+		'editor',
+		'element' => array( 'wp-polyfill', 'react', 'react-dom', 'lodash', 'wp-escape-html' ),
+//		'escape-html' => array( 'wp-polyfill' ), // Not on npm yet.
+		'hooks' => array( 'wp-polyfill' ),
+		'html-entities' => array( 'wp-polyfill' ),
+		'i18n' => array( 'wp-polyfill' ),
+		'is-shallow-equal' => array( 'wp-polyfill' ),
+		'keycodes' => array( 'lodash', 'wp-polyfill' ),
+//		'list-reusable-blocks', // Not on npm yet.
+		'nux' => array(
+			'wp-element',
+			'wp-components',
+			'wp-compose',
+			'wp-data',
+			'wp-i18n',
+			'wp-polyfill',
+			'lodash',
+		),
+		'plugins' => array( 'lodash', 'wp-compose', 'wp-element', 'wp-hooks', 'wp-polyfill' ),
+		'redux-routine' => array( 'wp-polyfill' ),
+//		'rich-text' => array( 'wp-polyfill', 'wp-escape-html', 'lodash' ), // Not on npm yet.
+		'shortcode' => array( 'wp-polyfill', 'lodash' ),
+		'token-list' => array( 'lodash', 'wp-polyfill' ),
+		'url' => array( 'wp-polyfill' ),
+		'viewport' => array( 'wp-polyfill', 'wp-element', 'wp-data', 'wp-compose', 'lodash' ),
+		'wordcount' => array( 'wp-polyfill' ),
+	];
+
+	foreach ( $packages_dependencies as $package => $dependencies ) {
+		$handle  = 'wp-' . $package;
+		$path     = '/js/dist/' . $package . $suffix . '.js';
+
+		$scripts->add( $handle, $path, $dependencies, false, 1 );
+	}
+
+	$scripts->add_inline_script( 'lodash', 'window.lodash = _.noConflict();' );
+
+	wp_add_inline_script(
+		'wp-api-fetch',
+		sprintf(
+			'wp.apiFetch.use( wp.apiFetch.createNonceMiddleware( "%s" ) );',
+			( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
+		),
+		'after'
+	);
+	wp_add_inline_script(
+		'wp-api-fetch',
+		sprintf(
+			'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
+			esc_url_raw( get_rest_url() )
+		),
+		'after'
+	);
+
+	wp_add_inline_script(
+		'wp-data',
+		implode(
+			"\n",
+			array(
+				'( function() {',
+				'	var userId = ' . get_current_user_ID() . ';',
+				'	var storageKey = "WP_DATA_USER_" + userId;',
+				'	wp.data',
+				'		.use( wp.data.plugins.persistence, { storageKey: storageKey } )',
+				'		.use( wp.data.plugins.asyncGenerator )',
+				'		.use( wp.data.plugins.controls );',
+				'} )()',
+			)
+		)
+	);
+
+	global $wp_locale;
+	wp_add_inline_script(
+		'wp-date',
+		sprintf(
+			'wp.date.setSettings( %s );',
+			wp_json_encode(
+				array(
+					'l10n'     => array(
+						'locale'        => get_user_locale(),
+						'months'        => array_values( $wp_locale->month ),
+						'monthsShort'   => array_values( $wp_locale->month_abbrev ),
+						'weekdays'      => array_values( $wp_locale->weekday ),
+						'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
+						'meridiem'      => (object) $wp_locale->meridiem,
+						'relative'      => array(
+							/* translators: %s: duration */
+							'future' => __( '%s from now', 'default' ),
+							/* translators: %s: duration */
+							'past'   => __( '%s ago', 'default' ),
+						),
+					),
+					'formats'  => array(
+						'time'     => get_option( 'time_format', __( 'g:i a', 'default' ) ),
+						'date'     => get_option( 'date_format', __( 'F j, Y', 'default' ) ),
+						'datetime' => __( 'F j, Y g:i a', 'default' ),
+					),
+					'timezone' => array(
+						'offset' => get_option( 'gmt_offset', 0 ),
+						'string' => get_option( 'timezone_string', 'UTC' ),
+					),
+				)
+			)
+		),
+		'after'
+	);
+
+	wp_add_inline_script(
+		'wp-components',
+		sprintf( 'wp.components.unstable__setSiteURL(%s);', json_encode( site_url() ) )
+	);
+}
+
 /**
  * Register all WordPress scripts.
  *
@@ -637,6 +953,8 @@ function wp_default_scripts( &$scripts ) {
 	$scripts->add( 'mce-view', "/wp-includes/js/mce-view$suffix.js", array( 'shortcode', 'jquery', 'media-views', 'media-audiovideo' ), false, 1 );
 
 	$scripts->add( 'wp-api', "/wp-includes/js/wp-api$suffix.js", array( 'jquery', 'backbone', 'underscore', 'wp-api-request' ), false, 1 );
+
+	wp_default_packages_scripts( $scripts, $suffix, $dev_suffix );
 
 	if ( is_admin() ) {
 		$scripts->add( 'admin-tags', "/wp-admin/js/tags$suffix.js", array( 'jquery', 'wp-ajax-response' ), false, 1 );
