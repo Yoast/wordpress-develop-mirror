@@ -51,6 +51,8 @@ function wp_register_tinymce_scripts( &$scripts ) {
 		$scripts->add( 'wp-tinymce-root', includes_url( 'js/tinymce/' ) . "tinymce{$mce_suffix}.js", array(), $tinymce_version );
 		$scripts->add( 'wp-tinymce', includes_url( 'js/tinymce/' ) . "plugins/compat3x/plugin{$suffix}.js", array( 'wp-tinymce-root' ), $tinymce_version );
 	}
+
+	$scripts->add( 'wp-tinymce-lists', includes_url( 'js/tinymce/plugins/lists/index' . $suffix . '.js', array( 'wp-tinymce' ), $tinymce_version ) );
 }
 
 function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
@@ -237,7 +239,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'editor' => array(
 			'jquery',
 			'lodash',
-			// 'tinymce-latest-lists',
+			'wp-tinymce-lists',
 			'wp-a11y',
 			'wp-api-fetch',
 			'wp-blob',
