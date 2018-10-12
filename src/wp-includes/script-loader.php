@@ -35,7 +35,11 @@ require( ABSPATH . WPINC . '/class.wp-styles.php' );
 require( ABSPATH . WPINC . '/functions.wp-styles.php' );
 
 /**
- * Registers the main TinyMCE scripts.
+ * Registers TinyMCE scripts.
+ *
+ * @since 5.0.0
+ *
+ * @param WP_Scripts $scripts WP_Scripts object.
  */
 function wp_register_tinymce_scripts( &$scripts ) {
 	global $tinymce_version, $concatenate_scripts, $compress_scripts;
@@ -55,6 +59,16 @@ function wp_register_tinymce_scripts( &$scripts ) {
 	$scripts->add( 'wp-tinymce-lists', includes_url( 'js/tinymce/plugins/lists/index' . $suffix . '.js', array( 'wp-tinymce' ), $tinymce_version ) );
 }
 
+/**
+ * Registers all the WordPress vendor scripts that are in the standardized
+ * `js/dist/vendor/` location.
+ *
+ * For the order of `$scripts->add` see `wp_default_scripts`.
+ *
+ * @since 5.0.0
+ *
+ * @param WP_Scripts $scripts WP_Scripts object.
+ */
 function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
 	wp_register_tinymce_scripts( $scripts );
 
@@ -104,6 +118,8 @@ function wp_default_packages_vendor( &$scripts, $dev_suffix ) {
  * browsers which fail the provided tests. The provided array is a mapping from
  * a condition to verify feature support to its polyfill script handle.
  *
+ * @since 5.0.0
+ *
  * @param WP_Scripts $scripts WP_Scripts object.
  * @param array      $tests   Features to detect.
  * @return string Conditional polyfill inline script.
@@ -130,7 +146,18 @@ function wp_get_script_polyfill( $scripts, $tests ) {
 	return $polyfill;
 }
 
-function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
+/**
+ * Register all the WordPress packages scripts that are in the standardized
+ * `js/dist/` location.
+ *
+ * For the order of `$scripts->add` see `wp_default_scripts`.
+ *
+ * @since 5.0.0
+ *
+ * @param WP_Scripts $scripts WP_Scripts object.
+ * @param string     $suffix  The suffix to use before `.js`.
+ */
+function wp_default_packages_scripts( &$scripts, $suffix ) {
 	$packages_dependencies = array(
 		'api-fetch' => array( 'wp-polyfill', 'wp-hooks', 'wp-i18n' ),
 		'a11y' => array( 'wp-dom-ready', 'wp-polyfill' ),
@@ -280,7 +307,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 			'wp-compose',
 			'wp-element',
 			'wp-i18n',
-			'wp-polyfill-ecmascript',
+			'wp-polyfill',
 		),
 		'nux' => array(
 			'wp-element',
@@ -307,8 +334,19 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 
 		$scripts->add( $handle, $path, $dependencies, false, 1 );
 	}
+}
 
-	did_action( 'init' ) && $scripts->add_inline_script(
+/**
+ * Adds inline scripts required for the WordPress JavaScript packages.
+ *
+ * @since 5.0.0
+ *
+ * @param WP_Scripts $scripts WP_Scripts object.
+ */
+function wp_default_packages_inline_scripts( &$scripts ) {
+	global $wp_locale;
+
+	$scripts->add_inline_script(
 		'wp-api-fetch',
 		sprintf(
 			'wp.apiFetch.use( wp.apiFetch.createNonceMiddleware( "%s" ) );',
@@ -316,7 +354,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		),
 		'after'
 	);
-	did_action( 'init' ) && $scripts->add_inline_script(
+	$scripts->add_inline_script(
 		'wp-api-fetch',
 		sprintf(
 			'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
@@ -325,7 +363,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		'after'
 	);
 
-	did_action( 'init' ) && $scripts->add_inline_script(
+	$scripts->add_inline_script(
 		'wp-data',
 		implode(
 			"\n",
@@ -342,8 +380,7 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 		)
 	);
 
-	global $wp_locale;
-	did_action( 'init' ) && $scripts->add_inline_script(
+	$scripts->add_inline_script(
 		'wp-date',
 		sprintf(
 			'wp.date.setSettings( %s );',
@@ -379,112 +416,112 @@ function wp_default_packages_scripts( &$scripts, $suffix, $dev_suffix ) {
 	);
 
 	// Loading the old editor and its config to ensure the classic block works as expected.
-	did_action( 'init' ) && $scripts->add_inline_script(
+	$scripts->add_inline_script(
 		'editor',
 		'window.wp.oldEditor = window.wp.editor;',
 		'after'
 	);
 
-	if ( did_action( 'init' ) ) {
-		$tinymce_settings = apply_filters(
-			'tiny_mce_before_init',
-			array(
-				'plugins'          => implode(
-					',',
-					array_unique(
-						apply_filters(
-							'tiny_mce_plugins',
-							array(
-								'charmap',
-								'colorpicker',
-								'hr',
-								'lists',
-								'media',
-								'paste',
-								'tabfocus',
-								'textcolor',
-								'fullscreen',
-								'wordpress',
-								'wpautoresize',
-								'wpeditimage',
-								'wpemoji',
-								'wpgallery',
-								'wplink',
-								'wpdialogs',
-								'wptextpattern',
-								'wpview',
-							)
+	$tinymce_settings = apply_filters(
+		'tiny_mce_before_init',
+		array(
+			'plugins'          => implode(
+				',',
+				array_unique(
+					apply_filters(
+						'tiny_mce_plugins',
+						array(
+							'charmap',
+							'colorpicker',
+							'hr',
+							'lists',
+							'media',
+							'paste',
+							'tabfocus',
+							'textcolor',
+							'fullscreen',
+							'wordpress',
+							'wpautoresize',
+							'wpeditimage',
+							'wpemoji',
+							'wpgallery',
+							'wplink',
+							'wpdialogs',
+							'wptextpattern',
+							'wpview',
 						)
 					)
-				),
-				'toolbar1'         => implode(
-					',',
-					array_merge(
-						apply_filters(
-							'mce_buttons',
-							array(
-								'formatselect',
-								'bold',
-								'italic',
-								'bullist',
-								'numlist',
-								'blockquote',
-								'alignleft',
-								'aligncenter',
-								'alignright',
-								'link',
-								'unlink',
-								'wp_more',
-								'spellchecker',
-								'wp_add_media',
-							),
-							'editor'
-						),
-						array( 'kitchensink' )
-					)
-				),
-				'toolbar2'         => implode(
-					',',
+				)
+			),
+			'toolbar1'         => implode(
+				',',
+				array_merge(
 					apply_filters(
-						'mce_buttons_2',
+						'mce_buttons',
 						array(
-							'strikethrough',
-							'hr',
-							'forecolor',
-							'pastetext',
-							'removeformat',
-							'charmap',
-							'outdent',
-							'indent',
-							'undo',
-							'redo',
-							'wp_help',
+							'formatselect',
+							'bold',
+							'italic',
+							'bullist',
+							'numlist',
+							'blockquote',
+							'alignleft',
+							'aligncenter',
+							'alignright',
+							'link',
+							'unlink',
+							'wp_more',
+							'spellchecker',
+							'wp_add_media',
 						),
 						'editor'
-					)
-				),
-				'toolbar3'         => implode( ',', apply_filters( 'mce_buttons_3', array(), 'editor' ) ),
-				'toolbar4'         => implode( ',', apply_filters( 'mce_buttons_4', array(), 'editor' ) ),
-				'external_plugins' => apply_filters( 'mce_external_plugins', array() ),
+					),
+					array( 'kitchensink' )
+				)
 			),
-			'editor'
-		);
-		if ( isset( $tinymce_settings['style_formats'] ) && is_string( $tinymce_settings['style_formats'] ) ) {
-			// Decode the options as we used to recommende json_encoding the TinyMCE settings.
-			$tinymce_settings['style_formats'] = json_decode( $tinymce_settings['style_formats'] );
-		}
-		did_action( 'init' ) && $scripts->localize(
-			'wp-block-library',
-			'wpEditorL10n',
-			array(
-				'tinymce' => array(
-					'baseURL'  => includes_url( 'js/tinymce' ),
-					'suffix'   => SCRIPT_DEBUG ? '' : '.min',
-					'settings' => $tinymce_settings,
-				),
-			)
-		);
+			'toolbar2'         => implode(
+				',',
+				apply_filters(
+					'mce_buttons_2',
+					array(
+						'strikethrough',
+						'hr',
+						'forecolor',
+						'pastetext',
+						'removeformat',
+						'charmap',
+						'outdent',
+						'indent',
+						'undo',
+						'redo',
+						'wp_help',
+					),
+					'editor'
+				)
+			),
+			'toolbar3'         => implode( ',', apply_filters( 'mce_buttons_3', array(), 'editor' ) ),
+			'toolbar4'         => implode( ',', apply_filters( 'mce_buttons_4', array(), 'editor' ) ),
+			'external_plugins' => apply_filters( 'mce_external_plugins', array() ),
+		),
+		'editor'
+	);
+
+	if ( isset( $tinymce_settings['style_formats'] ) && is_string( $tinymce_settings['style_formats'] ) ) {
+		// Decode the options as we used to recommende json_encoding the TinyMCE settings.
+		$tinymce_settings['style_formats'] = json_decode( $tinymce_settings['style_formats'] );
 	}
+
+	$scripts->localize(
+		'wp-block-library',
+		'wpEditorL10n',
+		array(
+			'tinymce' => array(
+				'baseURL'  => includes_url( 'js/tinymce' ),
+				'suffix'   => SCRIPT_DEBUG ? '' : '.min',
+				'settings' => $tinymce_settings,
+			),
+		)
+	);
 }
 
 /**
@@ -1092,7 +1129,10 @@ function wp_default_scripts( &$scripts ) {
 	$scripts->add( 'wp-api', "/wp-includes/js/wp-api$suffix.js", array( 'jquery', 'backbone', 'underscore', 'wp-api-request' ), false, 1 );
 
 	wp_default_packages_vendor( $scripts, $dev_suffix );
-	wp_default_packages_scripts( $scripts, $suffix, $dev_suffix );
+	wp_default_packages_scripts( $scripts, $suffix );
+	if ( did_action( 'init' ) ) {
+		wp_default_packages_inline_scripts( $scripts );
+	}
 
 	if ( is_admin() ) {
 		$scripts->add( 'admin-tags', "/wp-admin/js/tags$suffix.js", array( 'jquery', 'wp-ajax-response' ), false, 1 );
