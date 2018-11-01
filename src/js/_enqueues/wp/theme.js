@@ -558,24 +558,56 @@ themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.p
 	 * @access private
 	 *
 	 * @type     {boolean}
-	 *
-	 * @memberof wp.themes.Collection
 	 */
-
 	loadingThemes: false
 });
 
 themes.view.Theme = wp.Backbone.View.extend(/** @lends wp.themes.view.Theme.prototype */{
-	// Wrap theme data on a div.theme element
+	/**
+	 * Wrap theme data on a div.theme element.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {string}
+	 */
 	className: 'theme',
 
-	// Reflects which theme view we have
-	// 'grid' (default) or 'detail'
+	/**
+	 * Reflects which theme view we have 'grid' (default) or 'detail'.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {string}
+	 */
 	state: 'grid',
 
-	// The HTML template for each element to be rendered
+	/**
+	 * The HTML template for each element to be rendered.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {Function}
+	 */
 	html: themes.template( 'theme' ),
 
+	/**
+	 * The events that will be bound to methods on the theme View.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {Object}
+	 * @property {string} click The name of the method to be called on click.
+	 * @property {string} keydown The name of the method to be called on keydown.
+	 * @property {string} touchend The name of the method to be called on touchend.
+	 * @property {string} keyup The name of the method to be called on keyup.
+	 * @property {string} touchmove The name of the method to be called on touchmove.
+	 * @property {string} click .theme-install The name of the method to be called when clicked on an element with the class theme-install.
+	 * @property {string} click .update-message The name of the method to be called when clicked on an element with the class update-message.
+	 */
 	events: {
 		'click': themes.isInstall ? 'preview': 'expand',
 		'keydown': themes.isInstall ? 'preview': 'expand',
@@ -586,32 +618,26 @@ themes.view.Theme = wp.Backbone.View.extend(/** @lends wp.themes.view.Theme.prot
 		'click .update-message': 'updateTheme'
 	},
 
+	/**
+	 * Whether the user is currently dragging the view.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {boolean}
+	 */
 	touchDrag: false,
 
 	/**
 	 * This is the view that controls each theme item that will be displayed on the screen.
 	 *
-	 * Description. (use period)
-	 *
-	 * @since      x.x.x
-	 * @deprecated x.x.x Use new_function_name() instead.
+	 * @since      3.8.0
 	 * @access     private
 	 *
-	 * @constructs namespace.Class
-	 * @augments   Parent
-	 * @mixes      mixin
+	 * @constructs wp.themes.view.Theme
+	 * @augments   wp.themes.view
 	 *
-	 * @alias    realName
-	 * @memberof namespace
-	 *
-	 * @see   Function/class relied on
-	 * @link  URL
-	 * @fires Class#eventName
-	 *
-	 * @param {Object} attributes     The model's attributes.
-	 * @param {type}   attributes.key One of the model's attributes.
-	 * @param {Object} [options]      The model's options.
-	 * @param {type}   attributes.key One of the model's options.
+	 * @memberof wp.themes.view
 	 */
 	initialize: function() {
 		this.model.on( 'change', this.render, this );
