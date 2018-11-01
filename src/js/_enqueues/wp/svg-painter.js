@@ -39,6 +39,13 @@ wp.svgPainter = ( function( $, window, document, undefined ) {
 			r256 = [256],
 			i = 0;
 
+		/**
+		 * Initializes the basics for encoding and decoding.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @return {void}
+		 */
 		function init() {
 			while( i < 256 ) {
 				c = String.fromCharCode(i);
@@ -49,6 +56,20 @@ wp.svgPainter = ( function( $, window, document, undefined ) {
 			}
 		}
 
+		/**
+		 *
+		 *
+		 * @since 3.8.0
+		 *
+		 * @param {string}      s       The string to encode or decode.
+		 * @param {boolean}     discard
+		 * @param {number[]}    alpha
+		 * @param {string}      beta
+		 * @param {number}      w1
+		 * @param {number}      w2
+		 *
+		 * @return {string}
+		 */
 		function code( s, discard, alpha, beta, w1, w2 ) {
 			var tmp, length,
 				buffer = 0,
@@ -82,6 +103,13 @@ wp.svgPainter = ( function( $, window, document, undefined ) {
 			return result;
 		}
 
+		/**
+		 * Encodes plain text to a B64-encoded string.
+		 *
+		 * @param {string}  plain   The strong to encode.
+		 *
+		 * @return {string} The encoded string.
+		 */
 		function btoa( plain ) {
 			if ( ! c ) {
 				init();
@@ -91,6 +119,13 @@ wp.svgPainter = ( function( $, window, document, undefined ) {
 			return plain + '===='.slice( ( plain.length % 4 ) || 4 );
 		}
 
+		/**
+		 * Decodes a B64-encoded string to plain text.
+		 *
+		 * @param {string}  coded   The string to decode.
+		 *
+		 * @return {string} The decoded string.
+		 */
 		function atob( coded ) {
 			var i;
 
