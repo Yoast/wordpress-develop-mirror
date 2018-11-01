@@ -7832,7 +7832,7 @@
 			} ) );
 
 			/**
-			 * Returns whether the pubish settings section should be active.
+			 * Returns whether the publish settings section should be active.
 			 *
 			 * @return {boolean} True if the section is active.
 			 */
@@ -7851,6 +7851,12 @@
 
 			// Make sure publish settings are not available while the theme is not active and the customizer is in a published state.
 			section.active.validate = isSectionActive;
+
+			/**
+			 * Updates the active section state.
+			 *
+			 * @returns {void}
+			 */
 			updateSectionActive = function() {
 				section.active.set( isSectionActive() );
 			};
@@ -7861,6 +7867,10 @@
 			updateSectionActive();
 
 			// Bind visibility of the publish settings button to whether the section is active.
+
+			/**
+			 * Updates the
+			 */
 			updateButtonsState = function() {
 				publishSettingsBtn.toggle( section.active.get() );
 				saveBtn.toggleClass( 'has-next-sibling', section.active.get() );
@@ -9269,7 +9279,7 @@
 			};
 
 			/**
-			 * Update active header height.
+			 * Update the active header height.
 			 *
 			 * @since 4.7.0
 			 * @access private
@@ -9281,14 +9291,15 @@
 			};
 
 			/**
-			 * Reposition header on throttled `scroll` event.
+			 * Reposition the header on throttled `scroll` event.
 			 *
 			 * @since 4.7.0
 			 * @access private
 			 *
-			 * @param {Object} header - Header.
-			 * @param {number} scrollTop - Scroll top.
-			 * @param {number} scrollDirection - Scroll direction, negative number being up and positive being down.
+			 * @param {Object} header           The header.
+			 * @param {number} scrollTop        The scroll top position.
+			 * @param {number} scrollDirection  The scroll direction, negative number being up and positive being down.
+			 *
 			 * @return {void}
 			 */
 			positionStickyHeader = function( header, scrollTop, scrollDirection ) {
@@ -9865,7 +9876,11 @@
 			api.previewer.send( 'edit-shortcut-visibility', visibility );
 		} );
 
-		// Autosave changeset.
+		/**
+		 * Start the auto-saving.
+		 *
+		 * @return {void}
+		 */
 		function startAutosaving() {
 			var timeoutId, updateChangesetWithReschedule, scheduleChangesetUpdate, updatePending = false;
 
@@ -9881,7 +9896,7 @@
 			onChangeSaved( api.state( 'saved' ).get() );
 
 			/**
-			 * Request changeset update and then re-schedule the next changeset update time.
+			 * Request a changeset update and then re-schedule the next changeset update time.
 			 *
 			 * @since 4.7.0
 			 * @private
@@ -9897,7 +9912,7 @@
 			};
 
 			/**
-			 * Schedule changeset update.
+			 * Schedule the changeset update.
 			 *
 			 * @since 4.7.0
 			 * @private
