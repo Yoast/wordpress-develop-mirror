@@ -17,7 +17,10 @@ define( 'REST_API_VERSION', '2.0' );
 /**
  * Registers a REST API route.
  *
+ * Note: Do not use before the {@see 'rest_api_init'} hook.
+ *
  * @since 4.4.0
+ * @since 5.1.0 Added a _doing_it_wrong() notice when not called on or after the rest_api_init hook.
  *
  * @param string $namespace The first URL segment after core prefix. Should be unique to your package/plugin.
  * @param string $route     The base URL for route you are adding.
@@ -39,6 +42,18 @@ function register_rest_route( $namespace, $route, $args = array(), $override = f
 	} elseif ( empty( $route ) ) {
 		_doing_it_wrong( 'register_rest_route', __( 'Route must be specified.' ), '4.4.0' );
 		return false;
+	}
+
+	if ( ! did_action( 'rest_api_init' ) ) {
+		_doing_it_wrong(
+			'register_rest_route',
+			sprintf(
+				/* translators: %s: rest_api_init */
+				__( 'REST API routes must be registered on the %s action.' ),
+				'<code>rest_api_init</code>'
+			),
+			'5.1.0'
+		);
 	}
 
 	if ( isset( $args['args'] ) ) {
@@ -193,6 +208,11 @@ function create_initial_rest_routes() {
 			$revisions_controller = new WP_REST_Revisions_Controller( $post_type->name );
 			$revisions_controller->register_routes();
 		}
+
+		if ( 'attachment' !== $post_type->name ) {
+			$autosaves_controller = new WP_REST_Autosaves_Controller( $post_type->name );
+			$autosaves_controller->register_routes();
+		}
 	}
 
 	// Post types.
@@ -230,9 +250,32 @@ function create_initial_rest_routes() {
 	$controller = new WP_REST_Comments_Controller;
 	$controller->register_routes();
 
+	/**
+	 * Filters the search handlers to use in the REST search controller.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param array $search_handlers List of search handlers to use in the controller. Each search
+	 *                               handler instance must extend the `WP_REST_Search_Handler` class.
+	 *                               Default is only a handler for posts.
+	 */
+	$search_handlers = apply_filters( 'wp_rest_search_handlers', array( new WP_REST_Post_Search_Handler() ) );
+
+	$controller = new WP_REST_Search_Controller( $search_handlers );
+	$controller->register_routes();
+
+	// Block Renderer.
+	$controller = new WP_REST_Block_Renderer_Controller;
+	$controller->register_routes();
+
 	// Settings.
 	$controller = new WP_REST_Settings_Controller;
 	$controller->register_routes();
+
+	// Themes.
+	$controller = new WP_REST_Themes_Controller;
+	$controller->register_routes();
+
 }
 
 /**
@@ -572,10 +615,25 @@ function rest_handle_options_request( $response, $handler, $request ) {
 	$data     = array();
 
 	foreach ( $handler->get_routes() as $route => $endpoints ) {
-		$match = preg_match( '@^' . $route . '$@i', $request->get_route() );
+		$match = preg_match( '@^' . $route . '$@i', $request->get_route(), $matches );
 
 		if ( ! $match ) {
 			continue;
+		}
+
+		$args = array();
+		foreach ( $matches as $param => $value ) {
+			if ( ! is_int( $param ) ) {
+				$args[ $param ] = $value;
+			}
+		}
+
+		foreach ( $endpoints as $endpoint ) {
+			// Remove the redundant preg_match argument.
+			unset( $args[0] );
+
+			$request->set_url_params( $args );
+			$request->set_attributes( $endpoint );
 		}
 
 		$data = $handler->get_data_for_route( $route, $endpoints, 'help' );
@@ -651,7 +709,7 @@ function rest_filter_response_fields( $response, $server, $request ) {
 
 	$data = $response->get_data();
 
-	$fields = is_array( $request['_fields'] ) ? $request['_fields'] : preg_split( '/[\s,]+/', $request['_fields'] );
+	$fields = wp_parse_list( $request['_fields'] );
 
 	if ( 0 === count( $fields ) ) {
 		return $response;
@@ -866,10 +924,10 @@ function rest_get_date_with_gmt( $date, $is_utc = false ) {
 	// Timezone conversion needs to be handled differently between these two
 	// cases.
 	if ( ! $is_utc && ! $has_timezone ) {
-		$local = date( 'Y-m-d H:i:s', $date );
+		$local = gmdate( 'Y-m-d H:i:s', $date );
 		$utc   = get_gmt_from_date( $local );
 	} else {
-		$utc   = date( 'Y-m-d H:i:s', $date );
+		$utc   = gmdate( 'Y-m-d H:i:s', $date );
 		$local = get_date_from_gmt( $utc );
 	}
 
@@ -990,7 +1048,7 @@ function rest_sanitize_boolean( $value ) {
 	}
 
 	// Everything else will map nicely to boolean.
-	return (boolean) $value;
+	return (bool) $value;
 }
 
 /**
@@ -1081,8 +1139,8 @@ function rest_get_avatar_sizes() {
  */
 function rest_validate_value_from_schema( $value, $args, $param = '' ) {
 	if ( 'array' === $args['type'] ) {
-		if ( ! is_array( $value ) ) {
-			$value = preg_split( '/[\s,]+/', $value );
+		if ( ! is_null( $value ) ) {
+			$value = wp_parse_list( $value );
 		}
 		if ( ! wp_is_numeric_array( $value ) ) {
 			/* translators: 1: parameter, 2: type name */
@@ -1225,9 +1283,7 @@ function rest_sanitize_value_from_schema( $value, $args ) {
 		if ( empty( $args['items'] ) ) {
 			return (array) $value;
 		}
-		if ( ! is_array( $value ) ) {
-			$value = preg_split( '/[\s,]+/', $value );
-		}
+		$value = wp_parse_list( $value );
 		foreach ( $value as $index => $v ) {
 			$value[ $index ] = rest_sanitize_value_from_schema( $v, $args['items'] );
 		}
@@ -1292,4 +1348,72 @@ function rest_sanitize_value_from_schema( $value, $args ) {
 	}
 
 	return $value;
+}
+
+/**
+ * Append result of internal request to REST API for purpose of preloading data to be attached to a page.
+ * Expected to be called in the context of `array_reduce`.
+ *
+ * @since 5.0.0
+ *
+ * @param  array  $memo Reduce accumulator.
+ * @param  string $path REST API path to preload.
+ * @return array        Modified reduce accumulator.
+ */
+function rest_preload_api_request( $memo, $path ) {
+	// array_reduce() doesn't support passing an array in PHP 5.2, so we need to make sure we start with one.
+	if ( ! is_array( $memo ) ) {
+		$memo = array();
+	}
+
+	if ( empty( $path ) ) {
+		return $memo;
+	}
+
+	$method = 'GET';
+	if ( is_array( $path ) && 2 === count( $path ) ) {
+		$method = end( $path );
+		$path   = reset( $path );
+
+		if ( ! in_array( $method, array( 'GET', 'OPTIONS' ), true ) ) {
+			$method = 'GET';
+		}
+	}
+
+	$path_parts = parse_url( $path );
+	if ( false === $path_parts ) {
+		return $memo;
+	}
+
+	$request = new WP_REST_Request( $method, $path_parts['path'] );
+	if ( ! empty( $path_parts['query'] ) ) {
+		parse_str( $path_parts['query'], $query_params );
+		$request->set_query_params( $query_params );
+	}
+
+	$response = rest_do_request( $request );
+	if ( 200 === $response->status ) {
+		$server = rest_get_server();
+		$data   = (array) $response->get_data();
+		$links  = $server->get_compact_response_links( $response );
+		if ( ! empty( $links ) ) {
+			$data['_links'] = $links;
+		}
+
+		if ( 'OPTIONS' === $method ) {
+			$response = rest_send_allow_header( $response, $server, $request );
+
+			$memo[ $method ][ $path ] = array(
+				'body'    => $data,
+				'headers' => $response->headers,
+			);
+		} else {
+			$memo[ $path ] = array(
+				'body'    => $data,
+				'headers' => $response->headers,
+			);
+		}
+	}
+
+	return $memo;
 }

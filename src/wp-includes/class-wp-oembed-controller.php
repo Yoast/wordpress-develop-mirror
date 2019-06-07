@@ -32,7 +32,9 @@ final class WP_oEmbed_Controller {
 		$maxwidth = apply_filters( 'oembed_default_width', 600 );
 
 		register_rest_route(
-			'oembed/1.0', '/embed', array(
+			'oembed/1.0',
+			'/embed',
+			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_item' ),
@@ -55,7 +57,9 @@ final class WP_oEmbed_Controller {
 		);
 
 		register_rest_route(
-			'oembed/1.0', '/proxy', array(
+			'oembed/1.0',
+			'/proxy',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_proxy_item' ),
@@ -177,11 +181,21 @@ final class WP_oEmbed_Controller {
 			$args['height'] = $args['maxheight'];
 		}
 
+		// Short-circuit process for URLs belonging to the current site.
+		$data = get_oembed_response_data_for_url( $url, $args );
+
+		if ( $data ) {
+			return $data;
+		}
+
 		$data = _wp_oembed_get_object()->get_data( $url, $args );
 
 		if ( false === $data ) {
 			return new WP_Error( 'oembed_invalid_url', get_status_header_desc( 404 ), array( 'status' => 404 ) );
 		}
+
+		/** This filter is documented in wp-includes/class-oembed.php */
+		$data->html = apply_filters( 'oembed_result', _wp_oembed_get_object()->data2html( (object) $data, $url ), $url, $args );
 
 		/**
 		 * Filters the oEmbed TTL value (time to live).

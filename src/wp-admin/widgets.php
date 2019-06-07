@@ -14,7 +14,7 @@ require_once( ABSPATH . 'wp-admin/includes/widgets.php' );
 
 if ( ! current_user_can( 'edit_theme_options' ) ) {
 	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
+		'<h1>' . __( 'You need a higher level of permission.' ) . '</h1>' .
 		'<p>' . __( 'Sorry, you are not allowed to edit theme options on this site.' ) . '</p>',
 		403
 	);
@@ -81,7 +81,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Appearance_Widgets_Screen">Documentation on Widgets</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 if ( ! current_theme_supports( 'widgets' ) ) {
@@ -295,71 +295,71 @@ if ( isset( $_GET['editwidget'] ) && $_GET['editwidget'] ) {
 
 	<form action="widgets.php" method="post">
 	<div class="widget-inside">
-<?php
-if ( is_callable( $control_callback ) ) {
-	call_user_func_array( $control_callback, $control['params'] );
-} else {
-	echo '<p>' . __( 'There are no options for this widget.' ) . "</p>\n";
-}
-		?>
+	<?php
+	if ( is_callable( $control_callback ) ) {
+		call_user_func_array( $control_callback, $control['params'] );
+	} else {
+		echo '<p>' . __( 'There are no options for this widget.' ) . "</p>\n";
+	}
+	?>
 	</div>
 
 	<p class="describe"><?php _e( 'Select both the sidebar for this widget and the position of the widget in that sidebar.' ); ?></p>
 	<div class="widget-position">
 	<table class="widefat"><thead><tr><th><?php _e( 'Sidebar' ); ?></th><th><?php _e( 'Position' ); ?></th></tr></thead><tbody>
-<?php
-foreach ( $wp_registered_sidebars as $sbname => $sbvalue ) {
-	echo "\t\t<tr><td><label><input type='radio' name='sidebar' value='" . esc_attr( $sbname ) . "'" . checked( $sbname, $sidebar, false ) . " /> $sbvalue[name]</label></td><td>";
-	if ( 'wp_inactive_widgets' == $sbname || 'orphaned_widgets' == substr( $sbname, 0, 16 ) ) {
-		echo '&nbsp;';
-	} else {
-		if ( ! isset( $sidebars_widgets[ $sbname ] ) || ! is_array( $sidebars_widgets[ $sbname ] ) ) {
-			$j                           = 1;
-			$sidebars_widgets[ $sbname ] = array();
+	<?php
+	foreach ( $wp_registered_sidebars as $sbname => $sbvalue ) {
+		echo "\t\t<tr><td><label><input type='radio' name='sidebar' value='" . esc_attr( $sbname ) . "'" . checked( $sbname, $sidebar, false ) . " /> $sbvalue[name]</label></td><td>";
+		if ( 'wp_inactive_widgets' == $sbname || 'orphaned_widgets' == substr( $sbname, 0, 16 ) ) {
+			echo '&nbsp;';
 		} else {
-			$j = count( $sidebars_widgets[ $sbname ] );
-			if ( isset( $_GET['addnew'] ) || ! in_array( $widget_id, $sidebars_widgets[ $sbname ], true ) ) {
-				$j++;
+			if ( ! isset( $sidebars_widgets[ $sbname ] ) || ! is_array( $sidebars_widgets[ $sbname ] ) ) {
+				$j                           = 1;
+				$sidebars_widgets[ $sbname ] = array();
+			} else {
+				$j = count( $sidebars_widgets[ $sbname ] );
+				if ( isset( $_GET['addnew'] ) || ! in_array( $widget_id, $sidebars_widgets[ $sbname ], true ) ) {
+					$j++;
+				}
 			}
-		}
-		$selected = '';
-		echo "\t\t<select name='{$sbname}_position'>\n";
-		echo "\t\t<option value=''>" . __( '&mdash; Select &mdash;' ) . "</option>\n";
-		for ( $i = 1; $i <= $j; $i++ ) {
-			if ( in_array( $widget_id, $sidebars_widgets[ $sbname ], true ) ) {
-				$selected = selected( $i, $key + 1, false );
+			$selected = '';
+			echo "\t\t<select name='{$sbname}_position'>\n";
+			echo "\t\t<option value=''>" . __( '&mdash; Select &mdash;' ) . "</option>\n";
+			for ( $i = 1; $i <= $j; $i++ ) {
+				if ( in_array( $widget_id, $sidebars_widgets[ $sbname ], true ) ) {
+					$selected = selected( $i, $key + 1, false );
+				}
+				echo "\t\t<option value='$i'$selected> $i </option>\n";
 			}
-			echo "\t\t<option value='$i'$selected> $i </option>\n";
+			echo "\t\t</select>\n";
 		}
-		echo "\t\t</select>\n";
+		echo "</td></tr>\n";
 	}
-	echo "</td></tr>\n";
-}
 	?>
 	</tbody></table>
 	</div>
 
 	<div class="widget-control-actions">
-<?php
-if ( isset( $_GET['addnew'] ) ) {
-	?>
+	<?php
+	if ( isset( $_GET['addnew'] ) ) {
+		?>
 	<a href="widgets.php" class="button alignleft"><?php _e( 'Cancel' ); ?></a>
-<?php
-} else {
-	submit_button( __( 'Delete' ), 'alignleft', 'removewidget', false );
-}
+		<?php
+	} else {
+		submit_button( __( 'Delete' ), 'alignleft', 'removewidget', false );
+	}
 	submit_button( __( 'Save Widget' ), 'primary alignright', 'savewidget', false );
 	?>
 	<input type="hidden" name="widget-id" class="widget-id" value="<?php echo esc_attr( $widget_id ); ?>" />
 	<input type="hidden" name="id_base" class="id_base" value="<?php echo esc_attr( $id_base ); ?>" />
 	<input type="hidden" name="multi_number" class="multi_number" value="<?php echo esc_attr( $multi_number ); ?>" />
-<?php	wp_nonce_field( "save-delete-widget-$widget_id" ); ?>
+	<?php	wp_nonce_field( "save-delete-widget-$widget_id" ); ?>
 	<br class="clear" />
 	</div>
 	</form>
 	</div>
 	</div>
-<?php
+	<?php
 	require_once( ABSPATH . 'wp-admin/admin-footer.php' );
 	exit;
 }
@@ -399,7 +399,12 @@ if ( current_user_can( 'customize' ) ) {
 		__( 'Manage with Live Preview' )
 	);
 }
+
+$nonce = wp_create_nonce( 'widgets-access' );
 ?>
+<div class="widget-access-link">
+	<a id="access-on" href="widgets.php?widgets-access=on&_wpnonce=<?php echo urlencode( $nonce ); ?>"><?php _e( 'Enable accessibility mode' ); ?></a><a id="access-off" href="widgets.php?widgets-access=off&_wpnonce=<?php echo urlencode( $nonce ); ?>"><?php _e( 'Disable accessibility mode' ); ?></a>
+</div>
 
 <hr class="wp-header-end">
 

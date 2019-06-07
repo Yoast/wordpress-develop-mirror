@@ -170,7 +170,7 @@ function wp_admin_bar_wp_menu( $wp_admin_bar ) {
 		array(
 			'parent' => 'wp-logo-external',
 			'id'     => 'support-forums',
-			'title'  => __( 'Support Forums' ),
+			'title'  => __( 'Support' ),
 			'href'   => __( 'https://wordpress.org/support/' ),
 		)
 	);
@@ -613,7 +613,7 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 				array(
 					'parent' => $menu_id,
 					'id'     => $menu_id . '-n',
-					'title'  => __( 'New Post' ),
+					'title'  => get_post_type_object( 'post' )->labels->new_item,
 					'href'   => admin_url( 'post-new.php' ),
 				)
 			);
@@ -677,6 +677,8 @@ function wp_admin_bar_shortlink_menu( $wp_admin_bar ) {
  *
  * @global WP_Term  $tag
  * @global WP_Query $wp_the_query
+ * @global int      $user_id      The ID of the user being edited. Not to be confused with the
+ *                                global $user_ID, which contains the ID of the current user.
  *
  * @param WP_Admin_Bar $wp_admin_bar
  */
@@ -728,7 +730,7 @@ function wp_admin_bar_edit_menu( $wp_admin_bar ) {
 		} elseif ( 'term' == $current_screen->base
 			&& isset( $tag ) && is_object( $tag ) && ! is_wp_error( $tag )
 			&& ( $tax = get_taxonomy( $tag->taxonomy ) )
-			&& $tax->public ) {
+			&& is_taxonomy_viewable( $tax ) ) {
 			$wp_admin_bar->add_menu(
 				array(
 					'id'    => 'view',
@@ -883,11 +885,15 @@ function wp_admin_bar_comments_menu( $wp_admin_bar ) {
 
 	$awaiting_mod  = wp_count_comments();
 	$awaiting_mod  = $awaiting_mod->moderated;
-	$awaiting_text = sprintf( _n( '%s comment awaiting moderation', '%s comments awaiting moderation', $awaiting_mod ), number_format_i18n( $awaiting_mod ) );
+	$awaiting_text = sprintf(
+		/* translators: %s: number of comments in moderation */
+		_n( '%s Comment in moderation', '%s Comments in moderation', $awaiting_mod ),
+		number_format_i18n( $awaiting_mod )
+	);
 
 	$icon   = '<span class="ab-icon"></span>';
 	$title  = '<span class="ab-label awaiting-mod pending-count count-' . $awaiting_mod . '" aria-hidden="true">' . number_format_i18n( $awaiting_mod ) . '</span>';
-	$title .= '<span class="screen-reader-text">' . $awaiting_text . '</span>';
+	$title .= '<span class="screen-reader-text comments-in-moderation-text">' . $awaiting_text . '</span>';
 
 	$wp_admin_bar->add_menu(
 		array(
@@ -1042,6 +1048,32 @@ function wp_admin_bar_search_menu( $wp_admin_bar ) {
 }
 
 /**
+ * Add a link to exit recovery mode when Recovery Mode is active.
+ *
+ * @since 5.2.0
+ *
+ * @param WP_Admin_Bar $wp_admin_bar
+ */
+function wp_admin_bar_recovery_mode_menu( $wp_admin_bar ) {
+	if ( ! wp_is_recovery_mode() ) {
+		return;
+	}
+
+	$url = wp_login_url();
+	$url = add_query_arg( 'action', WP_Recovery_Mode::EXIT_ACTION, $url );
+	$url = wp_nonce_url( $url, WP_Recovery_Mode::EXIT_ACTION );
+
+	$wp_admin_bar->add_menu(
+		array(
+			'parent' => 'top-secondary',
+			'id'     => 'recovery-mode',
+			'title'  => __( 'Exit Recovery Mode' ),
+			'href'   => $url,
+		)
+	);
+}
+
+/**
  * Add secondary menus.
  *
  * @since 3.3.0
@@ -1077,7 +1109,7 @@ function wp_admin_bar_add_secondary_groups( $wp_admin_bar ) {
 function wp_admin_bar_header() {
 	?>
 <style type="text/css" media="print">#wpadminbar { display:none; }</style>
-<?php
+	<?php
 }
 
 /**
@@ -1087,7 +1119,7 @@ function wp_admin_bar_header() {
  */
 function _admin_bar_bump_cb() {
 
-?>
+	?>
 <style type="text/css" media="screen">
 	html { margin-top: 32px !important; }
 	* html body { margin-top: 32px !important; }
@@ -1096,7 +1128,7 @@ function _admin_bar_bump_cb() {
 		* html body { margin-top: 46px !important; }
 	}
 </style>
-<?php
+	<?php
 }
 
 /**
@@ -1117,7 +1149,11 @@ function show_admin_bar( $show ) {
 }
 
 /**
- * Determine whether the admin bar should be showing.
+ * Determines whether the admin bar should be showing.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 3.1.0
  *
@@ -1130,7 +1166,7 @@ function is_admin_bar_showing() {
 	global $show_admin_bar, $pagenow;
 
 	// For all these types of requests, we never want an admin bar.
-	if ( defined( 'XMLRPC_REQUEST' ) || defined( 'DOING_AJAX' ) || defined( 'IFRAME_REQUEST' ) ) {
+	if ( defined( 'XMLRPC_REQUEST' ) || defined( 'DOING_AJAX' ) || defined( 'IFRAME_REQUEST' ) || wp_is_json_request() ) {
 		return false;
 	}
 

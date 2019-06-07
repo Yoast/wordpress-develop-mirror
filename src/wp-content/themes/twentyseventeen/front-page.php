@@ -4,7 +4,7 @@
  *
  * If the user has selected a static page for their homepage, this is what will
  * appear.
- * Learn more: https://codex.wordpress.org/Template_Hierarchy
+ * Learn more: https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
  * @package WordPress
  * @subpackage Twenty_Seventeen
@@ -24,7 +24,7 @@ get_header(); ?>
 				the_post();
 				get_template_part( 'template-parts/page/content', 'front-page' );
 			endwhile;
-		else : // I'm not sure it's possible to have no posts when this page is shown, but WTH.
+		else :
 			get_template_part( 'template-parts/post/content', 'none' );
 		endif;
 		?>
@@ -50,7 +50,7 @@ get_header(); ?>
 			}
 
 	endif; // The if ( 0 !== twentyseventeen_panel_count() ) ends here.
-	?>
+		?>
 
 	</main><!-- #main -->
 </div><!-- #primary -->

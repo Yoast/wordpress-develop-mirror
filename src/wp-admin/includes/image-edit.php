@@ -9,6 +9,8 @@
 /**
  * Loads the WP image-editing interface.
  *
+ * @since 2.9.0
+ *
  * @param int         $post_id Post ID.
  * @param bool|object $msg     Optional. Message to display for image editor updates or errors.
  *                             Default false.
@@ -31,7 +33,7 @@ function wp_image_editor( $post_id, $msg = false ) {
 	$backup_sizes = get_post_meta( $post_id, '_wp_attachment_backup_sizes', true );
 	$can_restore  = false;
 	if ( ! empty( $backup_sizes ) && isset( $backup_sizes['full-orig'], $meta['file'] ) ) {
-		$can_restore = $backup_sizes['full-orig']['file'] != basename( $meta['file'] );
+		$can_restore = $backup_sizes['full-orig']['file'] != wp_basename( $meta['file'] );
 	}
 
 	if ( $msg ) {
@@ -78,7 +80,7 @@ function wp_image_editor( $post_id, $msg = false ) {
 	</div>
 	</div>
 
-<?php if ( $can_restore ) { ?>
+	<?php if ( $can_restore ) { ?>
 
 	<div class="imgedit-group">
 	<div class="imgedit-group-top">
@@ -101,7 +103,7 @@ function wp_image_editor( $post_id, $msg = false ) {
 	</div>
 	</div>
 
-<?php } ?>
+	<?php } ?>
 
 	<div class="imgedit-group">
 	<div class="imgedit-group-top">
@@ -150,7 +152,7 @@ function wp_image_editor( $post_id, $msg = false ) {
 	<?php
 	if ( $thumb && $sub_sizes ) {
 		$thumb_img = wp_constrain_dimensions( $thumb['width'], $thumb['height'], 160, 120 );
-	?>
+		?>
 
 	<div class="imgedit-group imgedit-applyto">
 	<div class="imgedit-group-top">
@@ -201,13 +203,13 @@ function wp_image_editor( $post_id, $msg = false ) {
 																			)
 																		) ) {
 																			$note_no_rotate = '';
-																	?>
+																			?>
 																		<button type="button" class="imgedit-rleft button" onclick="imageEdit.rotate( 90, <?php echo "$post_id, '$nonce'"; ?>, this)"><span class="screen-reader-text"><?php esc_html_e( 'Rotate counter-clockwise' ); ?></span></button>
 			<button type="button" class="imgedit-rright button" onclick="imageEdit.rotate(-90, <?php echo "$post_id, '$nonce'"; ?>, this)"><span class="screen-reader-text"><?php esc_html_e( 'Rotate clockwise' ); ?></span></button>
-																<?php
+																			<?php
 																		} else {
 																					$note_no_rotate = '<p class="note-no-rotate"><em>' . __( 'Image rotation is not supported by your web host.' ) . '</em></p>';
-																		?>
+																			?>
 																				<button type="button" class="imgedit-rleft button disabled" disabled></button>
 																				<button type="button" class="imgedit-rright button disabled" disabled></button>
 																		<?php } ?>
@@ -241,11 +243,13 @@ function wp_image_editor( $post_id, $msg = false ) {
 	<div class="imgedit-wait" id="imgedit-wait-<?php echo $post_id; ?>"></div>
 	<div class="hidden" id="imgedit-leaving-<?php echo $post_id; ?>"><?php _e( "There are unsaved changes that will be lost. 'OK' to continue, 'Cancel' to return to the Image Editor." ); ?></div>
 	</div>
-<?php
+	<?php
 }
 
 /**
  * Streams image in WP_Image_Editor to browser.
+ *
+ * @since 2.9.0
  *
  * @param WP_Image_Editor $image         The image editor instance.
  * @param string          $mime_type     The mime type of the image.
@@ -301,7 +305,9 @@ function wp_stream_image( $image, $mime_type, $attachment_id ) {
 }
 
 /**
- * Saves Image to File
+ * Saves image to file.
+ *
+ * @since 2.9.0
  *
  * @param string $filename
  * @param WP_Image_Editor $image
@@ -605,6 +611,8 @@ function image_edit_apply_changes( $image, $changes ) {
  * Streams image in post to browser, along with enqueued changes
  * in $_REQUEST['history']
  *
+ * @since 2.9.0
+ *
  * @param int $post_id
  * @return bool
  */
@@ -732,6 +740,8 @@ function wp_restore_image( $post_id ) {
 /**
  * Saves image to post along with enqueued changes
  * in $_REQUEST['history']
+ *
+ * @since 2.9.0
  *
  * @param int $post_id
  * @return \stdClass

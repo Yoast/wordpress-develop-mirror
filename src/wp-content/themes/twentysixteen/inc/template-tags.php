@@ -133,10 +133,10 @@ if ( ! function_exists( 'twentysixteen_post_thumbnail' ) ) :
 		}
 
 		if ( is_singular() ) :
-		?>
+			?>
 
 		<div class="post-thumbnail">
-		<?php the_post_thumbnail(); ?>
+			<?php the_post_thumbnail(); ?>
 	</div><!-- .post-thumbnail -->
 
 	<?php else : ?>
@@ -145,7 +145,7 @@ if ( ! function_exists( 'twentysixteen_post_thumbnail' ) ) :
 		<?php the_post_thumbnail( 'post-thumbnail', array( 'alt' => the_title_attribute( 'echo=0' ) ) ); ?>
 	</a>
 
-	<?php
+		<?php
 	endif; // End is_singular()
 	}
 endif;
@@ -166,11 +166,11 @@ if ( ! function_exists( 'twentysixteen_excerpt' ) ) :
 		$class = esc_attr( $class );
 
 		if ( has_excerpt() || is_search() ) :
-		?>
+			?>
 			<div class="<?php echo $class; ?>">
 				<?php the_excerpt(); ?>
 			</div><!-- .<?php echo $class; ?> -->
-		<?php
+			<?php
 		endif;
 	}
 endif;
@@ -262,5 +262,23 @@ if ( ! function_exists( 'twentysixteen_the_custom_logo' ) ) :
 		if ( function_exists( 'the_custom_logo' ) ) {
 			the_custom_logo();
 		}
+	}
+endif;
+
+if ( ! function_exists( 'wp_body_open' ) ) :
+	/**
+	 * Fire the wp_body_open action.
+	 *
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
+	 *
+	 * @since Twenty Sixteen 2.0
+	 */
+	function wp_body_open() {
+		/**
+		 * Triggered after the opening <body> tag.
+		 *
+		 * @since Twenty Sixteen 2.0
+		 */
+		do_action( 'wp_body_open' );
 	}
 endif;

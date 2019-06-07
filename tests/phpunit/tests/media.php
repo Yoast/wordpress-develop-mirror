@@ -132,9 +132,9 @@ CAP;
 		$this->assertEquals( 1, preg_match_all( "/{$this->caption}/", $result, $_r ) );
 
 		if ( current_theme_supports( 'html5', 'caption' ) ) {
-			$this->assertEquals( 1, preg_match_all( '/max-width: 20/', $result, $_r ) );
+			$this->assertEquals( 1, preg_match_all( '/width: 20/', $result, $_r ) );
 		} else {
-			$this->assertEquals( 1, preg_match_all( '/max-width: 30/', $result, $_r ) );
+			$this->assertEquals( 1, preg_match_all( '/width: 30/', $result, $_r ) );
 		}
 	}
 
@@ -212,6 +212,21 @@ CAP;
 
 		$this->assertEquals( 1, preg_match_all( "~{$img_preg}.*wp-caption-text~", $result, $_r ) );
 		$this->assertEquals( 1, preg_match_all( "~wp-caption-text.*{$content_preg}~", $result, $_r ) );
+	}
+
+	/**
+	 * @ticket 34595
+	 */
+	function test_img_caption_shortcode_has_aria_describedby() {
+		$result = img_caption_shortcode(
+			array(
+				'width' => 20,
+				'id'    => 'myId',
+			),
+			$this->img_content . $this->html_content
+		);
+
+		$this->assertEquals( 1, preg_match_all( '/aria-describedby="caption-myId"/', $result, $_r ) );
 	}
 
 	function test_add_remove_oembed_provider() {
@@ -388,7 +403,8 @@ https://w.org</a>',
 
 		// Add attachment metadata without sizes.
 		wp_update_attachment_metadata(
-			$id, array(
+			$id,
+			array(
 				'width'  => 50,
 				'height' => 50,
 				'file'   => 'test-image.jpg',
@@ -445,7 +461,9 @@ https://w.org</a>',
 	function test_get_attached_images() {
 		$post_id       = self::factory()->post->create();
 		$attachment_id = self::factory()->attachment->create_object(
-			$this->img_name, $post_id, array(
+			$this->img_name,
+			$post_id,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 			)
@@ -463,7 +481,9 @@ https://w.org</a>',
 		$ids1_srcs = array();
 		foreach ( range( 1, 3 ) as $i ) {
 			$attachment_id = self::factory()->attachment->create_object(
-				"image$i.jpg", 0, array(
+				"image$i.jpg",
+				0,
+				array(
 					'post_mime_type' => 'image/jpeg',
 					'post_type'      => 'attachment',
 				)
@@ -478,7 +498,9 @@ https://w.org</a>',
 		$ids2_srcs = array();
 		foreach ( range( 4, 6 ) as $i ) {
 			$attachment_id = self::factory()->attachment->create_object(
-				"image$i.jpg", 0, array(
+				"image$i.jpg",
+				0,
+				array(
 					'post_mime_type' => 'image/jpeg',
 					'post_type'      => 'attachment',
 				)
@@ -609,7 +631,9 @@ BLOB;
 		$ids1_srcs = array();
 		foreach ( range( 1, 3 ) as $i ) {
 			$attachment_id = self::factory()->attachment->create_object(
-				"image$i.jpg", 0, array(
+				"image$i.jpg",
+				0,
+				array(
 					'post_mime_type' => 'image/jpeg',
 					'post_type'      => 'attachment',
 				)
@@ -624,7 +648,9 @@ BLOB;
 		$ids2_srcs = array();
 		foreach ( range( 4, 6 ) as $i ) {
 			$attachment_id = self::factory()->attachment->create_object(
-				"image$i.jpg", 0, array(
+				"image$i.jpg",
+				0,
+				array(
 					'post_mime_type' => 'image/jpeg',
 					'post_type'      => 'attachment',
 				)
@@ -1020,7 +1046,9 @@ VIDEO;
 	function test_attachment_url_to_postid() {
 		$image_path    = '2014/11/' . $this->img_name;
 		$attachment_id = self::factory()->attachment->create_object(
-			$image_path, 0, array(
+			$image_path,
+			0,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 			)
@@ -1033,7 +1061,9 @@ VIDEO;
 	function test_attachment_url_to_postid_schemes() {
 		$image_path    = '2014/11/' . $this->img_name;
 		$attachment_id = self::factory()->attachment->create_object(
-			$image_path, 0, array(
+			$image_path,
+			0,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 			)
@@ -1049,7 +1079,9 @@ VIDEO;
 	function test_attachment_url_to_postid_filtered() {
 		$image_path    = '2014/11/' . $this->img_name;
 		$attachment_id = self::factory()->attachment->create_object(
-			$image_path, 0, array(
+			$image_path,
+			0,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 			)
@@ -1095,7 +1127,10 @@ VIDEO;
 		);
 
 		$post_id = media_handle_upload(
-			'upload', 0, array(), array(
+			'upload',
+			0,
+			array(),
+			array(
 				'action'    => 'test_iptc_upload',
 				'test_form' => false,
 			)
@@ -1131,7 +1166,10 @@ VIDEO;
 		);
 
 		$post_id = media_handle_upload(
-			'upload', 0, array(), array(
+			'upload',
+			0,
+			array(),
+			array(
 				'action'    => 'test_upload_titles',
 				'test_form' => false,
 			)
@@ -1297,7 +1335,9 @@ EOF;
 
 		$post_id       = self::factory()->post->create();
 		$attachment_id = self::factory()->attachment->create_object(
-			$this->img_name, $post_id, array(
+			$this->img_name,
+			$post_id,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 			)
@@ -1318,7 +1358,9 @@ EOF;
 
 		$post_id       = self::factory()->post->create();
 		$attachment_id = self::factory()->attachment->create_object(
-			$this->img_name, $post_id, array(
+			$this->img_name,
+			$post_id,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 				'post_excerpt'   => $caption,
@@ -1336,7 +1378,9 @@ EOF;
 	function test_wp_get_attachment_caption_empty() {
 		$post_id       = self::factory()->post->create();
 		$attachment_id = self::factory()->attachment->create_object(
-			$this->img_name, $post_id, array(
+			$this->img_name,
+			$post_id,
+			array(
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
 				'post_excerpt'   => '',
@@ -1384,7 +1428,7 @@ EOF;
 	function test_wp_calculate_image_srcset() {
 		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
-		$year_month      = date( 'Y/m' );
+		$year_month      = gmdate( 'Y/m' );
 		$image_meta      = wp_get_attachment_metadata( self::$large_id );
 		$uploads_dir_url = 'http://' . WP_TESTS_DOMAIN . '/wp-content/uploads/';
 
@@ -1480,7 +1524,7 @@ EOF;
 		// Copy hash generation method used in wp_save_image().
 		$hash = 'e' . time() . rand( 100, 999 );
 
-		$filename_base = basename( $image_meta['file'], '.png' );
+		$filename_base = wp_basename( $image_meta['file'], '.png' );
 
 		// Add the hash to the image URL
 		$image_url = str_replace( $filename_base, $filename_base . '-' . $hash, $image_url );
@@ -1506,7 +1550,7 @@ EOF;
 	function test_wp_calculate_image_srcset_with_absolute_path_in_meta() {
 		$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 
-		$year_month      = date( 'Y/m' );
+		$year_month      = gmdate( 'Y/m' );
 		$image_meta      = wp_get_attachment_metadata( self::$large_id );
 		$uploads_dir_url = 'http://' . WP_TESTS_DOMAIN . '/wp-content/uploads/';
 
@@ -1787,7 +1831,7 @@ EOF;
 
 		$srcset = wp_get_attachment_image_srcset( self::$large_id, $size_array, $image_meta );
 
-		$year_month  = date( 'Y/m' );
+		$year_month  = gmdate( 'Y/m' );
 		$uploads_dir = 'http://' . WP_TESTS_DOMAIN . '/wp-content/uploads/';
 
 		// Set up test cases for all expected size names.
@@ -2184,8 +2228,8 @@ EOF;
 		remove_all_filters( 'wp_calculate_image_sizes' );
 
 		$actual = wp_get_attachment_image( self::$large_id, 'testsize' );
-		$year   = date( 'Y' );
-		$month  = date( 'm' );
+		$year   = gmdate( 'Y' );
+		$month  = gmdate( 'm' );
 
 		$expected = '<img width="999" height="999" src="http://' . WP_TESTS_DOMAIN . '/wp-content/uploads/' . $year . '/' . $month . '/test-image-testsize-999x999.png"' .
 			' class="attachment-testsize size-testsize" alt=""' .
@@ -2300,6 +2344,21 @@ EOF;
 	}
 
 	/**
+	 * Test created timestamp is properly read from an MP4 file.
+	 *
+	 * This MP4 video file has an AAC audio track, so it can be used to test
+	 *`wp_read_audio_metadata()`.
+	 *
+	 * @ticket 42017
+	 */
+	function test_wp_read_audio_metadata_adds_creation_date_with_mp4() {
+		$video    = DIR_TESTDATA . '/uploads/small-video.mp4';
+		$metadata = wp_read_audio_metadata( $video );
+
+		$this->assertEquals( 1269120551, $metadata['created_timestamp'] );
+	}
+
+	/**
 	 * @ticket 35218
 	 */
 	function test_wp_read_video_metadata_adds_creation_date_with_quicktime() {
@@ -2361,7 +2420,10 @@ EOF;
 		$parent_id = self::factory()->post->create( array( 'post_date' => '2010-01-01' ) );
 
 		$post_id = media_handle_upload(
-			'upload', $parent_id, array(), array(
+			'upload',
+			$parent_id,
+			array(),
+			array(
 				'action'    => 'test_iptc_upload',
 				'test_form' => false,
 			)
@@ -2371,11 +2433,15 @@ EOF;
 
 		$url = wp_get_attachment_url( $post_id );
 
+		$uploads_dir = wp_upload_dir( '2010/01' );
+
+		$expected = $uploads_dir['url'] . '/test-image-iptc.jpg';
+
 		// Clean up.
 		wp_delete_attachment( $post_id );
 		wp_delete_post( $parent_id );
 
-		$this->assertSame( 'http://example.org/wp-content/uploads/2010/01/test-image-iptc.jpg', $url );
+		$this->assertSame( $expected, $url );
 	}
 
 	/**
@@ -2406,7 +2472,10 @@ EOF;
 		$parent    = get_post( $parent_id );
 
 		$post_id = media_handle_upload(
-			'upload', $parent_id, array(), array(
+			'upload',
+			$parent_id,
+			array(),
+			array(
 				'action'    => 'test_iptc_upload',
 				'test_form' => false,
 			)
@@ -2418,13 +2487,13 @@ EOF;
 
 		$uploads_dir = wp_upload_dir( current_time( 'mysql' ) );
 
-		$expected = $uploads_dir['url'] . 'test-image-iptc.jpg';
+		$expected = $uploads_dir['url'] . '/test-image-iptc.jpg';
 
 		// Clean up.
 		wp_delete_attachment( $post_id );
 		wp_delete_post( $parent_id );
 
-		$this->assertNotEquals( $expected, $url );
+		$this->assertSame( $expected, $url );
 	}
 }
 

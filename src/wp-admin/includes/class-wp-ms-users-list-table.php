@@ -26,11 +26,10 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 	/**
 	 * @global string $usersearch
 	 * @global string $role
-	 * @global wpdb   $wpdb
 	 * @global string $mode
 	 */
 	public function prepare_items() {
-		global $usersearch, $role, $wpdb, $mode;
+		global $usersearch, $role, $mode;
 
 		$usersearch = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
 
@@ -56,8 +55,7 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		}
 
 		if ( $role === 'super' ) {
-			$logins          = implode( "', '", get_super_admins() );
-			$args['include'] = $wpdb->get_col( "SELECT ID FROM $wpdb->users WHERE user_login IN ('$logins')" );
+			$args['login__in'] = get_super_admins();
 		}
 
 		/*
@@ -178,8 +176,8 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		 *
 		 * @since MU (3.0.0)
 		 *
-		 * @param array $users_columns An array of user columns. Default 'cb', 'username',
-		 *                             'name', 'email', 'registered', 'blogs'.
+		 * @param string[] $users_columns An array of user columns. Default 'cb', 'username',
+		 *                                'name', 'email', 'registered', 'blogs'.
 		 */
 		return apply_filters( 'wpmu_users_columns', $users_columns );
 	}
@@ -339,8 +337,25 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 				continue;
 			}
 
-			$path = ( $val->path === '/' ) ? '' : $val->path;
-			echo '<span class="site-' . $val->site_id . '" >';
+			$path         = ( $val->path === '/' ) ? '' : $val->path;
+			$site_classes = array( 'site-' . $val->site_id );
+			/**
+			 * Filters the span class for a site listing on the mulisite user list table.
+			 *
+			 * @since 5.2.0
+			 *
+			 * @param array  $site_classes Class used within the span tag. Default "site-#" with the site's network ID.
+			 * @param int    $site_id      Site ID.
+			 * @param int    $network_id   Network ID.
+			 * @param object $user         WP_User object.
+			 */
+			$site_classes = apply_filters( 'ms_user_list_site_class', $site_classes, $val->userblog_id, $val->site_id, $user );
+			if ( is_array( $site_classes ) && ! empty( $site_classes ) ) {
+				$site_classes = array_map( 'sanitize_html_class', array_unique( $site_classes ) );
+				echo '<span class="' . esc_attr( implode( ' ', $site_classes ) ) . '">';
+			} else {
+				echo '<span>';
+			}
 			echo '<a href="' . esc_url( network_admin_url( 'site-info.php?id=' . $val->userblog_id ) ) . '">' . str_replace( '.' . get_network()->domain, '', $val->domain . $path ) . '</a>';
 			echo ' <small class="row-actions">';
 			$actions         = array();
@@ -368,9 +383,8 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 			 *
 			 * @since 3.1.0
 			 *
-			 * @param array $actions     An array of action links to be displayed.
-			 *                           Default 'Edit', 'View'.
-			 * @param int   $userblog_id The site ID.
+			 * @param string[] $actions     An array of action links to be displayed. Default 'Edit', 'View'.
+			 * @param int      $userblog_id The site ID.
 			 */
 			$actions = apply_filters( 'ms_user_list_site_actions', $actions, $val->userblog_id );
 
@@ -465,9 +479,8 @@ class WP_MS_Users_List_Table extends WP_List_Table {
 		 *
 		 * @since 3.2.0
 		 *
-		 * @param array   $actions An array of action links to be displayed.
-		 *                         Default 'Edit', 'Delete'.
-		 * @param WP_User $user    WP_User object.
+		 * @param string[] $actions An array of action links to be displayed. Default 'Edit', 'Delete'.
+		 * @param WP_User  $user    WP_User object.
 		 */
 		$actions = apply_filters( 'ms_user_row_actions', $actions, $user );
 		return $this->row_actions( $actions );

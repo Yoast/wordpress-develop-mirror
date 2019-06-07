@@ -176,7 +176,8 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 
 		$total_sites = get_sites(
 			array_merge(
-				$args, array(
+				$args,
+				array(
 					'count'  => true,
 					'offset' => 0,
 					'number' => 0,
@@ -248,8 +249,8 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		 *
 		 * @since MU (3.0.0)
 		 *
-		 * @param array $sites_columns An array of displayed site columns. Default 'cb',
-		 *                             'blogname', 'lastupdated', 'registered', 'users'.
+		 * @param string[] $sites_columns An array of displayed site columns. Default 'cb',
+		 *                               'blogname', 'lastupdated', 'registered', 'users'.
 		 */
 		return apply_filters( 'wpmu_blogs_columns', $sites_columns );
 	}
@@ -275,14 +276,14 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	public function column_cb( $blog ) {
 		if ( ! is_main_site( $blog['blog_id'] ) ) :
 			$blogname = untrailingslashit( $blog['domain'] . $blog['path'] );
-		?>
+			?>
 			<label class="screen-reader-text" for="blog_<?php echo $blog['blog_id']; ?>">
 																	<?php
 																	printf( __( 'Select %s' ), $blogname );
-			?>
+																	?>
 			</label>
 			<input type="checkbox" id="blog_<?php echo $blog['blog_id']; ?>" name="allblogs[]" value="<?php echo esc_attr( $blog['blog_id'] ); ?>" />
-		<?php
+			<?php
 		endif;
 	}
 
@@ -406,14 +407,15 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 	public function column_users( $blog ) {
 		$user_count = wp_cache_get( $blog['blog_id'] . '_user_count', 'blog-details' );
 		if ( ! $user_count ) {
-			$blog_users = get_users(
+			$blog_users = new WP_User_Query(
 				array(
-					'blog_id' => $blog['blog_id'],
-					'fields'  => 'ID',
+					'blog_id'     => $blog['blog_id'],
+					'fields'      => 'ID',
+					'number'      => 1,
+					'count_total' => true,
 				)
 			);
-			$user_count = count( $blog_users );
-			unset( $blog_users );
+			$user_count = $blog_users->get_total();
 			wp_cache_set( $blog['blog_id'] . '_user_count', $user_count, 'blog-details', 12 * HOUR_IN_SECONDS );
 		}
 
@@ -569,10 +571,10 @@ class WP_MS_Sites_List_Table extends WP_List_Table {
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param array  $actions  An array of action links to be displayed.
-		 * @param int    $blog_id  The site ID.
-		 * @param string $blogname Site path, formatted depending on whether it is a sub-domain
-		 *                         or subdirectory multisite installation.
+		 * @param string[] $actions  An array of action links to be displayed.
+		 * @param int      $blog_id  The site ID.
+		 * @param string   $blogname Site path, formatted depending on whether it is a sub-domain
+		 *                           or subdirectory multisite installation.
 		 */
 		$actions = apply_filters( 'manage_sites_action_links', array_filter( $actions ), $blog['blog_id'], $blogname );
 		return $this->row_actions( $actions );

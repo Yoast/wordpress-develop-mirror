@@ -55,14 +55,14 @@ if ( ! function_exists( 'twentyfourteen_paging_nav' ) ) :
 
 		if ( $links ) :
 
-		?>
+			?>
 		<nav class="navigation paging-navigation" role="navigation">
 		<h1 class="screen-reader-text"><?php _e( 'Posts navigation', 'twentyfourteen' ); ?></h1>
 		<div class="pagination loop-pagination">
 			<?php echo $links; ?>
 		</div><!-- .pagination -->
 	</nav><!-- .navigation -->
-	<?php
+			<?php
 	endif;
 	}
 endif;
@@ -182,31 +182,31 @@ if ( ! function_exists( 'twentyfourteen_post_thumbnail' ) ) :
 		}
 
 		if ( is_singular() ) :
-		?>
+			?>
 
 		<div class="post-thumbnail">
-		<?php
-		if ( ( ! is_active_sidebar( 'sidebar-2' ) || is_page_template( 'page-templates/full-width.php' ) ) ) {
-			the_post_thumbnail( 'twentyfourteen-full-width' );
-		} else {
-			the_post_thumbnail();
-		}
-		?>
+			<?php
+			if ( ( ! is_active_sidebar( 'sidebar-2' ) || is_page_template( 'page-templates/full-width.php' ) ) ) {
+				the_post_thumbnail( 'twentyfourteen-full-width' );
+			} else {
+				the_post_thumbnail();
+			}
+			?>
 		</div>
 
 		<?php else : ?>
 
 	<a class="post-thumbnail" href="<?php the_permalink(); ?>" aria-hidden="true">
-	<?php
-	if ( ( ! is_active_sidebar( 'sidebar-2' ) || is_page_template( 'page-templates/full-width.php' ) ) ) {
-		the_post_thumbnail( 'twentyfourteen-full-width' );
-	} else {
-		the_post_thumbnail( 'post-thumbnail', array( 'alt' => get_the_title() ) );
-	}
-	?>
+			<?php
+			if ( ( ! is_active_sidebar( 'sidebar-2' ) || is_page_template( 'page-templates/full-width.php' ) ) ) {
+				the_post_thumbnail( 'twentyfourteen-full-width' );
+			} else {
+				the_post_thumbnail( 'post-thumbnail', array( 'alt' => get_the_title() ) );
+			}
+			?>
 	</a>
 
-	<?php
+			<?php
 	endif; // End is_singular()
 	}
 endif;
@@ -231,4 +231,22 @@ if ( ! function_exists( 'twentyfourteen_excerpt_more' ) && ! is_admin() ) :
 		return ' &hellip; ' . $link;
 	}
 	add_filter( 'excerpt_more', 'twentyfourteen_excerpt_more' );
+endif;
+
+if ( ! function_exists( 'wp_body_open' ) ) :
+	/**
+	 * Fire the wp_body_open action.
+	 *
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
+	 *
+	 * @since Twenty Fourteen 2.7
+	 */
+	function wp_body_open() {
+		/**
+		 * Triggered after the opening <body> tag.
+		 *
+		 * @since Twenty Fourteen 2.7
+		 */
+		do_action( 'wp_body_open' );
+	}
 endif;

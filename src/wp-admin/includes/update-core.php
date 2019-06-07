@@ -253,7 +253,8 @@ $_old_files = array(
 	'wp-includes/js/jquery/autocomplete.js',
 	'wp-includes/js/jquery/interface.js',
 	'wp-includes/js/scriptaculous/prototype.js',
-	'wp-includes/js/tinymce/wp-tinymce.js',
+	// Following file added back in 5.1 see #45645
+	//'wp-includes/js/tinymce/wp-tinymce.js',
 	// 3.1
 	'wp-admin/edit-attachment-rows.php',
 	'wp-admin/edit-link-categories.php',
@@ -535,7 +536,8 @@ $_old_files = array(
 	'wp-admin/images/screenshots/twitter-embed-1.png',
 	'wp-admin/images/screenshots/twitter-embed-2.png',
 	'wp-admin/js/utils.js',
-	'wp-admin/options-privacy.php',
+	// Added back in 5.3 [45448], see #43895
+	// 'wp-admin/options-privacy.php',
 	'wp-app.php',
 	'wp-includes/class-wp-atom-server.php',
 	'wp-includes/js/tinymce/themes/advanced/skins/wp_theme/ui.css',
@@ -743,6 +745,47 @@ $_old_files = array(
 	'wp-includes/js/plupload/plupload.silverlight.xap',
 	'wp-includes/js/swfupload/plugins',
 	'wp-includes/js/swfupload/swfupload.swf',
+	// 4.9.2
+	'wp-includes/js/mediaelement/lang',
+	'wp-includes/js/mediaelement/lang/ca.js',
+	'wp-includes/js/mediaelement/lang/cs.js',
+	'wp-includes/js/mediaelement/lang/de.js',
+	'wp-includes/js/mediaelement/lang/es.js',
+	'wp-includes/js/mediaelement/lang/fa.js',
+	'wp-includes/js/mediaelement/lang/fr.js',
+	'wp-includes/js/mediaelement/lang/hr.js',
+	'wp-includes/js/mediaelement/lang/hu.js',
+	'wp-includes/js/mediaelement/lang/it.js',
+	'wp-includes/js/mediaelement/lang/ja.js',
+	'wp-includes/js/mediaelement/lang/ko.js',
+	'wp-includes/js/mediaelement/lang/nl.js',
+	'wp-includes/js/mediaelement/lang/pl.js',
+	'wp-includes/js/mediaelement/lang/pt.js',
+	'wp-includes/js/mediaelement/lang/ro.js',
+	'wp-includes/js/mediaelement/lang/ru.js',
+	'wp-includes/js/mediaelement/lang/sk.js',
+	'wp-includes/js/mediaelement/lang/sv.js',
+	'wp-includes/js/mediaelement/lang/uk.js',
+	'wp-includes/js/mediaelement/lang/zh-cn.js',
+	'wp-includes/js/mediaelement/lang/zh.js',
+	'wp-includes/js/mediaelement/mediaelement-flash-audio-ogg.swf',
+	'wp-includes/js/mediaelement/mediaelement-flash-audio.swf',
+	'wp-includes/js/mediaelement/mediaelement-flash-video-hls.swf',
+	'wp-includes/js/mediaelement/mediaelement-flash-video-mdash.swf',
+	'wp-includes/js/mediaelement/mediaelement-flash-video.swf',
+	'wp-includes/js/mediaelement/renderers/dailymotion.js',
+	'wp-includes/js/mediaelement/renderers/dailymotion.min.js',
+	'wp-includes/js/mediaelement/renderers/facebook.js',
+	'wp-includes/js/mediaelement/renderers/facebook.min.js',
+	'wp-includes/js/mediaelement/renderers/soundcloud.js',
+	'wp-includes/js/mediaelement/renderers/soundcloud.min.js',
+	'wp-includes/js/mediaelement/renderers/twitch.js',
+	'wp-includes/js/mediaelement/renderers/twitch.min.js',
+	// 5.0
+	'wp-includes/js/codemirror/jshint.js',
+	// 5.1
+	'wp-includes/random_compat/random_bytes_openssl.php',
+	'wp-includes/js/tinymce/wp-tinymce.js.gz',
 );
 
 /**
@@ -778,6 +821,7 @@ $_new_bundled_files = array(
 	'themes/twentyfifteen/'   => '4.1',
 	'themes/twentysixteen/'   => '4.4',
 	'themes/twentyseventeen/' => '4.7',
+	'themes/twentynineteen/'  => '5.0',
 );
 
 /**
@@ -822,7 +866,7 @@ $_new_bundled_files = array(
  *
  * @since 2.7.0
  *
- * @global WP_Filesystem_Base $wp_filesystem
+ * @global WP_Filesystem_Base $wp_filesystem          WordPress filesystem subclass.
  * @global array              $_old_files
  * @global array              $_new_bundled_files
  * @global wpdb               $wpdb
@@ -903,10 +947,23 @@ function update_core( $from, $to ) {
 		$wp_filesystem->delete( $from, true );
 	}
 
+	$php_update_message = '';
+	if ( function_exists( 'wp_get_update_php_url' ) ) {
+		/* translators: %s: Update PHP page URL */
+		$php_update_message = '</p><p>' . sprintf( __( '<a href="%s">Learn more about updating PHP</a>.' ), esc_url( wp_get_update_php_url() ) );
+
+		if ( function_exists( 'wp_get_update_php_annotation' ) ) {
+			$annotation = wp_get_update_php_annotation();
+			if ( $annotation ) {
+				$php_update_message .= '</p><p><em>' . $annotation . '</em>';
+			}
+		}
+	}
+
 	if ( ! $mysql_compat && ! $php_compat ) {
-		return new WP_Error( 'php_mysql_not_compatible', sprintf( __( 'The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher and MySQL version %3$s or higher. You are running PHP version %4$s and MySQL version %5$s.' ), $wp_version, $required_php_version, $required_mysql_version, $php_version, $mysql_version ) );
+		return new WP_Error( 'php_mysql_not_compatible', sprintf( __( 'The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher and MySQL version %3$s or higher. You are running PHP version %4$s and MySQL version %5$s.' ), $wp_version, $required_php_version, $required_mysql_version, $php_version, $mysql_version ) . $php_update_message );
 	} elseif ( ! $php_compat ) {
-		return new WP_Error( 'php_not_compatible', sprintf( __( 'The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher. You are running version %3$s.' ), $wp_version, $required_php_version, $php_version ) );
+		return new WP_Error( 'php_not_compatible', sprintf( __( 'The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher. You are running version %3$s.' ), $wp_version, $required_php_version, $php_version ) . $php_update_message );
 	} elseif ( ! $mysql_compat ) {
 		return new WP_Error( 'mysql_not_compatible', sprintf( __( 'The update cannot be installed because WordPress %1$s requires MySQL version %2$s or higher. You are running version %3$s.' ), $wp_version, $required_mysql_version, $mysql_version ) );
 	}
@@ -1143,7 +1200,11 @@ function update_core( $from, $to ) {
 		if ( ! $wp_filesystem->exists( $old_file ) ) {
 			continue;
 		}
-		$wp_filesystem->delete( $old_file, true );
+
+		// If the file isn't deleted, try writing an empty string to the file instead.
+		if ( ! $wp_filesystem->delete( $old_file, true ) && $wp_filesystem->is_file( $old_file ) ) {
+			$wp_filesystem->put_contents( $old_file, '' );
+		}
 	}
 
 	// Remove any Genericons example.html's from the filesystem

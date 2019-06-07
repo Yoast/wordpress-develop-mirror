@@ -16,10 +16,11 @@
  * @see Bulk_Upgrader_Skin
  */
 class Bulk_Plugin_Upgrader_Skin extends Bulk_Upgrader_Skin {
-	public $plugin_info = array(); // Plugin_Upgrader::bulk() will fill this in.
+	public $plugin_info = array(); // Plugin_Upgrader::bulk_upgrade() will fill this in.
 
 	public function add_strings() {
 		parent::add_strings();
+		/* translators: 1: name of plugin being updated, 2: number of updating plugin, 3: total number of plugins being updated */
 		$this->upgrader->strings['skin_before_update_header'] = __( 'Updating Plugin %1$s (%2$d/%3$d)' );
 	}
 
@@ -55,8 +56,8 @@ class Bulk_Plugin_Upgrader_Skin extends Bulk_Upgrader_Skin {
 		 *
 		 * @since 3.0.0
 		 *
-		 * @param array $update_actions Array of plugin action links.
-		 * @param array $plugin_info    Array of information for the last-updated plugin.
+		 * @param string[] $update_actions Array of plugin action links.
+		 * @param array    $plugin_info    Array of information for the last-updated plugin.
 		 */
 		$update_actions = apply_filters( 'update_bulk_plugins_complete_actions', $update_actions, $this->plugin_info );
 

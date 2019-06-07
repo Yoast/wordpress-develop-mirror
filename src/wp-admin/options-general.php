@@ -46,7 +46,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Settings_General_Screen">Documentation on General Settings</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
@@ -58,7 +58,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 <form method="post" action="options.php" novalidate="novalidate">
 <?php settings_fields( 'general' ); ?>
 
-<table class="form-table">
+<table class="form-table" role="presentation">
 
 <tr>
 <th scope="row"><label for="blogname"><?php _e( 'Site Title' ); ?></label></th>
@@ -80,7 +80,7 @@ if ( ! is_multisite() ) {
 	if ( defined( 'WP_HOME' ) ) {
 		$wp_home_class = ' disabled';
 	}
-?>
+	?>
 
 <tr>
 <th scope="row"><label for="siteurl"><?php _e( 'WordPress Address (URL)' ); ?></label></th>
@@ -90,15 +90,15 @@ if ( ! is_multisite() ) {
 <tr>
 <th scope="row"><label for="home"><?php _e( 'Site Address (URL)' ); ?></label></th>
 <td><input name="home" type="url" id="home" aria-describedby="home-description" value="<?php form_option( 'home' ); ?>"<?php disabled( defined( 'WP_HOME' ) ); ?> class="regular-text code<?php echo $wp_home_class; ?>" />
-<?php if ( ! defined( 'WP_HOME' ) ) : ?>
+	<?php if ( ! defined( 'WP_HOME' ) ) : ?>
 <p class="description" id="home-description">
-<?php
-	printf(
-		/* translators: %s: Codex URL */
-		__( 'Enter the address here if you <a href="%s">want your site home page to be different from your WordPress installation directory</a>.' ),
-		__( 'https://codex.wordpress.org/Giving_WordPress_Its_Own_Directory' )
-	);
-?>
+		<?php
+		printf(
+			/* translators: %s: Codex URL */
+			__( 'Enter the address here if you <a href="%s">want your site home page to be different from your WordPress installation directory</a>.' ),
+			__( 'https://codex.wordpress.org/Giving_WordPress_Its_Own_Directory' )
+		);
+		?>
 </p>
 <?php endif; ?>
 </td>
@@ -113,7 +113,7 @@ if ( ! is_multisite() ) {
 <?php
 $new_admin_email = get_option( 'new_admin_email' );
 if ( $new_admin_email && $new_admin_email != get_option( 'admin_email' ) ) :
-?>
+	?>
 	<div class="updated inline">
 	<p>
 	<?php
@@ -140,7 +140,7 @@ if ( $new_admin_email && $new_admin_email != get_option( 'admin_email' ) ) :
 <th scope="row"><?php _e( 'Membership' ); ?></th>
 <td> <fieldset><legend class="screen-reader-text"><span><?php _e( 'Membership' ); ?></span></legend><label for="users_can_register">
 <input name="users_can_register" type="checkbox" id="users_can_register" value="1" <?php checked( '1', get_option( 'users_can_register' ) ); ?> />
-<?php _e( 'Anyone can register' ); ?></label>
+	<?php _e( 'Anyone can register' ); ?></label>
 </fieldset></td>
 </tr>
 
@@ -151,7 +151,7 @@ if ( $new_admin_email && $new_admin_email != get_option( 'admin_email' ) ) :
 </td>
 </tr>
 
-<?php
+	<?php
 }
 
 $languages    = get_available_languages();
@@ -162,7 +162,7 @@ if ( ! is_multisite() && defined( 'WPLANG' ) && '' !== WPLANG && 'en_US' !== WPL
 if ( ! empty( $languages ) || ! empty( $translations ) ) {
 	?>
 	<tr>
-		<th scope="row"><label for="WPLANG"><?php _e( 'Site Language' ); ?></label></th>
+		<th scope="row"><label for="WPLANG"><?php _e( 'Site Language' ); ?><span class="dashicons dashicons-translation" aria-hidden="true"></span></label></th>
 		<td>
 			<?php
 			$locale = get_locale();
@@ -177,20 +177,12 @@ if ( ! empty( $languages ) || ! empty( $translations ) ) {
 					'selected'                    => $locale,
 					'languages'                   => $languages,
 					'translations'                => $translations,
-					'show_available_translations' => current_user_can( 'install_languages' ),
+					'show_available_translations' => current_user_can( 'install_languages' ) && wp_can_install_language_pack(),
 				)
 			);
 
 			// Add note about deprecated WPLANG constant.
 			if ( defined( 'WPLANG' ) && ( '' !== WPLANG ) && $locale !== WPLANG ) {
-				if ( is_multisite() && current_user_can( 'manage_network_options' )
-					|| ! is_multisite() && current_user_can( 'manage_options' ) ) {
-					?>
-					<p class="description">
-						<strong><?php _e( 'Note:' ); ?></strong> <?php printf( __( 'The %1$s constant in your %2$s file is no longer needed.' ), '<code>WPLANG</code>', '<code>wp-config.php</code>' ); ?>
-					</p>
-					<?php
-				}
 				_deprecated_argument( 'define()', '4.0.0', sprintf( __( 'The %1$s constant in your %2$s file is no longer needed.' ), 'WPLANG', 'wp-config.php' ) );
 			}
 			?>
@@ -241,7 +233,7 @@ if ( empty( $tzstring ) ) { // Create a UTC+- zone if no timezone string exists
 			'<abbr>' . __( 'UTC' ) . '</abbr>',
 			'<code>' . date_i18n( $timezone_format, false, true ) . '</code>'
 		);
-	?>
+		?>
 	</span>
 <?php if ( get_option( 'timezone_string' ) || ! empty( $current_offset ) ) : ?>
 	<span id="local-time">
@@ -324,7 +316,7 @@ if ( empty( $tzstring ) ) { // Create a UTC+- zone if no timezone string exists
 	 * @since 2.7.0
 	 * @since 4.0.0 Added ISO date standard YYYY-MM-DD format.
 	 *
-	 * @param array $default_date_formats Array of default date formats.
+	 * @param string[] $default_date_formats Array of default date formats.
 	 */
 	$date_formats = array_unique( apply_filters( 'date_formats', array( __( 'F j, Y' ), 'Y-m-d', 'm/d/Y', 'd/m/Y' ) ) );
 
@@ -361,7 +353,7 @@ foreach ( $date_formats as $format ) {
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param array $default_time_formats Array of default time formats.
+	 * @param string[] $default_time_formats Array of default time formats.
 	 */
 	$time_formats = array_unique( apply_filters( 'time_formats', array( __( 'g:i a' ), 'g:i A', 'H:i' ) ) );
 

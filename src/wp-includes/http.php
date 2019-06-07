@@ -543,7 +543,7 @@ function wp_http_validate_url( $url ) {
 	$parsed_home = @parse_url( get_option( 'home' ) );
 
 	if ( isset( $parsed_home['host'] ) ) {
-		$same_host = ( strtolower( $parsed_home['host'] ) === strtolower( $parsed_url['host'] ) || 'localhost' === strtolower( $parsed_url['host'] ) );
+		$same_host = strtolower( $parsed_home['host'] ) === strtolower( $parsed_url['host'] );
 	} else {
 		$same_host = false;
 	}
@@ -663,7 +663,7 @@ function ms_allowed_http_request_hosts( $is_external, $host ) {
  * when URL parsing failed.
  *
  * @since 4.4.0
- * @since 4.7.0 The $component parameter was added for parity with PHP's parse_url().
+ * @since 4.7.0 The `$component` parameter was added for parity with PHP's `parse_url()`.
  *
  * @link https://secure.php.net/manual/en/function.parse-url.php
  *

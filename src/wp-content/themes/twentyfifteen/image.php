@@ -16,7 +16,7 @@ get_header(); ?>
 				// Start the loop.
 			while ( have_posts() ) :
 				the_post();
-			?>
+				?>
 
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
@@ -66,7 +66,7 @@ get_header(); ?>
 								'separator'   => '<span class="screen-reader-text">, </span>',
 							)
 						);
-					?>
+						?>
 					</div><!-- .entry-content -->
 
 					<footer class="entry-footer">
@@ -74,7 +74,7 @@ get_header(); ?>
 						<?php edit_post_link( __( 'Edit', 'twentyfifteen' ), '<span class="edit-link">', '</span>' ); ?>
 					</footer><!-- .entry-footer -->
 
-				</article><!-- #post-## -->
+				</article><!-- #post-<?php the_ID(); ?> -->
 
 				<?php
 				// If comments are open or we have at least one comment, load up the comment template

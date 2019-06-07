@@ -46,8 +46,8 @@ if ( empty( $option_page ) ) {
 
 if ( ! current_user_can( $capability ) ) {
 	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
-		'<p>' . __( 'Sorry, you are not allowed to manage these options.' ) . '</p>',
+		'<h1>' . __( 'You need a higher level of permission.' ) . '</h1>' .
+		'<p>' . __( 'Sorry, you are not allowed to manage options for this site.' ) . '</p>',
 		403
 	);
 }
@@ -74,18 +74,77 @@ if ( ! empty( $_GET['adminhash'] ) ) {
 
 if ( is_multisite() && ! current_user_can( 'manage_network_options' ) && 'update' != $action ) {
 	wp_die(
-		'<h1>' . __( 'Cheatin&#8217; uh?' ) . '</h1>' .
+		'<h1>' . __( 'You need a higher level of permission.' ) . '</h1>' .
 		'<p>' . __( 'Sorry, you are not allowed to delete these items.' ) . '</p>',
 		403
 	);
 }
 
 $whitelist_options         = array(
-	'general'    => array( 'blogname', 'blogdescription', 'gmt_offset', 'date_format', 'time_format', 'start_of_week', 'timezone_string', 'WPLANG', 'new_admin_email' ),
-	'discussion' => array( 'default_pingback_flag', 'default_ping_status', 'default_comment_status', 'comments_notify', 'moderation_notify', 'comment_moderation', 'require_name_email', 'comment_whitelist', 'comment_max_links', 'moderation_keys', 'blacklist_keys', 'show_avatars', 'avatar_rating', 'avatar_default', 'close_comments_for_old_posts', 'close_comments_days_old', 'thread_comments', 'thread_comments_depth', 'page_comments', 'comments_per_page', 'default_comments_page', 'comment_order', 'comment_registration' ),
-	'media'      => array( 'thumbnail_size_w', 'thumbnail_size_h', 'thumbnail_crop', 'medium_size_w', 'medium_size_h', 'large_size_w', 'large_size_h', 'image_default_size', 'image_default_align', 'image_default_link_type' ),
-	'reading'    => array( 'posts_per_page', 'posts_per_rss', 'rss_use_excerpt', 'show_on_front', 'page_on_front', 'page_for_posts', 'blog_public' ),
-	'writing'    => array( 'default_category', 'default_email_category', 'default_link_category', 'default_post_format' ),
+	'general'    => array(
+		'blogname',
+		'blogdescription',
+		'gmt_offset',
+		'date_format',
+		'time_format',
+		'start_of_week',
+		'timezone_string',
+		'WPLANG',
+		'new_admin_email',
+	),
+	'discussion' => array(
+		'default_pingback_flag',
+		'default_ping_status',
+		'default_comment_status',
+		'comments_notify',
+		'moderation_notify',
+		'comment_moderation',
+		'require_name_email',
+		'comment_whitelist',
+		'comment_max_links',
+		'moderation_keys',
+		'blacklist_keys',
+		'show_avatars',
+		'avatar_rating',
+		'avatar_default',
+		'close_comments_for_old_posts',
+		'close_comments_days_old',
+		'thread_comments',
+		'thread_comments_depth',
+		'page_comments',
+		'comments_per_page',
+		'default_comments_page',
+		'comment_order',
+		'comment_registration',
+		'show_comments_cookies_opt_in',
+	),
+	'media'      => array(
+		'thumbnail_size_w',
+		'thumbnail_size_h',
+		'thumbnail_crop',
+		'medium_size_w',
+		'medium_size_h',
+		'large_size_w',
+		'large_size_h',
+		'image_default_size',
+		'image_default_align',
+		'image_default_link_type',
+	),
+	'reading'    => array(
+		'posts_per_page',
+		'posts_per_rss',
+		'rss_use_excerpt',
+		'show_on_front',
+		'page_on_front',
+		'page_for_posts',
+		'blog_public',
+	),
+	'writing'    => array(
+		'default_category',
+		'default_email_category',
+		'default_link_category',
+		'default_post_format',
+	),
 );
 $whitelist_options['misc'] = $whitelist_options['options'] = $whitelist_options['privacy'] = array();
 
@@ -187,9 +246,11 @@ if ( 'update' == $action ) {
 		if ( ! empty( $_POST['WPLANG'] ) && current_user_can( 'install_languages' ) ) {
 			require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
 
-			$language = wp_download_language_pack( $_POST['WPLANG'] );
-			if ( $language ) {
-				$_POST['WPLANG'] = $language;
+			if ( wp_can_install_language_pack() ) {
+				$language = wp_download_language_pack( $_POST['WPLANG'] );
+				if ( $language ) {
+					$_POST['WPLANG'] = $language;
+				}
 			}
 		}
 	}
@@ -200,7 +261,8 @@ if ( 'update' == $action ) {
 		foreach ( $options as $option ) {
 			if ( $unregistered ) {
 				_deprecated_argument(
-					'options.php', '2.7.0',
+					'options.php',
+					'2.7.0',
 					sprintf(
 						/* translators: %s: the option/setting */
 						__( 'The %s setting is unregistered. Unregistered settings are deprecated. See https://codex.wordpress.org/Settings_API' ),
@@ -258,7 +320,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' ); ?>
 		<?php wp_nonce_field( 'options-options' ); ?>
 		<input type="hidden" name="action" value="update" />
 		<input type="hidden" name="option_page" value="options" />
-		<table class="form-table">
+		<table class="form-table" role="presentation">
 <?php
 $options = $wpdb->get_results( "SELECT * FROM $wpdb->options ORDER BY option_name" );
 
@@ -288,12 +350,8 @@ foreach ( (array) $options as $option ) :
 <tr>
 	<th scope="row"><label for="<?php echo $name; ?>"><?php echo esc_html( $option->option_name ); ?></label></th>
 <td>
-<?php if ( strpos( $value, "\n" ) !== false ) : ?>
-	<textarea class="<?php echo $class; ?>" name="<?php echo $name; ?>" id="<?php echo $name; ?>" cols="30" rows="5">
-								<?php
-								echo esc_textarea( $value );
-	?>
-	</textarea>
+	<?php if ( strpos( $value, "\n" ) !== false ) : ?>
+		<textarea class="<?php echo $class; ?>" name="<?php echo $name; ?>" id="<?php echo $name; ?>" cols="30" rows="5"><?php echo esc_textarea( $value ); ?></textarea>
 	<?php else : ?>
 		<input class="regular-text <?php echo $class; ?>" type="text" name="<?php echo $name; ?>" id="<?php echo $name; ?>" value="<?php echo esc_attr( $value ); ?>"<?php disabled( $disabled, true ); ?> />
 	<?php endif ?></td>

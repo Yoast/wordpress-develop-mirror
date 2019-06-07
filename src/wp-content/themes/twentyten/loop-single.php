@@ -19,7 +19,7 @@
 if ( have_posts() ) {
 	while ( have_posts() ) :
 		the_post();
-	?>
+		?>
 
 				<div id="nav-above" class="navigation">
 					<div class="nav-previous"><?php previous_post_link( '%link', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'twentyten' ) . '</span> %title' ); ?></div>
@@ -42,10 +42,10 @@ if ( have_posts() ) {
 								'after'  => '</div>',
 							)
 						);
-	?>
+						?>
 					</div><!-- .entry-content -->
 
-	<?php if ( get_the_author_meta( 'description' ) ) : // If a user has filled out their description, show a bio on their entries ?>
+		<?php if ( get_the_author_meta( 'description' ) ) : // If a user has filled out their description, show a bio on their entries ?>
 					<div id="entry-author-info">
 						<div id="author-avatar">
 							<?php
@@ -69,7 +69,7 @@ if ( have_posts() ) {
 							<?php twentyten_posted_in(); ?>
 							<?php edit_post_link( __( 'Edit', 'twentyten' ), '<span class="edit-link">', '</span>' ); ?>
 						</div><!-- .entry-utility -->
-					</div><!-- #post-## -->
+					</div><!-- #post-<?php the_ID(); ?> -->
 
 					<div id="nav-below" class="navigation">
 						<div class="nav-previous"><?php previous_post_link( '%link', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'twentyten' ) . '</span> %title' ); ?></div>

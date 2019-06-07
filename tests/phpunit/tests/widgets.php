@@ -56,19 +56,22 @@ class Tests_Widgets extends WP_UnitTestCase {
 		$this->assertEmpty( $wp_registered_widgets );
 
 		update_option(
-			'widget_search', array(
+			'widget_search',
+			array(
 				2              => array( 'title' => '' ),
 				'_multiwidget' => 1,
 			)
 		);
 		update_option(
-			'widget_better_search', array(
+			'widget_better_search',
+			array(
 				3              => array( 'title' => '' ),
 				'_multiwidget' => 1,
 			)
 		);
 		update_option(
-			'widget_best_search', array(
+			'widget_best_search',
+			array(
 				4              => array( 'title' => '' ),
 				'_multiwidget' => 1,
 			)
@@ -723,7 +726,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Tests for when 'sidebars_widgets' theme mod is populated.
 	 *
-	 * @covers retrieve_widgets()
+	 * @covers ::retrieve_widgets()
 	 */
 	function test_retrieve_widgets_with_theme_mod() {
 		global $sidebars_widgets, $_wp_sidebars_widgets;
@@ -733,7 +736,8 @@ class Tests_Widgets extends WP_UnitTestCase {
 
 		// Test restoring sidebars widgets when previously activated.
 		set_theme_mod(
-			'sidebars_widgets', array(
+			'sidebars_widgets',
+			array(
 				'time' => time(),
 				'data' => array(
 					'sidebar-1'          => array( 'tag_cloud-1' ),
@@ -786,7 +790,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Tests for when sidebars widgets matches registered sidebars.
 	 *
-	 * @covers retrieve_widgets()
+	 * @covers ::retrieve_widgets()
 	 */
 	function test_retrieve_widgets_with_sidebars_widgets_matching_registered_sidebars() {
 		global $sidebars_widgets;
@@ -824,7 +828,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Tests for when sidebars widgets doesn't match registered sidebars.
 	 *
-	 * @covers retrieve_widgets()
+	 * @covers ::retrieve_widgets()
 	 */
 	function test_retrieve_widgets_with_sidebars_widgets_not_matching_registered_sidebars() {
 		global $sidebars_widgets, $_wp_sidebars_widgets;
@@ -918,7 +922,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Tests for Customizer mode.
 	 *
-	 * @covers retrieve_widgets()
+	 * @covers ::retrieve_widgets()
 	 */
 	function test_retrieve_widgets_for_customizer() {
 		global $sidebars_widgets, $_wp_sidebars_widgets;
@@ -990,7 +994,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Tests for orphaned widgets being moved into inactive widgets.
 	 *
-	 * @covers retrieve_widgets()
+	 * @covers ::retrieve_widgets()
 	 */
 	function test_retrieve_widgets_move_orphaned_widgets_to_inactive() {
 		global $sidebars_widgets;
@@ -1025,7 +1029,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Test _wp_remove_unregistered_widgets.
 	 *
-	 * @covers _wp_remove_unregistered_widgets()
+	 * @covers ::_wp_remove_unregistered_widgets()
 	 */
 	public function test__wp_remove_unregistered_widgets() {
 		$widgets = array(
@@ -1055,7 +1059,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Two themes with one sidebar each should just map, switching to a theme not previously-active.
 	 *
-	 * @covers wp_map_sidebars_widgets()
+	 * @covers ::wp_map_sidebars_widgets()
 	 */
 	public function test_one_sidebar_each() {
 		$this->register_sidebars( array( 'primary' ) );
@@ -1075,7 +1079,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Sidebars with the same name should map, switching to a theme not previously-active.
 	 *
-	 * @covers wp_map_sidebars_widgets()
+	 * @covers ::wp_map_sidebars_widgets()
 	 */
 	public function test_sidebars_with_same_slug() {
 		$this->register_sidebars( array( 'primary', 'secondary' ) );
@@ -1093,7 +1097,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Make educated guesses on theme sidebars.
 	 *
-	 * @covers wp_map_sidebars_widgets()
+	 * @covers ::wp_map_sidebars_widgets()
 	 */
 	public function test_sidebar_guessing() {
 		$this->register_sidebars( array( 'primary', 'secondary' ) );
@@ -1116,7 +1120,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Make sure two sidebars that fall in the same group don't get the same menu assigned.
 	 *
-	 * @covers wp_map_sidebars_widgets()
+	 * @covers ::wp_map_sidebars_widgets()
 	 */
 	public function test_sidebar_guessing_one_menu_per_group() {
 		$this->register_sidebars( array( 'primary' ) );
@@ -1137,7 +1141,7 @@ class Tests_Widgets extends WP_UnitTestCase {
 	/**
 	 * Make sure two sidebars that fall in the same group get menus assigned from the same group.
 	 *
-	 * @covers wp_map_sidebars_widgets()
+	 * @covers ::wp_map_sidebars_widgets()
 	 */
 	public function test_sidebar_guessing_one_menu_per_sidebar() {
 		$this->register_sidebars( array( 'primary', 'main' ) );

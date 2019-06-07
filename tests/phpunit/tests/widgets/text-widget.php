@@ -29,14 +29,16 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 	/**
 	 * Clean up global scope.
 	 *
-	 * @global WP_Scripts $wp_scripts
-	 * @global WP_Styles  $wp_style
+	 * @global WP_Scripts           $wp_scripts
+	 * @global WP_Styles            $wp_style
+	 * @global WP_Customize_Manager $wp_customize
 	 */
 	function clean_up_global_scope() {
-		global $wp_scripts, $wp_styles;
+		global $wp_scripts, $wp_styles, $wp_customize;
 		parent::clean_up_global_scope();
-		$wp_scripts = null;
-		$wp_styles  = null;
+		$wp_scripts   = null;
+		$wp_styles    = null;
+		$wp_customize = null;
 	}
 
 	/**
@@ -66,6 +68,60 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_print_scripts-widgets.php', array( $widget, 'enqueue_admin_scripts' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_footer-widgets.php', array( 'WP_Widget_Text', 'render_control_template_scripts' ) ) );
 		$this->assertContains( 'wp.textWidgets.idBases.push( "text" );', wp_scripts()->registered['text-widgets']->extra['after'] );
+		$this->assertFalse( has_action( 'wp_enqueue_scripts', array( $widget, 'enqueue_preview_scripts' ) ) );
+	}
+
+	/**
+	 * Test register in customize preview.
+	 *
+	 * @global WP_Customize_Manager $wp_customize
+	 * @covers WP_Widget_Text::__construct()
+	 * @covers WP_Widget_Text::_register()
+	 */
+	function test__register_in_customize_preview() {
+		global $wp_customize;
+		wp_set_current_user(
+			$this->factory()->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			)
+		);
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$wp_customize = new WP_Customize_Manager(
+			array(
+				'changeset_uuid' => wp_generate_uuid4(),
+			)
+		);
+		$wp_customize->start_previewing_theme();
+
+		$widget = new WP_Widget_Text();
+		$widget->_register();
+		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( $widget, 'enqueue_preview_scripts' ) ) );
+	}
+
+	/**
+	 * Test enqueue_preview_scripts method.
+	 *
+	 * @global WP_Scripts $wp_scripts
+	 * @global WP_Styles $wp_styles
+	 * @covers WP_Widget_Text::enqueue_preview_scripts
+	 */
+	function test_enqueue_preview_scripts() {
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+		$widget     = new WP_Widget_Text();
+
+		$this->assertFalse( wp_style_is( 'wp-mediaelement' ) );
+		$this->assertFalse( wp_script_is( 'wp-playlist' ) );
+
+		ob_start();
+		$widget->enqueue_preview_scripts();
+		ob_end_clean();
+
+		$this->assertTrue( wp_style_is( 'wp-mediaelement' ) );
+		$this->assertTrue( wp_script_is( 'wp-playlist' ) );
 	}
 
 	/**
@@ -132,7 +188,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'filter' => 'content',
 		);
 		$expected_instance              = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => true,
 				'visual' => true,
 			)
@@ -278,7 +335,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 
 		// Legacy Text Widget without wpautop.
 		$instance                     = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'filter' => false,
 			)
 		);
@@ -294,7 +352,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 
 		// Legacy Text Widget with wpautop.
 		$instance                     = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'filter' => true,
 				'visual' => false,
 			)
@@ -322,7 +381,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		remove_filter( 'widget_text', 'do_shortcode' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'filter' => true,
 				'visual' => true,
 			)
@@ -413,28 +473,32 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		);
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'visual' => false,
 			)
 		);
 		$this->assertTrue( $widget->is_legacy_instance( $instance ), 'Legacy when visual=false prop is present.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'visual' => true,
 			)
 		);
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not legacy when visual=true prop is present.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'filter' => 'content',
 			)
 		);
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not legacy when filter is explicitly content (in WP 4.8.0 only).' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => '',
 				'filter' => true,
 			)
@@ -442,7 +506,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not legacy when text is empty.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => "\nOne line",
 				'filter' => false,
 			)
@@ -450,7 +515,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not legacy when there is leading whitespace.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => "\nOne line\n\n",
 				'filter' => false,
 			)
@@ -458,7 +524,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not legacy when there is trailing whitespace.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => "One\nTwo",
 				'filter' => false,
 			)
@@ -466,7 +533,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertTrue( $widget->is_legacy_instance( $instance ), 'Legacy when not-wpautop and there are line breaks.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => "One\n\nTwo",
 				'filter' => false,
 			)
@@ -474,7 +542,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertTrue( $widget->is_legacy_instance( $instance ), 'Legacy when not-wpautop and there are paragraph breaks.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => "One\nTwo",
 				'filter' => true,
 			)
@@ -482,7 +551,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not automatically legacy when wpautop and there are line breaks.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => "One\n\nTwo",
 				'filter' => true,
 			)
@@ -490,7 +560,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$this->assertFalse( $widget->is_legacy_instance( $instance ), 'Not automatically legacy when wpautop and there are paragraph breaks.' );
 
 		$instance = array_merge(
-			$base_instance, array(
+			$base_instance,
+			array(
 				'text'   => 'Test<!-- comment -->',
 				'filter' => true,
 			)
@@ -501,6 +572,7 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$legacy_text_examples = array(
 			'<span class="hello"></span>',
 			'<blockquote>Quote <footer>Citation</footer></blockquote>',
+			'<img src=\"http://example.com/img.jpg\" border=\"0\" title=\"Example\" /></a>',
 			'<span></span>',
 			"<ul>\n<li><a href=\"#\" class=\"location\"></a>List Item 1</li>\n<li><a href=\"#\" class=\"location\"></a>List Item 2</li>\n</ul>",
 			'<a href="#" class="map"></a>',
@@ -512,7 +584,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		);
 		foreach ( $legacy_text_examples as $legacy_text_example ) {
 			$instance = array_merge(
-				$base_instance, array(
+				$base_instance,
+				array(
 					'text'   => $legacy_text_example,
 					'filter' => true,
 				)
@@ -520,7 +593,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			$this->assertTrue( $widget->is_legacy_instance( $instance ), 'Legacy when wpautop and there is HTML that is not liable to be mutated.' );
 
 			$instance = array_merge(
-				$base_instance, array(
+				$base_instance,
+				array(
 					'text'   => $legacy_text_example,
 					'filter' => false,
 				)
@@ -541,7 +615,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		);
 		foreach ( $migratable_text_examples as $migratable_text_example ) {
 			$instance = array_merge(
-				$base_instance, array(
+				$base_instance,
+				array(
 					'text'   => $migratable_text_example,
 					'filter' => true,
 				)
@@ -708,12 +783,14 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'visual' => true,
 		);
 		$old_instance = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => false,
 			)
 		);
 		$expected     = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => true,
 			)
 		);
@@ -727,13 +804,15 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'filter' => true,
 		);
 		$old_instance = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => true,
 			)
 		);
 		$result       = $widget->update( $instance, $old_instance );
 		$expected     = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => true,
 			)
 		);
@@ -745,13 +824,15 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'text'  => 'Text',
 		);
 		$old_instance = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => true,
 			)
 		);
 		$result       = $widget->update( $instance, $old_instance );
 		$expected     = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => true,
 				'filter' => true,
 			)
@@ -765,7 +846,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'visual' => true,
 		);
 		$expected = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => true,
 			)
 		);
@@ -780,7 +862,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		);
 		$result   = $widget->update( $instance, array() );
 		$expected = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => false,
 			)
 		);
@@ -793,14 +876,16 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'filter' => false,
 		);
 		$old_instance = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => false,
 				'filter' => true,
 			)
 		);
 		$result       = $widget->update( $instance, $old_instance );
 		$expected     = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => false,
 				'filter' => false,
 			)
@@ -815,7 +900,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		);
 		$result   = $widget->update( $instance, array() );
 		$expected = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => true,
 				'visual' => true,
 			)
@@ -828,13 +914,15 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 			'text'  => 'Text',
 		);
 		$old_instance = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => 'content',
 			)
 		);
 		$result       = $widget->update( $instance, $old_instance );
 		$expected     = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'visual' => true,
 				'filter' => true,
 			)
@@ -849,7 +937,8 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		);
 		$result   = $widget->update( $instance, array() );
 		$expected = array_merge(
-			$instance, array(
+			$instance,
+			array(
 				'filter' => true,
 				'visual' => true,
 			)
@@ -911,5 +1000,59 @@ class Test_WP_Widget_Text extends WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertContains( '<script type="text/html" id="tmpl-widget-text-control-fields">', $output );
+	}
+
+	/**
+	 * Ensure that rel="noopener noreferrer" is added to links with a target.
+	 *
+	 * @ticket 46421
+	 */
+	function test_render_links_with_target() {
+		$widget = new WP_Widget_Text();
+
+		$text = 'Test content with an external <a href="https://example.org" target="_blank">link</a>.';
+
+		$args = array(
+			'before_title'  => '<h2>',
+			'after_title'   => '</h2>',
+			'before_widget' => '',
+			'after_widget'  => '',
+		);
+
+		$instance = array(
+			'title' => 'Foo',
+			'text'  => $text,
+		);
+
+		$output = get_echo( array( $widget, 'widget' ), array( $args, $instance ) );
+
+		$this->assertContains( 'rel="noopener noreferrer"', $output );
+	}
+
+	/**
+	 * Ensure that rel="noopener noreferrer" is not added to links without a target.
+	 *
+	 * @ticket 46421
+	 */
+	function test_render_links_without_target() {
+		$widget = new WP_Widget_Text();
+
+		$text = 'Test content with an internal <a href="/">link</a>.';
+
+		$args = array(
+			'before_title'  => '<h2>',
+			'after_title'   => '</h2>',
+			'before_widget' => '',
+			'after_widget'  => '',
+		);
+
+		$instance = array(
+			'title' => 'Foo',
+			'text'  => $text,
+		);
+
+		$output = get_echo( array( $widget, 'widget' ), array( $args, $instance ) );
+
+		$this->assertNotContains( 'rel="noopener noreferrer"', $output );
 	}
 }

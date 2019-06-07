@@ -23,7 +23,7 @@ $title = __( 'Export' );
  * @since 3.5.0
  */
 function export_add_js() {
-?>
+	?>
 <script type="text/javascript">
 	jQuery(document).ready(function($){
 		 var form = $('#export-filters'),
@@ -39,7 +39,7 @@ function export_add_js() {
 		 });
 	});
 </script>
-<?php
+	<?php
 }
 add_action( 'admin_head', 'export_add_js' );
 
@@ -55,7 +55,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Tools_Export_Screen">Documentation on Export</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 // If the 'download' URL parameter is set, a WXR export file is baked and returned.
@@ -144,7 +144,8 @@ function export_date_options( $post_type = 'post' ) {
 		FROM $wpdb->posts
 		WHERE post_type = %s AND post_status != 'auto-draft'
 		ORDER BY post_date DESC
-	", $post_type
+	",
+			$post_type
 		)
 	);
 
@@ -224,7 +225,7 @@ function export_date_options( $post_type = 'post' ) {
 			<?php
 			$post_stati = get_post_stati( array( 'internal' => false ), 'objects' );
 			foreach ( $post_stati as $status ) :
-			?>
+				?>
 			<option value="<?php echo esc_attr( $status->name ); ?>"><?php echo esc_html( $status->label ); ?></option>
 			<?php endforeach; ?>
 		</select>
@@ -280,9 +281,10 @@ foreach ( get_post_types(
 	array(
 		'_builtin'   => false,
 		'can_export' => true,
-	), 'objects'
+	),
+	'objects'
 ) as $post_type ) :
-?>
+	?>
 <p><label><input type="radio" name="content" value="<?php echo esc_attr( $post_type->name ); ?>" /> <?php echo esc_html( $post_type->label ); ?></label></p>
 <?php endforeach; ?>
 

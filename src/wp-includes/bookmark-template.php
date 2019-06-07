@@ -28,7 +28,7 @@
  *
  *     @type int|bool $show_updated     Whether to show the time the bookmark was last updated.
  *                                      Accepts 1|true or 0|false. Default 0|false.
- *     @type int|bool $show_description Whether to show the bookmakr description. Accepts 1|true,
+ *     @type int|bool $show_description Whether to show the bookmark description. Accepts 1|true,
  *                                      Accepts 1|true or 0|false. Default 0|false.
  *     @type int|bool $show_images      Whether to show the link image if available. Accepts 1|true
  *                                      or 0|false. Default 1|true.
@@ -87,7 +87,7 @@ function _walk_bookmarks( $bookmarks, $args = '' ) {
 				$title .= ' (';
 				$title .= sprintf(
 					__( 'Last updated: %s' ),
-					date(
+					gmdate(
 						get_option( 'links_updated_date_format' ),
 						$bookmark->link_updated_f + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS )
 					)
@@ -237,7 +237,8 @@ function wp_list_bookmarks( $args = '' ) {
 
 	if ( $r['categorize'] ) {
 		$cats = get_terms(
-			'link_category', array(
+			'link_category',
+			array(
 				'name__like'   => $r['category_name'],
 				'include'      => $r['category'],
 				'exclude'      => $r['exclude_category'],
@@ -265,11 +266,11 @@ function wp_list_bookmarks( $args = '' ) {
 				$r['category_before']
 			);
 			/**
-			 * Filters the bookmarks category name.
+			 * Filters the category name.
 			 *
 			 * @since 2.2.0
 			 *
-			 * @param string $cat_name The category name of bookmarks.
+			 * @param string $cat_name The category name.
 			 */
 			$catname = apply_filters( 'link_category', $cat->name );
 

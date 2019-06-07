@@ -66,9 +66,9 @@ class WP_Customize_Setting {
 	public $default = '';
 
 	/**
-	 * Options for rendering the live preview of changes in Theme Customizer.
+	 * Options for rendering the live preview of changes in Customizer.
 	 *
-	 * Set this value to 'postMessage' to enable a custom Javascript handler to render changes to this setting
+	 * Set this value to 'postMessage' to enable a custom JavaScript handler to render changes to this setting
 	 * as opposed to reloading the whole page.
 	 *
 	 * @link https://developer.wordpress.org/themes/customize-api
@@ -135,7 +135,6 @@ class WP_Customize_Setting {
 	 * Cache of multidimensional values to improve performance.
 	 *
 	 * @since 4.4.0
-	 * @static
 	 * @var array
 	 */
 	protected static $aggregated_multidimensionals = array();
@@ -595,7 +594,7 @@ class WP_Customize_Setting {
 		 */
 		$validity = apply_filters( "customize_validate_{$this->id}", $validity, $value, $this );
 
-		if ( is_wp_error( $validity ) && empty( $validity->errors ) ) {
+		if ( is_wp_error( $validity ) && ! $validity->has_errors() ) {
 			$validity = true;
 		}
 		return $validity;

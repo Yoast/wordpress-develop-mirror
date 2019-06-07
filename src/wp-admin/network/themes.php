@@ -181,14 +181,16 @@ if ( $action ) {
 
 			foreach ( $themes as $theme ) {
 				$delete_result = delete_theme(
-					$theme, esc_url(
+					$theme,
+					esc_url(
 						add_query_arg(
 							array(
 								'verify-delete' => 1,
 								'action'        => 'delete-selected',
 								'checked'       => $_REQUEST['checked'],
 								'_wpnonce'      => $_REQUEST['_wpnonce'],
-							), network_admin_url( 'themes.php' )
+							),
+							network_admin_url( 'themes.php' )
 						)
 					)
 				);
@@ -201,7 +203,8 @@ if ( $action ) {
 						'deleted' => count( $themes ),
 						'paged'   => $paged,
 						's'       => $s,
-					), network_admin_url( 'themes.php' )
+					),
+					network_admin_url( 'themes.php' )
 				)
 			);
 			exit;
@@ -241,7 +244,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Network_Admin_Themes_Screen">Documentation on Network Themes</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 get_current_screen()->set_screen_reader_content(

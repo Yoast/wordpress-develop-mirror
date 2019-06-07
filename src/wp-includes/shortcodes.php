@@ -458,14 +458,15 @@ function do_shortcodes_in_html_tags( $content, $ignore_html, $tagnames ) {
  * @return string Content with placeholders removed.
  */
 function unescape_invalid_shortcodes( $content ) {
-		// Clean up entire string, avoids re-parsing HTML.
-		$trans   = array(
-			'&#91;' => '[',
-			'&#93;' => ']',
-		);
-		$content = strtr( $content, $trans );
+	// Clean up entire string, avoids re-parsing HTML.
+	$trans = array(
+		'&#91;' => '[',
+		'&#93;' => ']',
+	);
 
-		return $content;
+	$content = strtr( $content, $trans );
+
+	return $content;
 }
 
 /**
@@ -608,8 +609,8 @@ function strip_shortcodes( $content ) {
 	 *
 	 * @since 4.7.0
 	 *
-	 * @param array  $tag_array Array of shortcode tags to remove.
-	 * @param string $content   Content shortcodes are being removed from.
+	 * @param array  $tags_to_remove Array of shortcode tags to remove.
+	 * @param string $content        Content shortcodes are being removed from.
 	 */
 	$tags_to_remove = apply_filters( 'strip_shortcodes_tagnames', $tags_to_remove, $content );
 

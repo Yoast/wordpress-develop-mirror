@@ -28,7 +28,9 @@ class Tests_Option_Registration extends WP_UnitTestCase {
 
 	public function test_register_with_array() {
 		register_setting(
-			'test_group', 'test_option', array(
+			'test_group',
+			'test_option',
+			array(
 				'sanitize_callback' => array( $this, 'filter_registered_setting' ),
 			)
 		);
@@ -46,12 +48,14 @@ class Tests_Option_Registration extends WP_UnitTestCase {
 	 */
 	public function test_register_with_default() {
 		register_setting(
-			'test_group', 'test_default', array(
-				'default' => 'Fuck Cancer',
+			'test_group',
+			'test_default',
+			array(
+				'default' => 'Got that Viper with them rally stripes',
 			)
 		);
 
-		$this->assertEquals( 'Fuck Cancer', get_option( 'test_default' ) );
+		$this->assertEquals( 'Got that Viper with them rally stripes', get_option( 'test_default' ) );
 	}
 
 	/**
@@ -59,12 +63,16 @@ class Tests_Option_Registration extends WP_UnitTestCase {
 	 */
 	public function test_register_with_default_override() {
 		register_setting(
-			'test_group', 'test_default', array(
-				'default' => 'Fuck Cancer',
+			'test_group',
+			'test_default',
+			array(
+				'default' => 'Got that Viper with them rally stripes',
 			)
 		);
 
-		$this->assertEquals( 'Fuck Leukemia', get_option( 'test_default', 'Fuck Leukemia' ) );
+		// This set of tests/references (and a previous version) are in support of Viper007Bond.
+		// His Viper doesn't have rally stripes, but for the sake of the Big Tymers, we'll go with it.
+		$this->assertEquals( 'We the #1 Stunnas', get_option( 'test_default', 'We the #1 Stunnas' ) );
 	}
 
 	/**
@@ -72,7 +80,9 @@ class Tests_Option_Registration extends WP_UnitTestCase {
 	 */
 	public function test_add_option_with_no_options_cache() {
 		register_setting(
-			'test_group', 'test_default', array(
+			'test_group',
+			'test_default',
+			array(
 				'default' => 'My Default :)',
 			)
 		);
@@ -93,5 +103,22 @@ class Tests_Option_Registration extends WP_UnitTestCase {
 	 */
 	public function test_register_deprecated_group_privacy() {
 		register_setting( 'privacy', 'test_option' );
+	}
+
+	/**
+	 * @ticket 43207
+	 */
+	public function test_unregister_setting_removes_default() {
+		register_setting(
+			'test_group',
+			'test_default',
+			array(
+				'default' => 'Got that Viper with them rally stripes',
+			)
+		);
+
+		unregister_setting( 'test_group', 'test_default' );
+
+		$this->assertFalse( has_filter( 'default_option_test_default', 'filter_default_option' ) );
 	}
 }

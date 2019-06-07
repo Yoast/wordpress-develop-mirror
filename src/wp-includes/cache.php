@@ -323,7 +323,7 @@ class WP_Object_Cache {
 	 * The blog prefix to prepend to keys in non-global groups.
 	 *
 	 * @since 3.5.0
-	 * @var int
+	 * @var string
 	 */
 	private $blog_prefix;
 
@@ -526,10 +526,10 @@ class WP_Object_Cache {
 	 *
 	 * @param int|string $key    What the contents in the cache are called.
 	 * @param string     $group  Optional. Where the cache contents are grouped. Default 'default'.
-	 * @param string     $force  Optional. Unused. Whether to force a refetch rather than relying on the local
+	 * @param bool       $force  Optional. Unused. Whether to force a refetch rather than relying on the local
 	 *                           cache. Default false.
-	 * @param bool        $found  Optional. Whether the key was found in the cache (passed by reference).
-	 *                            Disambiguates a return of false, a storable value. Default null.
+	 * @param bool       $found  Optional. Whether the key was found in the cache (passed by reference).
+	 *                           Disambiguates a return of false, a storable value. Default null.
 	 * @return false|mixed False on failure to retrieve contents or the cache contents on success.
 	 */
 	public function get( $key, $group = 'default', $force = false, &$found = null ) {
@@ -646,7 +646,7 @@ class WP_Object_Cache {
 	/**
 	 * Sets the data contents into the cache.
 	 *
-	 * The cache contents is grouped by the $group parameter followed by the
+	 * The cache contents are grouped by the $group parameter followed by the
 	 * $key. This allows for duplicate ids in unique groups. Therefore, naming of
 	 * the group should be used with care and should follow normal function
 	 * naming guidelines outside of core WordPress usage.

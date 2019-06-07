@@ -24,8 +24,6 @@ final class WP_Internal_Pointers {
 	 * Individual pointers (e.g. wp390_widgets) can be disabled using the following:
 	 *     remove_action( 'admin_print_footer_scripts', array( 'WP_Internal_Pointers', 'pointer_wp390_widgets' ) );
 	 *
-	 * @static
-	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public static function enqueue_scripts( $hook_suffix ) {
@@ -43,7 +41,7 @@ final class WP_Internal_Pointers {
 		 *     )
 		 */
 		$registered_pointers = array(
-			// None currently
+			//None currently.
 		);
 
 		// Check if screen related pointer is registered
@@ -67,7 +65,7 @@ final class WP_Internal_Pointers {
 		 *     )
 		 */
 		$caps_required = array(
-			// None currently
+			// None currently.
 		);
 
 		// Get dismissed pointers
@@ -101,8 +99,6 @@ final class WP_Internal_Pointers {
 	 * Print the pointer JavaScript data.
 	 *
 	 * @since 3.3.0
-	 *
-	 * @static
 	 *
 	 * @param string $pointer_id The pointer ID.
 	 * @param string $selector The HTML elements, on which the pointer should be attached.
@@ -154,13 +150,12 @@ final class WP_Internal_Pointers {
 	public static function pointer_wp360_locks() {}
 	public static function pointer_wp390_widgets() {}
 	public static function pointer_wp410_dfw() {}
+	public static function pointer_wp496_privacy() {}
 
 	/**
 	 * Prevents new users from seeing existing 'new feature' pointers.
 	 *
 	 * @since 3.3.0
-	 *
-	 * @static
 	 *
 	 * @param int $user_id User ID.
 	 */

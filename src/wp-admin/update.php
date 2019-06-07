@@ -106,21 +106,11 @@ if ( isset( $_GET['action'] ) ) {
 
 		check_admin_referer( 'install-plugin_' . $plugin );
 		$api = plugins_api(
-			'plugin_information', array(
+			'plugin_information',
+			array(
 				'slug'   => $plugin,
 				'fields' => array(
-					'short_description' => false,
-					'sections'          => false,
-					'requires'          => false,
-					'rating'            => false,
-					'ratings'           => false,
-					'downloaded'        => false,
-					'last_updated'      => false,
-					'added'             => false,
-					'tags'              => false,
-					'compatibility'     => false,
-					'homepage'          => false,
-					'donate_link'       => false,
+					'sections' => false,
 				),
 			)
 		);
@@ -236,7 +226,8 @@ if ( isset( $_GET['action'] ) ) {
 
 		check_admin_referer( 'install-theme_' . $theme );
 		$api = themes_api(
-			'theme_information', array(
+			'theme_information',
+			array(
 				'slug'   => $theme,
 				'fields' => array(
 					'sections' => false,
