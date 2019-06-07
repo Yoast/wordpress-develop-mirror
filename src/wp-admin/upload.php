@@ -40,7 +40,9 @@ if ( 'grid' === $mode ) {
 	}
 
 	wp_localize_script(
-		'media-grid', '_wpMediaGridSettings', array(
+		'media-grid',
+		'_wpMediaGridSettings',
+		array(
 			'adminUrl'  => parse_url( self_admin_url(), PHP_URL_PATH ),
 			'queryVars' => (object) $vars,
 		)
@@ -71,7 +73,7 @@ if ( 'grid' === $mode ) {
 	get_current_screen()->set_help_sidebar(
 		'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 		'<p>' . __( '<a href="https://codex.wordpress.org/Media_Library_Screen">Documentation on Media Library</a>' ) . '</p>' .
-		'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+		'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 	);
 
 	$title       = __( 'Media Library' );
@@ -84,7 +86,7 @@ if ( 'grid' === $mode ) {
 
 		<?php
 		if ( current_user_can( 'upload_files' ) ) {
-		?>
+			?>
 			<a href="<?php echo admin_url( 'media-new.php' ); ?>" class="page-title-action aria-button-if-js"><?php echo esc_html_x( 'Add New', 'file' ); ?></a>
 								<?php
 		}
@@ -160,7 +162,8 @@ if ( $doaction ) {
 				array(
 					'trashed' => count( $post_ids ),
 					'ids'     => join( ',', $post_ids ),
-				), $location
+				),
+				$location
 			);
 			break;
 		case 'untrash':
@@ -244,7 +247,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Media_Library_Screen">Documentation on Media Library</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 get_current_screen()->set_screen_reader_content(
@@ -263,7 +266,7 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 <?php
 if ( current_user_can( 'upload_files' ) ) {
-?>
+	?>
 	<a href="<?php echo admin_url( 'media-new.php' ); ?>" class="page-title-action"><?php echo esc_html_x( 'Add New', 'file' ); ?></a>
 						<?php
 }
@@ -351,7 +354,7 @@ if ( ! empty( $_GET['message'] ) && isset( $messages[ $_GET['message'] ] ) ) {
 }
 
 if ( ! empty( $message ) ) {
-?>
+	?>
 <div id="message" class="updated notice is-dismissible"><p><?php echo $message; ?></p></div>
 <?php } ?>
 

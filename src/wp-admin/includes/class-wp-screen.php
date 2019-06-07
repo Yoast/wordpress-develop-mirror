@@ -179,6 +179,14 @@ final class WP_Screen {
 	private $_screen_settings;
 
 	/**
+	 * Whether the screen is using the block editor.
+	 *
+	 * @since 5.0.0
+	 * @var bool
+	 */
+	public $is_block_editor = false;
+
+	/**
 	 * Fetches a screen object.
 	 *
 	 * @since 3.3.0
@@ -194,9 +202,10 @@ final class WP_Screen {
 			return $hook_name;
 		}
 
-		$post_type = $taxonomy = null;
-		$in_admin  = false;
-		$action    = '';
+		$post_type       = $taxonomy = null;
+		$in_admin        = false;
+		$action          = '';
+		$is_block_editor = false;
 
 		if ( $hook_name ) {
 			$id = $hook_name;
@@ -272,7 +281,9 @@ final class WP_Screen {
 
 			switch ( $base ) {
 				case 'post':
-					if ( isset( $_GET['post'] ) ) {
+					if ( isset( $_GET['post'] ) && isset( $_POST['post_ID'] ) && (int) $_GET['post'] !== (int) $_POST['post_ID'] ) {
+						wp_die( __( 'A post ID mismatch has been detected.' ), __( 'Sorry, you are not allowed to edit this item.' ), 400 );
+					} elseif ( isset( $_GET['post'] ) ) {
 						$post_id = (int) $_GET['post'];
 					} elseif ( isset( $_POST['post_ID'] ) ) {
 						$post_id = (int) $_POST['post_ID'];
@@ -284,6 +295,13 @@ final class WP_Screen {
 						$post = get_post( $post_id );
 						if ( $post ) {
 							$post_type = $post->post_type;
+
+							/** This filter is documented in wp-admin/post.php */
+							$replace_editor = apply_filters( 'replace_editor', false, $post );
+
+							if ( ! $replace_editor ) {
+								$is_block_editor = use_block_editor_for_post( $post );
+							}
 						}
 					}
 					break;
@@ -304,6 +322,12 @@ final class WP_Screen {
 				if ( null === $post_type ) {
 					$post_type = 'post';
 				}
+
+				// When creating a new post, use the default block editor support value for the post type.
+				if ( empty( $post_id ) ) {
+					$is_block_editor = use_block_editor_for_post_type( $post_type );
+				}
+
 				$id = $post_type;
 				break;
 			case 'edit':
@@ -347,13 +371,14 @@ final class WP_Screen {
 			$screen->id = $id;
 		}
 
-		$screen->base       = $base;
-		$screen->action     = $action;
-		$screen->post_type  = (string) $post_type;
-		$screen->taxonomy   = (string) $taxonomy;
-		$screen->is_user    = ( 'user' == $in_admin );
-		$screen->is_network = ( 'network' == $in_admin );
-		$screen->in_admin   = $in_admin;
+		$screen->base            = $base;
+		$screen->action          = $action;
+		$screen->post_type       = (string) $post_type;
+		$screen->taxonomy        = (string) $taxonomy;
+		$screen->is_user         = ( 'user' == $in_admin );
+		$screen->is_network      = ( 'network' == $in_admin );
+		$screen->in_admin        = $in_admin;
+		$screen->is_block_editor = $is_block_editor;
 
 		self::$_registry[ $id ] = $screen;
 
@@ -408,6 +433,22 @@ final class WP_Screen {
 		}
 
 		return ( $admin == $this->in_admin );
+	}
+
+	/**
+	 * Sets or returns whether the block editor is loading on the current screen.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param bool $set Optional. Sets whether the block editor is loading on the current screen or not.
+	 * @return bool True if the block editor is being loaded, false otherwise.
+	 */
+	public function is_block_editor( $set = null ) {
+		if ( $set !== null ) {
+			$this->is_block_editor = (bool) $set;
+		}
+
+		return $this->is_block_editor;
 	}
 
 	/**
@@ -806,7 +847,7 @@ final class WP_Screen {
 									<?php echo esc_html( $tab['title'] ); ?>
 								</a>
 							</li>
-						<?php
+							<?php
 							$class = '';
 						endforeach;
 						?>
@@ -837,7 +878,7 @@ final class WP_Screen {
 								}
 								?>
 							</div>
-						<?php
+							<?php
 							$classes = 'help-tab-content';
 						endforeach;
 						?>
@@ -890,10 +931,10 @@ final class WP_Screen {
 			<div id="contextual-help-link-wrap" class="hide-if-no-js screen-meta-toggle">
 			<button type="button" id="contextual-help-link" class="button show-settings" aria-controls="contextual-help-wrap" aria-expanded="false"><?php _e( 'Help' ); ?></button>
 			</div>
-		<?php
+			<?php
 		endif;
-if ( $this->show_screen_options() ) :
-		?>
+		if ( $this->show_screen_options() ) :
+			?>
 			<div id="screen-options-link-wrap" class="hide-if-no-js screen-meta-toggle">
 			<button type="button" id="show-settings-link" class="button show-settings" aria-controls="screen-options-wrap" aria-expanded="false"><?php _e( 'Screen Options' ); ?></button>
 			</div>
@@ -918,20 +959,13 @@ if ( $this->show_screen_options() ) :
 
 		$show_screen = ! empty( $wp_meta_boxes[ $this->id ] ) || $columns || $this->get_option( 'per_page' );
 
-		switch ( $this->base ) {
-			case 'widgets':
-				$nonce                  = wp_create_nonce( 'widgets-access' );
-				$this->_screen_settings = '<p><a id="access-on" href="widgets.php?widgets-access=on&_wpnonce=' . urlencode( $nonce ) . '">' . __( 'Enable accessibility mode' ) . '</a><a id="access-off" href="widgets.php?widgets-access=off&_wpnonce=' . urlencode( $nonce ) . '">' . __( 'Disable accessibility mode' ) . "</a></p>\n";
-				break;
-			case 'post':
-				$expand                 = '<fieldset class="editor-expand hidden"><legend>' . __( 'Additional settings' ) . '</legend><label for="editor-expand-toggle">';
-				$expand                .= '<input type="checkbox" id="editor-expand-toggle"' . checked( get_user_setting( 'editor_expand', 'on' ), 'on', false ) . ' />';
-				$expand                .= __( 'Enable full-height editor and distraction-free functionality.' ) . '</label></fieldset>';
-				$this->_screen_settings = $expand;
-				break;
-			default:
-				$this->_screen_settings = '';
-				break;
+		$this->_screen_settings = '';
+
+		if ( 'post' === $this->base ) {
+			$expand                 = '<fieldset class="editor-expand hidden"><legend>' . __( 'Additional settings' ) . '</legend><label for="editor-expand-toggle">';
+			$expand                .= '<input type="checkbox" id="editor-expand-toggle"' . checked( get_user_setting( 'editor_expand', 'on' ), 'on', false ) . ' />';
+			$expand                .= __( 'Enable full-height editor and distraction-free functionality.' ) . '</label></fieldset>';
+			$this->_screen_settings = $expand;
 		}
 
 		/**
@@ -975,7 +1009,8 @@ if ( $this->show_screen_options() ) :
 	 */
 	public function render_screen_options( $options = array() ) {
 		$options = wp_parse_args(
-			$options, array(
+			$options,
+			array(
 				'wrap' => true,
 			)
 		);
@@ -1128,12 +1163,12 @@ if ( $this->show_screen_options() ) :
 													?>
 													<label class="columns-prefs-<?php echo $i; ?>">
 				<input type='radio' name='screen_columns' value='<?php echo esc_attr( $i ); ?>'
-					<?php checked( $screen_layout_columns, $i ); ?> />
-				<?php printf( _n( '%s column', '%s columns', $i ), number_format_i18n( $i ) ); ?>
+													<?php checked( $screen_layout_columns, $i ); ?> />
+													<?php printf( _n( '%s column', '%s columns', $i ), number_format_i18n( $i ) ); ?>
 				</label>
-				<?php
+													<?php
 			endfor;
-			?>
+												?>
 		</fieldset>
 		<?php
 	}
@@ -1229,8 +1264,8 @@ if ( $this->show_screen_options() ) :
 		 *
 		 * @since 4.4.0
 		 *
-		 * @param array $view_mode_post_types Array of post types that can change view modes.
-		 *                                    Default non-hierarchical post types with show_ui on.
+		 * @param string[] $view_mode_post_types Array of post types that can change view modes.
+		 *                                       Default non-hierarchical post types with show_ui on.
 		 */
 		$view_mode_post_types = apply_filters( 'view_mode_post_types', $view_mode_post_types );
 
@@ -1242,7 +1277,7 @@ if ( $this->show_screen_options() ) :
 
 		// This needs a submit button
 		add_filter( 'screen_options_show_submit', '__return_true' );
-?>
+		?>
 		<fieldset class="metabox-prefs view-mode">
 		<legend><?php _e( 'View Mode' ); ?></legend>
 				<label for="list-view-mode">
@@ -1254,7 +1289,7 @@ if ( $this->show_screen_options() ) :
 					<?php _e( 'Excerpt View' ); ?>
 				</label>
 		</fieldset>
-<?php
+		<?php
 	}
 
 	/**

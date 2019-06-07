@@ -61,7 +61,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Network_Admin_Settings_Screen">Documentation on Network Settings</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 if ( $_POST ) {
@@ -148,7 +148,7 @@ if ( isset( $_GET['updated'] ) ) {
 	<form method="post" action="settings.php" novalidate="novalidate">
 		<?php wp_nonce_field( 'siteoptions' ); ?>
 		<h2><?php _e( 'Operational Settings' ); ?></h2>
-		<table class="form-table">
+		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><label for="site_name"><?php _e( 'Network Title' ); ?></label></th>
 				<td>
@@ -166,7 +166,7 @@ if ( isset( $_GET['updated'] ) ) {
 					<?php
 					$new_admin_email = get_site_option( 'new_admin_email' );
 					if ( $new_admin_email && $new_admin_email != get_site_option( 'admin_email' ) ) :
-					?>
+						?>
 						<div class="updated inline">
 						<p>
 						<?php
@@ -188,7 +188,7 @@ if ( isset( $_GET['updated'] ) ) {
 			</tr>
 		</table>
 		<h2><?php _e( 'Registration Settings' ); ?></h2>
-		<table class="form-table">
+		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php _e( 'Allow new registrations' ); ?></th>
 				<?php
@@ -207,7 +207,7 @@ if ( isset( $_GET['updated'] ) ) {
 					<?php
 					if ( is_subdomain_install() ) {
 						echo '<p class="description">';
-						/* translators: 1: NOBLOGREDIRECT 2: wp-config.php */
+						/* translators: 1: NOBLOGREDIRECT, 2: wp-config.php */
 						printf(
 							__( 'If registration is disabled, please set %1$s in %2$s to a URL you will redirect visitors to if they visit a non-existent site.' ),
 							'<code>NOBLOGREDIRECT</code>',
@@ -277,7 +277,7 @@ if ( isset( $_GET['updated'] ) ) {
 
 		</table>
 		<h2><?php _e( 'New Site Settings' ); ?></h2>
-		<table class="form-table">
+		<table class="form-table" role="presentation">
 
 			<tr>
 				<th scope="row"><label for="welcome_email"><?php _e( 'Welcome Email' ); ?></label></th>
@@ -358,7 +358,7 @@ if ( isset( $_GET['updated'] ) ) {
 			</tr>
 		</table>
 		<h2><?php _e( 'Upload Settings' ); ?></h2>
-		<table class="form-table">
+		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row"><?php _e( 'Site upload space' ); ?></th>
 				<td>
@@ -388,7 +388,7 @@ if ( isset( $_GET['updated'] ) ) {
 							__( '%s KB' ),
 							'<input name="fileupload_maxk" type="number" min="0" style="width: 100px" id="fileupload_maxk" aria-describedby="fileupload-maxk-desc" value="' . esc_attr( get_site_option( 'fileupload_maxk', 300 ) ) . '" />'
 						);
-					?>
+						?>
 					<p class="screen-reader-text" id="fileupload-maxk-desc">
 						<?php _e( 'Size in kilobytes' ); ?>
 					</p>
@@ -402,7 +402,7 @@ if ( isset( $_GET['updated'] ) ) {
 		if ( ! empty( $languages ) || ! empty( $translations ) ) {
 			?>
 			<h2><?php _e( 'Language Settings' ); ?></h2>
-			<table class="form-table">
+			<table class="form-table" role="presentation">
 				<tr>
 					<th><label for="WPLANG"><?php _e( 'Default Language' ); ?></label></th>
 					<td>
@@ -450,18 +450,17 @@ if ( isset( $_GET['updated'] ) ) {
 			 *
 			 * @since MU (3.0.0)
 			 *
-			 * @param array $admin_menus The menu items available.
+			 * @param string[] $admin_menus Associative array of the menu items available.
 			 */
-			$menu_items   = apply_filters( 'mu_menu_items', array( 'plugins' => __( 'Plugins' ) ) );
-			$fieldset_end = '';
-			if ( count( (array) $menu_items ) > 1 ) {
-				echo '<fieldset><legend class="screen-reader-text">' . __( 'Enable menus' ) . '</legend>';
-				$fieldset_end = '</fieldset>';
-			}
+			$menu_items = apply_filters( 'mu_menu_items', array( 'plugins' => __( 'Plugins' ) ) );
+
+			echo '<fieldset><legend class="screen-reader-text">' . __( 'Enable menus' ) . '</legend>';
+
 			foreach ( (array) $menu_items as $key => $val ) {
 				echo "<label><input type='checkbox' name='menu_items[" . $key . "]' value='1'" . ( isset( $menu_perms[ $key ] ) ? checked( $menu_perms[ $key ], '1', false ) : '' ) . ' /> ' . esc_html( $val ) . '</label><br/>';
 			}
-			echo $fieldset_end;
+
+			echo '</fieldset>';
 			?>
 				</td>
 			</tr>

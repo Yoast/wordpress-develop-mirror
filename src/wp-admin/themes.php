@@ -33,6 +33,26 @@ if ( current_user_can( 'switch_themes' ) && isset( $_GET['action'] ) ) {
 		switch_theme( $theme->get_stylesheet() );
 		wp_redirect( admin_url( 'themes.php?activated=true' ) );
 		exit;
+	} elseif ( 'resume' === $_GET['action'] ) {
+		check_admin_referer( 'resume-theme_' . $_GET['stylesheet'] );
+		$theme = wp_get_theme( $_GET['stylesheet'] );
+
+		if ( ! current_user_can( 'resume_theme', $_GET['stylesheet'] ) ) {
+			wp_die(
+				'<h1>' . __( 'You need a higher level of permission.' ) . '</h1>' .
+				'<p>' . __( 'Sorry, you are not allowed to resume this theme.' ) . '</p>',
+				403
+			);
+		}
+
+		$result = resume_theme( $theme->get_stylesheet(), self_admin_url( 'themes.php?error=resuming' ) );
+
+		if ( is_wp_error( $result ) ) {
+			wp_die( $result );
+		}
+
+		wp_redirect( admin_url( 'themes.php?resumed=true' ) );
+		exit;
 	} elseif ( 'delete' == $_GET['action'] ) {
 		check_admin_referer( 'delete-theme_' . $_GET['stylesheet'] );
 		$theme = wp_get_theme( $_GET['stylesheet'] );
@@ -122,7 +142,7 @@ if ( current_user_can( 'edit_theme_options' ) && current_user_can( 'customize' )
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Using_Themes">Documentation on Using Themes</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 if ( current_user_can( 'switch_themes' ) ) {
@@ -133,7 +153,9 @@ if ( current_user_can( 'switch_themes' ) ) {
 wp_reset_vars( array( 'theme', 'search' ) );
 
 wp_localize_script(
-	'theme', '_wpThemeSettings', array(
+	'theme',
+	'_wpThemeSettings',
+	array(
 		'themes'   => $themes,
 		'settings' => array(
 			'canInstall'    => ( ! is_multisite() && current_user_can( 'install_themes' ) ),
@@ -171,25 +193,37 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 
 	<hr class="wp-header-end">
 <?php
-if ( ! validate_current_theme() || isset( $_GET['broken'] ) ) :
-?>
-<div id="message1" class="updated notice is-dismissible"><p><?php _e( 'The active theme is broken. Reverting to the default theme.' ); ?></p></div>
-<?php
-elseif ( isset( $_GET['activated'] ) ) :
+if ( ! validate_current_theme() || isset( $_GET['broken'] ) ) {
+	?>
+	<div id="message1" class="updated notice is-dismissible"><p><?php _e( 'The active theme is broken. Reverting to the default theme.' ); ?></p></div>
+	<?php
+} elseif ( isset( $_GET['activated'] ) ) {
 	if ( isset( $_GET['previewed'] ) ) {
 		?>
 		<div id="message2" class="updated notice is-dismissible"><p><?php _e( 'Settings saved and theme activated.' ); ?> <a href="<?php echo home_url( '/' ); ?>"><?php _e( 'Visit site' ); ?></a></p></div>
-		<?php } else { ?>
-<div id="message2" class="updated notice is-dismissible"><p><?php _e( 'New theme activated.' ); ?> <a href="<?php echo home_url( '/' ); ?>"><?php _e( 'Visit site' ); ?></a></p></div>
-																		<?php
-}
-	elseif ( isset( $_GET['deleted'] ) ) :
+		<?php
+	} else {
+		?>
+		<div id="message2" class="updated notice is-dismissible"><p><?php _e( 'New theme activated.' ); ?> <a href="<?php echo home_url( '/' ); ?>"><?php _e( 'Visit site' ); ?></a></p></div>
+		<?php
+	}
+} elseif ( isset( $_GET['deleted'] ) ) {
 	?>
-<div id="message3" class="updated notice is-dismissible"><p><?php _e( 'Theme deleted.' ); ?></p></div>
-<?php elseif ( isset( $_GET['delete-active-child'] ) ) : ?>
+	<div id="message3" class="updated notice is-dismissible"><p><?php _e( 'Theme deleted.' ); ?></p></div>
+	<?php
+} elseif ( isset( $_GET['delete-active-child'] ) ) {
+	?>
 	<div id="message4" class="error"><p><?php _e( 'You cannot delete a theme while it has an active child theme.' ); ?></p></div>
-<?php
-endif;
+	<?php
+} elseif ( isset( $_GET['resumed'] ) ) {
+	?>
+	<div id="message5" class="updated notice is-dismissible"><p><?php _e( 'Theme resumed.' ); ?></p></div>
+	<?php
+} elseif ( isset( $_GET['error'] ) && 'resuming' === $_GET['error'] ) {
+	?>
+	<div id="message6" class="error"><p><?php _e( 'Theme could not be resumed because it triggered a <strong>fatal error</strong>.' ); ?></p></div>
+	<?php
+}
 
 $ct = wp_get_theme();
 
@@ -335,20 +369,24 @@ foreach ( $themes as $theme ) :
 <?php
 // List broken themes, if any.
 if ( ! is_multisite() && current_user_can( 'edit_themes' ) && $broken_themes = wp_get_themes( array( 'errors' => true ) ) ) {
-?>
+	?>
 
 <div class="broken-themes">
 <h3><?php _e( 'Broken Themes' ); ?></h3>
 <p><?php _e( 'The following themes are installed but incomplete.' ); ?></p>
 
-<?php
-$can_delete  = current_user_can( 'delete_themes' );
-$can_install = current_user_can( 'install_themes' );
-?>
+	<?php
+	$can_resume  = current_user_can( 'resume_themes' );
+	$can_delete  = current_user_can( 'delete_themes' );
+	$can_install = current_user_can( 'install_themes' );
+	?>
 <table>
 	<tr>
 		<th><?php _ex( 'Name', 'theme name' ); ?></th>
 		<th><?php _e( 'Description' ); ?></th>
+		<?php if ( $can_resume ) { ?>
+			<td></td>
+		<?php } ?>
 		<?php if ( $can_delete ) { ?>
 			<td></td>
 		<?php } ?>
@@ -361,13 +399,35 @@ $can_install = current_user_can( 'install_themes' );
 			<td><?php echo $broken_theme->get( 'Name' ) ? $broken_theme->display( 'Name' ) : $broken_theme->get_stylesheet(); ?></td>
 			<td><?php echo $broken_theme->errors()->get_error_message(); ?></td>
 			<?php
+			if ( $can_resume ) {
+				if ( 'theme_paused' === $broken_theme->errors()->get_error_code() ) {
+					$stylesheet = $broken_theme->get_stylesheet();
+					$resume_url = add_query_arg(
+						array(
+							'action'     => 'resume',
+							'stylesheet' => urlencode( $stylesheet ),
+						),
+						admin_url( 'themes.php' )
+					);
+					$resume_url = wp_nonce_url( $resume_url, 'resume-theme_' . $stylesheet );
+					?>
+					<td><a href="<?php echo esc_url( $resume_url ); ?>" class="button resume-theme"><?php _e( 'Resume' ); ?></a></td>
+					<?php
+				} else {
+					?>
+					<td></td>
+					<?php
+				}
+			}
+
 			if ( $can_delete ) {
 				$stylesheet = $broken_theme->get_stylesheet();
 				$delete_url = add_query_arg(
 					array(
 						'action'     => 'delete',
 						'stylesheet' => urlencode( $stylesheet ),
-					), admin_url( 'themes.php' )
+					),
+					admin_url( 'themes.php' )
 				);
 				$delete_url = wp_nonce_url( $delete_url, 'delete-theme_' . $stylesheet );
 				?>
@@ -384,7 +444,8 @@ $can_install = current_user_can( 'install_themes' );
 						array(
 							'action' => 'install-theme',
 							'theme'  => urlencode( $parent_theme_name ),
-						), admin_url( 'update.php' )
+						),
+						admin_url( 'update.php' )
 					);
 					$install_url = wp_nonce_url( $install_url, 'install-theme_' . $parent_theme_name );
 					?>
@@ -398,7 +459,7 @@ $can_install = current_user_can( 'install_themes' );
 </table>
 </div>
 
-<?php
+	<?php
 }
 ?>
 </div><!-- .wrap -->
@@ -533,7 +594,9 @@ wp_print_admin_notice_templates();
 wp_print_update_row_templates();
 
 wp_localize_script(
-	'updates', '_wpUpdatesItemCounts', array(
+	'updates',
+	'_wpUpdatesItemCounts',
+	array(
 		'totals' => wp_get_update_data(),
 	)
 );

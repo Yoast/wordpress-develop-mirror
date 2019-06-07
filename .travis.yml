@@ -4,7 +4,7 @@ language: php
 cache:
   apt: true
   directories:
-    - node_modules
+    - $HOME/.npm
     - vendor
     - $HOME/.composer/cache
 env:
@@ -12,25 +12,25 @@ env:
     - WP_TRAVISCI=travis:phpunit
 matrix:
   include:
+  - php: 7.2
+    env: WP_TRAVISCI=travis:format
   - php: 7.1
     env: WP_TRAVISCI=travis:js
+  - php: 7.4snapshot
+  - php: 7.3
+  - php: 7.3
+    env: WP_TRAVIS_OBJECT_CACHE=true
+    services: memcached
   - php: 7.2
   - php: 7.1
   - php: 7.0
     env: WP_TEST_REPORTER=true
   - php: 5.6
-  - php: 5.6
-    env: WP_TRAVIS_OBJECT_CACHE=true
-    services: memcached
-  - php: 5.5
-  - php: 5.4
-  - php: 5.3
-    dist: precise
-  - php: 5.2
-    dist: precise
   - php: nightly
   allow_failures:
+  - php: 7.4snapshot
   - php: nightly
+  fast_finish: true
 before_install:
 - |
   if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
@@ -39,7 +39,7 @@ before_install:
       sed -i "s/youremptytestdbnamehere/wordpress_tests/" wp-tests-config.php
       sed -i "s/yourusernamehere/root/" wp-tests-config.php
       sed -i "s/yourpasswordhere//" wp-tests-config.php
-      svn checkout https://plugins.svn.wordpress.org/wordpress-importer/tags/0.6.3/ tests/phpunit/data/plugins/wordpress-importer
+      travis_retry svn checkout https://plugins.svn.wordpress.org/wordpress-importer/tags/0.6.3/ tests/phpunit/data/plugins/wordpress-importer
   fi
 - |
   if [[ "$WP_TRAVIS_OBJECT_CACHE" == "true" ]]; then
@@ -56,25 +56,23 @@ before_script:
   fi
 - |
   # Export Composer's global bin dir to PATH, but not on PHP 5.2:
-  if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
-    composer config --list --global
-    export PATH=`composer config --list --global | grep '\[home\]' | { read a; echo "${a#* }/vendor/bin:$PATH"; }`
-  fi
+  composer config --list --global
+  export PATH=`composer config --list --global | grep '\[home\]' | { read a; echo "${a#* }/vendor/bin:$PATH"; }`
 - |
   # Install the specified version of PHPUnit depending on the PHP version:
   if [[ "$WP_TRAVISCI" == "travis:phpunit" ]]; then
     case "$TRAVIS_PHP_VERSION" in
-      7.2|7.1|7.0|nightly)
+      7.4snapshot|7.3|7.2|7.1|nightly)
+        echo "Using PHPUnit 7.x"
+        travis_retry composer global require "phpunit/phpunit:^7"
+        ;;
+      7.0)
         echo "Using PHPUnit 6.x"
-        composer global require "phpunit/phpunit:^6"
+        travis_retry composer global require "phpunit/phpunit:^6"
         ;;
-      5.6|5.5|5.4|5.3)
+      5.6)
         echo "Using PHPUnit 4.x"
-        composer global require "phpunit/phpunit:^4"
-        ;;
-      5.2)
-        # Do nothing, use default PHPUnit 3.6.x
-        echo "Using default PHPUnit, hopefully 3.6"
+        travis_retry composer global require "phpunit/phpunit:^4"
         ;;
       *)
         echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
@@ -82,10 +80,15 @@ before_script:
         ;;
     esac
   fi
+- |
+  # We only need to run composer install on the code formatting job.
+  if [[ "$WP_TRAVISCI" == "travis:format" ]]; then
+    composer --version
+    travis_retry composer install
+  fi
 - npm --version
 - node --version
-- nvm install 8.9.3
-- npm install -g grunt-cli
+- nvm install 10.13.0
 - npm install
 - npm prune
 - mysql --version
@@ -97,11 +100,10 @@ before_script:
 - which phpunit
 - phpunit --version
 - curl --version
-- grunt --version
 - git --version
 - svn --version
 - locale -a
-script: grunt $WP_TRAVISCI
+script: npm run grunt $WP_TRAVISCI
 after_script:
 - |
   if [[ "$WP_TEST_REPORTER" == "true" ]]; then

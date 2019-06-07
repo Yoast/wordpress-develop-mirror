@@ -1,8 +1,9 @@
 === Twenty Sixteen ===
-Contributors: the WordPress team
+Contributors: wordpressdotorg
 Requires at least: WordPress 4.4
-Tested up to: WordPress 5.0-trunk
-Version: 1.4
+Tested up to: WordPress 5.0
+Requires PHP: 5.2.4
+Version: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Tags: one-column, two-columns, right-sidebar, accessibility-ready, custom-background, custom-colors, custom-header, custom-menu, editor-style, featured-images, flexible-header, microformats, post-formats, rtl-language-support, sticky-post, threaded-comments, translation-ready, blog
@@ -29,7 +30,7 @@ For more information about Twenty Sixteen please go to https://codex.wordpress.o
 
 == Copyright ==
 
-Twenty Sixteen WordPress Theme, Copyright 2014-2017 WordPress.org
+Twenty Sixteen WordPress Theme, Copyright 2014-2018 WordPress.org
 Twenty Sixteen is distributed under the terms of the GNU GPL
 
 This program is free software: you can redistribute it and/or modify
@@ -55,6 +56,36 @@ Source: http://www.genericons.com
 Image used in screenshot.png: A photo by Austin Schmid (https://unsplash.com/schmidy/), licensed under Creative Commons Zero(http://creativecommons.org/publicdomain/zero/1.0/)
 
 == Changelog ==
+
+= 2.0 =
+* Released: May 7, 2019
+
+https://codex.wordpress.org/Twenty_Sixteen_Theme_Changelog#Version_2.0
+
+= 1.9 =
+* Released: February 21, 2019
+
+https://codex.wordpress.org/Twenty_Sixteen_Theme_Changelog#Version_1.9
+
+= 1.8 =
+* Released: January 9, 2019
+
+https://codex.wordpress.org/Twenty_Sixteen_Theme_Changelog#Version_1.8
+
+= 1.7 =
+* Released: December 19, 2018
+
+https://codex.wordpress.org/Twenty_Sixteen_Theme_Changelog#Version_1.7
+
+= 1.6 =
+* Released: December 6, 2018
+
+https://codex.wordpress.org/Twenty_Sixteen_Theme_Changelog#Version_1.6
+
+= 1.5 =
+* Released: May 17, 2018
+
+https://codex.wordpress.org/Twenty_Sixteen_Theme_Changelog#Version_1.5
 
 = 1.4 =
 * Released: November 14, 2017

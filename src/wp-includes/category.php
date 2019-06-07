@@ -42,7 +42,8 @@ function get_categories( $args = '' ) {
 	// Back compat
 	if ( isset( $args['type'] ) && 'link' == $args['type'] ) {
 		_deprecated_argument(
-			__FUNCTION__, '3.0.0',
+			__FUNCTION__,
+			'3.0.0',
 			/* translators: 1: "type => link", 2: "taxonomy => link_category" */
 			sprintf(
 				__( '%1$s is deprecated. Use %2$s instead.' ),
@@ -134,7 +135,8 @@ function get_category_by_path( $category_path, $full_match = true, $output = OBJ
 		$full_path .= ( $pathdir != '' ? '/' : '' ) . sanitize_title( $pathdir );
 	}
 	$categories = get_terms(
-		'category', array(
+		'category',
+		array(
 			'get'  => 'all',
 			'slug' => $leaf_path,
 		)
@@ -273,7 +275,7 @@ function sanitize_category_field( $field, $value, $cat_id, $context ) {
  * @see get_terms() For list of arguments to pass.
  *
  * @param string|array $args Tag arguments to use when retrieving tags.
- * @return array List of tags.
+ * @return WP_Term[]|int $tags Array of 'post_tag' term objects, or a count thereof.
  */
 function get_tags( $args = '' ) {
 	$tags = get_terms( 'post_tag', $args );
@@ -288,8 +290,8 @@ function get_tags( $args = '' ) {
 	 *
 	 * @since 2.3.0
 	 *
-	 * @param array $tags Array of 'post_tag' term objects.
-	 * @param array $args An array of arguments. @see get_terms()
+	 * @param WP_Term[]|int $tags Array of 'post_tag' term objects, or a count thereof.
+	 * @param array         $args An array of arguments. @see get_terms()
 	 */
 	$tags = apply_filters( 'get_tags', $tags, $args );
 	return $tags;

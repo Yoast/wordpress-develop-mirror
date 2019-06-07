@@ -12,7 +12,7 @@ class WP {
 	 * Long list of public query variables.
 	 *
 	 * @since 2.0.0
-	 * @var array
+	 * @var string[]
 	 */
 	public $public_query_vars = array( 'm', 'p', 'posts', 'w', 'cat', 'withcomments', 'withoutcomments', 's', 'search', 'exact', 'sentence', 'calendar', 'page', 'paged', 'more', 'tb', 'pb', 'author', 'order', 'orderby', 'year', 'monthnum', 'day', 'hour', 'minute', 'second', 'name', 'category_name', 'tag', 'feed', 'author_name', 'static', 'pagename', 'page_id', 'error', 'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview', 'robots', 'taxonomy', 'term', 'cpage', 'post_type', 'embed' );
 
@@ -22,7 +22,7 @@ class WP {
 	 * Long list of private query variables.
 	 *
 	 * @since 2.0.0
-	 * @var array
+	 * @var string[]
 	 */
 	public $private_query_vars = array( 'offset', 'posts_per_page', 'posts_per_archive_page', 'showposts', 'nopaging', 'post_type', 'post_status', 'category__in', 'category__not_in', 'category__and', 'tag__in', 'tag__not_in', 'tag__and', 'tag_slug__in', 'tag_slug__and', 'tag_id', 'post_mime_type', 'perm', 'comments_per_page', 'post__in', 'post__not_in', 'post_parent', 'post_parent__in', 'post_parent__not_in', 'title', 'fields' );
 
@@ -282,7 +282,7 @@ class WP {
 		 *
 		 * @since 1.5.0
 		 *
-		 * @param array $public_query_vars The array of whitelisted query variables.
+		 * @param string[] $public_query_vars The array of whitelisted query variable names.
 		 */
 		$this->public_query_vars = apply_filters( 'query_vars', $this->public_query_vars );
 
@@ -295,6 +295,8 @@ class WP {
 		foreach ( $this->public_query_vars as $wpvar ) {
 			if ( isset( $this->extra_query_vars[ $wpvar ] ) ) {
 				$this->query_vars[ $wpvar ] = $this->extra_query_vars[ $wpvar ];
+			} elseif ( isset( $_GET[ $wpvar ] ) && isset( $_POST[ $wpvar ] ) && $_GET[ $wpvar ] !== $_POST[ $wpvar ] ) {
+				wp_die( __( 'A variable mismatch has been detected.' ), __( 'Sorry, you are not allowed to view this item.' ), 400 );
 			} elseif ( isset( $_POST[ $wpvar ] ) ) {
 				$this->query_vars[ $wpvar ] = $_POST[ $wpvar ];
 			} elseif ( isset( $_GET[ $wpvar ] ) ) {
@@ -441,7 +443,7 @@ class WP {
 			}
 
 			if ( ! $wp_last_modified ) {
-				$wp_last_modified = date( 'D, d M Y H:i:s' );
+				$wp_last_modified = gmdate( 'D, d M Y H:i:s' );
 			}
 
 			$wp_last_modified .= ' GMT';
@@ -477,8 +479,8 @@ class WP {
 		 *
 		 * @since 2.8.0
 		 *
-		 * @param array $headers The list of headers to be sent.
-		 * @param WP    $this    Current WordPress environment instance.
+		 * @param string[] $headers Associative array of headers to be sent.
+		 * @param WP       $this    Current WordPress environment instance.
 		 */
 		$headers = apply_filters( 'wp_headers', $headers, $this );
 

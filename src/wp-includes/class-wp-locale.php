@@ -115,6 +115,7 @@ class WP_Locale {
 	 * @since 2.1.0
 	 *
 	 * @global string $text_direction
+	 * @global string $wp_version
 	 */
 	public function init() {
 		// The Weekdays
@@ -216,12 +217,13 @@ class WP_Locale {
 		// Set text direction.
 		if ( isset( $GLOBALS['text_direction'] ) ) {
 			$this->text_direction = $GLOBALS['text_direction'];
-		} /* translators: 'rtl' or 'ltr'. This sets the text direction for WordPress. */
-		elseif ( 'rtl' == _x( 'ltr', 'text direction' ) ) {
+
+			/* translators: 'rtl' or 'ltr'. This sets the text direction for WordPress. */
+		} elseif ( 'rtl' == _x( 'ltr', 'text direction' ) ) {
 			$this->text_direction = 'rtl';
 		}
 
-		if ( 'rtl' === $this->text_direction && strpos( get_bloginfo( 'version' ), '-src' ) ) {
+		if ( 'rtl' === $this->text_direction && strpos( $GLOBALS['wp_version'], '-src' ) ) {
 			$this->text_direction = 'ltr';
 			add_action( 'all_admin_notices', array( $this, 'rtl_src_admin_notice' ) );
 		}

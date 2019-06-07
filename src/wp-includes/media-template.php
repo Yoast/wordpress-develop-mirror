@@ -15,7 +15,7 @@
  */
 function wp_underscore_audio_template() {
 	$audio_types = wp_get_audio_extensions();
-?>
+	?>
 <audio style="visibility: hidden"
 	controls
 	class="wp-audio-shortcode"
@@ -24,7 +24,7 @@ function wp_underscore_audio_template() {
 	<#
 	<?php
 	foreach ( array( 'autoplay', 'loop' ) as $attr ) :
-	?>
+		?>
 	if ( ! _.isUndefined( data.model.<?php echo $attr; ?> ) && data.model.<?php echo $attr; ?> ) {
 		#> <?php echo $attr; ?><#
 	}
@@ -36,15 +36,15 @@ function wp_underscore_audio_template() {
 
 	<?php
 	foreach ( $audio_types as $type ) :
-	?>
+		?>
 	<# if ( ! _.isEmpty( data.model.<?php echo $type; ?> ) ) { #>
 	<source src="{{ data.model.<?php echo $type; ?> }}" type="{{ wp.media.view.settings.embedMimes[ '<?php echo $type; ?>' ] }}" />
 	<# } #>
-	<?php
+		<?php
 	endforeach;
-?>
+	?>
 </audio>
-<?php
+	<?php
 }
 
 /**
@@ -55,7 +55,7 @@ function wp_underscore_audio_template() {
  */
 function wp_underscore_video_template() {
 	$video_types = wp_get_video_extensions();
-?>
+	?>
 <#  var w_rule = '', classes = [],
 		w, h, settings = wp.media.view.settings,
 		isYouTube = isVimeo = false;
@@ -96,18 +96,18 @@ function wp_underscore_video_template() {
 	<# if ( w ) { #>width="{{ w }}"<# } #>
 	<# if ( h ) { #>height="{{ h }}"<# } #>
 	<?php
-	$props       = array(
+	$props = array(
 		'poster'  => '',
 		'preload' => 'metadata',
 	);
 	foreach ( $props as $key => $value ) :
 		if ( empty( $value ) ) {
-		?>
+			?>
 		<#
 		if ( ! _.isUndefined( data.model.<?php echo $key; ?> ) && data.model.<?php echo $key; ?> ) {
 			#> <?php echo $key; ?>="{{ data.model.<?php echo $key; ?> }}"<#
 		} #>
-		<?php
+			<?php
 		} else {
 			echo $key
 			?>
@@ -119,7 +119,7 @@ function wp_underscore_video_template() {
 	<#
 	<?php
 	foreach ( array( 'autoplay', 'loop' ) as $attr ) :
-	?>
+		?>
 	if ( ! _.isUndefined( data.model.<?php echo $attr; ?> ) && data.model.<?php echo $attr; ?> ) {
 		#> <?php echo $attr; ?><#
 	}
@@ -137,7 +137,7 @@ function wp_underscore_video_template() {
 
 	<?php
 	foreach ( $video_types as $type ) :
-	?>
+		?>
 	<# if ( data.model.<?php echo $type; ?> ) { #>
 	<source src="{{ data.model.<?php echo $type; ?> }}" type="{{ settings.embedMimes[ '<?php echo $type; ?>' ] }}" />
 	<# } #>
@@ -145,7 +145,7 @@ function wp_underscore_video_template() {
 	{{{ data.model.content }}}
 </video>
 </div>
-<?php
+	<?php
 }
 
 /**
@@ -161,6 +161,18 @@ function wp_print_media_templates() {
 	if ( $is_IE && strpos( $_SERVER['HTTP_USER_AGENT'], 'MSIE 7' ) !== false ) {
 		$class .= ' ie7';
 	}
+
+	$alt_text_description = sprintf(
+		/* translators: 1: link to tutorial, 2: additional link attributes, 3: accessibility text */
+		__( '<a href="%1$s" %2$s>Describe the purpose of the image%3$s</a>. Leave empty if the image is purely decorative.' ),
+		esc_url( 'https://www.w3.org/WAI/tutorials/images/decision-tree' ),
+		'target="_blank" rel="noopener noreferrer"',
+		sprintf(
+			'<span class="screen-reader-text"> %s</span>',
+			/* translators: accessibility text */
+			__( '(opens in a new tab)' )
+		)
+	);
 	?>
 	<!--[if lte IE 8]>
 	<style>
@@ -371,12 +383,20 @@ function wp_print_media_templates() {
 				<div class="file-size"><strong><?php _e( 'File size:' ); ?></strong> {{ data.filesizeHumanReadable }}</div>
 				<# if ( 'image' === data.type && ! data.uploading ) { #>
 					<# if ( data.width && data.height ) { #>
-						<div class="dimensions"><strong><?php _e( 'Dimensions:' ); ?></strong> {{ data.width }} &times; {{ data.height }}</div>
+						<div class="dimensions"><strong><?php _e( 'Dimensions:' ); ?></strong>
+							<?php
+							/* translators: 1: a number of pixels wide, 2: a number of pixels tall. */
+							printf( __( '%1$s by %2$s pixels' ), '{{ data.width }}', '{{ data.height }}' );
+							?>
+						</div>
 					<# } #>
 				<# } #>
 
-				<# if ( data.fileLength ) { #>
-					<div class="file-length"><strong><?php _e( 'Length:' ); ?></strong> {{ data.fileLength }}</div>
+				<# if ( data.fileLength && data.fileLengthHumanReadable ) { #>
+					<div class="file-length"><strong><?php _e( 'Length:' ); ?></strong>
+						<span aria-hidden="true">{{ data.fileLength }}</span>
+						<span class="screen-reader-text">{{ data.fileLengthHumanReadable }}</span>
+					</div>
 				<# } #>
 
 				<# if ( 'audio' === data.type && data.meta.bitrate ) { #>
@@ -396,11 +416,14 @@ function wp_print_media_templates() {
 			</div>
 
 			<div class="settings">
-				<label class="setting" data-setting="url">
-					<span class="name"><?php _e( 'URL' ); ?></span>
-					<input type="text" value="{{ data.url }}" readonly />
-				</label>
 				<# var maybeReadOnly = data.can.save || data.allowLocalEdits ? '' : 'readonly'; #>
+				<# if ( 'image' === data.type ) { #>
+					<label class="setting" data-setting="alt">
+						<span class="name"><?php _e( 'Alternative Text' ); ?></span>
+						<input type="text" value="{{ data.alt }}" aria-describedby="alt-text-description" {{ maybeReadOnly }} />
+					</label>
+					<p class="description" id="alt-text-description"><?php echo $alt_text_description; ?></p>
+				<# } #>
 				<?php if ( post_type_supports( 'attachment', 'title' ) ) : ?>
 				<label class="setting" data-setting="title">
 					<span class="name"><?php _e( 'Title' ); ?></span>
@@ -413,7 +436,7 @@ function wp_print_media_templates() {
 					'artist' => __( 'Artist' ),
 					'album'  => __( 'Album' ),
 				) as $key => $label ) :
-				?>
+					?>
 				<label class="setting" data-setting="<?php echo esc_attr( $key ); ?>">
 					<span class="name"><?php echo $label; ?></span>
 					<input type="text" value="{{ data.<?php echo $key; ?> || data.meta.<?php echo $key; ?> || '' }}" />
@@ -424,12 +447,6 @@ function wp_print_media_templates() {
 					<span class="name"><?php _e( 'Caption' ); ?></span>
 					<textarea {{ maybeReadOnly }}>{{ data.caption }}</textarea>
 				</label>
-				<# if ( 'image' === data.type ) { #>
-					<label class="setting" data-setting="alt">
-						<span class="name"><?php _e( 'Alt Text' ); ?></span>
-						<input type="text" value="{{ data.alt }}" {{ maybeReadOnly }} />
-					</label>
-				<# } #>
 				<label class="setting" data-setting="description">
 					<span class="name"><?php _e( 'Description' ); ?></span>
 					<textarea {{ maybeReadOnly }}>{{ data.description }}</textarea>
@@ -448,20 +465,24 @@ function wp_print_media_templates() {
 						<# } #>
 					</div>
 				<# } #>
+				<label class="setting" data-setting="url">
+					<span class="name"><?php _e( 'Copy Link' ); ?></span>
+					<input type="text" value="{{ data.url }}" readonly />
+				</label>
 				<div class="attachment-compat"></div>
 			</div>
 
 			<div class="actions">
 				<a class="view-attachment" href="{{ data.link }}"><?php _e( 'View attachment page' ); ?></a>
 				<# if ( data.can.save ) { #> |
-					<a href="post.php?post={{ data.id }}&action=edit"><?php _e( 'Edit more details' ); ?></a>
+					<a href="{{ data.editLink }}"><?php _e( 'Edit more details' ); ?></a>
 				<# } #>
 				<# if ( ! data.uploading && data.can.remove ) { #> |
 					<?php if ( MEDIA_TRASH ) : ?>
 						<# if ( 'trash' === data.status ) { #>
-							<button type="button" class="button-link untrash-attachment"><?php _e( 'Untrash' ); ?></button>
+							<button type="button" class="button-link untrash-attachment"><?php _e( 'Restore from Trash' ); ?></button>
 						<# } else { #>
-							<button type="button" class="button-link trash-attachment"><?php _ex( 'Trash', 'verb' ); ?></button>
+							<button type="button" class="button-link trash-attachment"><?php _e( 'Move to Trash' ); ?></button>
 						<# } #>
 					<?php else : ?>
 						<button type="button" class="button-link delete-attachment"><?php _e( 'Delete Permanently' ); ?></button>
@@ -547,7 +568,12 @@ function wp_print_media_templates() {
 				<div class="file-size">{{ data.filesizeHumanReadable }}</div>
 				<# if ( 'image' === data.type && ! data.uploading ) { #>
 					<# if ( data.width && data.height ) { #>
-						<div class="dimensions">{{ data.width }} &times; {{ data.height }}</div>
+						<div class="dimensions">
+							<?php
+							/* translators: 1: a number of pixels wide, 2: a number of pixels tall. */
+							printf( __( '%1$s by %2$s pixels' ), '{{ data.width }}', '{{ data.height }}' );
+							?>
+						</div>
 					<# } #>
 
 					<# if ( data.can.save && data.sizes ) { #>
@@ -555,16 +581,19 @@ function wp_print_media_templates() {
 					<# } #>
 				<# } #>
 
-				<# if ( data.fileLength ) { #>
-					<div class="file-length"><?php _e( 'Length:' ); ?> {{ data.fileLength }}</div>
+				<# if ( data.fileLength && data.fileLengthHumanReadable ) { #>
+					<div class="file-length"><?php _e( 'Length:' ); ?>
+						<span aria-hidden="true">{{ data.fileLength }}</span>
+						<span class="screen-reader-text">{{ data.fileLengthHumanReadable }}</span>
+					</div>
 				<# } #>
 
 				<# if ( ! data.uploading && data.can.remove ) { #>
 					<?php if ( MEDIA_TRASH ) : ?>
 					<# if ( 'trash' === data.status ) { #>
-						<button type="button" class="button-link untrash-attachment"><?php _e( 'Untrash' ); ?></button>
+						<button type="button" class="button-link untrash-attachment"><?php _e( 'Restore from Trash' ); ?></button>
 					<# } else { #>
-						<button type="button" class="button-link trash-attachment"><?php _ex( 'Trash', 'verb' ); ?></button>
+						<button type="button" class="button-link trash-attachment"><?php _e( 'Move to Trash' ); ?></button>
 					<# } #>
 					<?php else : ?>
 						<button type="button" class="button-link delete-attachment"><?php _e( 'Delete Permanently' ); ?></button>
@@ -579,11 +608,14 @@ function wp_print_media_templates() {
 			</div>
 		</div>
 
-		<label class="setting" data-setting="url">
-			<span class="name"><?php _e( 'URL' ); ?></span>
-			<input type="text" value="{{ data.url }}" readonly />
-		</label>
 		<# var maybeReadOnly = data.can.save || data.allowLocalEdits ? '' : 'readonly'; #>
+		<# if ( 'image' === data.type ) { #>
+			<label class="setting" data-setting="alt">
+				<span class="name"><?php _e( 'Alt Text' ); ?></span>
+				<input type="text" value="{{ data.alt }}" aria-describedby="alt-text-description" {{ maybeReadOnly }} />
+			</label>
+			<p class="description" id="alt-text-description"><?php echo $alt_text_description; ?></p>
+		<# } #>
 		<?php if ( post_type_supports( 'attachment', 'title' ) ) : ?>
 		<label class="setting" data-setting="title">
 			<span class="name"><?php _e( 'Title' ); ?></span>
@@ -596,7 +628,7 @@ function wp_print_media_templates() {
 			'artist' => __( 'Artist' ),
 			'album'  => __( 'Album' ),
 		) as $key => $label ) :
-		?>
+			?>
 		<label class="setting" data-setting="<?php echo esc_attr( $key ); ?>">
 			<span class="name"><?php echo $label; ?></span>
 			<input type="text" value="{{ data.<?php echo $key; ?> || data.meta.<?php echo $key; ?> || '' }}" />
@@ -607,15 +639,13 @@ function wp_print_media_templates() {
 			<span class="name"><?php _e( 'Caption' ); ?></span>
 			<textarea {{ maybeReadOnly }}>{{ data.caption }}</textarea>
 		</label>
-		<# if ( 'image' === data.type ) { #>
-			<label class="setting" data-setting="alt">
-				<span class="name"><?php _e( 'Alt Text' ); ?></span>
-				<input type="text" value="{{ data.alt }}" {{ maybeReadOnly }} />
-			</label>
-		<# } #>
 		<label class="setting" data-setting="description">
 			<span class="name"><?php _e( 'Description' ); ?></span>
 			<textarea {{ maybeReadOnly }}>{{ data.description }}</textarea>
+		</label>
+		<label class="setting" data-setting="url">
+			<span class="name"><?php _e( 'Copy Link' ); ?></span>
+			<input type="text" value="{{ data.url }}" readonly />
 		</label>
 	</script>
 
@@ -719,7 +749,8 @@ function wp_print_media_templates() {
 					<?php
 					/** This filter is documented in wp-admin/includes/media.php */
 					$sizes = apply_filters(
-						'image_size_names_choose', array(
+						'image_size_names_choose',
+						array(
 							'thumbnail' => __( 'Thumbnail' ),
 							'medium'    => __( 'Medium' ),
 							'large'     => __( 'Large' ),
@@ -728,7 +759,7 @@ function wp_print_media_templates() {
 					);
 
 					foreach ( $sizes as $value => $name ) :
-					?>
+						?>
 						<#
 						var size = data.sizes['<?php echo esc_js( $value ); ?>'];
 						if ( size ) { #>
@@ -797,7 +828,8 @@ function wp_print_media_templates() {
 				<?php
 				/** This filter is documented in wp-admin/includes/media.php */
 				$size_names = apply_filters(
-					'image_size_names_choose', array(
+					'image_size_names_choose',
+					array(
 						'thumbnail' => __( 'Thumbnail' ),
 						'medium'    => __( 'Medium' ),
 						'large'     => __( 'Large' ),
@@ -806,7 +838,7 @@ function wp_print_media_templates() {
 				);
 
 				foreach ( $size_names as $size => $label ) :
-				?>
+					?>
 					<option value="<?php echo esc_attr( $size ); ?>">
 						<?php echo esc_html( $label ); ?>
 					</option>
@@ -864,20 +896,21 @@ function wp_print_media_templates() {
 			<img src="{{ data.model.url }}" draggable="false" alt="" />
 		</div>
 
+		<label class="setting alt-text has-description">
+			<span><?php _e( 'Alternative Text' ); ?></span>
+			<input type="text" data-setting="alt" aria-describedby="alt-text-description" />
+		</label>
+		<p class="description" id="alt-text-description"><?php echo $alt_text_description; ?></p>
+
 		<?php
 		/** This filter is documented in wp-admin/includes/media.php */
 		if ( ! apply_filters( 'disable_captions', '' ) ) :
-		?>
+			?>
 			<label class="setting caption">
 				<span><?php _e( 'Caption' ); ?></span>
 				<textarea data-setting="caption" />
 			</label>
 		<?php endif; ?>
-
-		<label class="setting alt-text">
-			<span><?php _e( 'Alt Text' ); ?></span>
-			<input type="text" data-setting="alt" />
-		</label>
 
 		<div class="setting align">
 			<span><?php _e( 'Align' ); ?></span>
@@ -930,20 +963,21 @@ function wp_print_media_templates() {
 					</div>
 				</div>
 				<div class="column-settings">
+					<label class="setting alt-text has-description">
+						<span><?php _e( 'Alternative Text' ); ?></span>
+						<input type="text" data-setting="alt" value="{{ data.model.alt }}" aria-describedby="alt-text-description" />
+					</label>
+					<p class="description" id="alt-text-description"><?php echo $alt_text_description; ?></p>
+
 					<?php
 					/** This filter is documented in wp-admin/includes/media.php */
 					if ( ! apply_filters( 'disable_captions', '' ) ) :
-					?>
+						?>
 						<label class="setting caption">
 							<span><?php _e( 'Caption' ); ?></span>
 							<textarea data-setting="caption">{{ data.model.caption }}</textarea>
 						</label>
 					<?php endif; ?>
-
-					<label class="setting alt-text">
-						<span><?php _e( 'Alternative Text' ); ?></span>
-						<input type="text" data-setting="alt" value="{{ data.model.alt }}" />
-					</label>
 
 					<h2><?php _e( 'Display Settings' ); ?></h2>
 					<div class="setting align">
@@ -976,7 +1010,8 @@ function wp_print_media_templates() {
 									<?php
 									/** This filter is documented in wp-admin/includes/media.php */
 									$sizes = apply_filters(
-										'image_size_names_choose', array(
+										'image_size_names_choose',
+										array(
 											'thumbnail' => __( 'Thumbnail' ),
 											'medium'    => __( 'Medium' ),
 											'large'     => __( 'Large' ),
@@ -985,7 +1020,7 @@ function wp_print_media_templates() {
 									);
 
 									foreach ( $sizes as $value => $name ) :
-									?>
+										?>
 										<#
 										var size = data.sizes['<?php echo esc_js( $value ); ?>'];
 										if ( size ) { #>
@@ -1093,14 +1128,14 @@ function wp_print_media_templates() {
 				<?php
 
 				foreach ( $audio_types as $type ) :
-				?>
+					?>
 				<# if ( ! _.isEmpty( data.model.<?php echo $type; ?> ) ) {
 					if ( ! _.isUndefined( html5types.<?php echo $type; ?> ) ) {
 						delete html5types.<?php echo $type; ?>;
 					}
 				#>
 				<div class="setting">
-					<label for="<?php echo $type . '-source'; ?>"><?php echo strtoupper( $type ); ?></span>
+					<label for="<?php echo $type . '-source'; ?>"><?php echo strtoupper( $type ); ?></label>
 					<input type="text" id="<?php echo $type . '-source'; ?>" readonly data-setting="<?php echo $type; ?>" value="{{ data.model.<?php echo $type; ?> }}" />
 					<button type="button" class="button-link remove-setting"><?php _e( 'Remove audio source' ); ?></button>
 				</div>
@@ -1176,7 +1211,7 @@ function wp_print_media_templates() {
 				<# } #>
 				<?php
 				foreach ( $video_types as $type ) :
-				?>
+					?>
 				<# if ( ! _.isEmpty( data.model.<?php echo $type; ?> ) ) {
 					if ( ! _.isUndefined( html5types.<?php echo $type; ?> ) ) {
 						delete html5types.<?php echo $type; ?>;
@@ -1235,7 +1270,7 @@ function wp_print_media_templates() {
 						var tracks = jQuery( data.model.content ).filter( 'track' );
 						_.each( tracks.toArray(), function (track) {
 							content += track.outerHTML; #>
-						<label for="video-track"><?php _e( 'Tracks (subtitles, captions, descriptions, chapters, or metadata)' ); ?></span>
+						<label for="video-track"><?php _e( 'Tracks (subtitles, captions, descriptions, chapters, or metadata)' ); ?></label>
 						<input class="content-track" type="text" id="video-track" readonly value="{{ track.outerHTML }}" />
 						<button type="button" class="button-link remove-setting remove-track"><?php _ex( 'Remove video track', 'media' ); ?></button>
 						<# } ); #>

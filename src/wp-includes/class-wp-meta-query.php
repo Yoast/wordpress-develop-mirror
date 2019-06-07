@@ -99,7 +99,7 @@ class WP_Meta_Query {
 	 *
 	 * @since 3.2.0
 	 * @since 4.2.0 Introduced support for naming query clauses by associative array keys.
-	 * @since 5.0.0 Introduced $compare_key clause parameter, which enables LIKE key matches.
+	 * @since 5.1.0 Introduced $compare_key clause parameter, which enables LIKE key matches.
 	 *
 	 * @param array $meta_query {
 	 *     Array of meta query clauses. When first-order clauses or sub-clauses use strings as
@@ -339,7 +339,7 @@ class WP_Meta_Query {
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param array  $clauses           Array containing the query's JOIN and WHERE clauses.
+		 * @param array  $sql               Array containing the query's JOIN and WHERE clauses.
 		 * @param array  $queries           Array of meta queries.
 		 * @param string $type              Type of meta.
 		 * @param string $primary_table     Primary table.
@@ -498,7 +498,8 @@ class WP_Meta_Query {
 		}
 
 		if ( ! in_array(
-			$clause['compare'], array(
+			$clause['compare'],
+			array(
 				'=',
 				'!=',
 				'>',

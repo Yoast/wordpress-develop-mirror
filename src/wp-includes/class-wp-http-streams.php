@@ -97,7 +97,7 @@ class WP_Http_Streams {
 			 * Filters whether SSL should be verified for local requests.
 			 *
 			 * @since 2.8.0
-			 * @since 5.0.0 The `$url` parameter was added.
+			 * @since 5.1.0 The `$url` parameter was added.
 			 *
 			 * @param bool   $ssl_verify Whether to verify the SSL connection. Default true.
 			 * @param string $url        The request URL.
@@ -249,8 +249,9 @@ class WP_Http_Streams {
 			}
 			if ( ! $stream_handle ) {
 				return new WP_Error(
-					'http_request_failed', sprintf(
-						/* translators: 1: fopen() 2: file name */
+					'http_request_failed',
+					sprintf(
+						/* translators: 1: fopen(), 2: file name */
 						__( 'Could not open handle for %1$s to %2$s.' ),
 						'fopen()',
 						$r['filename']

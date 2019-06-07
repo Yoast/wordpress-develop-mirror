@@ -12,7 +12,7 @@ define( 'WP_LOAD_IMPORTERS', true );
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
 if ( ! current_user_can( 'import' ) ) {
-	wp_die( __( 'Sorry, you are not allowed to import content.' ) );
+	wp_die( __( 'Sorry, you are not allowed to import content into this site.' ) );
 }
 
 $title = __( 'Import' );
@@ -29,7 +29,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Tools_Import_Screen">Documentation on Import</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 if ( current_user_can( 'install_plugins' ) ) {
@@ -61,11 +61,11 @@ $parent_file = 'tools.php';
 <h1><?php echo esc_html( $title ); ?></h1>
 <?php if ( ! empty( $_GET['invalid'] ) ) : ?>
 	<div class="error">
-		<p><strong><?php _e( 'ERROR:' ); ?></strong> 
+		<p><strong><?php _e( 'ERROR:' ); ?></strong>
 								<?php
 								/* translators: %s: importer slug */
 								printf( __( 'The %s importer is invalid or is not installed.' ), '<strong>' . esc_html( $_GET['invalid'] ) . '</strong>' );
-		?>
+								?>
 		</p>
 	</div>
 <?php endif; ?>
@@ -96,7 +96,7 @@ if ( empty( $importers ) ) {
 	echo '<p>' . __( 'No importers are available.' ) . '</p>'; // TODO: make more helpful
 } else {
 	uasort( $importers, '_usort_by_first_member' );
-?>
+	?>
 <table class="widefat importers striped">
 
 	<?php
@@ -119,8 +119,10 @@ if ( empty( $importers ) ) {
 								'action' => 'activate',
 								'plugin' => $plugin_file,
 								'from'   => 'import',
-							), admin_url( 'plugins.php' )
-						), 'activate-plugin_' . $plugin_file
+							),
+							admin_url( 'plugins.php' )
+						),
+						'activate-plugin_' . $plugin_file
 					);
 					$action      = sprintf(
 						'<a href="%s" aria-label="%s">%s</a>',
@@ -142,8 +144,10 @@ if ( empty( $importers ) ) {
 								'action' => 'install-plugin',
 								'plugin' => $plugin_slug,
 								'from'   => 'import',
-							), self_admin_url( 'update.php' )
-						), 'install-plugin_' . $plugin_slug
+							),
+							self_admin_url( 'update.php' )
+						),
+						'install-plugin_' . $plugin_slug
 					);
 					$action = sprintf(
 						'<a href="%1$s" class="install-now" data-slug="%2$s" data-name="%3$s" aria-label="%4$s">%5$s</a>',
@@ -151,7 +155,7 @@ if ( empty( $importers ) ) {
 						esc_attr( $plugin_slug ),
 						esc_attr( $data[0] ),
 						/* translators: %s: Importer name */
-						esc_attr( sprintf( __( 'Install %s' ), $data[0] ) ),
+						esc_attr( sprintf( __( 'Install %s now' ), $data[0] ) ),
 						__( 'Install Now' )
 					);
 				} else {
@@ -166,7 +170,8 @@ if ( empty( $importers ) ) {
 			$url    = add_query_arg(
 				array(
 					'import' => $importer_id,
-				), self_admin_url( 'admin.php' )
+				),
+				self_admin_url( 'admin.php' )
 			);
 			$action = sprintf(
 				'<a href="%1$s" aria-label="%2$s">%3$s</a>',
@@ -188,7 +193,8 @@ if ( empty( $importers ) ) {
 					'TB_iframe' => 'true',
 					'width'     => 600,
 					'height'    => 550,
-				), network_admin_url( 'plugin-install.php' )
+				),
+				network_admin_url( 'plugin-install.php' )
 			);
 			$action .= sprintf(
 				' | <a href="%1$s" class="thickbox open-plugin-details-modal" aria-label="%2$s">%3$s</a>',
@@ -212,7 +218,7 @@ if ( empty( $importers ) ) {
 	}
 	?>
 </table>
-<?php
+	<?php
 }
 
 if ( current_user_can( 'install_plugins' ) ) {

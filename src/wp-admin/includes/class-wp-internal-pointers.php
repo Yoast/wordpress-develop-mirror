@@ -41,7 +41,7 @@ final class WP_Internal_Pointers {
 		 *     )
 		 */
 		$registered_pointers = array(
-			// None currently
+			//None currently.
 		);
 
 		// Check if screen related pointer is registered
@@ -65,7 +65,7 @@ final class WP_Internal_Pointers {
 		 *     )
 		 */
 		$caps_required = array(
-			// None currently
+			// None currently.
 		);
 
 		// Get dismissed pointers
@@ -150,6 +150,7 @@ final class WP_Internal_Pointers {
 	public static function pointer_wp360_locks() {}
 	public static function pointer_wp390_widgets() {}
 	public static function pointer_wp410_dfw() {}
+	public static function pointer_wp496_privacy() {}
 
 	/**
 	 * Prevents new users from seeing existing 'new feature' pointers.

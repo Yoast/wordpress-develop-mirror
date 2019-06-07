@@ -79,7 +79,8 @@ if ( isset( $_REQUEST['action'] ) && 'adduser' == $_REQUEST['action'] ) {
 					array(
 						'update'  => 'addnoconfirmation',
 						'user_id' => $user_id,
-					), 'user-new.php'
+					),
+					'user-new.php'
 				);
 			} else {
 				$redirect = add_query_arg( array( 'update' => 'could_not_add' ), 'user-new.php' );
@@ -87,7 +88,8 @@ if ( isset( $_REQUEST['action'] ) && 'adduser' == $_REQUEST['action'] ) {
 		} else {
 			$newuser_key = wp_generate_password( 20, false );
 			add_option(
-				'new_user_' . $newuser_key, array(
+				'new_user_' . $newuser_key,
+				array(
 					'user_id' => $user_id,
 					'email'   => $user_details->user_email,
 					'role'    => $_REQUEST['role'],
@@ -120,7 +122,9 @@ You\'ve been invited to join \'%1$s\' at
 Please click the following link to confirm the invite:
 %4$s'
 			);
-			wp_mail( $new_user_email, sprintf( __( '[%s] Joining confirmation' ), wp_specialchars_decode( get_option( 'blogname' ) ) ), sprintf( $message, get_option( 'blogname' ), home_url(), wp_specialchars_decode( translate_user_role( $role['name'] ) ), home_url( "/newbloguser/$newuser_key/" ) ) );
+
+			/* translators: Joining confirmation notification email subject. %s: Site title */
+			wp_mail( $new_user_email, sprintf( __( '[%s] Joining Confirmation' ), wp_specialchars_decode( get_option( 'blogname' ) ) ), sprintf( $message, get_option( 'blogname' ), home_url(), wp_specialchars_decode( translate_user_role( $role['name'] ) ), home_url( "/newbloguser/$newuser_key/" ) ) );
 
 			if ( $switched_locale ) {
 				restore_previous_locale();
@@ -163,20 +167,16 @@ Please click the following link to confirm the invite:
 		if ( is_wp_error( $user_details['errors'] ) && $user_details['errors']->has_errors() ) {
 			$add_user_errors = $user_details['errors'];
 		} else {
-			/**
-			 * Filters the user_login, also known as the username, before it is added to the site.
-			 *
-			 * @since 2.0.3
-			 *
-			 * @param string $user_login The sanitized username.
-			 */
+			/** This filter is documented in wp-includes/user.php */
 			$new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
 			if ( isset( $_POST['noconfirmation'] ) && current_user_can( 'manage_network_users' ) ) {
 				add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
 				add_filter( 'wpmu_welcome_user_notification', '__return_false' ); // Disable welcome email
 			}
 			wpmu_signup_user(
-				$new_user_login, $new_user_email, array(
+				$new_user_login,
+				$new_user_email,
+				array(
 					'add_to_blog' => get_current_blog_id(),
 					'new_role'    => $_REQUEST['role'],
 				)
@@ -193,7 +193,8 @@ Please click the following link to confirm the invite:
 						array(
 							'update'  => 'addnoconfirmation',
 							'user_id' => $new_user['user_id'],
-						), 'user-new.php'
+						),
+						'user-new.php'
 					);
 				}
 			} else {
@@ -252,7 +253,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Users_Add_New_Screen">Documentation on Adding New Users</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 wp_enqueue_script( 'wp-ajax-response' );
@@ -343,7 +344,7 @@ if ( current_user_can( 'create_users' ) ) {
 		?>
 		</ul>
 	</div>
-<?php
+	<?php
 endif;
 
 if ( ! empty( $messages ) ) {
@@ -378,21 +379,21 @@ if ( is_multisite() && current_user_can( 'promote_users' ) ) {
 		$label = __( 'Email or Username' );
 		$type  = 'text';
 	}
-?>
+	?>
 <form method="post" name="adduser" id="adduser" class="validate" novalidate="novalidate"
-<?php
+	<?php
 	/**
 	 * Fires inside the adduser form tag.
 	 *
 	 * @since 3.0.0
 	 */
 	do_action( 'user_new_form_tag' );
-?>
+	?>
 >
 <input name="action" type="hidden" value="adduser" />
-<?php wp_nonce_field( 'add-user', '_wpnonce_add-user' ); ?>
+	<?php wp_nonce_field( 'add-user', '_wpnonce_add-user' ); ?>
 
-<table class="form-table">
+<table class="form-table" role="presentation">
 	<tr class="form-field form-required">
 		<th scope="row"><label for="adduser-email"><?php echo $label; ?></label></th>
 		<td><input name="email" type="<?php echo $type; ?>" id="adduser-email" class="wp-suggest-user" value="" /></td>
@@ -404,7 +405,7 @@ if ( is_multisite() && current_user_can( 'promote_users' ) ) {
 			</select>
 		</td>
 	</tr>
-<?php if ( current_user_can( 'manage_network_users' ) ) { ?>
+	<?php if ( current_user_can( 'manage_network_users' ) ) { ?>
 	<tr>
 		<th scope="row"><?php _e( 'Skip Confirmation Email' ); ?></th>
 		<td>
@@ -414,54 +415,54 @@ if ( is_multisite() && current_user_can( 'promote_users' ) ) {
 	</tr>
 <?php } ?>
 </table>
-<?php
-/**
- * Fires at the end of the new user form.
- *
- * Passes a contextual string to make both types of new user forms
- * uniquely targetable. Contexts are 'add-existing-user' (Multisite),
- * and 'add-new-user' (single site and network admin).
- *
- * @since 3.7.0
- *
- * @param string $type A contextual string specifying which type of new user form the hook follows.
- */
-do_action( 'user_new_form', 'add-existing-user' );
-?>
-<?php submit_button( __( 'Add Existing User' ), 'primary', 'adduser', true, array( 'id' => 'addusersub' ) ); ?>
+	<?php
+	/**
+	 * Fires at the end of the new user form.
+	 *
+	 * Passes a contextual string to make both types of new user forms
+	 * uniquely targetable. Contexts are 'add-existing-user' (Multisite),
+	 * and 'add-new-user' (single site and network admin).
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param string $type A contextual string specifying which type of new user form the hook follows.
+	 */
+	do_action( 'user_new_form', 'add-existing-user' );
+	?>
+	<?php submit_button( __( 'Add Existing User' ), 'primary', 'adduser', true, array( 'id' => 'addusersub' ) ); ?>
 </form>
-<?php
+	<?php
 } // is_multisite()
 
 if ( current_user_can( 'create_users' ) ) {
 	if ( $do_both ) {
 		echo '<h2 id="create-new-user">' . __( 'Add New User' ) . '</h2>';
 	}
-?>
+	?>
 <p><?php _e( 'Create a brand new user and add them to this site.' ); ?></p>
 <form method="post" name="createuser" id="createuser" class="validate" novalidate="novalidate"
-<?php
+	<?php
 	/** This action is documented in wp-admin/user-new.php */
 	do_action( 'user_new_form_tag' );
-?>
+	?>
 >
 <input name="action" type="hidden" value="createuser" />
-<?php wp_nonce_field( 'create-user', '_wpnonce_create-user' ); ?>
-<?php
-// Load up the passed data, else set to a default.
-$creating = isset( $_POST['createuser'] );
+	<?php wp_nonce_field( 'create-user', '_wpnonce_create-user' ); ?>
+	<?php
+	// Load up the passed data, else set to a default.
+	$creating = isset( $_POST['createuser'] );
 
-$new_user_login             = $creating && isset( $_POST['user_login'] ) ? wp_unslash( $_POST['user_login'] ) : '';
-$new_user_firstname         = $creating && isset( $_POST['first_name'] ) ? wp_unslash( $_POST['first_name'] ) : '';
-$new_user_lastname          = $creating && isset( $_POST['last_name'] ) ? wp_unslash( $_POST['last_name'] ) : '';
-$new_user_email             = $creating && isset( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '';
-$new_user_uri               = $creating && isset( $_POST['url'] ) ? wp_unslash( $_POST['url'] ) : '';
-$new_user_role              = $creating && isset( $_POST['role'] ) ? wp_unslash( $_POST['role'] ) : '';
-$new_user_send_notification = $creating && ! isset( $_POST['send_user_notification'] ) ? false : true;
-$new_user_ignore_pass       = $creating && isset( $_POST['noconfirmation'] ) ? wp_unslash( $_POST['noconfirmation'] ) : '';
+	$new_user_login             = $creating && isset( $_POST['user_login'] ) ? wp_unslash( $_POST['user_login'] ) : '';
+	$new_user_firstname         = $creating && isset( $_POST['first_name'] ) ? wp_unslash( $_POST['first_name'] ) : '';
+	$new_user_lastname          = $creating && isset( $_POST['last_name'] ) ? wp_unslash( $_POST['last_name'] ) : '';
+	$new_user_email             = $creating && isset( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '';
+	$new_user_uri               = $creating && isset( $_POST['url'] ) ? wp_unslash( $_POST['url'] ) : '';
+	$new_user_role              = $creating && isset( $_POST['role'] ) ? wp_unslash( $_POST['role'] ) : '';
+	$new_user_send_notification = $creating && ! isset( $_POST['send_user_notification'] ) ? false : true;
+	$new_user_ignore_pass       = $creating && isset( $_POST['noconfirmation'] ) ? wp_unslash( $_POST['noconfirmation'] ) : '';
 
-?>
-<table class="form-table">
+	?>
+<table class="form-table" role="presentation">
 	<tr class="form-field form-required">
 		<th scope="row"><label for="user_login"><?php _e( 'Username' ); ?> <span class="description"><?php _e( '(required)' ); ?></span></label></th>
 		<td><input name="user_login" type="text" id="user_login" value="<?php echo esc_attr( $new_user_login ); ?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" /></td>
@@ -470,7 +471,7 @@ $new_user_ignore_pass       = $creating && isset( $_POST['noconfirmation'] ) ? w
 		<th scope="row"><label for="email"><?php _e( 'Email' ); ?> <span class="description"><?php _e( '(required)' ); ?></span></label></th>
 		<td><input name="email" type="email" id="email" value="<?php echo esc_attr( $new_user_email ); ?>" /></td>
 	</tr>
-<?php if ( ! is_multisite() ) { ?>
+	<?php if ( ! is_multisite() ) { ?>
 	<tr class="form-field">
 		<th scope="row"><label for="first_name"><?php _e( 'First Name' ); ?> </label></th>
 		<td><input name="first_name" type="text" id="first_name" value="<?php echo esc_attr( $new_user_firstname ); ?>" /></td>
@@ -499,10 +500,11 @@ $new_user_ignore_pass       = $creating && isset( $_POST['noconfirmation'] ) ? w
 					<input type="password" name="pass1" id="pass1" class="regular-text" autocomplete="off" data-reveal="1" data-pw="<?php echo esc_attr( $initial_password ); ?>" aria-describedby="pass-strength-result" />
 				</span>
 				<button type="button" class="button wp-hide-pw hide-if-no-js" data-toggle="0" aria-label="<?php esc_attr_e( 'Hide password' ); ?>">
-					<span class="dashicons dashicons-hidden"></span>
+					<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
 					<span class="text"><?php _e( 'Hide' ); ?></span>
 				</button>
 				<button type="button" class="button wp-cancel-pw hide-if-no-js" data-toggle="0" aria-label="<?php esc_attr_e( 'Cancel password change' ); ?>">
+					<span class="dashicons dashicons-no" aria-hidden="true"></span>
 					<span class="text"><?php _e( 'Cancel' ); ?></span>
 				</button>
 				<div style="display:none" id="pass-strength-result" aria-live="polite"></div>
@@ -555,12 +557,12 @@ $new_user_ignore_pass       = $creating && isset( $_POST['noconfirmation'] ) ? w
 	<?php } ?>
 </table>
 
-<?php
-/** This action is documented in wp-admin/user-new.php */
-do_action( 'user_new_form', 'add-new-user' );
-?>
+	<?php
+	/** This action is documented in wp-admin/user-new.php */
+	do_action( 'user_new_form', 'add-new-user' );
+	?>
 
-<?php submit_button( __( 'Add New User' ), 'primary', 'createuser', true, array( 'id' => 'createusersub' ) ); ?>
+	<?php submit_button( __( 'Add New User' ), 'primary', 'createuser', true, array( 'id' => 'createusersub' ) ); ?>
 
 </form>
 <?php } // current_user_can('create_users') ?>

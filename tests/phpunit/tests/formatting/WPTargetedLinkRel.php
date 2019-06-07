@@ -71,4 +71,72 @@ class Tests_Targeted_Link_Rel extends WP_UnitTestCase {
 		$expected = '<p>Links: <a href="/" target="_blank" rel="noopener noreferrer">Change me</a> <a href="/">Do not change me</a></p>';
 		$this->assertEquals( $expected, wp_targeted_link_rel( $content ) );
 	}
+
+	/**
+	 * Ensure empty rel attributes are not added.
+	 *
+	 * @ticket 45352.
+	 */
+	public function test_ignore_if_wp_targeted_link_rel_nulled() {
+		add_filter( 'wp_targeted_link_rel', '__return_empty_string' );
+		$content  = '<p>Links: <a href="/" target="_blank">Do not change me</a></p>';
+		$expected = '<p>Links: <a href="/" target="_blank">Do not change me</a></p>';
+		$this->assertEquals( $expected, wp_targeted_link_rel( $content ) );
+	}
+
+	/**
+	 * Ensure default content filters are added.
+	 *
+	 * @ticket 45292.
+	 */
+	public function test_wp_targeted_link_rel_filters_run() {
+		$content  = '<p>Links: <a href="/" target="_blank">No rel</a></p>';
+		$expected = '<p>Links: <a href="/" target="_blank" rel="noopener noreferrer">No rel</a></p>';
+
+		$post = $this->factory()->post->create_and_get(
+			array(
+				'post_content' => $content,
+			)
+		);
+
+		$this->assertEquals( $expected, $post->post_content );
+	}
+
+	/**
+	 * Ensure JSON format is preserved when relation attribute (rel) is missing.
+	 *
+	 * @ticket 46316
+	 */
+	public function test_wp_targeted_link_rel_should_preserve_json() {
+		$content  = '<p>Links: <a href=\"\/\" target=\"_blank\">No rel<\/a><\/p>';
+		$expected = '<p>Links: <a href=\"\/\" target=\"_blank\" rel=\"noopener noreferrer\">No rel<\/a><\/p>';
+		$this->assertEquals( $expected, wp_targeted_link_rel( $content ) );
+	}
+
+	/**
+	 * Ensure correct quotes are used when relation attribute (rel) is missing.
+	 *
+	 * @ticket 47244
+	 */
+	public function test_wp_targeted_link_rel_should_use_correct_quotes() {
+		$content  = '<p>Links: <a href=\'\/\' target=\'_blank\'>No rel<\/a><\/p>';
+		$expected = '<p>Links: <a href=\'\/\' target=\'_blank\' rel=\'noopener noreferrer\'>No rel<\/a><\/p>';
+		$this->assertEquals( $expected, wp_targeted_link_rel( $content ) );
+
+		$content  = '<p>Links: <a href=\'\/\' target=_blank>No rel<\/a><\/p>';
+		$expected = '<p>Links: <a href=\'\/\' target=_blank rel=\'noopener noreferrer\'>No rel<\/a><\/p>';
+		$this->assertEquals( $expected, wp_targeted_link_rel( $content ) );
+	}
+
+	/**
+	 * Ensure entirely serialized content is ignored.
+	 *
+	 * @ticket 46402
+	 */
+	public function test_ignore_entirely_serialized_content() {
+		$content  = 'a:1:{s:4:"html";s:52:"<p>Links: <a href="/" target="_blank">No Rel</a></p>";}';
+		$expected = 'a:1:{s:4:"html";s:52:"<p>Links: <a href="/" target="_blank">No Rel</a></p>";}';
+		$this->assertEquals( $expected, wp_targeted_link_rel( $content ) );
+	}
+
 }

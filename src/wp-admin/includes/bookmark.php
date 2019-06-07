@@ -253,7 +253,7 @@ function wp_insert_link( $linkdata, $wp_error = false ) {
  * @since 2.1.0
  *
  * @param int   $link_id         ID of the link to update.
- * @param array $link_categories Array of link categories to add the link to.
+ * @param int[] $link_categories Array of link category IDs to add the link to.
  */
 function wp_set_link_cats( $link_id = 0, $link_categories = array() ) {
 	// If $link_categories isn't already an array, make it one:
@@ -319,6 +319,7 @@ function wp_link_manager_disabled_message() {
 
 	if ( $really_can_manage_links && current_user_can( 'install_plugins' ) ) {
 		$link = network_admin_url( 'plugin-install.php?tab=search&amp;s=Link+Manager' );
+		/* translators: %s: URL of link manager plugin */
 		wp_die( sprintf( __( 'If you are looking to use the link manager, please install the <a href="%s">Link Manager</a> plugin.' ), $link ) );
 	}
 

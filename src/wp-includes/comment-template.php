@@ -102,7 +102,7 @@ function get_comment_author_email( $comment_ID = 0 ) {
  * Display the email of the author of the current global $comment.
  *
  * Care should be taken to protect the email address and assure that email
- * harvesters do not capture your commentors' email address. Most assume that
+ * harvesters do not capture your commenter's email address. Most assume that
  * their email address will not appear in raw form on the site. Doing so will
  * enable anyone, including those that people don't want to get the email
  * address and use it for their own means good and bad.
@@ -133,7 +133,7 @@ function comment_author_email( $comment_ID = 0 ) {
  * Display the html email link to the author of the current comment.
  *
  * Care should be taken to protect the email address and assure that email
- * harvesters do not capture your commentors' email address. Most assume that
+ * harvesters do not capture your commenter's email address. Most assume that
  * their email address will not appear in raw form on the site. Doing so will
  * enable anyone, including those that people don't want to get the email
  * address and use it for their own means good and bad.
@@ -157,7 +157,7 @@ function comment_author_email_link( $linktext = '', $before = '', $after = '', $
  * Return the html email link to the author of the current comment.
  *
  * Care should be taken to protect the email address and assure that email
- * harvesters do not capture your commentors' email address. Most assume that
+ * harvesters do not capture your commenter's email address. Most assume that
  * their email address will not appear in raw form on the site. Doing so will
  * enable anyone, including those that people don't want to get the email
  * address and use it for their own means good and bad.
@@ -423,7 +423,7 @@ function comment_author_url_link( $linktext = '', $before = '', $after = '', $co
  *                                 Default empty.
  * @param int|WP_Comment $comment  Comment ID or WP_Comment object. Default current comment.
  * @param int|WP_Post    $post_id  Post ID or WP_Post object. Default current post.
- * @param bool           $echo     Optional. Whether to cho or return the output.
+ * @param bool           $echo     Optional. Whether to echo or return the output.
  *                                 Default true.
  * @return string If `$echo` is false, the class will be returned. Void otherwise.
  */
@@ -523,7 +523,7 @@ function get_comment_class( $class = '', $comment_id = null, $post_id = null ) {
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param array       $classes    An array of comment classes.
+	 * @param string[]    $classes    An array of comment classes.
 	 * @param string      $class      A comma-separated list of additional classes added to the list.
 	 * @param int         $comment_id The comment id.
 	 * @param WP_Comment  $comment    The comment object.
@@ -1152,7 +1152,8 @@ function get_trackback_url() {
 function trackback_url( $deprecated_echo = true ) {
 	if ( true !== $deprecated_echo ) {
 		_deprecated_argument(
-			__FUNCTION__, '2.5.0',
+			__FUNCTION__,
+			'2.5.0',
 			/* translators: %s: get_trackback_url() */
 			sprintf(
 				__( 'Use %s instead if you do not want the value echoed.' ),
@@ -1202,11 +1203,11 @@ function trackback_rdf( $deprecated = '' ) {
 
 /**
  * Determines whether the current post is open for comments.
- * 
+ *
  * For more information on this and similar theme functions, check out
- * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
  * Conditional Tags} article in the Theme Developer Handbook.
- * 
+ *
  * @since 1.5.0
  *
  * @param int|WP_Post $post_id Post ID or WP_Post object. Default current post.
@@ -1232,9 +1233,9 @@ function comments_open( $post_id = null ) {
 
 /**
  * Determines whether the current post is open for pings.
- * 
+ *
  * For more information on this and similar theme functions, check out
- * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/ 
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
  * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 1.5.0
@@ -1371,8 +1372,12 @@ function comments_template( $file = '/comments.php', $separate_comments = false 
 
 	if ( $user_ID ) {
 		$comment_args['include_unapproved'] = array( $user_ID );
-	} elseif ( ! empty( $comment_author_email ) ) {
-		$comment_args['include_unapproved'] = array( $comment_author_email );
+	} else {
+		$unapproved_email = wp_get_unapproved_comment_author_email();
+
+		if ( $unapproved_email ) {
+			$comment_args['include_unapproved'] = array( $unapproved_email );
+		}
 	}
 
 	$per_page = 0;
@@ -1515,14 +1520,11 @@ function comments_template( $file = '/comments.php', $separate_comments = false 
  *
  * @since 0.71
  *
- * @param string $zero      Optional. String to display when no comments. Default false.
- * @param string $one       Optional. String to display when only one comment is available.
- *                          Default false.
- * @param string $more      Optional. String to display when there are more than one comment.
- *                          Default false.
- * @param string $css_class Optional. CSS class to use for comments. Default empty.
- * @param string $none      Optional. String to display when comments have been turned off.
- *                          Default false.
+ * @param false|string $zero      Optional. String to display when no comments. Default false.
+ * @param false|string $one       Optional. String to display when only one comment is available. Default false.
+ * @param false|string $more      Optional. String to display when there are more than one comment. Default false.
+ * @param string       $css_class Optional. CSS class to use for comments. Default empty.
+ * @param false|string $none      Optional. String to display when comments have been turned off. Default false.
  */
 function comments_popup_link( $zero = false, $one = false, $more = false, $css_class = '', $none = false ) {
 	$id     = get_the_ID();
@@ -1540,7 +1542,7 @@ function comments_popup_link( $zero = false, $one = false, $more = false, $css_c
 	}
 
 	if ( false === $more ) {
-		/* translators: 1: Number of comments 2: post title */
+		/* translators: 1: number of comments, 2: post title */
 		$more = _n( '%1$s Comment<span class="screen-reader-text"> on %2$s</span>', '%1$s Comments<span class="screen-reader-text"> on %2$s</span>', $number );
 		$more = sprintf( $more, number_format_i18n( $number ), $title );
 	}
@@ -1629,7 +1631,7 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 		'add_below'     => 'comment',
 		'respond_id'    => 'respond',
 		'reply_text'    => __( 'Reply' ),
-		/* translators: Comment reply button text. 1: Comment author name */
+		/* translators: Comment reply button text. %s: Comment author name */
 		'reply_to_text' => __( 'Reply to %s' ),
 		'login_text'    => __( 'Log in to Reply' ),
 		'max_depth'     => 0,
@@ -1676,23 +1678,31 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 		);
 	} else {
 		$data_attributes = array(
-			'commentid'        => $comment->comment_ID,
-			'postid'           => $post->ID,
-			'belowelement'     => $args['add_below'] . '-' . $comment->comment_ID,
-			'respondelement'   => $args['respond_id'],
+			'commentid'      => $comment->comment_ID,
+			'postid'         => $post->ID,
+			'belowelement'   => $args['add_below'] . '-' . $comment->comment_ID,
+			'respondelement' => $args['respond_id'],
 		);
 
 		$data_attribute_string = '';
 
 		foreach ( $data_attributes as $name => $value ) {
-			$data_attribute_string .= " data-${name}=\"" . esc_attr( $value ) . "\"";
+			$data_attribute_string .= " data-${name}=\"" . esc_attr( $value ) . '"';
 		}
 
 		$data_attribute_string = trim( $data_attribute_string );
 
 		$link = sprintf(
 			"<a rel='nofollow' class='comment-reply-link' href='%s' %s aria-label='%s'>%s</a>",
-			esc_url( add_query_arg( 'replytocom', $comment->comment_ID ) ) . "#" . $args['respond_id'],
+			esc_url(
+				add_query_arg(
+					array(
+						'replytocom'      => $comment->comment_ID,
+						'unapproved'      => false,
+						'moderation-hash' => false,
+					)
+				)
+			) . '#' . $args['respond_id'],
 			$data_attribute_string,
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
@@ -1779,7 +1789,9 @@ function get_post_reply_link( $args = array(), $post = null ) {
 	} else {
 		$onclick = sprintf(
 			'return addComment.moveForm( "%1$s-%2$s", "0", "%3$s", "%2$s" )',
-			$args['add_below'], $post->ID, $args['respond_id']
+			$args['add_below'],
+			$post->ID,
+			$args['respond_id']
 		);
 
 		$link = sprintf(
@@ -1832,7 +1844,7 @@ function get_cancel_comment_reply_link( $text = '' ) {
 	}
 
 	$style = isset( $_GET['replytocom'] ) ? '' : ' style="display:none;"';
-	$link  = esc_html( remove_query_arg( 'replytocom' ) ) . '#respond';
+	$link  = esc_html( remove_query_arg( array( 'replytocom', 'unapproved', 'moderation-hash' ) ) ) . '#respond';
 
 	$formatted_link = '<a rel="nofollow" id="cancel-comment-reply-link" href="' . $link . '"' . $style . '>' . $text . '</a>';
 
@@ -2055,9 +2067,10 @@ function wp_list_comments( $args = array(), $comments = null ) {
 				if ( is_user_logged_in() ) {
 					$comment_args['include_unapproved'] = get_current_user_id();
 				} else {
-					$commenter = wp_get_current_commenter();
-					if ( $commenter['comment_author_email'] ) {
-						$comment_args['include_unapproved'] = $commenter['comment_author_email'];
+					$unapproved_email = wp_get_unapproved_comment_author_email();
+
+					if ( $unapproved_email ) {
+						$comment_args['include_unapproved'] = array( $unapproved_email );
 					}
 				}
 
@@ -2187,6 +2200,7 @@ function wp_list_comments( $args = array(), $comments = null ) {
  * @since 4.5.0 The 'author', 'email', and 'url' form fields are limited to 245, 100,
  *              and 200 characters, respectively.
  * @since 4.6.0 Introduced the 'action' argument.
+ * @since 4.9.6 Introduced the 'cookies' default comment field.
  *
  * @param array       $args {
  *     Optional. Default arguments and form fields to override.
@@ -2194,9 +2208,10 @@ function wp_list_comments( $args = array(), $comments = null ) {
  *     @type array $fields {
  *         Default comment fields, filterable by default via the {@see 'comment_form_default_fields'} hook.
  *
- *         @type string $author Comment author field HTML.
- *         @type string $email  Comment author email field HTML.
- *         @type string $url    Comment author URL field HTML.
+ *         @type string $author  Comment author field HTML.
+ *         @type string $email   Comment author email field HTML.
+ *         @type string $url     Comment author URL field HTML.
+ *         @type string $cookies Comment cookie opt-in field HTML.
  *     }
  *     @type string $comment_field        The comment textarea field HTML.
  *     @type string $must_log_in          HTML element for a 'must be logged in to comment' message.
@@ -2262,12 +2277,23 @@ function comment_form( $args = array(), $post_id = null ) {
 	$html5    = 'html5' === $args['format'];
 	$fields   = array(
 		'author' => '<p class="comment-form-author">' . '<label for="author">' . __( 'Name' ) . ( $req ? ' <span class="required">*</span>' : '' ) . '</label> ' .
-					'<input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30" maxlength="245"' . $html_req . ' /></p>',
+					 '<input id="author" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30" maxlength="245"' . $html_req . ' /></p>',
 		'email'  => '<p class="comment-form-email"><label for="email">' . __( 'Email' ) . ( $req ? ' <span class="required">*</span>' : '' ) . '</label> ' .
-					'<input id="email" name="email" ' . ( $html5 ? 'type="email"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30" maxlength="100" aria-describedby="email-notes"' . $html_req . ' /></p>',
+					 '<input id="email" name="email" ' . ( $html5 ? 'type="email"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30" maxlength="100" aria-describedby="email-notes"' . $html_req . ' /></p>',
 		'url'    => '<p class="comment-form-url"><label for="url">' . __( 'Website' ) . '</label> ' .
-					'<input id="url" name="url" ' . ( $html5 ? 'type="url"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" maxlength="200" /></p>',
+					 '<input id="url" name="url" ' . ( $html5 ? 'type="url"' : 'type="text"' ) . ' value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" maxlength="200" /></p>',
 	);
+
+	if ( has_action( 'set_comment_cookies', 'wp_set_comment_cookies' ) && get_option( 'show_comments_cookies_opt_in' ) ) {
+		$consent           = empty( $commenter['comment_author_email'] ) ? '' : ' checked="checked"';
+		$fields['cookies'] = '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"' . $consent . ' />' .
+							 '<label for="wp-comment-cookies-consent">' . __( 'Save my name, email, and website in this browser for the next time I comment.' ) . '</label></p>';
+
+		// Ensure that the passed fields include cookies consent.
+		if ( isset( $args['fields'] ) && ! isset( $args['fields']['cookies'] ) ) {
+			$args['fields']['cookies'] = $fields['cookies'];
+		}
+	}
 
 	$required_text = sprintf( ' ' . __( 'Required fields are marked %s' ), '<span class="required">*</span>' );
 
@@ -2276,7 +2302,7 @@ function comment_form( $args = array(), $post_id = null ) {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param array $fields The default comment fields.
+	 * @param string[] $fields Array of the default comment fields.
 	 */
 	$fields   = apply_filters( 'comment_form_default_fields', $fields );
 	$defaults = array(
@@ -2363,7 +2389,7 @@ function comment_form( $args = array(), $post_id = null ) {
 			 */
 			do_action( 'comment_form_must_log_in_after' );
 		else :
-		?>
+			?>
 			<form action="<?php echo esc_url( $args['action'] ); ?>" method="post" id="<?php echo esc_attr( $args['id_form'] ); ?>" class="<?php echo esc_attr( $args['class_form'] ); ?>"<?php echo $html5 ? ' novalidate' : ''; ?>>
 				<?php
 				/**
@@ -2487,7 +2513,7 @@ function comment_form( $args = array(), $post_id = null ) {
 				 * @since 4.2.0
 				 *
 				 * @param string $submit_button HTML markup for the submit button.
-				 * @param array  $args          Arguments passed to `comment_form()`.
+				 * @param array  $args          Arguments passed to comment_form().
 				 */
 				$submit_button = apply_filters( 'comment_form_submit_button', $submit_button, $args );
 

@@ -42,6 +42,7 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 	 */
 	public function before() {
 		if ( ! empty( $this->api ) ) {
+			/* translators: 1: name of API, 2: version of API */
 			$this->upgrader->strings['process_success'] = sprintf( __( 'Successfully installed the plugin <strong>%1$s %2$s</strong>.' ), $this->api->name, $this->api->version );
 		}
 	}
@@ -89,11 +90,11 @@ class Plugin_Installer_Skin extends WP_Upgrader_Skin {
 		 *
 		 * @since 2.7.0
 		 *
-		 * @param array  $install_actions Array of plugin action links.
-		 * @param object $api             Object containing WordPress.org API plugin data. Empty
-		 *                                for non-API installs, such as when a plugin is installed
-		 *                                via upload.
-		 * @param string $plugin_file     Path to the plugin file.
+		 * @param string[] $install_actions Array of plugin action links.
+		 * @param object   $api             Object containing WordPress.org API plugin data. Empty
+		 *                                  for non-API installs, such as when a plugin is installed
+		 *                                  via upload.
+		 * @param string   $plugin_file     Path to the plugin file relative to the plugins directory.
 		 */
 		$install_actions = apply_filters( 'install_plugin_complete_actions', $install_actions, $this->api, $plugin_file );
 

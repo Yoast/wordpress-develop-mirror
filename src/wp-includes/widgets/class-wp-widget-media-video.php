@@ -12,6 +12,7 @@
  *
  * @since 4.8.0
  *
+ * @see WP_Widget_Media
  * @see WP_Widget
  */
 class WP_Widget_Media_Video extends WP_Widget_Media {
@@ -19,18 +20,21 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	/**
 	 * Constructor.
 	 *
-	 * @since  4.8.0
+	 * @since 4.8.0
 	 */
 	public function __construct() {
 		parent::__construct(
-			'media_video', __( 'Video' ), array(
+			'media_video',
+			__( 'Video' ),
+			array(
 				'description' => __( 'Displays a video from the media library or from YouTube, Vimeo, or another provider.' ),
 				'mime_type'   => 'video',
 			)
 		);
 
 		$this->l10n = array_merge(
-			$this->l10n, array(
+			$this->l10n,
+			array(
 				'no_media_selected'          => __( 'No video selected' ),
 				'add_media'                  => _x( 'Add Video', 'label for button in the video widget' ),
 				'replace_media'              => _x( 'Replace Video', 'label for button in the video widget; should preferably not be longer than ~13 characters long' ),
@@ -52,7 +56,7 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	/**
 	 * Get schema for properties of a widget instance (item).
 	 *
-	 * @since  4.8.0
+	 * @since 4.8.0
 	 *
 	 * @see WP_REST_Controller::get_item_schema()
 	 * @see WP_REST_Controller::get_additional_fields()
@@ -60,30 +64,28 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 	 * @return array Schema for properties.
 	 */
 	public function get_instance_schema() {
-		$schema = array_merge(
-			parent::get_instance_schema(),
-			array(
-				'preload' => array(
-					'type'                  => 'string',
-					'enum'                  => array( 'none', 'auto', 'metadata' ),
-					'default'               => 'metadata',
-					'description'           => __( 'Preload' ),
-					'should_preview_update' => false,
-				),
-				'loop'    => array(
-					'type'                  => 'boolean',
-					'default'               => false,
-					'description'           => __( 'Loop' ),
-					'should_preview_update' => false,
-				),
-				'content' => array(
-					'type'                  => 'string',
-					'default'               => '',
-					'sanitize_callback'     => 'wp_kses_post',
-					'description'           => __( 'Tracks (subtitles, captions, descriptions, chapters, or metadata)' ),
-					'should_preview_update' => false,
-				),
-			)
+
+		$schema = array(
+			'preload' => array(
+				'type'                  => 'string',
+				'enum'                  => array( 'none', 'auto', 'metadata' ),
+				'default'               => 'metadata',
+				'description'           => __( 'Preload' ),
+				'should_preview_update' => false,
+			),
+			'loop'    => array(
+				'type'                  => 'boolean',
+				'default'               => false,
+				'description'           => __( 'Loop' ),
+				'should_preview_update' => false,
+			),
+			'content' => array(
+				'type'                  => 'string',
+				'default'               => '',
+				'sanitize_callback'     => 'wp_kses_post',
+				'description'           => __( 'Tracks (subtitles, captions, descriptions, chapters, or metadata)' ),
+				'should_preview_update' => false,
+			),
 		);
 
 		foreach ( wp_get_video_extensions() as $video_extension ) {
@@ -96,13 +98,13 @@ class WP_Widget_Media_Video extends WP_Widget_Media {
 			);
 		}
 
-		return $schema;
+		return array_merge( $schema, parent::get_instance_schema() );
 	}
 
 	/**
 	 * Render the media on the frontend.
 	 *
-	 * @since  4.8.0
+	 * @since 4.8.0
 	 *
 	 * @param array $instance Widget instance props.
 	 *

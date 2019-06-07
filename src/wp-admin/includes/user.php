@@ -25,14 +25,15 @@ function add_user() {
  * @since 2.0.0
  *
  * @param int $user_id Optional. User ID.
- * @return int|WP_Error user id of the updated user
+ * @return int|WP_Error user id of the updated user.
  */
 function edit_user( $user_id = 0 ) {
 	$wp_roles = wp_roles();
 	$user     = new stdClass;
+	$user_id  = (int) $user_id;
 	if ( $user_id ) {
 		$update           = true;
-		$user->ID         = (int) $user_id;
+		$user->ID         = $user_id;
 		$userdata         = get_userdata( $user_id );
 		$user->user_login = wp_slash( $userdata->user_login );
 	} else {
@@ -51,19 +52,27 @@ function edit_user( $user_id = 0 ) {
 		$pass2 = $_POST['pass2'];
 	}
 
-	if ( isset( $_POST['role'] ) && current_user_can( 'edit_users' ) ) {
-		$new_role       = sanitize_text_field( $_POST['role'] );
-		$potential_role = isset( $wp_roles->role_objects[ $new_role ] ) ? $wp_roles->role_objects[ $new_role ] : false;
-		// Don't let anyone with 'edit_users' (admins) edit their own role to something without it.
-		// Multisite super admins can freely edit their blog roles -- they possess all caps.
-		if ( ( is_multisite() && current_user_can( 'manage_sites' ) ) || $user_id != get_current_user_id() || ( $potential_role && $potential_role->has_cap( 'edit_users' ) ) ) {
-			$user->role = $new_role;
-		}
+	if ( isset( $_POST['role'] ) && current_user_can( 'promote_users' ) && ( ! $user_id || current_user_can( 'promote_user', $user_id ) ) ) {
+		$new_role = sanitize_text_field( $_POST['role'] );
 
-		// If the new role isn't editable by the logged-in user die with error
+		// If the new role isn't editable by the logged-in user die with error.
 		$editable_roles = get_editable_roles();
 		if ( ! empty( $new_role ) && empty( $editable_roles[ $new_role ] ) ) {
 			wp_die( __( 'Sorry, you are not allowed to give users that role.' ), 403 );
+		}
+
+		$potential_role = isset( $wp_roles->role_objects[ $new_role ] ) ? $wp_roles->role_objects[ $new_role ] : false;
+
+		/*
+		 * Don't let anyone with 'promote_users' edit their own role to something without it.
+		 * Multisite super admins can freely edit their roles, they possess all caps.
+		 */
+		if (
+			( is_multisite() && current_user_can( 'manage_network_users' ) ) ||
+			$user_id !== get_current_user_id() ||
+			( $potential_role && $potential_role->has_cap( 'promote_users' ) )
+		) {
+			$user->role = $new_role;
 		}
 	}
 
@@ -235,7 +244,7 @@ function edit_user( $user_id = 0 ) {
  * Fetch a filtered list of user roles that the current user is
  * allowed to edit.
  *
- * Simple function who's main purpose is to allow filtering of the
+ * Simple function whose main purpose is to allow filtering of the
  * list of roles in the $wp_roles object so that plugins can remove
  * inappropriate ones depending on the situation or user making edits.
  * Specifically because without filtering anyone with the edit_users
@@ -245,7 +254,7 @@ function edit_user( $user_id = 0 ) {
  *
  * @since 2.8.0
  *
- * @return array
+ * @return array[] Array of arrays containing role information.
  */
 function get_editable_roles() {
 	$all_roles = wp_roles()->roles;
@@ -255,7 +264,7 @@ function get_editable_roles() {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $all_roles List of roles.
+	 * @param array[] $all_roles Array of arrays containing role information.
 	 */
 	$editable_roles = apply_filters( 'editable_roles', $all_roles );
 
@@ -368,8 +377,8 @@ function wp_delete_user( $id, $reassign = null ) {
 		 *
 		 * @since 3.4.0
 		 *
-		 * @param array $post_types_to_delete Post types to delete.
-		 * @param int   $id                   User ID.
+		 * @param string[] $post_types_to_delete Array of post types to delete.
+		 * @param int      $id                   User ID.
 		 */
 		$post_types_to_delete = apply_filters( 'post_types_to_delete_with_user', $post_types_to_delete, $id );
 		$post_types_to_delete = implode( "', '", $post_types_to_delete );
@@ -528,7 +537,7 @@ jQuery(document).ready( function($) {
 	});
 });
 </script>
-<?php
+	<?php
 }
 
 /**
@@ -538,15 +547,15 @@ jQuery(document).ready( function($) {
  *
  * @since 2.7.0
  *
- * @param object $user User data object
+ * @param object $user User data object.
  */
 function use_ssl_preference( $user ) {
-?>
+	?>
 	<tr class="user-use-ssl-wrap">
 		<th scope="row"><?php _e( 'Use https' ); ?></th>
 		<td><label for="use_ssl"><input name="use_ssl" type="checkbox" id="use_ssl" value="1" <?php checked( '1', $user->use_ssl ); ?> /> <?php _e( 'Always use https when visiting the admin' ); ?></label></td>
 	</tr>
-<?php
+	<?php
 }
 
 /**
@@ -556,7 +565,7 @@ function use_ssl_preference( $user ) {
 function admin_created_user_email( $text ) {
 	$roles = get_editable_roles();
 	$role  = $roles[ $_REQUEST['role'] ];
-	/* translators: 1: Site name, 2: site URL, 3: role */
+	/* translators: 1: site name, 2: site URL, 3: role */
 	return sprintf(
 		__(
 			'Hi,
@@ -567,6 +576,9 @@ this email. This invitation will expire in a few days.
 
 Please click the following link to activate your user account:
 %%s'
-		), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ), home_url(), wp_specialchars_decode( translate_user_role( $role['name'] ) )
+		),
+		wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+		home_url(),
+		wp_specialchars_decode( translate_user_role( $role['name'] ) )
 	);
 }

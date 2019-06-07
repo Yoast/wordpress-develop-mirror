@@ -612,12 +612,12 @@ class wp_xmlrpc_server extends IXR_Server {
 				'option'   => 'large_size_h',
 			),
 			'default_comment_status'  => array(
-				'desc'     => __( 'Allow people to post comments on new articles' ),
+				'desc'     => __( 'Allow people to submit comments on new posts' ),
 				'readonly' => false,
 				'option'   => 'default_comment_status',
 			),
 			'default_ping_status'     => array(
-				'desc'     => __( 'Allow link notifications from other blogs (pingbacks and trackbacks) on new articles' ),
+				'desc'     => __( 'Allow link notifications from other blogs (pingbacks and trackbacks) on new posts' ),
 				'readonly' => false,
 				'option'   => 'default_ping_status',
 			),
@@ -1555,7 +1555,8 @@ class wp_xmlrpc_server extends IXR_Server {
 					$ambiguous_terms = array();
 					if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 						$tax_term_names = get_terms(
-							$taxonomy, array(
+							$taxonomy,
+							array(
 								'fields'     => 'names',
 								'hide_empty' => false,
 							)
@@ -2896,8 +2897,8 @@ class wp_xmlrpc_server extends IXR_Server {
 		// If we found the page then format the data.
 		if ( $page->ID && ( $page->post_type == 'page' ) ) {
 			return $this->_prepare_page( $page );
-		} // If the page doesn't exist indicate that.
-		else {
+		} else {
+			// If the page doesn't exist indicate that.
 			return new IXR_Error( 404, __( 'Sorry, no such page.' ) );
 		}
 	}
@@ -3698,6 +3699,9 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		/** This action is documented in wp-includes/class-wp-xmlrpc-server.php */
 		do_action( 'xmlrpc_call', 'wp.editComment' );
+		$comment = array(
+			'comment_ID' => $comment_ID,
+		);
 
 		if ( isset( $content_struct['status'] ) ) {
 			$statuses = get_comment_statuses();
@@ -3706,35 +3710,33 @@ class wp_xmlrpc_server extends IXR_Server {
 			if ( ! in_array( $content_struct['status'], $statuses ) ) {
 				return new IXR_Error( 401, __( 'Invalid comment status.' ) );
 			}
-			$comment_approved = $content_struct['status'];
+
+			$comment['comment_approved'] = $content_struct['status'];
 		}
 
 		// Do some timestamp voodoo
 		if ( ! empty( $content_struct['date_created_gmt'] ) ) {
 			// We know this is supposed to be GMT, so we're going to slap that Z on there by force
-			$dateCreated      = rtrim( $content_struct['date_created_gmt']->getIso(), 'Z' ) . 'Z';
-			$comment_date     = get_date_from_gmt( iso8601_to_datetime( $dateCreated ) );
-			$comment_date_gmt = iso8601_to_datetime( $dateCreated, 'GMT' );
+			$dateCreated                 = rtrim( $content_struct['date_created_gmt']->getIso(), 'Z' ) . 'Z';
+			$comment['comment_date']     = get_date_from_gmt( iso8601_to_datetime( $dateCreated ) );
+			$comment['comment_date_gmt'] = iso8601_to_datetime( $dateCreated, 'GMT' );
 		}
 
 		if ( isset( $content_struct['content'] ) ) {
-			$comment_content = $content_struct['content'];
+			$comment['comment_content'] = $content_struct['content'];
 		}
 
 		if ( isset( $content_struct['author'] ) ) {
-			$comment_author = $content_struct['author'];
+			$comment['comment_author'] = $content_struct['author'];
 		}
 
 		if ( isset( $content_struct['author_url'] ) ) {
-			$comment_author_url = $content_struct['author_url'];
+			$comment['comment_author_url'] = $content_struct['author_url'];
 		}
 
 		if ( isset( $content_struct['author_email'] ) ) {
-			$comment_author_email = $content_struct['author_email'];
+			$comment['comment_author_email'] = $content_struct['author_email'];
 		}
-
-		// We've got all the data -- post it:
-		$comment = compact( 'comment_ID', 'comment_content', 'comment_approved', 'comment_date', 'comment_date_gmt', 'comment_author', 'comment_author_email', 'comment_author_url' );
 
 		$result = wp_update_comment( $comment );
 		if ( is_wp_error( $result ) ) {
@@ -5260,16 +5262,22 @@ class wp_xmlrpc_server extends IXR_Server {
 		// Only use a password if one was given.
 		if ( isset( $content_struct['wp_password'] ) ) {
 			$post_password = $content_struct['wp_password'];
+		} else {
+			$post_password = '';
 		}
 
 		// Only set a post parent if one was provided.
 		if ( isset( $content_struct['wp_page_parent_id'] ) ) {
 			$post_parent = $content_struct['wp_page_parent_id'];
+		} else {
+			$post_parent = 0;
 		}
 
 		// Only set the menu_order if it was provided.
 		if ( isset( $content_struct['wp_page_order'] ) ) {
 			$menu_order = $content_struct['wp_page_order'];
+		} else {
+			$menu_order = 0;
 		}
 
 		$post_author = $user->ID;
@@ -5598,14 +5606,16 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		$this->escape( $postdata );
 
-		$ID            = $postdata['ID'];
-		$post_content  = $postdata['post_content'];
-		$post_title    = $postdata['post_title'];
-		$post_excerpt  = $postdata['post_excerpt'];
-		$post_password = $postdata['post_password'];
-		$post_parent   = $postdata['post_parent'];
-		$post_type     = $postdata['post_type'];
-		$menu_order    = $postdata['menu_order'];
+		$ID             = $postdata['ID'];
+		$post_content   = $postdata['post_content'];
+		$post_title     = $postdata['post_title'];
+		$post_excerpt   = $postdata['post_excerpt'];
+		$post_password  = $postdata['post_password'];
+		$post_parent    = $postdata['post_parent'];
+		$post_type      = $postdata['post_type'];
+		$menu_order     = $postdata['menu_order'];
+		$ping_status    = $postdata['ping_status'];
+		$comment_status = $postdata['comment_status'];
 
 		// Let WordPress manage slug if none was provided.
 		$post_name = $postdata['post_name'];
@@ -6224,7 +6234,14 @@ class wp_xmlrpc_server extends IXR_Server {
 		}
 
 		if ( is_multisite() && upload_is_user_over_quota( false ) ) {
-			$this->error = new IXR_Error( 401, __( 'Sorry, you have used your space allocation.' ) );
+			$this->error = new IXR_Error(
+				401,
+				sprintf(
+					/* translators: %s: allowed space allocation */
+					__( 'Sorry, you have used your space allocation of %s. Please delete some files to upload more files.' ),
+					size_format( get_space_allowed() * MB_IN_BYTES )
+				)
+			);
 			return $this->error;
 		}
 
@@ -6839,8 +6856,14 @@ class wp_xmlrpc_server extends IXR_Server {
 		$comment_type = 'pingback';
 
 		$commentdata = compact(
-			'comment_post_ID', 'comment_author', 'comment_author_url', 'comment_author_email',
-			'comment_content', 'comment_type', 'remote_source', 'remote_source_original'
+			'comment_post_ID',
+			'comment_author',
+			'comment_author_url',
+			'comment_author_email',
+			'comment_content',
+			'comment_type',
+			'remote_source',
+			'remote_source_original'
 		);
 
 		$comment_ID = wp_new_comment( $commentdata );

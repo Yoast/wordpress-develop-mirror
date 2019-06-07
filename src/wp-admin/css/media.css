@@ -100,7 +100,7 @@
 .describe-toggle-on,
 .describe-toggle-off {
 	display: block;
-	line-height: 36px;
+	line-height: 2.76923076;
 	float: right;
 	margin-right: 10px;
 }
@@ -132,7 +132,7 @@
 }
 
 .media-item .filename {
-	line-height: 36px;
+	line-height: 2.76923076;
 	overflow: hidden;
 	margin-left: 6px;
 }
@@ -164,7 +164,7 @@
 	overflow: hidden;
 	border-radius: 22px;
 	background: #ddd;
-	box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .media-item .bar {
@@ -174,7 +174,7 @@
 	margin-top: -22px;
 	border-radius: 22px;
 	background-color: #0073aa;
-	box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+	box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
 }
 
 .media-item .progress .percent {
@@ -186,7 +186,7 @@
 	text-align: center;
 	line-height: 22px;
 	font-weight: 400;
-	text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .upload-php .fixed .column-parent {
@@ -211,8 +211,7 @@
 	padding: 10px 0 10px 14px;
 }
 
-.media-item .error-div a.dismiss {
-	display: block;
+.media-item .error-div button.dismiss {
 	float: right;
 	margin: 0 10px 0 15px;
 }
@@ -223,7 +222,7 @@
 
 .find-box {
 	background-color: #fff;
-	box-shadow: 0 3px 6px rgba( 0, 0, 0, 0.3 );
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
 	width: 600px;
 	overflow: hidden;
 	margin-left: -300px;
@@ -240,7 +239,7 @@
 	height: 36px;
 	font-size: 18px;
 	font-weight: 600;
-	line-height: 36px;
+	line-height: 2;
 	padding: 0 36px 0 16px;
 	position: absolute;
 	top: 0;
@@ -311,10 +310,12 @@
 }
 
 #find-posts-close:focus {
-	outline: none;
 	box-shadow:
 		0 0 0 1px #5b9dd9,
-		0 0 2px 1px rgba(30, 140, 190, .8);
+		0 0 2px 1px rgba(30, 140, 190, 0.8);
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
+	outline-offset: -2px;
 }
 
 #find-posts-close:before {
@@ -336,13 +337,13 @@
 	right: 0;
 }
 
-@media screen and ( max-width: 782px ) {
+@media screen and (max-width: 782px) {
 	.find-box-inside {
 		bottom: 57px;
 	}
 }
 
-@media screen and ( max-width: 660px ) {
+@media screen and (max-width: 660px) {
 
 	.find-box {
 		top: 0;
@@ -365,28 +366,6 @@
 	opacity: 0.7;
 	filter: alpha(opacity=70);
 	z-index: 100100;
-}
-
-ul#dismissed-updates {
-	display: none;
-}
-
-form.upgrade {
-	margin-top: 8px;
-}
-
-form.upgrade .hint {
-	font-style: italic;
-	font-size: 85%;
-	margin: -0.5em 0 2em 0;
-}
-
-#poststuff .inside .the-tagcloud {
-	margin: 5px 0 10px;
-	padding: 8px;
-	border: 1px solid #ddd;
-	line-height: 1.8em;
-	word-spacing: 3px;
 }
 
 .drag-drop #drag-drop-area {
@@ -461,7 +440,7 @@ border color while dragging a file over the uploader drop area */
 	margin-top: 12px;
 	padding: 0 16px;
 	border-left: 4px solid #dd3d36;
- 	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
 	background-color: #fff;
 }
 
@@ -529,7 +508,9 @@ border color while dragging a file over the uploader drop area */
 	box-shadow:
 		inset 0 0 2px 3px #f1f1f1,
 		inset 0 0 0 7px #5b9dd9;
-	outline: none;
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
+	outline-offset: -6px;
 }
 
 .media-frame.mode-grid .selected.attachment {
@@ -682,18 +663,24 @@ border color while dragging a file over the uploader drop area */
 	box-shadow: none;
 }
 
+.upload-php .media-modal-close:focus,
+.edit-attachment-frame .edit-media-header .left:focus,
+.edit-attachment-frame .edit-media-header .right:focus {
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+}
+
 .upload-php .media-modal-close:focus .media-modal-icon:before,
 .upload-php .media-modal-close:hover .media-modal-icon:before {
 	color: #000;
 }
 
-.edit-attachment-frame .edit-media-header .left:before,
-.rtl .edit-attachment-frame .edit-media-header .right:before {
+.edit-attachment-frame .edit-media-header .left:before {
 	content: "\f341";
 }
 
-.edit-attachment-frame .edit-media-header .right:before,
-.rtl .edit-attachment-frame .edit-media-header .left:before {
+.edit-attachment-frame .edit-media-header .right:before {
 	content: "\f345";
 }
 
@@ -766,7 +753,7 @@ border color while dragging a file over the uploader drop area */
 .edit-attachment-frame input,
 .edit-attachment-frame textarea {
 	padding: 6px 8px;
-	line-height: 16px;
+	line-height: 1.14285714;
 }
 
 .edit-attachment-frame .attachment-info {
@@ -814,6 +801,13 @@ border color while dragging a file over the uploader drop area */
 /*------------------------------------------------------------------------------
   14.2 - Image Editor
 ------------------------------------------------------------------------------*/
+.wp_attachment_details .attachment-alt-text {
+	margin-bottom: 5px;
+}
+
+.wp_attachment_details .attachment-alt-text-description {
+	margin-top: 5px;
+}
 
 .wp_attachment_details label[for="content"] {
 	font-size: 13px;
@@ -892,7 +886,6 @@ border color while dragging a file over the uploader drop area */
 	margin: -10px 0 0 -10px;
 	background: transparent url(../images/spinner.gif) no-repeat center;
 	background-size: 20px 20px;
-	-webkit-transform: translateZ(0);
 	transform: translateZ(0);
 }
 
@@ -945,7 +938,7 @@ border color while dragging a file over the uploader drop area */
 	background: #f1f1f1;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	line-height: 16px;
+	line-height: 1.23076923;
 	color: #72777c;
 }
 
@@ -1081,8 +1074,9 @@ border color while dragging a file over the uploader drop area */
 .image-editor .imgedit-settings .imgedit-help-toggle:focus {
 	color: #0074a2;
 	border-color: #5b9dd9;
-	outline: none;
-	box-shadow: 0 0 3px rgba( 0, 115, 170, .8 );
+	box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
 }
 
 .form-table td.imgedit-response {
@@ -1165,10 +1159,10 @@ audio, video {
 	}
 }
 
-@media screen and ( max-width: 782px ) {
+@media screen and (max-width: 782px) {
 	.wp_attachment_details label[for="content"] {
 		font-size: 14px;
-		line-height: 1.5em;
+		line-height: 1.5;
 	}
 
 	.media-upload-form .media-item.error,
@@ -1209,7 +1203,7 @@ audio, video {
 	}
 }
 
-@media only screen and ( max-width: 782px ) {
+@media only screen and (max-width: 782px) {
 	.media-frame.mode-select .attachments-browser.fixed .media-toolbar {
 		top: 46px;
 		right: 10px;

@@ -127,7 +127,8 @@ if ( $doaction ) {
 					'trashed' => $trashed,
 					'ids'     => join( ',', $post_ids ),
 					'locked'  => $locked,
-				), $sendback
+				),
+				$sendback
 			);
 			break;
 		case 'untrash':
@@ -199,6 +200,11 @@ $wp_list_table->prepare_items();
 wp_enqueue_script( 'inline-edit-post' );
 wp_enqueue_script( 'heartbeat' );
 
+if ( 'wp_block' === $post_type ) {
+	wp_enqueue_script( 'wp-list-reusable-blocks' );
+	wp_enqueue_style( 'wp-list-reusable-blocks' );
+}
+
 $title = $post_type_object->labels->name;
 
 if ( 'post' == $post_type ) {
@@ -251,7 +257,7 @@ if ( 'post' == $post_type ) {
 	get_current_screen()->set_help_sidebar(
 		'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 		'<p>' . __( '<a href="https://codex.wordpress.org/Posts_Screen">Documentation on Managing Posts</a>' ) . '</p>' .
-		'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+		'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 	);
 
 } elseif ( 'page' == $post_type ) {
@@ -276,7 +282,7 @@ if ( 'post' == $post_type ) {
 	get_current_screen()->set_help_sidebar(
 		'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 		'<p>' . __( '<a href="https://codex.wordpress.org/Pages_Screen">Documentation on Managing Pages</a>' ) . '</p>' .
-		'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+		'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 	);
 
 }
@@ -290,7 +296,8 @@ get_current_screen()->set_screen_reader_content(
 );
 
 add_screen_option(
-	'per_page', array(
+	'per_page',
+	array(
 		'default' => 20,
 		'option'  => 'edit_' . $post_type . '_per_page',
 	)
@@ -304,8 +311,8 @@ $bulk_counts = array(
 	'untrashed' => isset( $_REQUEST['untrashed'] ) ? absint( $_REQUEST['untrashed'] ) : 0,
 );
 
-$bulk_messages         = array();
-$bulk_messages['post'] = array(
+$bulk_messages             = array();
+$bulk_messages['post']     = array(
 	'updated'   => _n( '%s post updated.', '%s posts updated.', $bulk_counts['updated'] ),
 	'locked'    => ( 1 == $bulk_counts['locked'] ) ? __( '1 post not updated, somebody is editing it.' ) :
 					_n( '%s post not updated, somebody is editing it.', '%s posts not updated, somebody is editing them.', $bulk_counts['locked'] ),
@@ -313,13 +320,20 @@ $bulk_messages['post'] = array(
 	'trashed'   => _n( '%s post moved to the Trash.', '%s posts moved to the Trash.', $bulk_counts['trashed'] ),
 	'untrashed' => _n( '%s post restored from the Trash.', '%s posts restored from the Trash.', $bulk_counts['untrashed'] ),
 );
-$bulk_messages['page'] = array(
+$bulk_messages['page']     = array(
 	'updated'   => _n( '%s page updated.', '%s pages updated.', $bulk_counts['updated'] ),
 	'locked'    => ( 1 == $bulk_counts['locked'] ) ? __( '1 page not updated, somebody is editing it.' ) :
 					_n( '%s page not updated, somebody is editing it.', '%s pages not updated, somebody is editing them.', $bulk_counts['locked'] ),
 	'deleted'   => _n( '%s page permanently deleted.', '%s pages permanently deleted.', $bulk_counts['deleted'] ),
 	'trashed'   => _n( '%s page moved to the Trash.', '%s pages moved to the Trash.', $bulk_counts['trashed'] ),
 	'untrashed' => _n( '%s page restored from the Trash.', '%s pages restored from the Trash.', $bulk_counts['untrashed'] ),
+);
+$bulk_messages['wp_block'] = array(
+	'updated'   => _n( '%s block updated.', '%s blocks updated.', $bulk_counts['updated'] ),
+	'locked'    => ( 1 == $bulk_counts['locked'] ) ? __( '1 block not updated, somebody is editing it.' ) : _n( '%s block not updated, somebody is editing it.', '%s blocks not updated, somebody is editing them.', $bulk_counts['locked'] ),
+	'deleted'   => _n( '%s block permanently deleted.', '%s blocks permanently deleted.', $bulk_counts['deleted'] ),
+	'trashed'   => _n( '%s block moved to the Trash.', '%s blocks moved to the Trash.', $bulk_counts['trashed'] ),
+	'untrashed' => _n( '%s block restored from the Trash.', '%s blocks restored from the Trash.', $bulk_counts['untrashed'] ),
 );
 
 /**
@@ -329,9 +343,9 @@ $bulk_messages['page'] = array(
  *
  * @since 3.7.0
  *
- * @param array $bulk_messages Arrays of messages, each keyed by the corresponding post type. Messages are
- *                             keyed with 'updated', 'locked', 'deleted', 'trashed', and 'untrashed'.
- * @param array $bulk_counts   Array of item counts for each message, used to build internationalized strings.
+ * @param array[] $bulk_messages Arrays of messages, each keyed by the corresponding post type. Messages are
+ *                               keyed with 'updated', 'locked', 'deleted', 'trashed', and 'untrashed'.
+ * @param int[]   $bulk_counts   Array of item counts for each message, used to build internationalized strings.
  */
 $bulk_messages = apply_filters( 'bulk_post_updated_messages', $bulk_messages, $bulk_counts );
 $bulk_counts   = array_filter( $bulk_counts );

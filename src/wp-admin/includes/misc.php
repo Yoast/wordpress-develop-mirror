@@ -165,7 +165,8 @@ function insert_with_markers( $filename, $marker, $insertion ) {
 
 	// Generate the new file data
 	$new_file_data = implode(
-		"\n", array_merge(
+		"\n",
+		array_merge(
 			$pre_lines,
 			array( $start_marker ),
 			$insertion,
@@ -196,6 +197,8 @@ function insert_with_markers( $filename, $marker, $insertion ) {
  * @since 1.5.0
  *
  * @global WP_Rewrite $wp_rewrite
+ *
+ * @return bool|null True on write success, false on failure. Null in multisite.
  */
 function save_mod_rewrite_rules() {
 	if ( is_multisite() ) {
@@ -203,6 +206,9 @@ function save_mod_rewrite_rules() {
 	}
 
 	global $wp_rewrite;
+
+	// Ensure get_home_path() is declared.
+	require_once( ABSPATH . 'wp-admin/includes/file.php' );
 
 	$home_path     = get_home_path();
 	$htaccess_file = $home_path . '.htaccess';
@@ -229,7 +235,7 @@ function save_mod_rewrite_rules() {
  *
  * @global WP_Rewrite $wp_rewrite
  *
- * @return bool True if web.config was updated successfully
+ * @return bool|null True on write success, false on failure. Null in multisite.
  */
 function iis7_save_url_rewrite_rules() {
 	if ( is_multisite() ) {
@@ -238,12 +244,15 @@ function iis7_save_url_rewrite_rules() {
 
 	global $wp_rewrite;
 
+	// Ensure get_home_path() is declared.
+	require_once( ABSPATH . 'wp-admin/includes/file.php' );
+
 	$home_path       = get_home_path();
 	$web_config_file = $home_path . 'web.config';
 
 	// Using win_is_writable() instead of is_writable() because of a bug in Windows PHP
 	if ( iis7_supports_permalinks() && ( ( ! file_exists( $web_config_file ) && win_is_writable( $home_path ) && $wp_rewrite->using_mod_rewrite_permalinks() ) || win_is_writable( $web_config_file ) ) ) {
-		$rule = $wp_rewrite->iis7_url_rewrite_rules( false, '', '' );
+		$rule = $wp_rewrite->iis7_url_rewrite_rules( false );
 		if ( ! empty( $rule ) ) {
 			return iis7_add_rewrite_rule( $web_config_file, $rule );
 		} else {
@@ -304,6 +313,10 @@ function wp_make_theme_file_tree( $allowed_files ) {
  * @since 4.9.0
  * @access private
  *
+ * @global string $relative_file Name of the file being edited relative to the
+ *                               theme directory.
+ * @global string $stylesheet    The stylesheet name of the theme being edited.
+ *
  * @param array|string $tree  List of file/folder paths, or filename.
  * @param int          $level The aria-level for the current iteration.
  * @param int          $size  The aria-setsize for the current iteration.
@@ -349,7 +362,7 @@ function wp_print_theme_file_tree( $tree, $level = 2, $size = 1, $index = 1 ) {
 				aria-posinset="<?php echo esc_attr( $index ); ?>">
 				<?php
 				$file_description = esc_html( get_file_description( $filename ) );
-				if ( $file_description !== $filename && basename( $filename ) !== $file_description ) {
+				if ( $file_description !== $filename && wp_basename( $filename ) !== $file_description ) {
 					$file_description .= '<br /><span class="nonessential">(' . esc_html( $filename ) . ')</span>';
 				}
 
@@ -371,7 +384,7 @@ function wp_print_theme_file_tree( $tree, $level = 2, $size = 1, $index = 1 ) {
  * @since 4.9.0
  * @access private
  *
- * @param string $plugin_editable_files List of plugin file paths.
+ * @param array $plugin_editable_files List of plugin file paths.
  * @return array Tree structure for listing plugin files.
  */
 function wp_make_plugin_file_tree( $plugin_editable_files ) {
@@ -556,7 +569,7 @@ function wp_doc_link_parse( $content ) {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $ignore_functions Functions and classes to be ignored.
+	 * @param string[] $ignore_functions Array of names of functions and classes to be ignored.
 	 */
 	$ignore_functions = apply_filters( 'documentation_ignore_functions', $ignore_functions );
 
@@ -611,6 +624,8 @@ function set_screen_options() {
 			case 'upload_per_page':
 			case 'edit_tags_per_page':
 			case 'plugins_per_page':
+			case 'export_personal_data_requests_per_page':
+			case 'remove_personal_data_requests_per_page':
 				// Network admin
 			case 'sites_network_per_page':
 			case 'users_network_per_page':
@@ -636,7 +651,7 @@ function set_screen_options() {
 				 *
 				 * @see set_screen_options()
 				 *
-				 * @param bool|int $value  Screen option value. Default false to skip.
+				 * @param bool     $keep   Whether to save or skip saving the screen option value. Default false.
 				 * @param string   $option The option name.
 				 * @param int      $value  The number of rows to use.
 				 */
@@ -845,7 +860,8 @@ function admin_color_scheme_picker( $user_id ) {
 				array(
 					'fresh' => '',
 					'light' => '',
-				), $_wp_admin_css_colors
+				),
+				$_wp_admin_css_colors
 			)
 		);
 	}
@@ -887,12 +903,13 @@ function admin_color_scheme_picker( $user_id ) {
 
 		endforeach;
 
-	?>
+		?>
 	</fieldset>
 	<?php
 }
 
 /**
+ *
  * @global array $_wp_admin_css_colors
  */
 function wp_color_scheme_settings() {
@@ -912,7 +929,7 @@ function wp_color_scheme_settings() {
 	} else {
 		// Fall back to the default set of icon colors if the default scheme is missing.
 		$icon_colors = array(
-			'base'    => '#82878c',
+			'base'    => '#a0a5aa',
 			'focus'   => '#00a0d2',
 			'current' => '#fff',
 		);
@@ -1041,17 +1058,33 @@ function wp_refresh_post_nonces( $response, $data, $screen_id ) {
 		}
 
 		$response['wp-refresh-post-nonces'] = array(
-			'replace'        => array(
+			'replace' => array(
 				'getpermalinknonce'    => wp_create_nonce( 'getpermalink' ),
 				'samplepermalinknonce' => wp_create_nonce( 'samplepermalink' ),
 				'closedpostboxesnonce' => wp_create_nonce( 'closedpostboxes' ),
 				'_ajax_linking_nonce'  => wp_create_nonce( 'internal-linking' ),
 				'_wpnonce'             => wp_create_nonce( 'update-post_' . $post_id ),
 			),
-			'heartbeatNonce' => wp_create_nonce( 'heartbeat-nonce' ),
 		);
 	}
 
+	return $response;
+}
+
+/**
+ * Add the latest Heartbeat and REST-API nonce to the Heartbeat response.
+ *
+ * @since 5.0.0
+ *
+ * @param array  $response  The Heartbeat response.
+ * @return array The Heartbeat response.
+ */
+function wp_refresh_heartbeat_nonces( $response ) {
+	// Refresh the Rest API nonce.
+	$response['rest_nonce'] = wp_create_nonce( 'wp_rest' );
+
+	// Refresh the Heartbeat nonce.
+	$response['heartbeat_nonce'] = wp_create_nonce( 'heartbeat-nonce' );
 	return $response;
 }
 
@@ -1137,7 +1170,7 @@ function wp_admin_canonical_url() {
 			window.history.replaceState( null, null, document.getElementById( 'wp-admin-canonical' ).href + window.location.hash );
 		}
 	</script>
-<?php
+	<?php
 }
 
 /**
@@ -1146,15 +1179,17 @@ function wp_admin_canonical_url() {
  * @since 4.9.0
  */
 function wp_admin_headers() {
-	$policy = 'same-origin';
+	$policy = 'strict-origin-when-cross-origin';
 
 	/**
-	 * Filters the admin referrer policy header value. Default 'same-origin'.
+	 * Filters the admin referrer policy header value.
 	 *
 	 * @since 4.9.0
+	 * @since 4.9.5 The default value was changed to 'strict-origin-when-cross-origin'.
+	 *
 	 * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 	 *
-	 * @param string $policy The referrer policy header value.
+	 * @param string $policy The admin referrer policy header value. Default 'strict-origin-when-cross-origin'.
 	 */
 	$policy = apply_filters( 'admin_referrer_policy', $policy );
 
@@ -1195,7 +1230,7 @@ function update_option_new_admin_email( $old_value, $value ) {
 		return;
 	}
 
-	$hash            = md5( $value . time() . mt_rand() );
+	$hash            = md5( $value . time() . wp_rand() );
 	$new_admin_email = array(
 		'hash'     => $hash,
 		'newemail' => $value,
@@ -1254,9 +1289,94 @@ All at ###SITENAME###
 	$content      = str_replace( '###SITENAME###', wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ), $content );
 	$content      = str_replace( '###SITEURL###', home_url(), $content );
 
+	/* translators: New admin email address notification email subject. %s: Site title */
 	wp_mail( $value, sprintf( __( '[%s] New Admin Email Address' ), wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ), $content );
 
 	if ( $switched_locale ) {
 		restore_previous_locale();
 	}
+}
+
+/**
+ * Appends '(Draft)' to draft page titles in the privacy page dropdown
+ * so that unpublished content is obvious.
+ *
+ * @since 4.9.8
+ * @access private
+ *
+ * @param string  $title Page title.
+ * @param WP_Post $page  Page data object.
+ *
+ * @return string Page title.
+ */
+function _wp_privacy_settings_filter_draft_page_titles( $title, $page ) {
+	if ( 'draft' === $page->post_status && 'privacy' === get_current_screen()->id ) {
+		/* translators: %s: Page Title */
+		$title = sprintf( __( '%s (Draft)' ), $title );
+	}
+
+	return $title;
+}
+
+/**
+ * Checks if the user needs to update PHP.
+ *
+ * @since 5.1.0
+ * @since 5.1.1 Added the {@see 'wp_is_php_version_acceptable'} filter.
+ *
+ * @return array|false $response Array of PHP version data. False on failure.
+ */
+function wp_check_php_version() {
+	$version = phpversion();
+	$key     = md5( $version );
+
+	$response = get_site_transient( 'php_check_' . $key );
+	if ( false === $response ) {
+		$url = 'http://api.wordpress.org/core/serve-happy/1.0/';
+		if ( wp_http_supports( array( 'ssl' ) ) ) {
+			$url = set_url_scheme( $url, 'https' );
+		}
+
+		$url = add_query_arg( 'php_version', $version, $url );
+
+		$response = wp_remote_get( $url );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return false;
+		}
+
+		/**
+		 * Response should be an array with:
+		 *  'recommended_version' - string - The PHP version recommended by WordPress.
+		 *  'is_supported' - boolean - Whether the PHP version is actively supported.
+		 *  'is_secure' - boolean - Whether the PHP version receives security updates.
+		 *  'is_acceptable' - boolean - Whether the PHP version is still acceptable for WordPress.
+		 */
+		$response = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( ! is_array( $response ) ) {
+			return false;
+		}
+
+		set_site_transient( 'php_check_' . $key, $response, WEEK_IN_SECONDS );
+	}
+
+	if ( isset( $response['is_acceptable'] ) && $response['is_acceptable'] ) {
+		/**
+		 * Filters whether the active PHP version is considered acceptable by WordPress.
+		 *
+		 * Returning false will trigger a PHP version warning to show up in the admin dashboard to administrators.
+		 *
+		 * This filter is only run if the wordpress.org Serve Happy API considers the PHP version acceptable, ensuring
+		 * that this filter can only make this check stricter, but not loosen it.
+		 *
+		 * @since 5.1.1
+		 *
+		 * @param bool   $is_acceptable Whether the PHP version is considered acceptable. Default true.
+		 * @param string $version       PHP version checked.
+		 */
+		$response['is_acceptable'] = (bool) apply_filters( 'wp_is_php_version_acceptable', true, $version );
+	}
+
+	return $response;
 }

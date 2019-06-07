@@ -146,7 +146,7 @@ if ( $post_id ) {
 	$comments_count      = wp_count_comments( $post_id );
 	$draft_or_post_title = wp_html_excerpt( _draft_or_post_title( $post_id ), 50, '&hellip;' );
 	if ( $comments_count->moderated > 0 ) {
-		/* translators: 1: comments count 2: post title */
+		/* translators: 1: comments count, 2: post title */
 		$title = sprintf(
 			__( 'Comments (%1$s) on &#8220;%2$s&#8221;' ),
 			number_format_i18n( $comments_count->moderated ),
@@ -201,7 +201,7 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __( '<a href="https://codex.wordpress.org/Administration_Screens#Comments">Documentation on Comments</a>' ) . '</p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Comment_Spam">Documentation on Comment Spam</a>' ) . '</p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Keyboard_Shortcuts">Documentation on Keyboard Shortcuts</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 get_current_screen()->set_screen_reader_content(

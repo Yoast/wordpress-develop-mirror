@@ -97,7 +97,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 			 *
 			 * @since 3.1.0
 			 *
-			 * @param array $all An array of WP_Theme objects to display in the list table.
+			 * @param WP_Theme[] $all Array of WP_Theme objects to display in the list table.
 			 */
 			'all'      => apply_filters( 'all_themes', wp_get_themes() ),
 			'search'   => array(),
@@ -153,7 +153,9 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		$total_this_page = $totals[ $status ];
 
 		wp_localize_script(
-			'updates', '_wpUpdatesItemCounts', array(
+			'updates',
+			'_wpUpdatesItemCounts',
+			array(
 				'themes' => $totals,
 				'totals' => wp_get_update_data(),
 			)
@@ -423,7 +425,8 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 						'theme'  => $theme_key,
 						'paged'  => $page,
 						's'      => $s,
-					), $url
+					),
+					$url
 				);
 
 				if ( $this->is_site_themes ) {
@@ -448,7 +451,8 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 					'theme'  => $theme_key,
 					'paged'  => $page,
 					's'      => $s,
-				), $url
+				),
+				$url
 			);
 
 			if ( $this->is_site_themes ) {
@@ -475,7 +479,8 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 					'theme_status' => $context,
 					'paged'        => $page,
 					's'            => $s,
-				), 'themes.php'
+				),
+				'themes.php'
 			);
 
 			/* translators: %s: theme name */
@@ -506,7 +511,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		 *
 		 * @since 2.8.0
 		 *
-		 * @param array    $actions An array of action links.
+		 * @param string[] $actions An array of action links.
 		 * @param WP_Theme $theme   The current WP_Theme object.
 		 * @param string   $context Status of the theme, one of 'all', 'enabled', or 'disabled'.
 		 */
@@ -522,7 +527,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param array    $actions An array of action links.
+		 * @param string[] $actions An array of action links.
 		 * @param WP_Theme $theme   The current WP_Theme object.
 		 * @param string   $context Status of the theme, one of 'all', 'enabled', or 'disabled'.
 		 */
@@ -587,7 +592,7 @@ class WP_MS_Themes_List_Table extends WP_List_Table {
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param array    $theme_meta An array of the theme's metadata,
+		 * @param string[] $theme_meta An array of the theme's metadata,
 		 *                             including the version, author, and
 		 *                             theme URI.
 		 * @param string   $stylesheet Directory name of the theme.

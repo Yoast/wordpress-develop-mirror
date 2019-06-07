@@ -47,6 +47,7 @@ class Language_Pack_Upgrader_Skin extends WP_Upgrader_Skin {
 
 		echo '<div class="update-messages lp-show-latest">';
 
+		/* translators: 1: name of project, 2: language */
 		printf( '<h2>' . __( 'Updating translations for %1$s (%2$s)&#8230;' ) . '</h2>', $name, $this->language_update->language );
 	}
 
@@ -77,7 +78,7 @@ class Language_Pack_Upgrader_Skin extends WP_Upgrader_Skin {
 		 *
 		 * @since 3.7.0
 		 *
-		 * @param array $update_actions Array of translations update links.
+		 * @param string[] $update_actions Array of translations update links.
 		 */
 		$update_actions = apply_filters( 'update_translations_complete_actions', $update_actions );
 

@@ -46,7 +46,9 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 	public function register_routes() {
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -64,7 +66,9 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the user.' ),
@@ -108,7 +112,9 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/me', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/me',
+			array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_current_item' ),
@@ -192,6 +198,20 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 			return new WP_Error( 'rest_forbidden_orderby', __( 'Sorry, you are not allowed to order users by this parameter.' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
+		if ( 'authors' === $request['who'] ) {
+			$can_view = false;
+			$types    = get_post_types( array( 'show_in_rest' => true ), 'objects' );
+			foreach ( $types as $type ) {
+				if ( post_type_supports( $type->name, 'author' )
+					&& current_user_can( $type->cap->edit_posts ) ) {
+					$can_view = true;
+				}
+			}
+			if ( ! $can_view ) {
+				return new WP_Error( 'rest_forbidden_who', __( 'Sorry, you are not allowed to query users by this parameter.' ), array( 'status' => rest_authorization_required_code() ) );
+			}
+		}
+
 		return true;
 	}
 
@@ -256,7 +276,9 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 			$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		}
 
-		if ( ! current_user_can( 'list_users' ) ) {
+		if ( isset( $registered['who'] ) && ! empty( $request['who'] ) && 'authors' === $request['who'] ) {
+			$prepared_args['who'] = 'authors';
+		} elseif ( ! current_user_can( 'list_users' ) ) {
 			$prepared_args['has_published_posts'] = get_post_types( array( 'show_in_rest' => true ), 'names' );
 		}
 
@@ -307,7 +329,7 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
+		$base = add_query_arg( urlencode_deep( $request->get_query_params() ), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
 
@@ -544,6 +566,17 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 
 		$request->set_param( 'context', 'edit' );
 
+		/**
+		 * Fires after a user is completely created or updated via the REST API.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param WP_User         $user     Inserted or updated user object.
+		 * @param WP_REST_Request $request  Request object.
+		 * @param bool            $creating True when creating a user, false when updating.
+		 */
+		do_action( 'rest_after_insert_user', $user, $request, true );
+
 		$response = $this->prepare_item_for_response( $user, $request );
 		$response = rest_ensure_response( $response );
 
@@ -608,7 +641,9 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 			return new WP_Error( 'rest_user_invalid_id', __( 'Invalid user ID.' ), array( 'status' => 404 ) );
 		}
 
-		if ( email_exists( $request['email'] ) && $request['email'] !== $user->user_email ) {
+		$owner_id = email_exists( $request['email'] );
+
+		if ( $owner_id && $owner_id !== $id ) {
 			return new WP_Error( 'rest_user_invalid_email', __( 'Invalid email address.' ), array( 'status' => 400 ) );
 		}
 
@@ -666,6 +701,9 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 		}
 
 		$request->set_param( 'context', 'edit' );
+
+		/** This action is documented in wp-includes/rest-api/endpoints/class-wp-rest-users-controller.php */
+		do_action( 'rest_after_insert_user', $user, $request, false );
 
 		$response = $this->prepare_item_for_response( $user, $request );
 		$response = rest_ensure_response( $response );
@@ -831,78 +869,78 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 	public function prepare_item_for_response( $user, $request ) {
 
 		$data   = array();
-		$schema = $this->get_item_schema();
+		$fields = $this->get_fields_for_response( $request );
 
-		if ( ! empty( $schema['properties']['id'] ) ) {
+		if ( in_array( 'id', $fields, true ) ) {
 			$data['id'] = $user->ID;
 		}
 
-		if ( ! empty( $schema['properties']['username'] ) ) {
+		if ( in_array( 'username', $fields, true ) ) {
 			$data['username'] = $user->user_login;
 		}
 
-		if ( ! empty( $schema['properties']['name'] ) ) {
+		if ( in_array( 'name', $fields, true ) ) {
 			$data['name'] = $user->display_name;
 		}
 
-		if ( ! empty( $schema['properties']['first_name'] ) ) {
+		if ( in_array( 'first_name', $fields, true ) ) {
 			$data['first_name'] = $user->first_name;
 		}
 
-		if ( ! empty( $schema['properties']['last_name'] ) ) {
+		if ( in_array( 'last_name', $fields, true ) ) {
 			$data['last_name'] = $user->last_name;
 		}
 
-		if ( ! empty( $schema['properties']['email'] ) ) {
+		if ( in_array( 'email', $fields, true ) ) {
 			$data['email'] = $user->user_email;
 		}
 
-		if ( ! empty( $schema['properties']['url'] ) ) {
+		if ( in_array( 'url', $fields, true ) ) {
 			$data['url'] = $user->user_url;
 		}
 
-		if ( ! empty( $schema['properties']['description'] ) ) {
+		if ( in_array( 'description', $fields, true ) ) {
 			$data['description'] = $user->description;
 		}
 
-		if ( ! empty( $schema['properties']['link'] ) ) {
+		if ( in_array( 'link', $fields, true ) ) {
 			$data['link'] = get_author_posts_url( $user->ID, $user->user_nicename );
 		}
 
-		if ( ! empty( $schema['properties']['locale'] ) ) {
+		if ( in_array( 'locale', $fields, true ) ) {
 			$data['locale'] = get_user_locale( $user );
 		}
 
-		if ( ! empty( $schema['properties']['nickname'] ) ) {
+		if ( in_array( 'nickname', $fields, true ) ) {
 			$data['nickname'] = $user->nickname;
 		}
 
-		if ( ! empty( $schema['properties']['slug'] ) ) {
+		if ( in_array( 'slug', $fields, true ) ) {
 			$data['slug'] = $user->user_nicename;
 		}
 
-		if ( ! empty( $schema['properties']['roles'] ) ) {
+		if ( in_array( 'roles', $fields, true ) ) {
 			// Defensively call array_values() to ensure an array is returned.
 			$data['roles'] = array_values( $user->roles );
 		}
 
-		if ( ! empty( $schema['properties']['registered_date'] ) ) {
-			$data['registered_date'] = date( 'c', strtotime( $user->user_registered ) );
+		if ( in_array( 'registered_date', $fields, true ) ) {
+			$data['registered_date'] = gmdate( 'c', strtotime( $user->user_registered ) );
 		}
 
-		if ( ! empty( $schema['properties']['capabilities'] ) ) {
+		if ( in_array( 'capabilities', $fields, true ) ) {
 			$data['capabilities'] = (object) $user->allcaps;
 		}
 
-		if ( ! empty( $schema['properties']['extra_capabilities'] ) ) {
+		if ( in_array( 'extra_capabilities', $fields, true ) ) {
 			$data['extra_capabilities'] = (object) $user->caps;
 		}
 
-		if ( ! empty( $schema['properties']['avatar_urls'] ) ) {
+		if ( in_array( 'avatar_urls', $fields, true ) ) {
 			$data['avatar_urls'] = rest_get_avatar_urls( $user->user_email );
 		}
 
-		if ( ! empty( $schema['properties']['meta'] ) ) {
+		if ( in_array( 'meta', $fields, true ) ) {
 			$data['meta'] = $this->meta->get_value( $user->ID, $request );
 		}
 
@@ -1369,6 +1407,14 @@ class WP_REST_Users_Controller extends WP_REST_Controller {
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'string',
+			),
+		);
+
+		$query_params['who'] = array(
+			'description' => __( 'Limit result set to users who are considered authors.' ),
+			'type'        => 'string',
+			'enum'        => array(
+				'authors',
 			),
 		);
 

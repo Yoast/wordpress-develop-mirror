@@ -75,8 +75,8 @@ final class WP_Customize_Nav_Menus {
 	 *
 	 * @since 4.5.0
 	 *
-	 * @param array $nonces Array of nonces.
-	 * @return array $nonces Modified array of nonces.
+	 * @param string[] $nonces Array of nonces.
+	 * @return string[] $nonces Modified array of nonces.
 	 */
 	public function filter_nonces( $nonces ) {
 		$nonces['customize-menus'] = wp_create_nonce( 'customize-menus' );
@@ -180,7 +180,8 @@ final class WP_Customize_Nav_Menus {
 			}
 
 			$posts = array_merge(
-				$posts, get_posts(
+				$posts,
+				get_posts(
 					array(
 						'numberposts' => 10,
 						'offset'      => 10 * $page,
@@ -209,7 +210,8 @@ final class WP_Customize_Nav_Menus {
 			}
 		} elseif ( 'taxonomy' === $type ) {
 			$terms = get_terms(
-				$object, array(
+				$object,
+				array(
 					'child_of'     => 0,
 					'exclude'      => '',
 					'hide_empty'   => false,
@@ -324,7 +326,7 @@ final class WP_Customize_Nav_Menus {
 
 		// Prepend list of posts with nav_menus_created_posts search results on first page.
 		$nav_menus_created_posts_setting = $this->manager->get_setting( 'nav_menus_created_posts' );
-		if ( 1 === $args['pagenum'] && $nav_menus_created_posts_setting && count( $nav_menus_created_posts_setting ) > 0 ) {
+		if ( 1 === $args['pagenum'] && $nav_menus_created_posts_setting && count( $nav_menus_created_posts_setting->value() ) > 0 ) {
 			$stub_post_query = new WP_Query(
 				array_merge(
 					$query,
@@ -363,7 +365,8 @@ final class WP_Customize_Nav_Menus {
 		// Query taxonomy terms.
 		$taxonomies = get_taxonomies( array( 'show_in_nav_menus' => true ), 'names' );
 		$terms      = get_terms(
-			$taxonomies, array(
+			$taxonomies,
+			array(
 				'name__like' => $args['s'],
 				'number'     => 20,
 				'offset'     => 20 * ( $args['pagenum'] - 1 ),
@@ -387,7 +390,7 @@ final class WP_Customize_Nav_Menus {
 
 		// Add "Home" link if search term matches. Treat as a page, but switch to custom on add.
 		if ( isset( $args['s'] ) ) {
-			$title = _x( 'Home', 'nav menu home label' );
+			$title   = _x( 'Home', 'nav menu home label' );
 			$matches = function_exists( 'mb_stripos' ) ? false !== mb_stripos( $title, $args['s'] ) : false !== stripos( $title, $args['s'] );
 			if ( $matches ) {
 				$items[] = array(
@@ -592,13 +595,19 @@ final class WP_Customize_Nav_Menus {
 		} else {
 			$description .= '<p>' . __( 'Menus can be displayed in locations defined by your theme.' ) . '</p>';
 		}
+
+		/*
+		 * Once multiple theme supports are allowed in WP_Customize_Panel,
+		 * this panel can be restricted to themes that support menus or widgets.
+		 */
 		$this->manager->add_panel(
 			new WP_Customize_Nav_Menus_Panel(
-				$this->manager, 'nav_menus', array(
+				$this->manager,
+				'nav_menus',
+				array(
 					'title'       => __( 'Menus' ),
 					'description' => $description,
 					'priority'    => 100,
-				// 'theme_supports' => 'menus|widgets', @todo allow multiple theme supports
 				)
 			)
 		);
@@ -620,7 +629,8 @@ final class WP_Customize_Nav_Menus {
 		}
 
 		$this->manager->add_section(
-			'menu_locations', array(
+			'menu_locations',
+			array(
 				'title'       => 1 === $num_locations ? _x( 'View Location', 'menu locations' ) : _x( 'View All Locations', 'menu locations' ),
 				'panel'       => 'nav_menus',
 				'priority'    => 30,
@@ -656,7 +666,8 @@ final class WP_Customize_Nav_Menus {
 				add_filter( "customize_sanitize_{$setting_id}", array( $this, 'intval_base10' ) );
 			} else {
 				$this->manager->add_setting(
-					$setting_id, array(
+					$setting_id,
+					array(
 						'sanitize_callback' => array( $this, 'intval_base10' ),
 						'theme_supports'    => 'menus',
 						'type'              => 'theme_mod',
@@ -673,7 +684,9 @@ final class WP_Customize_Nav_Menus {
 
 			$this->manager->add_control(
 				new WP_Customize_Nav_Menu_Location_Control(
-					$this->manager, $setting_id, array(
+					$this->manager,
+					$setting_id,
+					array(
 						'label'       => $description,
 						'location_id' => $location,
 						'section'     => 'menu_locations',
@@ -691,7 +704,9 @@ final class WP_Customize_Nav_Menus {
 			$section_id = 'nav_menu[' . $menu_id . ']';
 			$this->manager->add_section(
 				new WP_Customize_Nav_Menu_Section(
-					$this->manager, $section_id, array(
+					$this->manager,
+					$section_id,
+					array(
 						'title'    => html_entity_decode( $menu->name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
 						'priority' => 10,
 						'panel'    => 'nav_menus',
@@ -702,7 +717,9 @@ final class WP_Customize_Nav_Menus {
 			$nav_menu_setting_id = 'nav_menu[' . $menu_id . ']';
 			$this->manager->add_setting(
 				new WP_Customize_Nav_Menu_Setting(
-					$this->manager, $nav_menu_setting_id, array(
+					$this->manager,
+					$nav_menu_setting_id,
+					array(
 						'transport' => 'postMessage',
 					)
 				)
@@ -724,7 +741,9 @@ final class WP_Customize_Nav_Menus {
 				$value['nav_menu_term_id'] = $menu_id;
 				$this->manager->add_setting(
 					new WP_Customize_Nav_Menu_Item_Setting(
-						$this->manager, $menu_item_setting_id, array(
+						$this->manager,
+						$menu_item_setting_id,
+						array(
 							'value'     => $value,
 							'transport' => 'postMessage',
 						)
@@ -734,7 +753,9 @@ final class WP_Customize_Nav_Menus {
 				// Create a control for each menu item.
 				$this->manager->add_control(
 					new WP_Customize_Nav_Menu_Item_Control(
-						$this->manager, $menu_item_setting_id, array(
+						$this->manager,
+						$menu_item_setting_id,
+						array(
 							'label'    => $item->title,
 							'section'  => $section_id,
 							'priority' => 10 + $i,
@@ -748,7 +769,8 @@ final class WP_Customize_Nav_Menus {
 
 		// Add the add-new-menu section and controls.
 		$this->manager->add_section(
-			'add_menu', array(
+			'add_menu',
+			array(
 				'type'     => 'new_menu',
 				'title'    => __( 'New Menu' ),
 				'panel'    => 'nav_menus',
@@ -758,7 +780,9 @@ final class WP_Customize_Nav_Menus {
 
 		$this->manager->add_setting(
 			new WP_Customize_Filter_Setting(
-				$this->manager, 'nav_menus_created_posts', array(
+				$this->manager,
+				'nav_menus_created_posts',
+				array(
 					'transport'         => 'postMessage',
 					'type'              => 'option', // To prevent theme prefix in changeset.
 					'default'           => array(),
@@ -854,10 +878,10 @@ final class WP_Customize_Nav_Menus {
 			return new WP_Error( 'unknown_post_type', __( 'Invalid post type.' ) );
 		}
 		if ( empty( $postarr['post_title'] ) ) {
-			return new WP_Error( 'empty_title', __( 'Empty title' ) );
+			return new WP_Error( 'empty_title', __( 'Empty title.' ) );
 		}
 		if ( ! empty( $postarr['post_status'] ) ) {
-			return new WP_Error( 'status_forbidden', __( 'Status is forbidden' ) );
+			return new WP_Error( 'status_forbidden', __( 'Status is forbidden.' ) );
 		}
 
 		/*
@@ -947,7 +971,7 @@ final class WP_Customize_Nav_Menus {
 			}
 
 			$data = array(
-				/* translators: %1$s is the post type name and %2$s is the error message. */
+				/* translators: 1: post type name, 2: error message */
 				'message' => sprintf( __( '%1$s could not be created: %2$s' ), $singular_name, $error->get_error_message() ),
 			);
 			wp_send_json_error( $data );
@@ -981,7 +1005,7 @@ final class WP_Customize_Nav_Menus {
 						<button type="button" class="button-link item-add">
 							<span class="screen-reader-text">
 							<?php
-								/* translators: 1: Title of a menu item, 2: Type of a menu item */
+								/* translators: 1: title of a menu item, 2: type of a menu item */
 								printf( __( 'Add to menu: %1$s (%2$s)' ), '{{ data.title || wp.customize.Menus.data.l10n.untitled }}', '{{ data.type_label }}' );
 							?>
 							</span>
@@ -1036,7 +1060,7 @@ final class WP_Customize_Nav_Menus {
 				</button>
 			</h3>
 		</script>
-	<?php
+		<?php
 	}
 
 	/**
@@ -1094,7 +1118,7 @@ final class WP_Customize_Nav_Menus {
 			}
 			?>
 		</div><!-- #available-menu-items -->
-	<?php
+		<?php
 	}
 
 	/**
@@ -1120,7 +1144,7 @@ final class WP_Customize_Nav_Menus {
 					<?php
 						/* translators: %s: Title of a section with menu items */
 						printf( __( 'Toggle section: %s' ), esc_html( $available_item_type['title'] ) );
-						?>
+					?>
 						</span>
 					<span class="toggle-indicator" aria-hidden="true"></span>
 				</button>

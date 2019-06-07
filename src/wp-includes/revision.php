@@ -474,7 +474,8 @@ function wp_get_post_revisions( $post_id = 0, $args = null ) {
 	}
 
 	$args = array_merge(
-		$args, array(
+		$args,
+		array(
 			'post_parent' => $post->ID,
 			'post_type'   => 'revision',
 			'post_status' => 'inherit',
@@ -581,7 +582,7 @@ function _show_post_preview() {
 		$id = (int) $_GET['preview_id'];
 
 		if ( false === wp_verify_nonce( $_GET['preview_nonce'], 'post_preview_' . $id ) ) {
-			wp_die( __( 'Sorry, you are not allowed to preview drafts.' ) );
+			wp_die( __( 'Sorry, you are not allowed to preview drafts.' ), 403 );
 		}
 
 		add_filter( 'the_preview', '_set_preview' );

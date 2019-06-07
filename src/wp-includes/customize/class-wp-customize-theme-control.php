@@ -103,10 +103,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 			<# if ( data.theme.active ) { #>
 				<div class="theme-id-container">
 					<h3 class="theme-name" id="{{ data.section }}-{{ data.theme.id }}-name">
-						<?php
-						/* translators: %s: theme name */
-						printf( __( '<span>Previewing:</span> %s' ), '{{ data.theme.name }}' );
-						?>
+						<span><?php _e( 'Previewing:' ); ?></span> {{ data.theme.name }}
 					</h3>
 					<div class="theme-actions">
 						<button type="button" class="button button-primary customize-theme" aria-label="<?php echo esc_attr( $customize_label ); ?>"><?php _e( 'Customize' ); ?></button>
@@ -117,7 +114,7 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 				<div class="theme-id-container">
 					<h3 class="theme-name" id="{{ data.section }}-{{ data.theme.id }}-name">{{ data.theme.name }}</h3>
 					<div class="theme-actions">
-						<button type="button" class="button button-primary preview-theme" aria-label="<?php echo esc_attr( $preview_label ); ?>" data-slug="{{ data.theme.id }}"><?php _e( 'Live Preview' ); ?></span>
+						<button type="button" class="button button-primary preview-theme" aria-label="<?php echo esc_attr( $preview_label ); ?>" data-slug="{{ data.theme.id }}"><?php _e( 'Live Preview' ); ?></button>
 					</div>
 				</div>
 				<div class="notice notice-success notice-alt"><p><?php _ex( 'Installed', 'theme' ); ?></p></div>
@@ -130,6 +127,6 @@ class WP_Customize_Theme_Control extends WP_Customize_Control {
 				</div>
 			<# } #>
 		</div>
-	<?php
+		<?php
 	}
 }

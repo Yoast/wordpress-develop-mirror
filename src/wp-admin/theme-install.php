@@ -41,7 +41,9 @@ foreach ( $installed_themes as $k => $v ) {
 }
 
 wp_localize_script(
-	'theme', '_wpThemeSettings', array(
+	'theme',
+	'_wpThemeSettings',
+	array(
 		'themes'          => false,
 		'settings'        => array(
 			'isInstall'  => true,
@@ -58,7 +60,7 @@ wp_localize_script(
 			'error'               => sprintf(
 				/* translators: %s: support forums URL */
 				__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.' ),
-				__( 'https://wordpress.org/support/' )
+				__( 'https://wordpress.org/support/forums/' )
 			),
 			'tryAgain'            => __( 'Try Again' ),
 			'themesFound'         => __( 'Number of Themes found: %d' ),
@@ -125,7 +127,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Using_Themes#Adding_New_Themes">Documentation on Adding New Themes</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
@@ -143,7 +145,7 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $tabs The tabs shown on the Add Themes screen. Default is 'upload'.
+	 * @param string[] $tabs Associative array of the tabs shown on the Add Themes screen. Default is 'upload'.
 	 */
 	$tabs = apply_filters( 'install_themes_tabs', array( 'upload' => __( 'Upload Theme' ) ) );
 	if ( ! empty( $tabs['upload'] ) && current_user_can( 'upload_themes' ) ) {
@@ -309,8 +311,8 @@ if ( $tab ) {
 	<div class="wp-full-overlay-sidebar">
 		<div class="wp-full-overlay-header">
 			<button class="close-full-overlay"><span class="screen-reader-text"><?php _e( 'Close' ); ?></span></button>
-			<button class="previous-theme"><span class="screen-reader-text"><?php _ex( 'Previous', 'Button label for a theme' ); ?></span></button>
-			<button class="next-theme"><span class="screen-reader-text"><?php _ex( 'Next', 'Button label for a theme' ); ?></span></button>
+			<button class="previous-theme"><span class="screen-reader-text"><?php _e( 'Previous theme' ); ?></span></button>
+			<button class="next-theme"><span class="screen-reader-text"><?php _e( 'Next theme' ); ?></span></button>
 			<# if ( data.installed ) { #>
 				<a class="button button-primary activate" href="{{ data.activate_url }}"><?php _e( 'Activate' ); ?></a>
 			<# } else { #>
@@ -333,7 +335,12 @@ if ( $tab ) {
 						<# if ( data.rating ) { #>
 							<div class="theme-rating">
 								{{{ data.stars }}}
-								<span class="num-ratings">({{ data.num_ratings }})</span>
+								<a class="num-ratings" href="{{ data.reviews_url }}">
+									<?php
+									/* translators: %s: number of ratings */
+									echo sprintf( __( '(%s ratings)' ), '{{ data.num_ratings }}' );
+									?>
+								</a>
 							</div>
 						<# } else { #>
 							<span class="no-rating"><?php _e( 'This theme has not been rated yet.' ); ?></span>

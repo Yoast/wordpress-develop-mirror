@@ -41,7 +41,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Settings_Reading_Screen">Documentation on Reading Settings</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
@@ -61,18 +61,18 @@ if ( ! in_array( get_option( 'blog_charset' ), array( 'utf8', 'utf-8', 'UTF8', '
 
 <?php if ( ! get_pages() ) : ?>
 <input name="show_on_front" type="hidden" value="posts" />
-<table class="form-table">
-<?php
-if ( 'posts' != get_option( 'show_on_front' ) ) :
-	update_option( 'show_on_front', 'posts' );
+<table class="form-table" role="presentation">
+	<?php
+	if ( 'posts' != get_option( 'show_on_front' ) ) :
+		update_option( 'show_on_front', 'posts' );
 	endif;
 
 else :
 	if ( 'page' == get_option( 'show_on_front' ) && ! get_option( 'page_on_front' ) && ! get_option( 'page_for_posts' ) ) {
 		update_option( 'show_on_front', 'posts' );
 	}
-?>
-<table class="form-table">
+	?>
+<table class="form-table" role="presentation">
 <tr>
 <th scope="row"><?php _e( 'Your homepage displays' ); ?></th>
 <td id="front-static-pages"><fieldset><legend class="screen-reader-text"><span><?php _e( 'Your homepage displays' ); ?></span></legend>
@@ -90,7 +90,8 @@ else :
 	<li><label for="page_on_front">
 	<?php
 	printf(
-		__( 'Homepage: %s' ), wp_dropdown_pages(
+		__( 'Homepage: %s' ),
+		wp_dropdown_pages(
 			array(
 				'name'              => 'page_on_front',
 				'echo'              => 0,
@@ -100,12 +101,13 @@ else :
 			)
 		)
 	);
-?>
+	?>
 </label></li>
 	<li><label for="page_for_posts">
 	<?php
 	printf(
-		__( 'Posts page: %s' ), wp_dropdown_pages(
+		__( 'Posts page: %s' ),
+		wp_dropdown_pages(
 			array(
 				'name'              => 'page_for_posts',
 				'echo'              => 0,
@@ -115,10 +117,10 @@ else :
 			)
 		)
 	);
-?>
+	?>
 </label></li>
 </ul>
-<?php if ( 'page' == get_option( 'show_on_front' ) && get_option( 'page_for_posts' ) == get_option( 'page_on_front' ) ) : ?>
+	<?php if ( 'page' == get_option( 'show_on_front' ) && get_option( 'page_for_posts' ) == get_option( 'page_on_front' ) ) : ?>
 <div id="front-page-warning" class="error inline"><p><?php _e( '<strong>Warning:</strong> these pages should not be the same!' ); ?></p></div>
 <?php endif; ?>
 </fieldset></td>
@@ -135,8 +137,8 @@ else :
 <td><input name="posts_per_rss" type="number" step="1" min="1" id="posts_per_rss" value="<?php form_option( 'posts_per_rss' ); ?>" class="small-text" /> <?php _e( 'items' ); ?></td>
 </tr>
 <tr>
-<th scope="row"><?php _e( 'For each article in a feed, show' ); ?> </th>
-<td><fieldset><legend class="screen-reader-text"><span><?php _e( 'For each article in a feed, show' ); ?> </span></legend>
+<th scope="row"><?php _e( 'For each post in a feed, show' ); ?> </th>
+<td><fieldset><legend class="screen-reader-text"><span><?php _e( 'For each post in a feed, show' ); ?> </span></legend>
 <p><label><input name="rss_use_excerpt" type="radio" value="0" <?php checked( 0, get_option( 'rss_use_excerpt' ) ); ?>	/> <?php _e( 'Full text' ); ?></label><br />
 <label><input name="rss_use_excerpt" type="radio" value="1" <?php checked( 1, get_option( 'rss_use_excerpt' ) ); ?> /> <?php _e( 'Summary' ); ?></label></p>
 </fieldset></td>

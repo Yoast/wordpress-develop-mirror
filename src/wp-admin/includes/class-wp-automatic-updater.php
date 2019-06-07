@@ -171,7 +171,7 @@ class WP_Automatic_Updater {
 		 * by default, while translations and minor and development versions for core
 		 * are updated by default.
 		 *
-		 * See the {@see 'allow_dev_auto_core_updates', {@see 'allow_minor_auto_core_updates'},
+		 * See the {@see 'allow_dev_auto_core_updates'}, {@see 'allow_minor_auto_core_updates'},
 		 * and {@see 'allow_major_auto_core_updates'} filters for a more straightforward way to
 		 * adjust core updates.
 		 *
@@ -201,6 +201,13 @@ class WP_Automatic_Updater {
 			}
 
 			if ( ! $php_compat || ! $mysql_compat ) {
+				return false;
+			}
+		}
+
+		// If updating a plugin, ensure the minimum PHP version requirements are satisfied.
+		if ( 'plugin' === $type ) {
+			if ( ! empty( $item->requires_php ) && version_compare( phpversion(), $item->requires_php, '<' ) ) {
 				return false;
 			}
 		}
@@ -307,24 +314,30 @@ class WP_Automatic_Updater {
 		$upgrader_item = $item;
 		switch ( $type ) {
 			case 'core':
+				/* translators: %s: WordPress version */
 				$skin->feedback( __( 'Updating to WordPress %s' ), $item->version );
+				/* translators: %s: WordPress version */
 				$item_name = sprintf( __( 'WordPress %s' ), $item->version );
 				break;
 			case 'theme':
 				$upgrader_item = $item->theme;
 				$theme         = wp_get_theme( $upgrader_item );
 				$item_name     = $theme->Get( 'Name' );
+				/* translators: %s: Theme name */
 				$skin->feedback( __( 'Updating theme: %s' ), $item_name );
 				break;
 			case 'plugin':
 				$upgrader_item = $item->plugin;
 				$plugin_data   = get_plugin_data( $context . '/' . $upgrader_item );
 				$item_name     = $plugin_data['Name'];
+				/* translators: %s: Plugin name */
 				$skin->feedback( __( 'Updating plugin: %s' ), $item_name );
 				break;
 			case 'translation':
 				$language_item_name = $upgrader->get_name_for_update( $item );
-				$item_name          = sprintf( __( 'Translations for %s' ), $language_item_name );
+				/* translators: %s: Name of language item */
+				$item_name = sprintf( __( 'Translations for %s' ), $language_item_name );
+				/* translators: 1: Name of language item, 2: Language */
 				$skin->feedback( sprintf( __( 'Updating translations for %1$s (%2$s)&#8230;' ), $language_item_name, $item->language ) );
 				break;
 		}
@@ -336,7 +349,8 @@ class WP_Automatic_Updater {
 
 		// Boom, This sites about to get a whole new splash of paint!
 		$upgrade_result = $upgrader->upgrade(
-			$upgrader_item, array(
+			$upgrader_item,
+			array(
 				'clear_update_cache'           => false,
 				// Always use partial builds if possible for core updates.
 				'pre_check_md5'                => false,
@@ -574,7 +588,8 @@ class WP_Automatic_Updater {
 		}
 
 		update_site_option(
-			'auto_core_update_failed', array(
+			'auto_core_update_failed',
+			array(
 				'attempted'  => $core_update->current,
 				'current'    => $wp_version,
 				'error_code' => $error_code,
@@ -600,7 +615,8 @@ class WP_Automatic_Updater {
 	 */
 	protected function send_email( $type, $core_update, $result = null ) {
 		update_site_option(
-			'auto_core_update_notified', array(
+			'auto_core_update_notified',
+			array(
 				'type'      => $type,
 				'email'     => get_site_option( 'admin_email' ),
 				'version'   => $core_update->current,
@@ -632,18 +648,18 @@ class WP_Automatic_Updater {
 
 		switch ( $type ) {
 			case 'success': // We updated.
-				/* translators: 1: Site name, 2: WordPress version number. */
+				/* translators: Site updated notification email subject. 1: Site title, 2: WordPress version number. */
 				$subject = __( '[%1$s] Your site has updated to WordPress %2$s' );
 				break;
 
 			case 'fail':   // We tried to update but couldn't.
 			case 'manual': // We can't update (and made no attempt).
-				/* translators: 1: Site name, 2: WordPress version number. */
+				/* translators: Update available notification email subject. 1: Site title, 2: WordPress version number. */
 				$subject = __( '[%1$s] WordPress %2$s is available. Please update!' );
 				break;
 
 			case 'critical': // We tried to update, started to copy files, then things went wrong.
-				/* translators: 1: Site name. */
+				/* translators: Site down notification email subject. 1: Site title. */
 				$subject = __( '[%1$s] URGENT: Your site may be down due to a failed update' );
 				break;
 
@@ -659,6 +675,7 @@ class WP_Automatic_Updater {
 
 		switch ( $type ) {
 			case 'success':
+				/* translators: 1: Home URL, 2: WordPress version */
 				$body .= sprintf( __( 'Howdy! Your site at %1$s has been updated automatically to WordPress %2$s.' ), home_url(), $core_update->current );
 				$body .= "\n\n";
 				if ( ! $newer_version_available ) {
@@ -667,10 +684,12 @@ class WP_Automatic_Updater {
 
 				// Can only reference the About screen if their update was successful.
 				list( $about_version ) = explode( '-', $core_update->current, 2 );
-				$body                 .= sprintf( __( 'For more on version %s, see the About WordPress screen:' ), $about_version );
-				$body                 .= "\n" . admin_url( 'about.php' );
+				/* translators: %s: WordPress core version */
+				$body .= sprintf( __( 'For more on version %s, see the About WordPress screen:' ), $about_version );
+				$body .= "\n" . admin_url( 'about.php' );
 
 				if ( $newer_version_available ) {
+					/* translators: %s: WordPress core latest version */
 					$body .= "\n\n" . sprintf( __( 'WordPress %s is also now available.' ), $next_user_core_update->current ) . ' ';
 					$body .= __( 'Updating is easy and only takes a few moments:' );
 					$body .= "\n" . network_admin_url( 'update-core.php' );
@@ -680,6 +699,7 @@ class WP_Automatic_Updater {
 
 			case 'fail':
 			case 'manual':
+				/* translators: 1: Home URL, 2: WordPress core latest version */
 				$body .= sprintf( __( 'Please update your site at %1$s to WordPress %2$s.' ), home_url(), $next_user_core_update->current );
 
 				$body .= "\n\n";
@@ -696,8 +716,10 @@ class WP_Automatic_Updater {
 
 			case 'critical':
 				if ( $newer_version_available ) {
+					/* translators: 1: Home URL, 2: WordPress core latest version */
 					$body .= sprintf( __( 'Your site at %1$s experienced a critical failure while trying to update WordPress to version %2$s.' ), home_url(), $core_update->current );
 				} else {
+					/* translators: 1: Home URL, 2: Core update version */
 					$body .= sprintf( __( 'Your site at %1$s experienced a critical failure while trying to update to the latest version of WordPress, %2$s.' ), home_url(), $core_update->current );
 				}
 
@@ -711,11 +733,12 @@ class WP_Automatic_Updater {
 		$critical_support = 'critical' === $type && ! empty( $core_update->support_email );
 		if ( $critical_support ) {
 			// Support offer if available.
+			/* translators: %s: Support e-mail */
 			$body .= "\n\n" . sprintf( __( 'The WordPress team is willing to help you. Forward this email to %s and the team will work with you to make sure your site is working.' ), $core_update->support_email );
 		} else {
 			// Add a note about the support forums.
 			$body .= "\n\n" . __( 'If you experience any issues or need support, the volunteers in the WordPress.org support forums may be able to help.' );
-			$body .= "\n" . __( 'https://wordpress.org/support/' );
+			$body .= "\n" . __( 'https://wordpress.org/support/forums/' );
 		}
 
 		// Updates are important!
@@ -737,6 +760,7 @@ class WP_Automatic_Updater {
 
 		if ( 'critical' == $type && is_wp_error( $result ) ) {
 			$body .= "\n***\n\n";
+			/* translators: %s: WordPress version */
 			$body .= sprintf( __( 'Your site was running version %s.' ), get_bloginfo( 'version' ) );
 			$body .= ' ' . __( 'We have some data that describes the error your site encountered.' );
 			$body .= ' ' . __( 'Your hosting company, support forum volunteers, or a friendly developer may be able to use this information to help you:' );
@@ -754,7 +778,8 @@ class WP_Automatic_Updater {
 					continue;
 				}
 				$error_code = $error->get_error_code();
-				$body      .= "\n\n" . sprintf( __( 'Error code: %s' ), $error_code );
+				/* translators: %s: Error code */
+				$body .= "\n\n" . sprintf( __( 'Error code: %s' ), $error_code );
 				if ( 'rollback_was_required' == $error_code ) {
 					continue;
 				}
@@ -812,14 +837,17 @@ class WP_Automatic_Updater {
 		$body     = array();
 		$failures = 0;
 
+		/* translators: %s: Network home URL */
 		$body[] = sprintf( __( 'WordPress site: %s' ), network_home_url( '/' ) );
 
 		// Core
 		if ( isset( $this->update_results['core'] ) ) {
 			$result = $this->update_results['core'][0];
 			if ( $result->result && ! is_wp_error( $result->result ) ) {
+				/* translators: %s: WordPress core version */
 				$body[] = sprintf( __( 'SUCCESS: WordPress was successfully updated to %s' ), $result->name );
 			} else {
+				/* translators: %s: WordPress core version */
 				$body[] = sprintf( __( 'FAILED: WordPress failed to update to %s' ), $result->name );
 				$failures++;
 			}
@@ -841,6 +869,7 @@ class WP_Automatic_Updater {
 
 				$body[] = $messages[ $type ];
 				foreach ( wp_list_pluck( $success_items, 'name' ) as $name ) {
+					/* translators: %s: name of plugin / theme / translations */
 					$body[] = ' * ' . sprintf( __( 'SUCCESS: %s' ), $name );
 				}
 			}
@@ -855,6 +884,7 @@ class WP_Automatic_Updater {
 				$body[] = $messages[ $type ];
 				foreach ( $this->update_results[ $type ] as $item ) {
 					if ( ! $item->result || is_wp_error( $item->result ) ) {
+						/* translators: %s: name of plugin / theme / translations */
 						$body[] = ' * ' . sprintf( __( 'FAILED: %s' ), $item->name );
 						$failures++;
 					}
@@ -881,9 +911,11 @@ Thanks! -- The WordPress Team"
 			);
 			$body[] = '';
 
-			$subject = sprintf( __( '[%s] There were failures during background updates' ), $site_title );
+			/* translators: Background update failed notification email subject. %s: Site title */
+			$subject = sprintf( __( '[%s] Background Update Failed' ), $site_title );
 		} else {
-			$subject = sprintf( __( '[%s] Background updates have finished' ), $site_title );
+			/* translators: Background update finished notification email subject. %s: Site title */
+			$subject = sprintf( __( '[%s] Background Update Finished' ), $site_title );
 		}
 
 		$body[] = trim(
