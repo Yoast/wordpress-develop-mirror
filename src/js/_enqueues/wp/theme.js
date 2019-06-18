@@ -22,9 +22,24 @@ themes.isInstall = !! themes.data.settings.isInstall;
 // Setup app structure
 _.extend( themes, { model: {}, view: {}, routes: {}, router: {}, template: wp.template });
 
-themes.Model = Backbone.Model.extend({
-	// Adds attributes to the default data coming through the .org themes api
-	// Map `id` to `slug` for shared code
+themes.Model = Backbone.Model.extend(/** @lends wp.themes.Model.prototype */{
+	/**
+	 * Initializes the Themes model.
+	 *
+	 * Adds attributes to the default data coming through the .org themes API.
+	 * Map `id` to `slug` for shared code.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @constructs wp.themes.Model
+	 * @augments   wp.themes
+	 *
+	 * @memberof wp.themes
+	 *
+	 * @see  Backbone.Model
+	 * @link http://backbonejs.org/#Model
+	 */
 	initialize: function() {
 		var description;
 
@@ -33,14 +48,16 @@ themes.Model = Backbone.Model.extend({
 			this.set({ installed: true });
 		}
 
-		// Set the attributes
+		// Set the attributes.
 		this.set({
-			// slug is for installation, id is for existing.
+			// The slug is for installation, id is for existing.
 			id: this.get( 'slug' ) || this.get( 'id' )
 		});
 
-		// Map `section.description` to `description`
-		// as the API sometimes returns it differently
+		/*
+		 * Map `section.description` to `description` as the API sometimes
+		 * returns it differently.
+		 */
 		if ( this.has( 'sections' ) ) {
 			description = this.get( 'sections' ).description;
 			this.set({ description: description });
@@ -48,31 +65,50 @@ themes.Model = Backbone.Model.extend({
 	}
 });
 
-// Main view controller for themes.php
-// Unifies and renders all available views
-themes.view.Appearance = wp.Backbone.View.extend({
+themes.view.Appearance = wp.Backbone.View.extend(/** @lends wp.themes.View.prototype */{
 
 	el: '#wpbody-content .wrap .theme-browser',
 
 	window: $( window ),
-	// Pagination instance
+	// Pagination instance.
 	page: 0,
 
-	// Sets up a throttler for binding to 'scroll'
+	/**
+	 * Appearance view for the themes.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @constructs wp.themes.view.Appearance
+	 * @augments   wp.themes.view
+	 *
+	 * @see  Backbone.View
+	 * @link http://backbonejs.org/#View
+	 *
+	 * @param {Object}        options              The view's attributes.
+	 * @param {Backbone.View} [options.SearchView] The theme's search view.
+	 */
 	initialize: function( options ) {
-		// Scroller checks how far the scroll position is
+		// Scroller checks how far the scroll position is.
 		_.bindAll( this, 'scroller' );
 
 		this.SearchView = options.SearchView ? options.SearchView : themes.view.Search;
-		// Bind to the scroll event and throttle
-		// the results from this.scroller
+		// Bind to the scroll event and throttle the results from this.scroller.
 		this.window.bind( 'scroll', _.throttle( this.scroller, 300 ) );
 	},
 
-	// Main render control
+	/**
+	 * Renders the appearance view.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.view.Appearance
+	 *
+	 * @return {void}
+	 */
 	render: function() {
-		// Setup the main theme view
-		// with the current theme collection
+		// Setup the main theme view with the current theme collection.
 		this.view = new themes.view.Themes({
 			collection: this.collection,
 			parent: this
@@ -83,21 +119,36 @@ themes.view.Appearance = wp.Backbone.View.extend({
 
 		this.$el.removeClass( 'search-loading' );
 
-		// Render and append
+		// Render and append.
 		this.view.render();
 		this.$el.empty().append( this.view.el ).addClass( 'rendered' );
 	},
 
-	// Defines search element container
+	/**
+	 * Defines search element container.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type {Object}
+	 */
 	searchContainer: $( '.search-form' ),
 
-	// Search input and view
-	// for current theme collection
+	/**
+	 * Renders the search input and view for current theme collection.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.view.Appearance
+	 *
+	 * @return {void}
+	 */
 	search: function() {
 		var view,
 			self = this;
 
-		// Don't render the search if there is only one theme
+		// Don't render the search if there is only one theme.
 		if ( themes.data.themes.length === 1 ) {
 			return;
 		}
@@ -108,7 +159,7 @@ themes.view.Appearance = wp.Backbone.View.extend({
 		});
 		self.SearchView = view;
 
-		// Render and append after screen title
+		// Render and append after screen title.
 		view.render();
 		this.searchContainer
 			.append( $.parseHTML( '<label class="screen-reader-text" for="wp-filter-search-input">' + l10n.search + '</label>' ) )
@@ -118,8 +169,21 @@ themes.view.Appearance = wp.Backbone.View.extend({
 			});
 	},
 
-	// Checks when the user gets close to the bottom
-	// of the mage and triggers a theme:scroll event
+	/**
+	 * Checks when the user gets close to the bottom of the page.
+	 *
+	 * Checks when the user gets close to the bottom of the page and triggers a
+	 * theme:scroll event.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.view.Appearance
+	 *
+	 * @fires theme:scroll
+	 *
+	 * @return {void}
+	 */
 	scroller: function() {
 		var self = this,
 			bottom, threshold;
@@ -134,62 +198,124 @@ themes.view.Appearance = wp.Backbone.View.extend({
 	}
 });
 
-// Set up the Collection for our theme data
-// @has 'id' 'name' 'screenshot' 'author' 'authorURI' 'version' 'active' ...
-themes.Collection = Backbone.Collection.extend({
+/**
+ * Set up the Collection for our theme data.
+ *
+ * @since  3.8.0
+ * @access private
+ *
+ * @constructs wp.themes.Collection
+ * @memberof   wp.themes
+ * @augments   wp.themes
+ * @inheritDoc
+ *
+ * @see   Backbone.Collection
+ * @link  http://backbonejs.org/#Collection
+ */
+themes.Collection = Backbone.Collection.extend(/** @lends wp.themes.Collection.prototype */{
 
+	/**
+	 * Theme model.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type {Backbone.Model}
+	 */
 	model: themes.Model,
 
-	// Search terms
+	/**
+	 * Search terms.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type {string}
+	 */
 	terms: '',
 
-	// Controls searching on the current theme collection
-	// and triggers an update event
+	/**
+	 * Searches on the current theme collection and triggers an update event.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @fires themes:update
+	 *
+	 * @param {string} value The terms to search for.
+	 *
+	 * @return {void}
+	 */
 	doSearch: function( value ) {
 
-		// Don't do anything if we've already done this search
-		// Useful because the Search handler fires multiple times per keystroke
+		/*
+		 * Don't do anything if the value has not changed since the last search.
+		 * Useful because the Search handler fires multiple times per keystroke.
+		 */
 		if ( this.terms === value ) {
 			return;
 		}
 
-		// Updates terms with the value passed
+		// Updates terms with the value passed.
 		this.terms = value;
 
-		// If we have terms, run a search...
+		// If we have terms, run a search.
 		if ( this.terms.length > 0 ) {
 			this.search( this.terms );
 		}
 
-		// If search is blank, show all themes
-		// Useful for resetting the views when you clean the input
+		/*
+		 * If search is blank, show all themes.
+		 * Useful for resetting the views when you clean the input.
+		 */
 		if ( this.terms === '' ) {
 			this.reset( themes.data.themes );
 			$( 'body' ).removeClass( 'no-results' );
 		}
 
-		// Trigger a 'themes:update' event
+		// Trigger a 'themes:update' event.
 		this.trigger( 'themes:update' );
 	},
 
-	// Performs a search within the collection
-	// @uses RegExp
+	/**
+	 * Performs a search within the collection.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @fires query:empty
+	 *
+	 * @param {string} term The terms to search for.
+	 *
+	 * @return {void}
+	 */
 	search: function( term ) {
 		var match, results, haystack, name, description, author;
 
-		// Start with a full collection
+		// Start with a full collection.
 		this.reset( themes.data.themes, { silent: true } );
 
-		// Escape the term string for RegExp meta characters
+		/*
+		 * Escape the term string for RegExp meta characters.
+		 * E.g. "[x].*" -> "\[x\]\.\*"
+		 */
 		term = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
-		// Consider spaces as word delimiters and match the whole string
-		// so matching terms can be combined
+		/*
+		 * Consider spaces as word delimiters and match the whole string so
+		 * matching terms can be combined.
+		 */
 		term = term.replace( / /g, ')(?=.*' );
 		match = new RegExp( '^(?=.*' + term + ').+', 'i' );
 
-		// Find results
-		// _.filter and .test
+		/*
+		 * Search for term in the themes' name, description, author, id or tags.
+		 * Using _.filter and RegExp.test
+		 */
 		results = this.filter( function( data ) {
 			name        = data.get( 'name' ).replace( /(<([^>]+)>)/ig, '' );
 			description = data.get( 'description' ).replace( /(<([^>]+)>)/ig, '' );
@@ -197,6 +323,10 @@ themes.Collection = Backbone.Collection.extend({
 
 			haystack = _.union( [ name, data.get( 'id' ), description, author, data.get( 'tags' ) ] );
 
+			/*
+			 * When the search term is longer than 2 characters and it is found
+			 * in the author data, display the author name.
+			 */
 			if ( match.test( data.get( 'author' ) ) && term.length > 2 ) {
 				data.set( 'displayAuthor', true );
 			}
@@ -213,28 +343,61 @@ themes.Collection = Backbone.Collection.extend({
 		this.reset( results );
 	},
 
-	// Paginates the collection with a helper method
-	// that slices the collection
+	/**
+	 * Paginates the collection with a helper method that slices the collection.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @param {number} instance The current page number.
+	 *
+	 * @return {wp.themes.Collection} The paginated collection.
+	 */
 	paginate: function( instance ) {
 		var collection = this;
 		instance = instance || 0;
 
-		// Themes per instance are set at 20
+		// Themes per instance are set at 20.
 		collection = _( collection.rest( 20 * instance ) );
 		collection = _( collection.first( 20 ) );
 
 		return collection;
 	},
 
+	/**
+	 * The number of themes in this collection.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @type {number|boolean}
+	 */
 	count: false,
 
-	// Handles requests for more themes
-	// and caches results
-	//
-	// When we are missing a cache object we fire an apiCall()
-	// which triggers events of `query:success` or `query:fail`
+	/**
+	 * Handles requests for more themes and caches results.
+	 *
+	 * When we are missing a cache object we fire an apiCall() which triggers
+	 * events of `query:success` or `query:fail`.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @fires query:success
+	 * @fires query:fail
+	 * @fires query:empty
+	 * @fires themes:update
+	 *
+	 * @param {Object} request The request arguments.
+	 *
+	 * @return {void}
+	 */
 	query: function( request ) {
-		/**
+		/*
 		 * @static
 		 * @type Array
 		 */
@@ -242,8 +405,10 @@ themes.Collection = Backbone.Collection.extend({
 			self = this,
 			query, isPaginated, count;
 
-		// Store current query request args
-		// for later use with the event `theme:end`
+		/*
+		 * Store current query request arguments for later use with the event
+		 * `theme:end`.
+		 */
 		this.currentQuery.request = request;
 
 		// Search the query cache for matches.
@@ -251,8 +416,10 @@ themes.Collection = Backbone.Collection.extend({
 			return _.isEqual( query.request, request );
 		});
 
-		// If the request matches the stored currentQuery.request
-		// it means we have a paginated request.
+		/*
+		 * If the request matches the stored current Query.request it means we
+		 * have a paginated request.
+		 */
 		isPaginated = _.has( request, 'page' );
 
 		// Reset the internal api page counter for non paginated queries.
@@ -268,12 +435,14 @@ themes.Collection = Backbone.Collection.extend({
 				if ( data.themes ) {
 					self.reset( data.themes );
 					count = data.info.results;
-					// Store the results and the query request
+					// Store the results and the query request.
 					queries.push( { themes: data.themes, request: request, total: count } );
 				}
 
-				// Trigger a collection refresh event
-				// and a `query:success` event with a `count` argument.
+				/*
+				 * Trigger a collection refresh event and a `query:success`
+				 * event with a `count` argument.
+				 */
 				self.trigger( 'themes:update' );
 				self.trigger( 'query:success', count );
 
@@ -285,10 +454,10 @@ themes.Collection = Backbone.Collection.extend({
 				self.trigger( 'query:fail' );
 			});
 		} else {
-			// If it's a paginated request we need to fetch more themes...
+			// If it's a paginated request we need to fetch more themes.
 			if ( isPaginated ) {
 				return this.apiCall( request, isPaginated ).done( function( data ) {
-					// Add the new themes to the current collection
+					// Add the new themes to the current collection.
 					// @todo update counter
 					self.add( data.themes );
 					self.trigger( 'query:success' );
@@ -301,14 +470,17 @@ themes.Collection = Backbone.Collection.extend({
 				});
 			}
 
+			/*
+			 * Only trigger an update event since we already have the themes on
+			 * our cached object.
+			 */
+
 			if ( query.themes.length === 0 ) {
 				self.trigger( 'query:empty' );
 			} else {
 				$( 'body' ).removeClass( 'no-results' );
 			}
 
-			// Only trigger an update event since we already have the themes
-			// on our cached object
 			if ( _.isNumber( query.total ) ) {
 				this.count = query.total;
 			}
@@ -323,20 +495,48 @@ themes.Collection = Backbone.Collection.extend({
 		}
 	},
 
-	// Local cache array for API queries
+	/**
+	 * Local cache array for API queries.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @type {Array}
+	 */
 	queries: [],
 
-	// Keep track of current query so we can handle pagination
+	/**
+	 * Keep track of current query so we can handle pagination.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @type     {Object}
+	 * @property {number} page    The current page number.
+	 * @property {Object} request The current request arguments.
+	 */
 	currentQuery: {
 		page: 1,
 		request: {}
 	},
 
-	// Send request to api.wordpress.org/themes
+	/**
+	 * Send request to api.wordpress.org/themes.
+	 *
+	 * @since      3.9.0
+	 * @access     private
+	 *
+	 * @memberof wp.themes.Collection
+	 *
+	 * @param {Object}  request   The current request.
+	 * @param {boolean} paginated Whether the request is paginated.
+	 *
+	 * @return {$.promise} A jQuery promise that represents the request.
+	 */
 	apiCall: function( request, paginated ) {
 		return wp.ajax.send( 'query-themes', {
 			data: {
-			// Request data
+				// Request data, defaults to 100 results per page.
 				request: _.extend({
 					per_page: 100
 				}, request)
@@ -344,31 +544,70 @@ themes.Collection = Backbone.Collection.extend({
 
 			beforeSend: function() {
 				if ( ! paginated ) {
-					// Spin it
+					// Spin it.
 					$( 'body' ).addClass( 'loading-content' ).removeClass( 'no-results' );
 				}
 			}
 		});
 	},
 
-	// Static status controller for when we are loading themes.
+	/**
+	 * Static status controller for when we are loading themes.
+	 *
+	 * @since  3.9.0
+	 * @access private
+	 *
+	 * @type     {boolean}
+	 */
 	loadingThemes: false
 });
 
-// This is the view that controls each theme item
-// that will be displayed on the screen
-themes.view.Theme = wp.Backbone.View.extend({
-
-	// Wrap theme data on a div.theme element
+themes.view.Theme = wp.Backbone.View.extend(/** @lends wp.themes.view.Theme.prototype */{
+	/**
+	 * Wrap theme data on a div.theme element.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {string}
+	 */
 	className: 'theme',
 
-	// Reflects which theme view we have
-	// 'grid' (default) or 'detail'
+	/**
+	 * Reflects which theme view we have 'grid' (default) or 'detail'.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {string}
+	 */
 	state: 'grid',
 
-	// The HTML template for each element to be rendered
+	/**
+	 * The HTML template for each element to be rendered.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {Function}
+	 */
 	html: themes.template( 'theme' ),
 
+	/**
+	 * The events that will be bound to methods on the theme View.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {Object}
+	 * @property {string} click The name of the method to be called on click.
+	 * @property {string} keydown The name of the method to be called on keydown.
+	 * @property {string} touchend The name of the method to be called on touchend.
+	 * @property {string} keyup The name of the method to be called on keyup.
+	 * @property {string} touchmove The name of the method to be called on touchmove.
+	 * @property {string} click .theme-install The name of the method to be called when clicked on an element with the class theme-install.
+	 * @property {string} click .update-message The name of the method to be called when clicked on an element with the class update-message.
+	 */
 	events: {
 		'click': themes.isInstall ? 'preview': 'expand',
 		'keydown': themes.isInstall ? 'preview': 'expand',
@@ -379,8 +618,27 @@ themes.view.Theme = wp.Backbone.View.extend({
 		'click .update-message': 'updateTheme'
 	},
 
+	/**
+	 * Whether the user is currently dragging the view.
+	 *
+	 * @since  3.8.0
+	 * @access private
+	 *
+	 * @type     {boolean}
+	 */
 	touchDrag: false,
 
+	/**
+	 * This is the view that controls each theme item that will be displayed on the screen.
+	 *
+	 * @since      3.8.0
+	 * @access     private
+	 *
+	 * @constructs wp.themes.view.Theme
+	 * @augments   wp.themes.view
+	 *
+	 * @memberof wp.themes.view
+	 */
 	initialize: function() {
 		this.model.on( 'change', this.render, this );
 	},
