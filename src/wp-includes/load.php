@@ -13,7 +13,7 @@
  * @return string The HTTP protocol. Default: HTTP/1.0.
  */
 function wp_get_server_protocol() {
-	$protocol = $_SERVER['SERVER_PROTOCOL'];
+	$protocol = isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : '';
 	if ( ! in_array( $protocol, array( 'HTTP/1.1', 'HTTP/2', 'HTTP/2.0' ) ) ) {
 		$protocol = 'HTTP/1.0';
 	}
@@ -68,11 +68,11 @@ function wp_fix_server_vars() {
 	// Fix for IIS when running with PHP ISAPI
 	if ( empty( $_SERVER['REQUEST_URI'] ) || ( PHP_SAPI != 'cgi-fcgi' && preg_match( '/^Microsoft-IIS\//', $_SERVER['SERVER_SOFTWARE'] ) ) ) {
 
-		// IIS Mod-Rewrite
 		if ( isset( $_SERVER['HTTP_X_ORIGINAL_URL'] ) ) {
+			// IIS Mod-Rewrite
 			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_ORIGINAL_URL'];
-		} // IIS Isapi_Rewrite
-		elseif ( isset( $_SERVER['HTTP_X_REWRITE_URL'] ) ) {
+		} elseif ( isset( $_SERVER['HTTP_X_REWRITE_URL'] ) ) {
+			// IIS Isapi_Rewrite
 			$_SERVER['REQUEST_URI'] = $_SERVER['HTTP_X_REWRITE_URL'];
 		} else {
 			// Use ORIG_PATH_INFO if there is no PATH_INFO
@@ -136,16 +136,23 @@ function wp_check_php_mysql_versions() {
 		header( sprintf( '%s 500 Internal Server Error', $protocol ), true, 500 );
 		header( 'Content-Type: text/html; charset=utf-8' );
 		/* translators: 1: Current PHP version number, 2: WordPress version number, 3: Minimum required PHP version number */
-		die( sprintf( __( 'Your server is running PHP version %1$s but WordPress %2$s requires at least %3$s.' ), $php_version, $wp_version, $required_php_version ) );
+		printf( __( 'Your server is running PHP version %1$s but WordPress %2$s requires at least %3$s.' ), $php_version, $wp_version, $required_php_version );
+		exit( 1 );
 	}
 
 	if ( ! extension_loaded( 'mysql' ) && ! extension_loaded( 'mysqli' ) && ! extension_loaded( 'mysqlnd' ) && ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+		require_once( ABSPATH . WPINC . '/functions.php' );
 		wp_load_translations_early();
-
-		$protocol = wp_get_server_protocol();
-		header( sprintf( '%s 500 Internal Server Error', $protocol ), true, 500 );
-		header( 'Content-Type: text/html; charset=utf-8' );
-		die( __( 'Your PHP installation appears to be missing the MySQL extension which is required by WordPress.' ) );
+		$args = array(
+			'exit' => false,
+			'code' => 'mysql_not_found',
+		);
+		wp_die(
+			__( 'Your PHP installation appears to be missing the MySQL extension which is required by WordPress.' ),
+			__( 'Insufficient Requirements' ),
+			$args
+		);
+		exit( 1 );
 	}
 }
 
@@ -214,31 +221,16 @@ function wp_maintenance() {
 		die();
 	}
 
+	require_once( ABSPATH . WPINC . '/functions.php' );
 	wp_load_translations_early();
 
-	$protocol = wp_get_server_protocol();
-	header( "$protocol 503 Service Unavailable", true, 503 );
-	header( 'Content-Type: text/html; charset=utf-8' );
 	header( 'Retry-After: 600' );
 
-	$dir_attr = '';
-	if ( is_rtl() ) {
-		$dir_attr = ' dir="rtl"';
-	}
-?>
-	<!DOCTYPE html>
-	<html xmlns="http://www.w3.org/1999/xhtml"<?php echo $dir_attr; ?>>
-	<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title><?php _e( 'Maintenance' ); ?></title>
-
-	</head>
-	<body>
-		<h1><?php _e( 'Briefly unavailable for scheduled maintenance. Check back in a minute.' ); ?></h1>
-	</body>
-	</html>
-<?php
-	die();
+	wp_die(
+		__( 'Briefly unavailable for scheduled maintenance. Check back in a minute.' ),
+		__( 'Maintenance' ),
+		503
+	);
 }
 
 /**
@@ -307,12 +299,13 @@ function timer_stop( $display = 0, $precision = 3 ) {
  * from changing the global configuration setting. Defining `WP_DEBUG_DISPLAY`
  * as false will force errors to be hidden.
  *
- * When `WP_DEBUG_LOG` is true, errors will be logged to debug.log in the content
- * directory.
+ * When `WP_DEBUG_LOG` is true, errors will be logged to `wp-content/debug.log`.
+ * When `WP_DEBUG_LOG` is a valid path, errors will be logged to the specified file.
  *
  * Errors are never displayed for XML-RPC, REST, and Ajax requests.
  *
  * @since 3.0.0
+ * @since 5.1.0 `WP_DEBUG_LOG` can be a file path.
  * @access private
  */
 function wp_debug_mode() {
@@ -341,15 +334,23 @@ function wp_debug_mode() {
 			ini_set( 'display_errors', 0 );
 		}
 
-		if ( WP_DEBUG_LOG ) {
+		if ( in_array( strtolower( (string) WP_DEBUG_LOG ), array( 'true', '1' ), true ) ) {
+			$log_path = WP_CONTENT_DIR . '/debug.log';
+		} elseif ( is_string( WP_DEBUG_LOG ) ) {
+			$log_path = WP_DEBUG_LOG;
+		} else {
+			$log_path = false;
+		}
+
+		if ( $log_path ) {
 			ini_set( 'log_errors', 1 );
-			ini_set( 'error_log', WP_CONTENT_DIR . '/debug.log' );
+			ini_set( 'error_log', $log_path );
 		}
 	} else {
 		error_reporting( E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_ERROR | E_WARNING | E_PARSE | E_USER_ERROR | E_USER_WARNING | E_RECOVERABLE_ERROR );
 	}
 
-	if ( defined( 'XMLRPC_REQUEST' ) || defined( 'REST_REQUEST' ) || ( defined( 'WP_INSTALLING' ) && WP_INSTALLING ) || wp_doing_ajax() ) {
+	if ( defined( 'XMLRPC_REQUEST' ) || defined( 'REST_REQUEST' ) || ( defined( 'WP_INSTALLING' ) && WP_INSTALLING ) || wp_doing_ajax() || wp_is_json_request() ) {
 		@ini_set( 'display_errors', 0 );
 	}
 }
@@ -418,7 +419,12 @@ function require_wp_db() {
 		return;
 	}
 
-	$wpdb = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+	$dbuser     = defined( 'DB_USER' ) ? DB_USER : '';
+	$dbpassword = defined( 'DB_PASSWORD' ) ? DB_PASSWORD : '';
+	$dbname     = defined( 'DB_NAME' ) ? DB_NAME : '';
+	$dbhost     = defined( 'DB_HOST' ) ? DB_HOST : '';
+
+	$wpdb = new wpdb( $dbuser, $dbpassword, $dbname, $dbhost );
 }
 
 /**
@@ -482,7 +488,7 @@ function wp_set_wpdb_vars() {
 	if ( is_wp_error( $prefix ) ) {
 		wp_load_translations_early();
 		wp_die(
-			/* translators: 1: $table_prefix 2: wp-config.php */
+			/* translators: 1: $table_prefix, 2: wp-config.php */
 			sprintf(
 				__( '<strong>ERROR</strong>: %1$s in %2$s can only contain numbers, letters, and underscores.' ),
 				'<code>$table_prefix</code>',
@@ -525,30 +531,39 @@ function wp_using_ext_object_cache( $using = null ) {
  */
 function wp_start_object_cache() {
 	global $wp_filter;
+	static $first_init = true;
 
-	$first_init = false;
-	if ( ! function_exists( 'wp_cache_init' ) ) {
-		if ( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
-			require_once( WP_CONTENT_DIR . '/object-cache.php' );
-			if ( function_exists( 'wp_cache_init' ) ) {
-				wp_using_ext_object_cache( true );
-			}
+	// Only perform the following checks once.
+	if ( $first_init ) {
+		if ( ! function_exists( 'wp_cache_init' ) ) {
+			/*
+			 * This is the normal situation. First-run of this function. No
+			 * caching backend has been loaded.
+			 *
+			 * We try to load a custom caching backend, and then, if it
+			 * results in a wp_cache_init() function existing, we note
+			 * that an external object cache is being used.
+			 */
+			if ( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
+				require_once( WP_CONTENT_DIR . '/object-cache.php' );
+				if ( function_exists( 'wp_cache_init' ) ) {
+					wp_using_ext_object_cache( true );
+				}
 
-			// Re-initialize any hooks added manually by object-cache.php
-			if ( $wp_filter ) {
-				$wp_filter = WP_Hook::build_preinitialized_hooks( $wp_filter );
+				// Re-initialize any hooks added manually by object-cache.php
+				if ( $wp_filter ) {
+					$wp_filter = WP_Hook::build_preinitialized_hooks( $wp_filter );
+				}
 			}
+		} elseif ( ! wp_using_ext_object_cache() && file_exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
+			/*
+			 * Sometimes advanced-cache.php can load object-cache.php before
+			 * this function is run. This breaks the function_exists() check
+			 * above and can result in wp_using_ext_object_cache() returning
+			 * false when actually an external cache is in use.
+			 */
+			wp_using_ext_object_cache( true );
 		}
-
-		$first_init = true;
-	} elseif ( ! wp_using_ext_object_cache() && file_exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
-		/*
-		 * Sometimes advanced-cache.php can load object-cache.php before
-		 * it is loaded here. This breaks the function_exists check above
-		 * and can result in `$_wp_using_ext_object_cache` being set
-		 * incorrectly. Double check if an external cache exists.
-		 */
-		wp_using_ext_object_cache( true );
 	}
 
 	if ( ! wp_using_ext_object_cache() ) {
@@ -567,9 +582,11 @@ function wp_start_object_cache() {
 	}
 
 	if ( function_exists( 'wp_cache_add_global_groups' ) ) {
-		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
+		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites', 'blog_meta' ) );
 		wp_cache_add_non_persistent_groups( array( 'counts', 'plugins' ) );
 	}
+
+	$first_init = false;
 }
 
 /**
@@ -592,7 +609,6 @@ function wp_not_installed() {
 
 		require( ABSPATH . WPINC . '/kses.php' );
 		require( ABSPATH . WPINC . '/pluggable.php' );
-		require( ABSPATH . WPINC . '/formatting.php' );
 
 		$link = wp_guess_url() . '/wp-admin/install.php';
 
@@ -637,14 +653,14 @@ function wp_get_mu_plugins() {
  *
  * While upgrading or installing WordPress, no plugins are returned.
  *
- * The default directory is wp-content/plugins. To change the default
+ * The default directory is `wp-content/plugins`. To change the default
  * directory manually, define `WP_PLUGIN_DIR` and `WP_PLUGIN_URL`
- * in wp-config.php.
+ * in `wp-config.php`.
  *
  * @since 3.0.0
  * @access private
  *
- * @return array Files.
+ * @return string[] $plugin_file Array of paths to plugin files relative to the plugins directory.
  */
 function wp_get_active_and_valid_plugins() {
 	$plugins        = array();
@@ -672,7 +688,210 @@ function wp_get_active_and_valid_plugins() {
 			$plugins[] = WP_PLUGIN_DIR . '/' . $plugin;
 		}
 	}
+
+	/*
+	 * Remove plugins from the list of active plugins when we're on an endpoint
+	 * that should be protected against WSODs and the plugin is paused.
+	 */
+	if ( wp_is_recovery_mode() ) {
+		$plugins = wp_skip_paused_plugins( $plugins );
+	}
+
 	return $plugins;
+}
+
+/**
+ * Filters a given list of plugins, removing any paused plugins from it.
+ *
+ * @since 5.2.0
+ *
+ * @param array $plugins List of absolute plugin main file paths.
+ * @return array Filtered value of $plugins, without any paused plugins.
+ */
+function wp_skip_paused_plugins( array $plugins ) {
+	$paused_plugins = wp_paused_plugins()->get_all();
+
+	if ( empty( $paused_plugins ) ) {
+		return $plugins;
+	}
+
+	foreach ( $plugins as $index => $plugin ) {
+		list( $plugin ) = explode( '/', plugin_basename( $plugin ) );
+
+		if ( array_key_exists( $plugin, $paused_plugins ) ) {
+			unset( $plugins[ $index ] );
+
+			// Store list of paused plugins for displaying an admin notice.
+			$GLOBALS['_paused_plugins'][ $plugin ] = $paused_plugins[ $plugin ];
+		}
+	}
+
+	return $plugins;
+}
+
+/**
+ * Retrieves an array of active and valid themes.
+ *
+ * While upgrading or installing WordPress, no themes are returned.
+ *
+ * @since 5.1.0
+ * @access private
+ *
+ * @return array Array of paths to theme directories.
+ */
+function wp_get_active_and_valid_themes() {
+	global $pagenow;
+
+	$themes = array();
+
+	if ( wp_installing() && 'wp-activate.php' !== $pagenow ) {
+		return $themes;
+	}
+
+	if ( TEMPLATEPATH !== STYLESHEETPATH ) {
+		$themes[] = STYLESHEETPATH;
+	}
+
+	$themes[] = TEMPLATEPATH;
+
+	/*
+	 * Remove themes from the list of active themes when we're on an endpoint
+	 * that should be protected against WSODs and the theme is paused.
+	 */
+	if ( wp_is_recovery_mode() ) {
+		$themes = wp_skip_paused_themes( $themes );
+
+		// If no active and valid themes exist, skip loading themes.
+		if ( empty( $themes ) ) {
+			add_filter( 'wp_using_themes', '__return_false' );
+		}
+	}
+
+	return $themes;
+}
+
+/**
+ * Filters a given list of themes, removing any paused themes from it.
+ *
+ * @since 5.2.0
+ *
+ * @param array $themes List of absolute theme directory paths.
+ * @return array Filtered value of $themes, without any paused themes.
+ */
+function wp_skip_paused_themes( array $themes ) {
+	$paused_themes = wp_paused_themes()->get_all();
+
+	if ( empty( $paused_themes ) ) {
+		return $themes;
+	}
+
+	foreach ( $themes as $index => $theme ) {
+		$theme = basename( $theme );
+
+		if ( array_key_exists( $theme, $paused_themes ) ) {
+			unset( $themes[ $index ] );
+
+			// Store list of paused themes for displaying an admin notice.
+			$GLOBALS['_paused_themes'][ $theme ] = $paused_themes[ $theme ];
+		}
+	}
+
+	return $themes;
+}
+
+/**
+ * Is WordPress in Recovery Mode.
+ *
+ * In this mode, plugins or themes that cause WSODs will be paused.
+ *
+ * @since 5.2.0
+ *
+ * @return bool
+ */
+function wp_is_recovery_mode() {
+	return wp_recovery_mode()->is_active();
+}
+
+/**
+ * Determines whether we are currently on an endpoint that should be protected against WSODs.
+ *
+ * @since 5.2.0
+ *
+ * @return bool True if the current endpoint should be protected.
+ */
+function is_protected_endpoint() {
+	// Protect login pages.
+	if ( isset( $GLOBALS['pagenow'] ) && 'wp-login.php' === $GLOBALS['pagenow'] ) {
+		return true;
+	}
+
+	// Protect the admin backend.
+	if ( is_admin() && ! wp_doing_ajax() ) {
+		return true;
+	}
+
+	// Protect AJAX actions that could help resolve a fatal error should be available.
+	if ( is_protected_ajax_action() ) {
+		return true;
+	}
+
+	/**
+	 * Filters whether the current request is against a protected endpoint.
+	 *
+	 * This filter is only fired when an endpoint is requested which is not already protected by
+	 * WordPress core. As such, it exclusively allows providing further protected endpoints in
+	 * addition to the admin backend, login pages and protected AJAX actions.
+	 *
+	 * @since 5.2.0
+	 *
+	 * @param bool $is_protected_endpoint Whether the currently requested endpoint is protected. Default false.
+	 */
+	return (bool) apply_filters( 'is_protected_endpoint', false );
+}
+
+/**
+ * Determines whether we are currently handling an AJAX action that should be protected against WSODs.
+ *
+ * @since 5.2.0
+ *
+ * @return bool True if the current AJAX action should be protected.
+ */
+function is_protected_ajax_action() {
+	if ( ! wp_doing_ajax() ) {
+		return false;
+	}
+
+	if ( ! isset( $_REQUEST['action'] ) ) {
+		return false;
+	}
+
+	$actions_to_protect = array(
+		'edit-theme-plugin-file', // Saving changes in the core code editor.
+		'heartbeat',              // Keep the heart beating.
+		'install-plugin',         // Installing a new plugin.
+		'install-theme',          // Installing a new theme.
+		'search-plugins',         // Searching in the list of plugins.
+		'search-install-plugins', // Searching for a plugin in the plugin install screen.
+		'update-plugin',          // Update an existing plugin.
+		'update-theme',           // Update an existing theme.
+	);
+
+	/**
+	 * Filters the array of protected AJAX actions.
+	 *
+	 * This filter is only fired when doing AJAX and the AJAX request has an 'action' property.
+	 *
+	 * @since 5.2.0
+	 *
+	 * @param array $actions_to_protect Array of strings with AJAX actions to protect.
+	 */
+	$actions_to_protect = (array) apply_filters( 'wp_protected_ajax_actions', $actions_to_protect );
+
+	if ( ! in_array( $_REQUEST['action'], $actions_to_protect, true ) ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
@@ -752,10 +971,14 @@ function wp_clone( $object ) {
 }
 
 /**
- * Whether the current request is for an administrative interface page.
+ * Determines whether the current request is for an administrative interface page.
  *
- * Does not check if the user is an administrator; current_user_can()
+ * Does not check if the user is an administrator; use current_user_can()
  * for checking roles and capabilities.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 1.5.1
  *
@@ -778,7 +1001,7 @@ function is_admin() {
  *
  * e.g. `/wp-admin/`
  *
- * Does not check if the user is an administrator; current_user_can()
+ * Does not check if the user is an administrator; use current_user_can()
  * for checking roles and capabilities.
  *
  * @since 3.1.0
@@ -802,7 +1025,7 @@ function is_blog_admin() {
  *
  * e.g. `/wp-admin/network/`
  *
- * Does not check if the user is an administrator; current_user_can()
+ * Does not check if the user is an administrator; use current_user_can()
  * for checking roles and capabilities.
  *
  * @since 3.1.0
@@ -826,9 +1049,8 @@ function is_network_admin() {
  *
  * e.g. `/wp-admin/user/`
  *
- * Does not inform on whether the user is an admin! Use capability
- * checks to tell if the user should be accessing a section or not
- * current_user_can().
+ * Does not check if the user is an administrator; use current_user_can()
+ * for checking roles and capabilities.
  *
  * @since 3.1.0
  *
@@ -1137,6 +1359,24 @@ function wp_doing_ajax() {
 }
 
 /**
+ * Determines whether the current request should use themes.
+ *
+ * @since 5.1.0
+ *
+ * @return bool True if themes should be used, false otherwise.
+ */
+function wp_using_themes() {
+	/**
+	 * Filters whether the current request should use themes.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param bool $wp_using_themes Whether the current request should use themes.
+	 */
+	return apply_filters( 'wp_using_themes', defined( 'WP_USE_THEMES' ) && WP_USE_THEMES );
+}
+
+/**
  * Determines whether the current request is a WordPress cron request.
  *
  * @since 4.8.0
@@ -1211,6 +1451,9 @@ function wp_start_scraping_edited_file_errors() {
 		echo "###### wp_scraping_result_end:$key ######";
 		die();
 	}
+	if ( ! defined( 'WP_SANDBOX_SCRAPING' ) ) {
+		define( 'WP_SANDBOX_SCRAPING', true );
+	}
 	register_shutdown_function( 'wp_finalize_scraping_edited_file_errors', $key );
 }
 
@@ -1231,4 +1474,85 @@ function wp_finalize_scraping_edited_file_errors( $scrape_key ) {
 		echo wp_json_encode( true );
 	}
 	echo "\n###### wp_scraping_result_end:$scrape_key ######\n";
+}
+
+/**
+ * Checks whether current request is a JSON request, or is expecting a JSON response.
+ *
+ * @since 5.0.0
+ *
+ * @return bool True if Accepts or Content-Type headers contain application/json, false otherwise.
+ */
+function wp_is_json_request() {
+
+	if ( isset( $_SERVER['HTTP_ACCEPT'] ) && false !== strpos( $_SERVER['HTTP_ACCEPT'], 'application/json' ) ) {
+		return true;
+	}
+
+	if ( isset( $_SERVER['CONTENT_TYPE'] ) && 'application/json' === $_SERVER['CONTENT_TYPE'] ) {
+		return true;
+	}
+
+	return false;
+
+}
+
+/**
+ * Checks whether current request is a JSONP request, or is expecting a JSONP response.
+ *
+ * @since 5.2.0
+ *
+ * @return bool True if JSONP request, false otherwise.
+ */
+function wp_is_jsonp_request() {
+	if ( ! isset( $_GET['_jsonp'] ) ) {
+		return false;
+	}
+
+	if ( ! function_exists( 'wp_check_jsonp_callback' ) ) {
+		require_once ABSPATH . WPINC . '/functions.php';
+	}
+
+	$jsonp_callback = $_GET['_jsonp'];
+	if ( ! wp_check_jsonp_callback( $jsonp_callback ) ) {
+		return false;
+	}
+
+	/** This filter is documented in wp-includes/rest-api/class-wp-rest-server.php */
+	$jsonp_enabled = apply_filters( 'rest_jsonp_enabled', true );
+
+	return $jsonp_enabled;
+
+}
+
+/**
+ * Checks whether current request is an XML request, or is expecting an XML response.
+ *
+ * @since 5.2.0
+ *
+ * @return bool True if Accepts or Content-Type headers contain xml, false otherwise.
+ */
+function wp_is_xml_request() {
+	$accepted = array(
+		'text/xml',
+		'application/rss+xml',
+		'application/atom+xml',
+		'application/rdf+xml',
+		'text/xml+oembed',
+		'application/xml+oembed',
+	);
+
+	if ( isset( $_SERVER['HTTP_ACCEPT'] ) ) {
+		foreach ( $accepted as $type ) {
+			if ( false !== strpos( $_SERVER['HTTP_ACCEPT'], $type ) ) {
+				return true;
+			}
+		}
+	}
+
+	if ( isset( $_SERVER['CONTENT_TYPE'] ) && in_array( $_SERVER['CONTENT_TYPE'], $accepted, true ) ) {
+		return true;
+	}
+
+	return false;
 }

@@ -137,7 +137,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	 */
 	public function display() {
 		wp_nonce_field( 'fetch-list-' . get_class( $this ), '_ajax_fetch_list_nonce' );
-?>
+		?>
 		<?php $this->tablenav( 'top' ); ?>
 
 		<div id="availablethemes">
@@ -145,7 +145,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		</div>
 
 		<?php $this->tablenav( 'bottom' ); ?>
-<?php
+		<?php
 	}
 
 	/**
@@ -241,8 +241,9 @@ class WP_Themes_List_Table extends WP_List_Table {
 				<?php
 				if ( $theme->parent() ) {
 					printf(
+						/* translators: %s: link to documentation on child themes */
 						' <p class="howto">' . __( 'This <a href="%1$s">child theme</a> requires its parent theme, %2$s.' ) . '</p>',
-						__( 'https://codex.wordpress.org/Child_Themes' ),
+						__( 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ),
 						$theme->parent()->display( 'Name' )
 					);
 				}
@@ -250,7 +251,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 			</div>
 
 			</div>
-		<?php
+			<?php
 		endforeach;
 	}
 

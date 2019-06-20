@@ -35,6 +35,7 @@ if ( ! class_exists( 'MO', false ) ) :
 		 * Fills up with the entries from MO file $filename
 		 *
 		 * @param string $filename MO file to load
+		 * @return bool True if the import from file was successful, otherwise false.
 		 */
 		function import_from_file( $filename ) {
 			$reader = new POMO_FileReader( $filename );
@@ -107,9 +108,16 @@ if ( ! class_exists( 'MO', false ) ) :
 			$hash_addr                 = $translations_lenghts_addr + 8 * $total;
 			$current_addr              = $hash_addr;
 			fwrite(
-				$fh, pack(
-					'V*', $magic, $revision, $total, $originals_lenghts_addr,
-					$translations_lenghts_addr, $size_of_hash, $hash_addr
+				$fh,
+				pack(
+					'V*',
+					$magic,
+					$revision,
+					$total,
+					$originals_lenghts_addr,
+					$translations_lenghts_addr,
+					$size_of_hash,
+					$hash_addr
 				)
 			);
 			fseek( $fh, $originals_lenghts_addr );
@@ -117,12 +125,12 @@ if ( ! class_exists( 'MO', false ) ) :
 			// headers' msgid is an empty string
 			fwrite( $fh, pack( 'VV', 0, $current_addr ) );
 			$current_addr++;
-			$originals_table = chr( 0 );
+			$originals_table = "\0";
 
 			$reader = new POMO_Reader();
 
 			foreach ( $entries as $entry ) {
-				$originals_table .= $this->export_original( $entry ) . chr( 0 );
+				$originals_table .= $this->export_original( $entry ) . "\0";
 				$length           = $reader->strlen( $this->export_original( $entry ) );
 				fwrite( $fh, pack( 'VV', $length, $current_addr ) );
 				$current_addr += $length + 1; // account for the NULL byte after
@@ -131,10 +139,10 @@ if ( ! class_exists( 'MO', false ) ) :
 			$exported_headers = $this->export_headers();
 			fwrite( $fh, pack( 'VV', $reader->strlen( $exported_headers ), $current_addr ) );
 			$current_addr      += strlen( $exported_headers ) + 1;
-			$translations_table = $exported_headers . chr( 0 );
+			$translations_table = $exported_headers . "\0";
 
 			foreach ( $entries as $entry ) {
-				$translations_table .= $this->export_translations( $entry ) . chr( 0 );
+				$translations_table .= $this->export_translations( $entry ) . "\0";
 				$length              = $reader->strlen( $this->export_translations( $entry ) );
 				fwrite( $fh, pack( 'VV', $length, $current_addr ) );
 				$current_addr += $length + 1;
@@ -153,10 +161,10 @@ if ( ! class_exists( 'MO', false ) ) :
 			//TODO: warnings for control characters
 			$exported = $entry->singular;
 			if ( $entry->is_plural ) {
-				$exported .= chr( 0 ) . $entry->plural;
+				$exported .= "\0" . $entry->plural;
 			}
 			if ( $entry->context ) {
-				$exported = $entry->context . chr( 4 ) . $exported;
+				$exported = $entry->context . "\4" . $exported;
 			}
 			return $exported;
 		}
@@ -167,7 +175,7 @@ if ( ! class_exists( 'MO', false ) ) :
 		 */
 		function export_translations( $entry ) {
 			//TODO: warnings for control characters
-			return $entry->is_plural ? implode( chr( 0 ), $entry->translations ) : $entry->translations[0];
+			return $entry->is_plural ? implode( "\0", $entry->translations ) : $entry->translations[0];
 		}
 
 		/**
@@ -204,6 +212,7 @@ if ( ! class_exists( 'MO', false ) ) :
 
 		/**
 		 * @param POMO_FileReader $reader
+		 * @return bool True if the import was successful, otherwise false.
 		 */
 		function import_from_reader( $reader ) {
 			$endian_string = MO::get_byteorder( $reader->readint32() );
@@ -300,24 +309,25 @@ if ( ! class_exists( 'MO', false ) ) :
 		 *  0x04 as context separator or 0x00 as singular/plural separator
 		 * @param string $translation translation string from MO file. Might contain
 		 *  0x00 as a plural translations separator
+		 * @return Translation_Entry Entry instance.
 		 */
 		function &make_entry( $original, $translation ) {
 			$entry = new Translation_Entry();
-			// look for context
-			$parts = explode( chr( 4 ), $original );
+			// Look for context, separated by \4.
+			$parts = explode( "\4", $original );
 			if ( isset( $parts[1] ) ) {
 				$original       = $parts[1];
 				$entry->context = $parts[0];
 			}
 			// look for plural original
-			$parts           = explode( chr( 0 ), $original );
+			$parts           = explode( "\0", $original );
 			$entry->singular = $parts[0];
 			if ( isset( $parts[1] ) ) {
 				$entry->is_plural = true;
 				$entry->plural    = $parts[1];
 			}
 			// plural translations are also separated by \0
-			$entry->translations = explode( chr( 0 ), $translation );
+			$entry->translations = explode( "\0", $translation );
 			return $entry;
 		}
 

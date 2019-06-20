@@ -388,7 +388,10 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 			}
 		}
 
-		$_parsed_query = rawurlencode_deep( $_parsed_query );
+		$_parsed_query = array_combine(
+			rawurlencode_deep( array_keys( $_parsed_query ) ),
+			rawurlencode_deep( array_values( $_parsed_query ) )
+		);
 		$redirect_url  = add_query_arg( $_parsed_query, $redirect_url );
 	}
 
@@ -416,8 +419,10 @@ function redirect_canonical( $requested_url = null, $do_redirect = true ) {
 	$redirect['path'] = preg_replace( '|/' . preg_quote( $wp_rewrite->index, '|' ) . '/*?$|', '/', $redirect['path'] );
 
 	$punctuation_pattern = implode(
-		'|', array_map(
-			'preg_quote', array(
+		'|',
+		array_map(
+			'preg_quote',
+			array(
 				' ',
 				'%20',  // space
 				'!',

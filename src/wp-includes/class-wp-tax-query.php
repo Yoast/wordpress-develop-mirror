@@ -43,8 +43,6 @@ class WP_Tax_Query {
 	 * Standard response when the query should not return any rows.
 	 *
 	 * @since 3.2.0
-	 *
-	 * @static
 	 * @var string
 	 */
 	private static $no_results = array(
@@ -224,8 +222,6 @@ class WP_Tax_Query {
 	 *
 	 * @since 4.1.0
 	 *
-	 * @static
-	 *
 	 * @param array $query Tax query arguments.
 	 * @return bool Whether the query clause is a first-order clause.
 	 */
@@ -237,8 +233,6 @@ class WP_Tax_Query {
 	 * Generates SQL clauses to be appended to a main query.
 	 *
 	 * @since 3.1.0
-	 *
-	 * @static
 	 *
 	 * @param string $primary_table     Database table where the object being filtered is stored (eg wp_users).
 	 * @param string $primary_id_column ID column for the filtered object in $primary_table.
@@ -476,7 +470,8 @@ class WP_Tax_Query {
 				ON $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
 				WHERE $wpdb->term_taxonomy.taxonomy = %s
 				AND $wpdb->term_relationships.object_id = $this->primary_table.$this->primary_id_column
-			)", $clause['taxonomy']
+			)",
+				$clause['taxonomy']
 			);
 
 		}

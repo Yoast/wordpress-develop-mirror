@@ -50,7 +50,7 @@ class Walker_Nav_Menu extends Walker {
 	 * @param int      $depth  Depth of menu item. Used for padding.
 	 * @param stdClass $args   An object of wp_nav_menu() arguments.
 	 */
-	public function start_lvl( &$output, $depth = 0, $args = array() ) {
+	public function start_lvl( &$output, $depth = 0, $args = null ) {
 		if ( isset( $args->item_spacing ) && 'discard' === $args->item_spacing ) {
 			$t = '';
 			$n = '';
@@ -68,7 +68,7 @@ class Walker_Nav_Menu extends Walker {
 		 *
 		 * @since 4.8.0
 		 *
-		 * @param array    $classes The CSS classes that are applied to the menu `<ul>` element.
+		 * @param string[] $classes Array of the CSS classes that are applied to the menu `<ul>` element.
 		 * @param stdClass $args    An object of `wp_nav_menu()` arguments.
 		 * @param int      $depth   Depth of menu item. Used for padding.
 		 */
@@ -89,7 +89,7 @@ class Walker_Nav_Menu extends Walker {
 	 * @param int      $depth  Depth of menu item. Used for padding.
 	 * @param stdClass $args   An object of wp_nav_menu() arguments.
 	 */
-	public function end_lvl( &$output, $depth = 0, $args = array() ) {
+	public function end_lvl( &$output, $depth = 0, $args = null ) {
 		if ( isset( $args->item_spacing ) && 'discard' === $args->item_spacing ) {
 			$t = '';
 			$n = '';
@@ -115,7 +115,7 @@ class Walker_Nav_Menu extends Walker {
 	 * @param stdClass $args   An object of wp_nav_menu() arguments.
 	 * @param int      $id     Current item ID.
 	 */
-	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
 		if ( isset( $args->item_spacing ) && 'discard' === $args->item_spacing ) {
 			$t = '';
 			$n = '';
@@ -140,12 +140,12 @@ class Walker_Nav_Menu extends Walker {
 		$args = apply_filters( 'nav_menu_item_args', $args, $item, $depth );
 
 		/**
-		 * Filters the CSS class(es) applied to a menu item's list item element.
+		 * Filters the CSS classes applied to a menu item's list item element.
 		 *
 		 * @since 3.0.0
 		 * @since 4.1.0 The `$depth` parameter was added.
 		 *
-		 * @param array    $classes The CSS classes that are applied to the menu item's `<li>` element.
+		 * @param string[] $classes Array of the CSS classes that are applied to the menu item's `<li>` element.
 		 * @param WP_Post  $item    The current menu item.
 		 * @param stdClass $args    An object of wp_nav_menu() arguments.
 		 * @param int      $depth   Depth of menu item. Used for padding.
@@ -172,8 +172,13 @@ class Walker_Nav_Menu extends Walker {
 		$atts           = array();
 		$atts['title']  = ! empty( $item->attr_title ) ? $item->attr_title : '';
 		$atts['target'] = ! empty( $item->target ) ? $item->target : '';
-		$atts['rel']    = ! empty( $item->xfn ) ? $item->xfn : '';
-		$atts['href']   = ! empty( $item->url ) ? $item->url : '';
+		if ( '_blank' === $item->target && empty( $item->xfn ) ) {
+			$atts['rel'] = 'noopener noreferrer';
+		} else {
+			$atts['rel'] = $item->xfn;
+		}
+		$atts['href']         = ! empty( $item->url ) ? $item->url : '';
+		$atts['aria-current'] = $item->current ? 'page' : '';
 
 		/**
 		 * Filters the HTML attributes applied to a menu item's anchor element.
@@ -184,10 +189,11 @@ class Walker_Nav_Menu extends Walker {
 		 * @param array $atts {
 		 *     The HTML attributes applied to the menu item's `<a>` element, empty strings are ignored.
 		 *
-		 *     @type string $title  Title attribute.
-		 *     @type string $target Target attribute.
-		 *     @type string $rel    The rel attribute.
-		 *     @type string $href   The href attribute.
+		 *     @type string $title        Title attribute.
+		 *     @type string $target       Target attribute.
+		 *     @type string $rel          The rel attribute.
+		 *     @type string $href         The href attribute.
+		 *     @type string $aria_current The aria-current attribute.
 		 * }
 		 * @param WP_Post  $item  The current menu item.
 		 * @param stdClass $args  An object of wp_nav_menu() arguments.
@@ -253,7 +259,7 @@ class Walker_Nav_Menu extends Walker {
 	 * @param int      $depth  Depth of page. Not Used.
 	 * @param stdClass $args   An object of wp_nav_menu() arguments.
 	 */
-	public function end_el( &$output, $item, $depth = 0, $args = array() ) {
+	public function end_el( &$output, $item, $depth = 0, $args = null ) {
 		if ( isset( $args->item_spacing ) && 'discard' === $args->item_spacing ) {
 			$t = '';
 			$n = '';

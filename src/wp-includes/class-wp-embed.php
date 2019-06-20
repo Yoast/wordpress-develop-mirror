@@ -85,13 +85,13 @@ class WP_Embed {
 			return;
 		}
 
-?>
+		?>
 <script type="text/javascript">
 	jQuery(document).ready(function($){
 		$.get("<?php echo admin_url( 'admin-ajax.php?action=oembed-cache&post=' . $post->ID, 'relative' ); ?>");
 	});
 </script>
-<?php
+		<?php
 	}
 
 	/**
@@ -374,7 +374,7 @@ class WP_Embed {
 		 *
 		 * @since 2.9.0
 		 *
-		 * @param array $post_types Array of post types to cache oEmbed results for. Defaults to post types with `show_ui` set to true.
+		 * @param string[] $post_types Array of post type names to cache oEmbed results for. Defaults to post types with `show_ui` set to true.
 		 */
 		if ( empty( $post->ID ) || ! in_array( $post->post_type, apply_filters( 'embed_cache_oembed_types', $post_types ) ) ) {
 			return;

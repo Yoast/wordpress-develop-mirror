@@ -541,7 +541,7 @@ class WP_User_Query {
 			 *
 			 * @since 3.6.0
 			 *
-			 * @param array         $search_columns Array of column names to be searched.
+			 * @param string[]      $search_columns Array of column names to be searched.
 			 * @param string        $search         Text being searched.
 			 * @param WP_User_Query $this           The current WP_User_Query instance.
 			 */
@@ -592,25 +592,48 @@ class WP_User_Query {
 
 		$qv =& $this->query_vars;
 
-		$this->request = "SELECT $this->query_fields $this->query_from $this->query_where $this->query_orderby $this->query_limit";
-
-		if ( is_array( $qv['fields'] ) || 'all' == $qv['fields'] ) {
-			$this->results = $wpdb->get_results( $this->request );
-		} else {
-			$this->results = $wpdb->get_col( $this->request );
-		}
-
 		/**
-		 * Filters SELECT FOUND_ROWS() query for the current WP_User_Query instance.
+		 * Filters the users array before the query takes place.
 		 *
-		 * @since 3.2.0
+		 * Return a non-null value to bypass WordPress's default user queries.
+		 * Filtering functions that require pagination information are encouraged to set
+		 * the `total_users` property of the WP_User_Query object, passed to the filter
+		 * by reference. If WP_User_Query does not perform a database query, it will not
+		 * have enough information to generate these values itself.
 		 *
-		 * @global wpdb $wpdb WordPress database abstraction object.
+		 * @since 5.1.0
 		 *
-		 * @param string $sql The SELECT FOUND_ROWS() query for the current WP_User_Query.
+		 * @param array|null $results Return an array of user data to short-circuit WP's user query
+		 *                            or null to allow WP to run its normal queries.
+		 * @param WP_User_Query $this The WP_User_Query instance (passed by reference).
 		 */
-		if ( isset( $qv['count_total'] ) && $qv['count_total'] ) {
-			$this->total_users = (int) $wpdb->get_var( apply_filters( 'found_users_query', 'SELECT FOUND_ROWS()' ) );
+		$this->results = apply_filters_ref_array( 'users_pre_query', array( null, &$this ) );
+
+		if ( null === $this->results ) {
+			$this->request = "SELECT $this->query_fields $this->query_from $this->query_where $this->query_orderby $this->query_limit";
+
+			if ( is_array( $qv['fields'] ) || 'all' == $qv['fields'] ) {
+				$this->results = $wpdb->get_results( $this->request );
+			} else {
+				$this->results = $wpdb->get_col( $this->request );
+			}
+
+			if ( isset( $qv['count_total'] ) && $qv['count_total'] ) {
+				/**
+				 * Filters SELECT FOUND_ROWS() query for the current WP_User_Query instance.
+				 *
+				 * @since 3.2.0
+				 * @since 5.1.0 Added the `$this` parameter.
+				 *
+				 * @global wpdb $wpdb WordPress database abstraction object.
+				 *
+				 * @param string $sql         The SELECT FOUND_ROWS() query for the current WP_User_Query.
+				 * @param WP_User_Query $this The current WP_User_Query instance.
+				 */
+				$found_users_query = apply_filters( 'found_users_query', 'SELECT FOUND_ROWS()', $this );
+
+				$this->total_users = (int) $wpdb->get_var( $found_users_query );
+			}
 		}
 
 		if ( ! $this->results ) {

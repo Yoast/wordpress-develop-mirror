@@ -44,7 +44,7 @@ if ( isset( $_REQUEST['action'] ) && 'add-user' == $_REQUEST['action'] ) {
 	$user = wp_unslash( $_POST['user'] );
 
 	$user_details = wpmu_validate_user_signup( $user['username'], $user['email'] );
-	if ( is_wp_error( $user_details['errors'] ) && ! empty( $user_details['errors']->errors ) ) {
+	if ( is_wp_error( $user_details['errors'] ) && $user_details['errors']->has_errors() ) {
 		$add_user_errors = $user_details['errors'];
 	} else {
 		$password = wp_generate_password( 12, false );
@@ -66,7 +66,8 @@ if ( isset( $_REQUEST['action'] ) && 'add-user' == $_REQUEST['action'] ) {
 					array(
 						'update'  => 'added',
 						'user_id' => $user_id,
-					), 'user-new.php'
+					),
+					'user-new.php'
 				)
 			);
 			exit;
@@ -85,12 +86,17 @@ if ( isset( $_GET['update'] ) ) {
 			}
 		}
 
-		if ( empty( $edit_link ) ) {
-			$messages[] = __( 'User added.' );
-		} else {
-			/* translators: %s: edit page url */
-			$messages[] = sprintf( __( 'User added. <a href="%s">Edit user</a>' ), $edit_link );
+		$message = __( 'User added.' );
+
+		if ( $edit_link ) {
+			$message .= sprintf(
+				' <a href="%s">%s</a>',
+				$edit_link,
+				__( 'Edit user' )
+			);
 		}
+
+		$messages[] = $message;
 	}
 }
 
@@ -109,7 +115,7 @@ if ( ! empty( $messages ) ) {
 }
 
 if ( isset( $add_user_errors ) && is_wp_error( $add_user_errors ) ) {
-?>
+	?>
 	<div class="error">
 		<?php
 		foreach ( $add_user_errors->get_error_messages() as $message ) {
@@ -119,7 +125,7 @@ if ( isset( $add_user_errors ) && is_wp_error( $add_user_errors ) ) {
 	</div>
 <?php } ?>
 	<form action="<?php echo network_admin_url( 'user-new.php?action=add-user' ); ?>" id="adduser" method="post" novalidate="novalidate">
-	<table class="form-table">
+	<table class="form-table" role="presentation">
 		<tr class="form-field form-required">
 			<th scope="row"><label for="username"><?php _e( 'Username' ); ?></label></th>
 			<td><input type="text" class="regular-text" name="user[username]" id="username" autocapitalize="none" autocorrect="off" maxlength="60" /></td>
@@ -129,7 +135,7 @@ if ( isset( $add_user_errors ) && is_wp_error( $add_user_errors ) ) {
 			<td><input type="email" class="regular-text" name="user[email]" id="email"/></td>
 		</tr>
 		<tr class="form-field">
-			<td colspan="2"><?php _e( 'A password reset link will be sent to the user via email.' ); ?></td>
+			<td colspan="2" class="td-full"><?php _e( 'A password reset link will be sent to the user via email.' ); ?></td>
 		</tr>
 	</table>
 	<?php

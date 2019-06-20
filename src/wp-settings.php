@@ -17,6 +17,14 @@ define( 'WPINC', 'wp-includes' );
 
 // Include files required for initialization.
 require( ABSPATH . WPINC . '/load.php' );
+require( ABSPATH . WPINC . '/class-wp-paused-extensions-storage.php' );
+require( ABSPATH . WPINC . '/class-wp-fatal-error-handler.php' );
+require( ABSPATH . WPINC . '/class-wp-recovery-mode-cookie-service.php' );
+require( ABSPATH . WPINC . '/class-wp-recovery-mode-key-service.php' );
+require( ABSPATH . WPINC . '/class-wp-recovery-mode-link-service.php' );
+require( ABSPATH . WPINC . '/class-wp-recovery-mode-email-service.php' );
+require( ABSPATH . WPINC . '/class-wp-recovery-mode.php' );
+require( ABSPATH . WPINC . '/error-protection.php' );
 require( ABSPATH . WPINC . '/default-constants.php' );
 require_once( ABSPATH . WPINC . '/plugin.php' );
 
@@ -39,6 +47,9 @@ global $blog_id;
 
 // Set initial default constants including WP_MEMORY_LIMIT, WP_MAX_MEMORY_LIMIT, WP_DEBUG, SCRIPT_DEBUG, WP_CONTENT_DIR and WP_CACHE.
 wp_initial_constants();
+
+// Make sure we register the shutdown handler for fatal errors as soon as possible.
+wp_register_fatal_error_handler();
 
 // Check for the required PHP version and for the MySQL extension or a database drop-in.
 wp_check_php_mysql_versions();
@@ -95,7 +106,10 @@ wp_set_lang_dir();
 // Load early WordPress files.
 require( ABSPATH . WPINC . '/compat.php' );
 require( ABSPATH . WPINC . '/class-wp-list-util.php' );
+require( ABSPATH . WPINC . '/formatting.php' );
+require( ABSPATH . WPINC . '/meta.php' );
 require( ABSPATH . WPINC . '/functions.php' );
+require( ABSPATH . WPINC . '/class-wp-meta-query.php' );
 require( ABSPATH . WPINC . '/class-wp-matchesmapregex.php' );
 require( ABSPATH . WPINC . '/class-wp.php' );
 require( ABSPATH . WPINC . '/class-wp-error.php' );
@@ -143,7 +157,6 @@ wp_not_installed();
 // Load most of WordPress.
 require( ABSPATH . WPINC . '/class-wp-walker.php' );
 require( ABSPATH . WPINC . '/class-wp-ajax-response.php' );
-require( ABSPATH . WPINC . '/formatting.php' );
 require( ABSPATH . WPINC . '/capabilities.php' );
 require( ABSPATH . WPINC . '/class-wp-roles.php' );
 require( ABSPATH . WPINC . '/class-wp-role.php' );
@@ -154,12 +167,11 @@ require( ABSPATH . WPINC . '/date.php' );
 require( ABSPATH . WPINC . '/theme.php' );
 require( ABSPATH . WPINC . '/class-wp-theme.php' );
 require( ABSPATH . WPINC . '/template.php' );
+require( ABSPATH . WPINC . '/class-wp-user-request.php' );
 require( ABSPATH . WPINC . '/user.php' );
 require( ABSPATH . WPINC . '/class-wp-user-query.php' );
 require( ABSPATH . WPINC . '/class-wp-session-tokens.php' );
 require( ABSPATH . WPINC . '/class-wp-user-meta-session-tokens.php' );
-require( ABSPATH . WPINC . '/meta.php' );
-require( ABSPATH . WPINC . '/class-wp-meta-query.php' );
 require( ABSPATH . WPINC . '/class-wp-metadata-lazyloader.php' );
 require( ABSPATH . WPINC . '/general-template.php' );
 require( ABSPATH . WPINC . '/link-template.php' );
@@ -230,16 +242,37 @@ require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-attachments-contro
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-post-types-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-post-statuses-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-revisions-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-autosaves-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-taxonomies-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-terms-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-users-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-comments-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-search-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-blocks-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-block-renderer-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-settings-controller.php' );
+require( ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-themes-controller.php' );
 require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-meta-fields.php' );
 require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-comment-meta-fields.php' );
 require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-post-meta-fields.php' );
 require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-term-meta-fields.php' );
 require( ABSPATH . WPINC . '/rest-api/fields/class-wp-rest-user-meta-fields.php' );
+require( ABSPATH . WPINC . '/rest-api/search/class-wp-rest-search-handler.php' );
+require( ABSPATH . WPINC . '/rest-api/search/class-wp-rest-post-search-handler.php' );
+require( ABSPATH . WPINC . '/class-wp-block-type.php' );
+require( ABSPATH . WPINC . '/class-wp-block-type-registry.php' );
+require( ABSPATH . WPINC . '/class-wp-block-parser.php' );
+require( ABSPATH . WPINC . '/blocks.php' );
+require( ABSPATH . WPINC . '/blocks/archives.php' );
+require( ABSPATH . WPINC . '/blocks/block.php' );
+require( ABSPATH . WPINC . '/blocks/calendar.php' );
+require( ABSPATH . WPINC . '/blocks/categories.php' );
+require( ABSPATH . WPINC . '/blocks/latest-comments.php' );
+require( ABSPATH . WPINC . '/blocks/latest-posts.php' );
+require( ABSPATH . WPINC . '/blocks/rss.php' );
+require( ABSPATH . WPINC . '/blocks/search.php' );
+require( ABSPATH . WPINC . '/blocks/shortcode.php' );
+require( ABSPATH . WPINC . '/blocks/tag-cloud.php' );
 
 $GLOBALS['wp_embed'] = new WP_Embed();
 
@@ -259,6 +292,15 @@ $GLOBALS['wp_plugin_paths'] = array();
 // Load must-use plugins.
 foreach ( wp_get_mu_plugins() as $mu_plugin ) {
 	include_once( $mu_plugin );
+
+	/**
+	 * Fires once a single must-use plugin has loaded.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param string $mu_plugin Full path to the plugin's main file.
+	 */
+	do_action( 'mu_plugin_loaded', $mu_plugin );
 }
 unset( $mu_plugin );
 
@@ -267,6 +309,15 @@ if ( is_multisite() ) {
 	foreach ( wp_get_active_network_plugins() as $network_plugin ) {
 		wp_register_plugin_realpath( $network_plugin );
 		include_once( $network_plugin );
+
+		/**
+		 * Fires once a single network-activated plugin has loaded.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param string $network_plugin Full path to the plugin's main file.
+		 */
+		do_action( 'network_plugin_loaded', $network_plugin );
 	}
 	unset( $network_plugin );
 }
@@ -301,10 +352,24 @@ wp_start_scraping_edited_file_errors();
 // Register the default theme directory root
 register_theme_directory( get_theme_root() );
 
+if ( ! is_multisite() ) {
+	// Handle users requesting a recovery mode link and initiating recovery mode.
+	wp_recovery_mode()->initialize();
+}
+
 // Load active plugins.
 foreach ( wp_get_active_and_valid_plugins() as $plugin ) {
 	wp_register_plugin_realpath( $plugin );
 	include_once( $plugin );
+
+	/**
+	 * Fires once a single activated plugin has loaded.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param string $plugin Full path to the plugin's main file.
+	 */
+	do_action( 'plugin_loaded', $plugin );
 }
 unset( $plugin );
 
@@ -430,14 +495,12 @@ $GLOBALS['wp_locale_switcher'] = new WP_Locale_Switcher();
 $GLOBALS['wp_locale_switcher']->init();
 
 // Load the functions for the active theme, for both parent and child theme if applicable.
-if ( ! wp_installing() || 'wp-activate.php' === $pagenow ) {
-	if ( TEMPLATEPATH !== STYLESHEETPATH && file_exists( STYLESHEETPATH . '/functions.php' ) ) {
-		include( STYLESHEETPATH . '/functions.php' );
-	}
-	if ( file_exists( TEMPLATEPATH . '/functions.php' ) ) {
-		include( TEMPLATEPATH . '/functions.php' );
+foreach ( wp_get_active_and_valid_themes() as $theme ) {
+	if ( file_exists( $theme . '/functions.php' ) ) {
+		include $theme . '/functions.php';
 	}
 }
+unset( $theme );
 
 /**
  * Fires after the theme is loaded.

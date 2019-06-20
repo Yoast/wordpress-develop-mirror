@@ -253,21 +253,34 @@ function the_content( $more_link_text = null, $strip_teaser = false ) {
  * Retrieve the post content.
  *
  * @since 0.71
+ * @since 5.2.0 Added the `$post` parameter.
  *
  * @global int   $page      Page number of a single post/page.
  * @global int   $more      Boolean indicator for whether single post/page is being viewed.
  * @global bool  $preview   Whether post/page is in preview mode.
- * @global array $pages     Array of all pages in post/page. Each array element contains part of the content separated by the <!--nextpage--> tag.
+ * @global array $pages     Array of all pages in post/page. Each array element contains
+ *                          part of the content separated by the `<!--nextpage-->` tag.
  * @global int   $multipage Boolean indicator for whether multiple pages are in play.
  *
- * @param string $more_link_text Optional. Content for when there is more text.
- * @param bool   $strip_teaser   Optional. Strip teaser content before the more text. Default is false.
+ * @param string             $more_link_text Optional. Content for when there is more text.
+ * @param bool               $strip_teaser   Optional. Strip teaser content before the more text. Default is false.
+ * @param WP_Post|object|int $post           Optional. WP_Post instance or Post ID/object. Default is null.
  * @return string
  */
-function get_the_content( $more_link_text = null, $strip_teaser = false ) {
+function get_the_content( $more_link_text = null, $strip_teaser = false, $post = null ) {
 	global $page, $more, $preview, $pages, $multipage;
 
-	$post = get_post();
+	$_post = get_post( $post );
+
+	if ( ! ( $_post instanceof WP_Post ) ) {
+		return '';
+	}
+
+	if ( null === $post ) {
+		$elements = compact( 'page', 'more', 'preview', 'pages', 'multipage' );
+	} else {
+		$elements = generate_postdata( $_post );
+	}
 
 	if ( null === $more_link_text ) {
 		$more_link_text = sprintf(
@@ -275,7 +288,12 @@ function get_the_content( $more_link_text = null, $strip_teaser = false ) {
 			sprintf(
 				/* translators: %s: Name of current post */
 				__( 'Continue reading %s' ),
-				the_title_attribute( array( 'echo' => false ) )
+				the_title_attribute(
+					array(
+						'echo' => false,
+						'post' => $_post,
+					)
+				)
 			),
 			__( '(more&hellip;)' )
 		);
@@ -285,17 +303,24 @@ function get_the_content( $more_link_text = null, $strip_teaser = false ) {
 	$has_teaser = false;
 
 	// If post password required and it doesn't match the cookie.
-	if ( post_password_required( $post ) ) {
-		return get_the_password_form( $post );
+	if ( post_password_required( $_post ) ) {
+		return get_the_password_form( $_post );
 	}
 
-	if ( $page > count( $pages ) ) { // if the requested page doesn't exist
-		$page = count( $pages ); // give them the highest numbered page that DOES exist
+	if ( $elements['page'] > count( $elements['pages'] ) ) { // if the requested page doesn't exist
+		$elements['page'] = count( $elements['pages'] ); // give them the highest numbered page that DOES exist
 	}
 
-	$content = $pages[ $page - 1 ];
+	$page_no = $elements['page'];
+	$content = $elements['pages'][ $page_no - 1 ];
 	if ( preg_match( '/<!--more(.*?)?-->/', $content, $matches ) ) {
+		if ( has_block( 'more', $content ) ) {
+			// Remove the core/more block delimiters. They will be left over after $content is split up.
+			$content = preg_replace( '/<!-- \/?wp:more(.*?) -->/', '', $content );
+		}
+
 		$content = explode( $matches[0], $content, 2 );
+
 		if ( ! empty( $matches[1] ) && ! empty( $more_link_text ) ) {
 			$more_link_text = strip_tags( wp_kses_no_null( trim( $matches[1] ) ) );
 		}
@@ -305,21 +330,21 @@ function get_the_content( $more_link_text = null, $strip_teaser = false ) {
 		$content = array( $content );
 	}
 
-	if ( false !== strpos( $post->post_content, '<!--noteaser-->' ) && ( ! $multipage || $page == 1 ) ) {
+	if ( false !== strpos( $_post->post_content, '<!--noteaser-->' ) && ( ! $elements['multipage'] || $elements['page'] == 1 ) ) {
 		$strip_teaser = true;
 	}
 
 	$teaser = $content[0];
 
-	if ( $more && $strip_teaser && $has_teaser ) {
+	if ( $elements['more'] && $strip_teaser && $has_teaser ) {
 		$teaser = '';
 	}
 
 	$output .= $teaser;
 
 	if ( count( $content ) > 1 ) {
-		if ( $more ) {
-			$output .= '<span id="more-' . $post->ID . '"></span>' . $content[1];
+		if ( $elements['more'] ) {
+			$output .= '<span id="more-' . $_post->ID . '"></span>' . $content[1];
 		} else {
 			if ( ! empty( $more_link_text ) ) {
 
@@ -331,7 +356,7 @@ function get_the_content( $more_link_text = null, $strip_teaser = false ) {
 				 * @param string $more_link_element Read More link element.
 				 * @param string $more_link_text    Read More text.
 				 */
-				$output .= apply_filters( 'the_content_more_link', ' <a href="' . get_permalink() . "#more-{$post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
+				$output .= apply_filters( 'the_content_more_link', ' <a href="' . get_permalink( $_post ) . "#more-{$_post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
 			}
 			$output = force_balance_tags( $output );
 		}
@@ -412,7 +437,11 @@ function get_the_excerpt( $post = null ) {
 }
 
 /**
- * Whether the post has a custom excerpt.
+ * Determines whether the post has a custom excerpt.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.3.0
  *
@@ -425,7 +454,7 @@ function has_excerpt( $post = 0 ) {
 }
 
 /**
- * Display the classes for the post div.
+ * Displays the classes for the post container element.
  *
  * @since 2.7.0
  *
@@ -438,7 +467,7 @@ function post_class( $class = '', $post_id = null ) {
 }
 
 /**
- * Retrieves the classes for the post div as an array.
+ * Retrieves an array of the class names for the post container element.
  *
  * The class names are many. If the post is a sticky, then the 'sticky'
  * class name. The class 'hentry' is always added to each post. If the post has a
@@ -447,16 +476,16 @@ function post_class( $class = '', $post_id = null ) {
  * eg 'category-foo' or 'my_custom_taxonomy-bar'.
  *
  * The 'post_tag' taxonomy is a special
- * case; the class has the 'tag-' prefix instead of 'post_tag-'. All classes are
- * passed through the filter, {@see 'post_class'}, with the list of classes, followed by
+ * case; the class has the 'tag-' prefix instead of 'post_tag-'. All class names are
+ * passed through the filter, {@see 'post_class'}, with the list of class names, followed by
  * $class parameter value, with the post ID as the last parameter.
  *
  * @since 2.7.0
- * @since 4.2.0 Custom taxonomy classes were added.
+ * @since 4.2.0 Custom taxonomy class names were added.
  *
- * @param string|array $class   One or more classes to add to the class list.
- * @param int|WP_Post  $post_id Optional. Post ID or post object.
- * @return array Array of classes.
+ * @param string|string[] $class   Space-separated string or array of class names to add to the class list.
+ * @param int|WP_Post     $post_id Optional. Post ID or post object.
+ * @return string[] Array of class names.
  */
 function get_post_class( $class = '', $post_id = null ) {
 	$post = get_post( $post_id );
@@ -548,13 +577,13 @@ function get_post_class( $class = '', $post_id = null ) {
 	$classes = array_map( 'esc_attr', $classes );
 
 	/**
-	 * Filters the list of CSS classes for the current post.
+	 * Filters the list of CSS class names for the current post.
 	 *
 	 * @since 2.7.0
 	 *
-	 * @param array $classes An array of post classes.
-	 * @param array $class   An array of additional classes added to the post.
-	 * @param int   $post_id The post ID.
+	 * @param string[] $classes An array of post class names.
+	 * @param string[] $class   An array of additional class names added to the post.
+	 * @param int      $post_id The post ID.
 	 */
 	$classes = apply_filters( 'post_class', $classes, $class, $post->ID );
 
@@ -562,26 +591,26 @@ function get_post_class( $class = '', $post_id = null ) {
 }
 
 /**
- * Display the classes for the body element.
+ * Displays the class names for the body element.
  *
  * @since 2.8.0
  *
- * @param string|array $class One or more classes to add to the class list.
+ * @param string|string[] $class Space-separated string or array of class names to add to the class list.
  */
 function body_class( $class = '' ) {
-	// Separates classes with a single space, collates classes for body element
+	// Separates class names with a single space, collates class names for body element
 	echo 'class="' . join( ' ', get_body_class( $class ) ) . '"';
 }
 
 /**
- * Retrieve the classes for the body element as an array.
+ * Retrieves an array of the class names for the body element.
  *
  * @since 2.8.0
  *
  * @global WP_Query $wp_query
  *
- * @param string|array $class One or more classes to add to the class list.
- * @return array Array of classes.
+ * @param string|string[] $class Space-separated string or array of class names to add to the class list.
+ * @return string[] Array of class names.
  */
 function get_body_class( $class = '' ) {
 	global $wp_query;
@@ -597,6 +626,9 @@ function get_body_class( $class = '' ) {
 	}
 	if ( is_home() ) {
 		$classes[] = 'blog';
+	}
+	if ( is_privacy_policy() ) {
+		$classes[] = 'privacy-policy';
 	}
 	if ( is_archive() ) {
 		$classes[] = 'archive';
@@ -747,12 +779,17 @@ function get_body_class( $class = '' ) {
 		$classes[] = 'no-customize-support';
 	}
 
-	if ( get_background_color() !== get_theme_support( 'custom-background', 'default-color' ) || get_background_image() ) {
+	if ( current_theme_supports( 'custom-background' )
+		&& ( get_background_color() !== get_theme_support( 'custom-background', 'default-color' ) || get_background_image() ) ) {
 		$classes[] = 'custom-background';
 	}
 
 	if ( has_custom_logo() ) {
 		$classes[] = 'wp-custom-logo';
+	}
+
+	if ( current_theme_supports( 'responsive-embeds' ) ) {
+		$classes[] = 'wp-embed-responsive';
 	}
 
 	$page = $wp_query->get( 'page' );
@@ -796,12 +833,12 @@ function get_body_class( $class = '' ) {
 	$classes = array_map( 'esc_attr', $classes );
 
 	/**
-	 * Filters the list of CSS body classes for the current post or page.
+	 * Filters the list of CSS body class names for the current post or page.
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param array $classes An array of body classes.
-	 * @param array $class   An array of additional classes added to the body.
+	 * @param string[] $classes An array of body class names.
+	 * @param string[] $class   An array of additional class names added to the body.
 	 */
 	$classes = apply_filters( 'body_class', $classes, $class );
 
@@ -858,11 +895,11 @@ function post_password_required( $post = null ) {
 /**
  * The formatted output of a list of pages.
  *
- * Displays page links for paginated posts (i.e. includes the <!--nextpage-->.
+ * Displays page links for paginated posts (i.e. including the `<!--nextpage-->`
  * Quicktag one or more times). This tag must be within The Loop.
  *
  * @since 1.2.0
- * @since 5.0.0 Added the `aria_current` argument.
+ * @since 5.1.0 Added the `aria_current` argument.
  *
  * @global int $page
  * @global int $numpages
@@ -1051,7 +1088,7 @@ function post_custom( $key = '' ) {
 }
 
 /**
- * Display list of post custom fields.
+ * Display a list of post custom fields.
  *
  * @since 1.2.0
  *
@@ -1067,7 +1104,7 @@ function the_meta() {
 			}
 
 			$values = array_map( 'trim', get_post_custom_values( $key ) );
-			$value  = implode( $values, ', ' );
+			$value  = implode( ', ', $values );
 
 			$html = sprintf(
 				"<li><span class='post-meta-key'>%s</span> %s</li>\n",
@@ -1099,14 +1136,16 @@ function the_meta() {
 //
 
 /**
- * Retrieve or display list of pages as a dropdown (select list).
+ * Retrieve or display a list of pages as a dropdown (select list).
  *
  * @since 2.1.0
  * @since 4.2.0 The `$value_field` argument was added.
  * @since 4.3.0 The `$class` argument was added.
  *
+ * @see get_pages()
+ *
  * @param array|string $args {
- *     Optional. Array or string of arguments to generate a pages drop-down element.
+ *     Optional. Array or string of arguments to generate a page dropdown. See `get_pages()` for additional arguments.
  *
  *     @type int          $depth                 Maximum depth. Default 0.
  *     @type int          $child_of              Page ID to retrieve child pages of. Default 0.
@@ -1186,7 +1225,7 @@ function wp_dropdown_pages( $args = '' ) {
 }
 
 /**
- * Retrieve or display list of pages (or hierarchical post type items) in list (li) format.
+ * Retrieve or display a list of pages (or hierarchical post type items) in list (li) format.
  *
  * @since 1.5.0
  * @since 4.7.0 Added the `item_spacing` argument.
@@ -1196,7 +1235,7 @@ function wp_dropdown_pages( $args = '' ) {
  * @global WP_Query $wp_query
  *
  * @param array|string $args {
- *     Array or string of arguments. Optional.
+ *     Optional. Array or string of arguments to generate a list of pages. See `get_pages()` for additional arguments.
  *
  *     @type int          $child_of     Display only the sub-pages of a single page by ID. Default 0 (all pages).
  *     @type string       $authors      Comma-separated list of author IDs. Default empty (all authors).
@@ -1316,7 +1355,7 @@ function wp_list_pages( $args = '' ) {
 /**
  * Displays or retrieves a list of pages with an optional home link.
  *
- * The arguments are listed below and part of the arguments are for wp_list_pages()} function.
+ * The arguments are listed below and part of the arguments are for wp_list_pages() function.
  * Check that function for more info on those arguments.
  *
  * @since 2.7.0
@@ -1324,7 +1363,7 @@ function wp_list_pages( $args = '' ) {
  * @since 4.7.0 Added the `item_spacing` argument.
  *
  * @param array|string $args {
- *     Optional. Arguments to generate a page menu. See wp_list_pages() for additional arguments.
+ *     Optional. Array or string of arguments to generate a page menu. See `wp_list_pages()` for additional arguments.
  *
  *     @type string          $sort_column  How to sort the list of pages. Accepts post column names.
  *                                         Default 'menu_order, post_title'.
@@ -1339,7 +1378,8 @@ function wp_list_pages( $args = '' ) {
  *     @type string          $link_after   The HTML or text to append to $show_home text. Default empty.
  *     @type string          $before       The HTML or text to prepend to the menu. Default is '<ul>'.
  *     @type string          $after        The HTML or text to append to the menu. Default is '</ul>'.
- *     @type string          $item_spacing Whether to preserve whitespace within the menu's HTML. Accepts 'preserve' or 'discard'. Default 'discard'.
+ *     @type string          $item_spacing Whether to preserve whitespace within the menu's HTML. Accepts 'preserve'
+ *                                         or 'discard'. Default 'discard'.
  *     @type Walker          $walker       Walker instance to use for listing pages. Default empty (Walker_Page).
  * }
  * @return string|void HTML menu
@@ -1590,6 +1630,7 @@ function wp_get_attachment_link( $id = 0, $size = 'thumbnail', $permalink = fals
 	 * Filters a retrieved attachment page link.
 	 *
 	 * @since 2.7.0
+	 * @since 5.1.0 Added the $attr parameter.
 	 *
 	 * @param string       $link_html The page link HTML output.
 	 * @param int          $id        Post ID.
@@ -1598,8 +1639,9 @@ function wp_get_attachment_link( $id = 0, $size = 'thumbnail', $permalink = fals
 	 * @param bool         $permalink Whether to add permalink to image. Default false.
 	 * @param bool         $icon      Whether to include an icon. Default false.
 	 * @param string|bool  $text      If string, will be link text. Default false.
+	 * @param array|string $attr      Array or string of attributes. Default empty.
 	 */
-	return apply_filters( 'wp_get_attachment_link', "<a href='" . esc_url( $url ) . "'>$link_text</a>", $id, $size, $permalink, $icon, $text );
+	return apply_filters( 'wp_get_attachment_link', "<a href='" . esc_url( $url ) . "'>$link_text</a>", $id, $size, $permalink, $icon, $text, $attr );
 }
 
 /**
@@ -1686,11 +1728,15 @@ function get_the_password_form( $post = 0 ) {
 }
 
 /**
- * Whether currently in a page template.
+ * Determines whether currently in a page template.
  *
  * This template tag allows you to determine if you are in a page template.
  * You can optionally provide a template name or array of template names
  * and then the check will be specific to that template.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
  *
  * @since 2.5.0
  * @since 4.2.0 The `$template` parameter was changed to also accept an array of page templates.
@@ -1853,7 +1899,7 @@ function wp_post_revision_title_expanded( $revision, $link = true ) {
 }
 
 /**
- * Display list of a post's revisions.
+ * Display a list of a post's revisions.
  *
  * Can output either a UL with edit links or a TABLE with diff interface, and
  * restore action links.

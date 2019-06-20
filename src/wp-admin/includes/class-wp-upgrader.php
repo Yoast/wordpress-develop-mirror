@@ -173,7 +173,7 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param array $directories                  Optional. A list of directories. If any of these do
 	 *                                            not exist, a WP_Error object will be returned.
@@ -191,7 +191,7 @@ class WP_Upgrader {
 
 		if ( ! WP_Filesystem( $credentials, $directories[0], $allow_relaxed_file_ownership ) ) {
 			$error = true;
-			if ( is_object( $wp_filesystem ) && $wp_filesystem->errors->get_error_code() ) {
+			if ( is_object( $wp_filesystem ) && $wp_filesystem->errors->has_errors() ) {
 				$error = $wp_filesystem->errors;
 			}
 			// Failed to connect, Error and request again
@@ -203,7 +203,7 @@ class WP_Upgrader {
 			return new WP_Error( 'fs_unavailable', $this->strings['fs_unavailable'] );
 		}
 
-		if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->get_error_code() ) {
+		if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
 			return new WP_Error( 'fs_error', $this->strings['fs_error'], $wp_filesystem->errors );
 		}
 
@@ -244,11 +244,12 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @param string $package The URI of the package. If this is the full path to an
-	 *                        existing local file, it will be returned untouched.
+	 * @param string $package          The URI of the package. If this is the full path to an
+	 *                                 existing local file, it will be returned untouched.
+	 * @param bool   $check_signatures Whether to validate file signatures. Default false.
 	 * @return string|WP_Error The full path to the downloaded package file, or a WP_Error object.
 	 */
-	public function download_package( $package ) {
+	public function download_package( $package, $check_signatures = false ) {
 
 		/**
 		 * Filters whether to return the package.
@@ -275,9 +276,9 @@ class WP_Upgrader {
 
 		$this->skin->feedback( 'downloading_package', $package );
 
-		$download_file = download_url( $package );
+		$download_file = download_url( $package, 300, $check_signatures );
 
-		if ( is_wp_error( $download_file ) ) {
+		if ( is_wp_error( $download_file ) && ! $download_file->get_error_data( 'softfail-filename' ) ) {
 			return new WP_Error( 'download_failed', $this->strings['download_failed'], $download_file->get_error_message() );
 		}
 
@@ -289,7 +290,7 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param string $package        Full path to the package file.
 	 * @param bool   $delete_package Optional. Whether to delete the package file after attempting
@@ -371,7 +372,7 @@ class WP_Upgrader {
 	 *
 	 * @since 4.3.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
 	 * @param string $remote_destination The location on the remote filesystem to be cleared
 	 * @return bool|WP_Error True upon success, WP_Error on failure.
@@ -423,7 +424,7 @@ class WP_Upgrader {
 	 *
 	 * @since 2.8.0
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
+	 * @global WP_Filesystem_Base $wp_filesystem        WordPress filesystem subclass.
 	 * @global array              $wp_theme_directories
 	 *
 	 * @param array|string $args {
@@ -691,7 +692,7 @@ class WP_Upgrader {
 		 *         @type string $action               Type of action. Default 'update'.
 		 *         @type string $type                 Type of update process. Accepts 'plugin', 'theme', or 'core'.
 		 *         @type bool   $bulk                 Whether the update process is a bulk update. Default true.
-		 *         @type string $plugin               The base plugin path from the plugins directory.
+		 *         @type string $plugin               Path to the plugin file relative to the plugins directory.
 		 *         @type string $theme                The stylesheet or template name of the theme.
 		 *         @type string $language_update_type The language pack update type. Accepts 'plugin', 'theme',
 		 *                                            or 'core'.
@@ -730,7 +731,30 @@ class WP_Upgrader {
 		 * Download the package (Note, This just returns the filename
 		 * of the file if the package is a local file)
 		 */
-		$download = $this->download_package( $options['package'] );
+		$download = $this->download_package( $options['package'], true );
+
+		// Allow for signature soft-fail.
+		// WARNING: This may be removed in the future.
+		if ( is_wp_error( $download ) && $download->get_error_data( 'softfail-filename' ) ) {
+
+			// Don't output the 'no signature could be found' failure message for now.
+			if ( 'signature_verification_no_signature' != $download->get_error_code() || WP_DEBUG ) {
+				// Outout the failure error as a normal feedback, and not as an error:
+				$this->skin->feedback( $download->get_error_message() );
+
+				// Report this failure back to WordPress.org for debugging purposes.
+				wp_version_check(
+					array(
+						'signature_failure_code' => $download->get_error_code(),
+						'signature_failure_data' => $download->get_error_data(),
+					)
+				);
+			}
+
+			// Pretend this error didn't happen.
+			$download = $download->get_error_data( 'softfail-filename' );
+		}
+
 		if ( is_wp_error( $download ) ) {
 			$this->skin->error( $download );
 			$this->skin->after();
@@ -846,7 +870,6 @@ class WP_Upgrader {
 	 * Creates a lock using WordPress options.
 	 *
 	 * @since 4.5.0
-	 * @static
 	 *
 	 * @param string $lock_name       The name of this unique lock.
 	 * @param int    $release_timeout Optional. The duration in seconds to respect an existing lock.
@@ -892,7 +915,6 @@ class WP_Upgrader {
 	 * Releases an upgrader lock.
 	 *
 	 * @since 4.5.0
-	 * @static
 	 *
 	 * @see WP_Upgrader::create_lock()
 	 *

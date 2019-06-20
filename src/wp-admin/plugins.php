@@ -389,6 +389,26 @@ if ( $action ) {
 			}
 			break;
 
+		case 'resume':
+			if ( is_multisite() ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'resume_plugin', $plugin ) ) {
+				wp_die( __( 'Sorry, you are not allowed to resume this plugin.' ) );
+			}
+
+			check_admin_referer( 'resume-plugin_' . $plugin );
+
+			$result = resume_plugin( $plugin, self_admin_url( "plugins.php?error=resuming&plugin_status=$status&paged=$page&s=$s" ) );
+
+			if ( is_wp_error( $result ) ) {
+				wp_die( $result );
+			}
+
+			wp_redirect( self_admin_url( "plugins.php?resume=true&plugin_status=$status&paged=$page&s=$s" ) );
+			exit;
+
 		default:
 			if ( isset( $_POST['checked'] ) ) {
 				check_admin_referer( 'bulk-plugins' );
@@ -442,7 +462,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Managing_Plugins#Plugin_Management">Documentation on Managing Plugins</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 get_current_screen()->set_screen_reader_content(
@@ -463,8 +483,8 @@ if ( ! empty( $invalid ) ) {
 	foreach ( $invalid as $plugin_file => $error ) {
 		echo '<div id="message" class="error"><p>';
 		printf(
-			/* translators: 1: plugin file 2: error message */
-			__( 'The plugin %1$s has been <strong>deactivated</strong> due to an error: %2$s' ),
+			/* translators: 1: plugin file, 2: error message */
+			__( 'The plugin %1$s has been deactivated due to an error: %2$s' ),
 			'<code>' . esc_html( $plugin_file ) . '</code>',
 			$error->get_error_message()
 		);
@@ -479,7 +499,17 @@ if ( isset( $_GET['error'] ) ) :
 	if ( isset( $_GET['main'] ) ) {
 		$errmsg = __( 'You cannot delete a plugin while it is active on the main site.' );
 	} elseif ( isset( $_GET['charsout'] ) ) {
-		$errmsg = sprintf( __( 'The plugin generated %d characters of <strong>unexpected output</strong> during activation. If you notice &#8220;headers already sent&#8221; messages, problems with syndication feeds or other issues, try deactivating or removing this plugin.' ), $_GET['charsout'] );
+		$errmsg  = sprintf(
+			_n(
+				'The plugin generated %d character of <strong>unexpected output</strong> during activation.',
+				'The plugin generated %d characters of <strong>unexpected output</strong> during activation.',
+				$_GET['charsout']
+			),
+			$_GET['charsout']
+		);
+		$errmsg .= ' ' . __( 'If you notice &#8220;headers already sent&#8221; messages, problems with syndication feeds or other issues, try deactivating or removing this plugin.' );
+	} elseif ( 'resuming' === $_GET['error'] ) {
+		$errmsg = __( 'Plugin could not be resumed because it triggered a <strong>fatal error</strong>.' );
 	} else {
 		$errmsg = __( 'Plugin could not be activated because it triggered a <strong>fatal error</strong>.' );
 	}
@@ -492,15 +522,16 @@ if ( isset( $_GET['error'] ) ) :
 				'action'   => 'error_scrape',
 				'plugin'   => urlencode( $plugin ),
 				'_wpnonce' => urlencode( $_GET['_error_nonce'] ),
-			), admin_url( 'plugins.php' )
+			),
+			admin_url( 'plugins.php' )
 		);
-	?>
+		?>
 	<iframe style="border:0" width="100%" height="70px" src="<?php echo esc_url( $iframe_url ); ?>"></iframe>
-	<?php
+		<?php
 	}
 	?>
 	</div>
-<?php
+	<?php
 elseif ( isset( $_GET['deleted'] ) ) :
 		$delete_result = get_transient( 'plugins_delete_result_' . $user_ID );
 		// Delete it once we're done.
@@ -514,24 +545,26 @@ elseif ( isset( $_GET['deleted'] ) ) :
 			<p>
 				<?php
 				if ( 1 == (int) $_GET['deleted'] ) {
-					_e( 'The selected plugin has been <strong>deleted</strong>.' );
+					_e( 'The selected plugin has been deleted.' );
 				} else {
-					_e( 'The selected plugins have been <strong>deleted</strong>.' );
+					_e( 'The selected plugins have been deleted.' );
 				}
 				?>
 			</p>
 		</div>
 		<?php endif; ?>
 <?php elseif ( isset( $_GET['activate'] ) ) : ?>
-	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Plugin <strong>activated</strong>.' ); ?></p></div>
+	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Plugin activated.' ); ?></p></div>
 <?php elseif ( isset( $_GET['activate-multi'] ) ) : ?>
-	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Selected plugins <strong>activated</strong>.' ); ?></p></div>
+	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Selected plugins activated.' ); ?></p></div>
 <?php elseif ( isset( $_GET['deactivate'] ) ) : ?>
-	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Plugin <strong>deactivated</strong>.' ); ?></p></div>
+	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Plugin deactivated.' ); ?></p></div>
 <?php elseif ( isset( $_GET['deactivate-multi'] ) ) : ?>
-	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Selected plugins <strong>deactivated</strong>.' ); ?></p></div>
+	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Selected plugins deactivated.' ); ?></p></div>
 <?php elseif ( 'update-selected' == $action ) : ?>
 	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'All selected plugins are up to date.' ); ?></p></div>
+<?php elseif ( isset( $_GET['resume'] ) ) : ?>
+	<div id="message" class="updated notice is-dismissible"><p><?php _e( 'Plugin resumed.' ); ?></p></div>
 <?php endif; ?>
 
 <div class="wrap">
@@ -543,9 +576,9 @@ echo esc_html( $title );
 
 <?php
 if ( ( ! is_multisite() || is_network_admin() ) && current_user_can( 'install_plugins' ) ) {
-?>
+	?>
 	<a href="<?php echo self_admin_url( 'plugin-install.php' ); ?>" class="page-title-action"><?php echo esc_html_x( 'Add New', 'plugin' ); ?></a>
-<?php
+	<?php
 }
 
 if ( strlen( $s ) ) {
@@ -567,7 +600,7 @@ if ( strlen( $s ) ) {
  *
  * @since 3.0.0
  *
- * @param array $plugins_all An array containing all installed plugins.
+ * @param array[] $plugins_all An array of arrays containing information on all installed plugins.
  */
 do_action( 'pre_current_active_plugins', $plugins['all'] );
 ?>

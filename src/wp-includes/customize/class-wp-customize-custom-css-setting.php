@@ -161,7 +161,7 @@ final class WP_Customize_Custom_CSS_Setting extends WP_Customize_Setting {
 			$validity->add( 'illegal_markup', __( 'Markup is not allowed in CSS.' ) );
 		}
 
-		if ( empty( $validity->errors ) ) {
+		if ( ! $validity->has_errors() ) {
 			$validity = parent::validate( $css );
 		}
 		return $validity;
@@ -181,7 +181,8 @@ final class WP_Customize_Custom_CSS_Setting extends WP_Customize_Setting {
 		}
 
 		$r = wp_update_custom_css_post(
-			$css, array(
+			$css,
+			array(
 				'stylesheet' => $this->stylesheet,
 			)
 		);

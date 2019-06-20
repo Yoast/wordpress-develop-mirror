@@ -29,7 +29,7 @@ get_current_screen()->add_help_tab(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Network_Admin_Updates_Screen">Documentation on Upgrade Network</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 require_once( ABSPATH . 'wp-admin/admin-header.php' );
@@ -57,15 +57,16 @@ switch ( $action ) {
 
 		$site_ids = get_sites(
 			array(
-				'spam'       => 0,
-				'deleted'    => 0,
-				'archived'   => 0,
-				'network_id' => get_current_network_id(),
-				'number'     => 5,
-				'offset'     => $n,
-				'fields'     => 'ids',
-				'order'      => 'DESC',
-				'orderby'    => 'id',
+				'spam'                   => 0,
+				'deleted'                => 0,
+				'archived'               => 0,
+				'network_id'             => get_current_network_id(),
+				'number'                 => 5,
+				'offset'                 => $n,
+				'fields'                 => 'ids',
+				'order'                  => 'DESC',
+				'orderby'                => 'id',
+				'update_site_meta_cache' => false,
 			)
 		);
 		if ( empty( $site_ids ) ) {
@@ -82,7 +83,8 @@ switch ( $action ) {
 			echo "<li>$siteurl</li>";
 
 			$response = wp_remote_get(
-				$upgrade_url, array(
+				$upgrade_url,
+				array(
 					'timeout'     => 120,
 					'httpversion' => '1.1',
 					'sslverify'   => false,
@@ -131,7 +133,7 @@ switch ( $action ) {
 	case 'show':
 	default:
 		if ( get_site_option( 'wpmu_upgrade_site' ) != $GLOBALS['wp_db_version'] ) :
-		?>
+			?>
 		<h2><?php _e( 'Database Update Required' ); ?></h2>
 		<p><?php _e( 'WordPress has been updated! Before we send you on your way, we need to individually upgrade the sites in your network.' ); ?></p>
 		<?php endif; ?>

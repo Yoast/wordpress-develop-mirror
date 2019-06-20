@@ -24,7 +24,7 @@
  *
  * @since 4.4.0
  *
- * @see ArrayAccess
+ * @link https://secure.php.net/manual/en/class.arrayaccess.php
  */
 class WP_REST_Request implements ArrayAccess {
 
@@ -174,7 +174,6 @@ class WP_REST_Request implements ArrayAccess {
 	 * @link https://nginx.org/en/docs/http/ngx_http_core_module.html#underscores_in_headers
 	 *
 	 * @since 4.4.0
-	 * @static
 	 *
 	 * @param string $key Header name.
 	 * @return string Canonicalized name.
@@ -803,7 +802,9 @@ class WP_REST_Request implements ArrayAccess {
 
 		if ( $invalid_params ) {
 			return new WP_Error(
-				'rest_invalid_param', sprintf( __( 'Invalid parameter(s): %s' ), implode( ', ', array_keys( $invalid_params ) ) ), array(
+				'rest_invalid_param',
+				sprintf( __( 'Invalid parameter(s): %s' ), implode( ', ', array_keys( $invalid_params ) ) ),
+				array(
 					'status' => 400,
 					'params' => $invalid_params,
 				)
@@ -846,7 +847,9 @@ class WP_REST_Request implements ArrayAccess {
 
 		if ( ! empty( $required ) ) {
 			return new WP_Error(
-				'rest_missing_callback_param', sprintf( __( 'Missing parameter(s): %s' ), implode( ', ', $required ) ), array(
+				'rest_missing_callback_param',
+				sprintf( __( 'Missing parameter(s): %s' ), implode( ', ', $required ) ),
+				array(
 					'status' => 400,
 					'params' => $required,
 				)
@@ -879,7 +882,9 @@ class WP_REST_Request implements ArrayAccess {
 
 		if ( $invalid_params ) {
 			return new WP_Error(
-				'rest_invalid_param', sprintf( __( 'Invalid parameter(s): %s' ), implode( ', ', array_keys( $invalid_params ) ) ), array(
+				'rest_invalid_param',
+				sprintf( __( 'Invalid parameter(s): %s' ), implode( ', ', array_keys( $invalid_params ) ) ),
+				array(
 					'status' => 400,
 					'params' => $invalid_params,
 				)
@@ -953,7 +958,6 @@ class WP_REST_Request implements ArrayAccess {
 	/**
 	 * Retrieves a WP_REST_Request object from a full URL.
 	 *
-	 * @static
 	 * @since 4.5.0
 	 *
 	 * @param string $url URL with protocol, domain, path and query args.

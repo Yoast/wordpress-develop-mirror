@@ -361,8 +361,9 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 
 	$possible_object_parents = array_filter( $possible_object_parents );
 
-	$front_page_url = home_url();
-	$front_page_id  = (int) get_option( 'page_on_front' );
+	$front_page_url         = home_url();
+	$front_page_id          = (int) get_option( 'page_on_front' );
+	$privacy_policy_page_id = (int) get_option( 'wp_page_for_privacy_policy' );
 
 	foreach ( (array) $menu_items as $key => $menu_item ) {
 
@@ -376,6 +377,11 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 		// This menu item is set as the 'Front Page'.
 		if ( 'post_type' === $menu_item->type && $front_page_id === (int) $menu_item->object_id ) {
 			$classes[] = 'menu-item-home';
+		}
+
+		// This menu item is set as the 'Privacy Policy Page'.
+		if ( 'post_type' === $menu_item->type && $privacy_policy_page_id === (int) $menu_item->object_id ) {
+			$classes[] = 'menu-item-privacy-policy';
 		}
 
 		// if the menu item corresponds to a taxonomy term for the currently-queried non-hierarchical post object
@@ -441,12 +447,22 @@ function _wp_menu_item_classes_by_context( &$menu_items ) {
 			if ( is_customize_preview() ) {
 				$_root_relative_current = strtok( untrailingslashit( $_SERVER['REQUEST_URI'] ), '?' );
 			}
+
 			$current_url        = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_root_relative_current );
 			$raw_item_url       = strpos( $menu_item->url, '#' ) ? substr( $menu_item->url, 0, strpos( $menu_item->url, '#' ) ) : $menu_item->url;
 			$item_url           = set_url_scheme( untrailingslashit( $raw_item_url ) );
 			$_indexless_current = untrailingslashit( preg_replace( '/' . preg_quote( $wp_rewrite->index, '/' ) . '$/', '', $current_url ) );
 
-			if ( $raw_item_url && in_array( $item_url, array( $current_url, $_indexless_current, $_root_relative_current ) ) ) {
+			$matches = array(
+				$current_url,
+				urldecode( $current_url ),
+				$_indexless_current,
+				urldecode( $_indexless_current ),
+				$_root_relative_current,
+				urldecode( $_root_relative_current ),
+			);
+
+			if ( $raw_item_url && in_array( $item_url, $matches ) ) {
 				$classes[]                   = 'current-menu-item';
 				$menu_items[ $key ]->current = true;
 				$_anc_id                     = (int) $menu_item->db_id;

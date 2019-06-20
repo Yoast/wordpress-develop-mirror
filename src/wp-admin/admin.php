@@ -74,7 +74,8 @@ if ( get_option( 'db_upgraded' ) ) {
 		if ( $c <= 50 || ( $c > 50 && mt_rand( 0, (int) ( $c / 50 ) ) == 1 ) ) {
 			require_once( ABSPATH . WPINC . '/http.php' );
 			$response = wp_remote_get(
-				admin_url( 'upgrade.php?step=1' ), array(
+				admin_url( 'upgrade.php?step=1' ),
+				array(
 					'timeout'     => 120,
 					'httpversion' => '1.1',
 				)
@@ -173,7 +174,9 @@ if ( isset( $plugin_page ) ) {
 	} else {
 		$the_parent = $pagenow;
 	}
-	if ( ! $page_hook = get_plugin_page_hook( $plugin_page, $the_parent ) ) {
+
+	$page_hook = get_plugin_page_hook( $plugin_page, $the_parent );
+	if ( ! $page_hook ) {
 		$page_hook = get_plugin_page_hook( $plugin_page, $plugin_page );
 
 		// Back-compat for plugins using add_management_page().
@@ -233,7 +236,18 @@ if ( isset( $plugin_page ) ) {
 		/**
 		 * Used to call the registered callback for a plugin screen.
 		 *
-		 * @ignore
+		 * This hook uses a dynamic hook name, `$page_hook`, which refers to a mixture of plugin
+		 * page information including:
+		 * 1. The page type. If the plugin page is registered as a submenu page, such as for
+		 *    Settings, the page type would be 'settings'. Otherwise the type is 'toplevel'.
+		 * 2. A separator of '_page_'.
+		 * 3. The plugin basename minus the file extension.
+		 *
+		 * Together, the three parts form the `$page_hook`. Citing the example above,
+		 * the hook name used would be 'settings_page_pluginbasename'.
+		 *
+		 * @see get_plugin_page_hook()
+		 *
 		 * @since 1.5.0
 		 */
 		do_action( $page_hook );
@@ -279,7 +293,7 @@ if ( isset( $plugin_page ) ) {
 	$importer = $_GET['import'];
 
 	if ( ! current_user_can( 'import' ) ) {
-		wp_die( __( 'Sorry, you are not allowed to import content.' ) );
+		wp_die( __( 'Sorry, you are not allowed to import content into this site.' ) );
 	}
 
 	if ( validate_file( $importer ) ) {

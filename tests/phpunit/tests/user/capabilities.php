@@ -17,6 +17,8 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 	);
 	protected static $super_admin = null;
 
+	protected static $block_id;
+
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$users       = array(
 			'administrator' => $factory->user->create_and_get( array( 'role' => 'administrator' ) ),
@@ -27,6 +29,16 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		);
 		self::$super_admin = $factory->user->create_and_get( array( 'role' => 'contributor' ) );
 		grant_super_admin( self::$super_admin->ID );
+
+		self::$block_id = $factory->post->create(
+			array(
+				'post_author'  => self::$users['administrator']->ID,
+				'post_type'    => 'wp_block',
+				'post_status'  => 'publish',
+				'post_title'   => 'Test Block',
+				'post_content' => '<!-- wp:core/paragraph --><p>Hello world!</p><!-- /wp:core/paragraph -->',
+			)
+		);
 	}
 
 	function setUp() {
@@ -35,6 +47,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->_flush_roles();
 
 	}
+
+	public static function wpTearDownAfterClass() {
+		wp_delete_post( self::$block_id, true );
+	}
+
 
 	function _flush_roles() {
 		// we want to make sure we're testing against the db, not just in-memory data
@@ -59,77 +76,80 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 	final private function _getSingleSitePrimitiveCaps() {
 		return array(
 
-			'unfiltered_html'        => array( 'administrator', 'editor' ),
+			'unfiltered_html'         => array( 'administrator', 'editor' ),
 
-			'activate_plugins'       => array( 'administrator' ),
-			'create_users'           => array( 'administrator' ),
-			'delete_plugins'         => array( 'administrator' ),
-			'delete_themes'          => array( 'administrator' ),
-			'delete_users'           => array( 'administrator' ),
-			'edit_files'             => array( 'administrator' ),
-			'edit_plugins'           => array( 'administrator' ),
-			'edit_themes'            => array( 'administrator' ),
-			'edit_users'             => array( 'administrator' ),
-			'install_plugins'        => array( 'administrator' ),
-			'install_themes'         => array( 'administrator' ),
-			'update_core'            => array( 'administrator' ),
-			'update_plugins'         => array( 'administrator' ),
-			'update_themes'          => array( 'administrator' ),
-			'edit_theme_options'     => array( 'administrator' ),
-			'export'                 => array( 'administrator' ),
-			'import'                 => array( 'administrator' ),
-			'list_users'             => array( 'administrator' ),
-			'manage_options'         => array( 'administrator' ),
-			'promote_users'          => array( 'administrator' ),
-			'remove_users'           => array( 'administrator' ),
-			'switch_themes'          => array( 'administrator' ),
-			'edit_dashboard'         => array( 'administrator' ),
+			'activate_plugins'        => array( 'administrator' ),
+			'create_users'            => array( 'administrator' ),
+			'delete_plugins'          => array( 'administrator' ),
+			'delete_themes'           => array( 'administrator' ),
+			'delete_users'            => array( 'administrator' ),
+			'edit_files'              => array( 'administrator' ),
+			'edit_plugins'            => array( 'administrator' ),
+			'edit_themes'             => array( 'administrator' ),
+			'edit_users'              => array( 'administrator' ),
+			'install_plugins'         => array( 'administrator' ),
+			'install_themes'          => array( 'administrator' ),
+			'update_core'             => array( 'administrator' ),
+			'update_plugins'          => array( 'administrator' ),
+			'update_themes'           => array( 'administrator' ),
+			'edit_theme_options'      => array( 'administrator' ),
+			'export'                  => array( 'administrator' ),
+			'import'                  => array( 'administrator' ),
+			'list_users'              => array( 'administrator' ),
+			'manage_options'          => array( 'administrator' ),
+			'promote_users'           => array( 'administrator' ),
+			'remove_users'            => array( 'administrator' ),
+			'switch_themes'           => array( 'administrator' ),
+			'edit_dashboard'          => array( 'administrator' ),
+			'resume_plugins'          => array( 'administrator' ),
+			'resume_themes'           => array( 'administrator' ),
+			'view_site_health_checks' => array( 'administrator' ),
 
-			'moderate_comments'      => array( 'administrator', 'editor' ),
-			'manage_categories'      => array( 'administrator', 'editor' ),
-			'edit_others_posts'      => array( 'administrator', 'editor' ),
-			'edit_pages'             => array( 'administrator', 'editor' ),
-			'edit_others_pages'      => array( 'administrator', 'editor' ),
-			'edit_published_pages'   => array( 'administrator', 'editor' ),
-			'publish_pages'          => array( 'administrator', 'editor' ),
-			'delete_pages'           => array( 'administrator', 'editor' ),
-			'delete_others_pages'    => array( 'administrator', 'editor' ),
-			'delete_published_pages' => array( 'administrator', 'editor' ),
-			'delete_others_posts'    => array( 'administrator', 'editor' ),
-			'delete_private_posts'   => array( 'administrator', 'editor' ),
-			'edit_private_posts'     => array( 'administrator', 'editor' ),
-			'read_private_posts'     => array( 'administrator', 'editor' ),
-			'delete_private_pages'   => array( 'administrator', 'editor' ),
-			'edit_private_pages'     => array( 'administrator', 'editor' ),
-			'read_private_pages'     => array( 'administrator', 'editor' ),
+			'moderate_comments'       => array( 'administrator', 'editor' ),
+			'manage_categories'       => array( 'administrator', 'editor' ),
+			'edit_others_posts'       => array( 'administrator', 'editor' ),
+			'edit_pages'              => array( 'administrator', 'editor' ),
+			'edit_others_pages'       => array( 'administrator', 'editor' ),
+			'edit_published_pages'    => array( 'administrator', 'editor' ),
+			'publish_pages'           => array( 'administrator', 'editor' ),
+			'delete_pages'            => array( 'administrator', 'editor' ),
+			'delete_others_pages'     => array( 'administrator', 'editor' ),
+			'delete_published_pages'  => array( 'administrator', 'editor' ),
+			'delete_others_posts'     => array( 'administrator', 'editor' ),
+			'delete_private_posts'    => array( 'administrator', 'editor' ),
+			'edit_private_posts'      => array( 'administrator', 'editor' ),
+			'read_private_posts'      => array( 'administrator', 'editor' ),
+			'delete_private_pages'    => array( 'administrator', 'editor' ),
+			'edit_private_pages'      => array( 'administrator', 'editor' ),
+			'read_private_pages'      => array( 'administrator', 'editor' ),
 
-			'edit_published_posts'   => array( 'administrator', 'editor', 'author' ),
-			'upload_files'           => array( 'administrator', 'editor', 'author' ),
-			'publish_posts'          => array( 'administrator', 'editor', 'author' ),
-			'delete_published_posts' => array( 'administrator', 'editor', 'author' ),
+			'edit_published_posts'    => array( 'administrator', 'editor', 'author' ),
+			'upload_files'            => array( 'administrator', 'editor', 'author' ),
+			'publish_posts'           => array( 'administrator', 'editor', 'author' ),
+			'delete_published_posts'  => array( 'administrator', 'editor', 'author' ),
 
-			'edit_posts'             => array( 'administrator', 'editor', 'author', 'contributor' ),
-			'delete_posts'           => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'edit_posts'              => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'delete_posts'            => array( 'administrator', 'editor', 'author', 'contributor' ),
 
-			'read'                   => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
+			'read'                    => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
 
-			'level_10'               => array( 'administrator' ),
-			'level_9'                => array( 'administrator' ),
-			'level_8'                => array( 'administrator' ),
-			'level_7'                => array( 'administrator', 'editor' ),
-			'level_6'                => array( 'administrator', 'editor' ),
-			'level_5'                => array( 'administrator', 'editor' ),
-			'level_4'                => array( 'administrator', 'editor' ),
-			'level_3'                => array( 'administrator', 'editor' ),
-			'level_2'                => array( 'administrator', 'editor', 'author' ),
-			'level_1'                => array( 'administrator', 'editor', 'author', 'contributor' ),
-			'level_0'                => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
+			'level_10'                => array( 'administrator' ),
+			'level_9'                 => array( 'administrator' ),
+			'level_8'                 => array( 'administrator' ),
+			'level_7'                 => array( 'administrator', 'editor' ),
+			'level_6'                 => array( 'administrator', 'editor' ),
+			'level_5'                 => array( 'administrator', 'editor' ),
+			'level_4'                 => array( 'administrator', 'editor' ),
+			'level_3'                 => array( 'administrator', 'editor' ),
+			'level_2'                 => array( 'administrator', 'editor', 'author' ),
+			'level_1'                 => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'level_0'                 => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
 
-			'administrator'          => array( 'administrator' ),
-			'editor'                 => array( 'editor' ),
-			'author'                 => array( 'author' ),
-			'contributor'            => array( 'contributor' ),
-			'subscriber'             => array( 'subscriber' ),
+			'administrator'           => array( 'administrator' ),
+			'editor'                  => array( 'editor' ),
+			'author'                  => array( 'author' ),
+			'contributor'             => array( 'contributor' ),
+			'subscriber'              => array( 'subscriber' ),
 
 		);
 
@@ -138,78 +158,81 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 	final private function _getMultiSitePrimitiveCaps() {
 		return array(
 
-			'unfiltered_html'        => array(),
+			'unfiltered_html'         => array(),
 
-			'activate_plugins'       => array(),
-			'create_users'           => array(),
-			'delete_plugins'         => array(),
-			'delete_themes'          => array(),
-			'delete_users'           => array(),
-			'edit_files'             => array(),
-			'edit_plugins'           => array(),
-			'edit_themes'            => array(),
-			'edit_users'             => array(),
-			'install_plugins'        => array(),
-			'install_themes'         => array(),
-			'update_core'            => array(),
-			'update_plugins'         => array(),
-			'update_themes'          => array(),
+			'activate_plugins'        => array(),
+			'create_users'            => array(),
+			'delete_plugins'          => array(),
+			'delete_themes'           => array(),
+			'delete_users'            => array(),
+			'edit_files'              => array(),
+			'edit_plugins'            => array(),
+			'edit_themes'             => array(),
+			'edit_users'              => array(),
+			'install_plugins'         => array(),
+			'install_themes'          => array(),
+			'update_core'             => array(),
+			'update_plugins'          => array(),
+			'update_themes'           => array(),
+			'view_site_health_checks' => array(),
 
-			'edit_theme_options'     => array( 'administrator' ),
-			'export'                 => array( 'administrator' ),
-			'import'                 => array( 'administrator' ),
-			'list_users'             => array( 'administrator' ),
-			'manage_options'         => array( 'administrator' ),
-			'promote_users'          => array( 'administrator' ),
-			'remove_users'           => array( 'administrator' ),
-			'switch_themes'          => array( 'administrator' ),
-			'edit_dashboard'         => array( 'administrator' ),
+			'edit_theme_options'      => array( 'administrator' ),
+			'export'                  => array( 'administrator' ),
+			'import'                  => array( 'administrator' ),
+			'list_users'              => array( 'administrator' ),
+			'manage_options'          => array( 'administrator' ),
+			'promote_users'           => array( 'administrator' ),
+			'remove_users'            => array( 'administrator' ),
+			'switch_themes'           => array( 'administrator' ),
+			'edit_dashboard'          => array( 'administrator' ),
+			'resume_plugins'          => array( 'administrator' ),
+			'resume_themes'           => array( 'administrator' ),
 
-			'moderate_comments'      => array( 'administrator', 'editor' ),
-			'manage_categories'      => array( 'administrator', 'editor' ),
-			'edit_others_posts'      => array( 'administrator', 'editor' ),
-			'edit_pages'             => array( 'administrator', 'editor' ),
-			'edit_others_pages'      => array( 'administrator', 'editor' ),
-			'edit_published_pages'   => array( 'administrator', 'editor' ),
-			'publish_pages'          => array( 'administrator', 'editor' ),
-			'delete_pages'           => array( 'administrator', 'editor' ),
-			'delete_others_pages'    => array( 'administrator', 'editor' ),
-			'delete_published_pages' => array( 'administrator', 'editor' ),
-			'delete_others_posts'    => array( 'administrator', 'editor' ),
-			'delete_private_posts'   => array( 'administrator', 'editor' ),
-			'edit_private_posts'     => array( 'administrator', 'editor' ),
-			'read_private_posts'     => array( 'administrator', 'editor' ),
-			'delete_private_pages'   => array( 'administrator', 'editor' ),
-			'edit_private_pages'     => array( 'administrator', 'editor' ),
-			'read_private_pages'     => array( 'administrator', 'editor' ),
+			'moderate_comments'       => array( 'administrator', 'editor' ),
+			'manage_categories'       => array( 'administrator', 'editor' ),
+			'edit_others_posts'       => array( 'administrator', 'editor' ),
+			'edit_pages'              => array( 'administrator', 'editor' ),
+			'edit_others_pages'       => array( 'administrator', 'editor' ),
+			'edit_published_pages'    => array( 'administrator', 'editor' ),
+			'publish_pages'           => array( 'administrator', 'editor' ),
+			'delete_pages'            => array( 'administrator', 'editor' ),
+			'delete_others_pages'     => array( 'administrator', 'editor' ),
+			'delete_published_pages'  => array( 'administrator', 'editor' ),
+			'delete_others_posts'     => array( 'administrator', 'editor' ),
+			'delete_private_posts'    => array( 'administrator', 'editor' ),
+			'edit_private_posts'      => array( 'administrator', 'editor' ),
+			'read_private_posts'      => array( 'administrator', 'editor' ),
+			'delete_private_pages'    => array( 'administrator', 'editor' ),
+			'edit_private_pages'      => array( 'administrator', 'editor' ),
+			'read_private_pages'      => array( 'administrator', 'editor' ),
 
-			'edit_published_posts'   => array( 'administrator', 'editor', 'author' ),
-			'upload_files'           => array( 'administrator', 'editor', 'author' ),
-			'publish_posts'          => array( 'administrator', 'editor', 'author' ),
-			'delete_published_posts' => array( 'administrator', 'editor', 'author' ),
+			'edit_published_posts'    => array( 'administrator', 'editor', 'author' ),
+			'upload_files'            => array( 'administrator', 'editor', 'author' ),
+			'publish_posts'           => array( 'administrator', 'editor', 'author' ),
+			'delete_published_posts'  => array( 'administrator', 'editor', 'author' ),
 
-			'edit_posts'             => array( 'administrator', 'editor', 'author', 'contributor' ),
-			'delete_posts'           => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'edit_posts'              => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'delete_posts'            => array( 'administrator', 'editor', 'author', 'contributor' ),
 
-			'read'                   => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
+			'read'                    => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
 
-			'level_10'               => array( 'administrator' ),
-			'level_9'                => array( 'administrator' ),
-			'level_8'                => array( 'administrator' ),
-			'level_7'                => array( 'administrator', 'editor' ),
-			'level_6'                => array( 'administrator', 'editor' ),
-			'level_5'                => array( 'administrator', 'editor' ),
-			'level_4'                => array( 'administrator', 'editor' ),
-			'level_3'                => array( 'administrator', 'editor' ),
-			'level_2'                => array( 'administrator', 'editor', 'author' ),
-			'level_1'                => array( 'administrator', 'editor', 'author', 'contributor' ),
-			'level_0'                => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
+			'level_10'                => array( 'administrator' ),
+			'level_9'                 => array( 'administrator' ),
+			'level_8'                 => array( 'administrator' ),
+			'level_7'                 => array( 'administrator', 'editor' ),
+			'level_6'                 => array( 'administrator', 'editor' ),
+			'level_5'                 => array( 'administrator', 'editor' ),
+			'level_4'                 => array( 'administrator', 'editor' ),
+			'level_3'                 => array( 'administrator', 'editor' ),
+			'level_2'                 => array( 'administrator', 'editor', 'author' ),
+			'level_1'                 => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'level_0'                 => array( 'administrator', 'editor', 'author', 'contributor', 'subscriber' ),
 
-			'administrator'          => array( 'administrator' ),
-			'editor'                 => array( 'editor' ),
-			'author'                 => array( 'author' ),
-			'contributor'            => array( 'contributor' ),
-			'subscriber'             => array( 'subscriber' ),
+			'administrator'           => array( 'administrator' ),
+			'editor'                  => array( 'editor' ),
+			'author'                  => array( 'author' ),
+			'contributor'             => array( 'contributor' ),
+			'subscriber'              => array( 'subscriber' ),
 
 		);
 
@@ -217,69 +240,77 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 	final private function _getSingleSiteMetaCaps() {
 		return array(
-			'create_sites'           => array(),
-			'delete_sites'           => array(),
-			'manage_network'         => array(),
-			'manage_sites'           => array(),
-			'manage_network_users'   => array(),
-			'manage_network_plugins' => array(),
-			'manage_network_themes'  => array(),
-			'manage_network_options' => array(),
-			'delete_site'            => array(),
-			'upgrade_network'        => array(),
+			'create_sites'                => array(),
+			'delete_sites'                => array(),
+			'manage_network'              => array(),
+			'manage_sites'                => array(),
+			'manage_network_users'        => array(),
+			'manage_network_plugins'      => array(),
+			'manage_network_themes'       => array(),
+			'manage_network_options'      => array(),
+			'delete_site'                 => array(),
+			'upgrade_network'             => array(),
 
-			'setup_network'          => array( 'administrator' ),
-			'upload_plugins'         => array( 'administrator' ),
-			'upload_themes'          => array( 'administrator' ),
-			'customize'              => array( 'administrator' ),
-			'add_users'              => array( 'administrator' ),
-			'install_languages'      => array( 'administrator' ),
-			'update_languages'       => array( 'administrator' ),
-			'deactivate_plugins'     => array( 'administrator' ),
+			'setup_network'               => array( 'administrator' ),
+			'upload_plugins'              => array( 'administrator' ),
+			'upload_themes'               => array( 'administrator' ),
+			'customize'                   => array( 'administrator' ),
+			'add_users'                   => array( 'administrator' ),
+			'install_languages'           => array( 'administrator' ),
+			'update_languages'            => array( 'administrator' ),
+			'deactivate_plugins'          => array( 'administrator' ),
+			'update_php'                  => array( 'administrator' ),
+			'export_others_personal_data' => array( 'administrator' ),
+			'erase_others_personal_data'  => array( 'administrator' ),
+			'manage_privacy_options'      => array( 'administrator' ),
 
-			'edit_categories'        => array( 'administrator', 'editor' ),
-			'delete_categories'      => array( 'administrator', 'editor' ),
-			'manage_post_tags'       => array( 'administrator', 'editor' ),
-			'edit_post_tags'         => array( 'administrator', 'editor' ),
-			'delete_post_tags'       => array( 'administrator', 'editor' ),
-			'edit_css'               => array( 'administrator', 'editor' ),
+			'edit_categories'             => array( 'administrator', 'editor' ),
+			'delete_categories'           => array( 'administrator', 'editor' ),
+			'manage_post_tags'            => array( 'administrator', 'editor' ),
+			'edit_post_tags'              => array( 'administrator', 'editor' ),
+			'delete_post_tags'            => array( 'administrator', 'editor' ),
+			'edit_css'                    => array( 'administrator', 'editor' ),
 
-			'assign_categories'      => array( 'administrator', 'editor', 'author', 'contributor' ),
-			'assign_post_tags'       => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'assign_categories'           => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'assign_post_tags'            => array( 'administrator', 'editor', 'author', 'contributor' ),
 		);
 	}
 
 	final private function _getMultiSiteMetaCaps() {
 		return array(
-			'create_sites'           => array(),
-			'delete_sites'           => array(),
-			'manage_network'         => array(),
-			'manage_sites'           => array(),
-			'manage_network_users'   => array(),
-			'manage_network_plugins' => array(),
-			'manage_network_themes'  => array(),
-			'manage_network_options' => array(),
-			'setup_network'          => array(),
-			'upload_plugins'         => array(),
-			'upload_themes'          => array(),
-			'edit_css'               => array(),
-			'upgrade_network'        => array(),
-			'install_languages'      => array(),
-			'update_languages'       => array(),
-			'deactivate_plugins'     => array(),
+			'create_sites'                => array(),
+			'delete_sites'                => array(),
+			'manage_network'              => array(),
+			'manage_sites'                => array(),
+			'manage_network_users'        => array(),
+			'manage_network_plugins'      => array(),
+			'manage_network_themes'       => array(),
+			'manage_network_options'      => array(),
+			'setup_network'               => array(),
+			'upload_plugins'              => array(),
+			'upload_themes'               => array(),
+			'edit_css'                    => array(),
+			'upgrade_network'             => array(),
+			'install_languages'           => array(),
+			'update_languages'            => array(),
+			'deactivate_plugins'          => array(),
+			'update_php'                  => array(),
+			'export_others_personal_data' => array( '' ),
+			'erase_others_personal_data'  => array( '' ),
+			'manage_privacy_options'      => array(),
 
-			'customize'              => array( 'administrator' ),
-			'delete_site'            => array( 'administrator' ),
-			'add_users'              => array( 'administrator' ),
+			'customize'                   => array( 'administrator' ),
+			'delete_site'                 => array( 'administrator' ),
+			'add_users'                   => array( 'administrator' ),
 
-			'edit_categories'        => array( 'administrator', 'editor' ),
-			'delete_categories'      => array( 'administrator', 'editor' ),
-			'manage_post_tags'       => array( 'administrator', 'editor' ),
-			'edit_post_tags'         => array( 'administrator', 'editor' ),
-			'delete_post_tags'       => array( 'administrator', 'editor' ),
+			'edit_categories'             => array( 'administrator', 'editor' ),
+			'delete_categories'           => array( 'administrator', 'editor' ),
+			'manage_post_tags'            => array( 'administrator', 'editor' ),
+			'edit_post_tags'              => array( 'administrator', 'editor' ),
+			'delete_post_tags'            => array( 'administrator', 'editor' ),
 
-			'assign_categories'      => array( 'administrator', 'editor', 'author', 'contributor' ),
-			'assign_post_tags'       => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'assign_categories'           => array( 'administrator', 'editor', 'author', 'contributor' ),
+			'assign_post_tags'            => array( 'administrator', 'editor', 'author', 'contributor' ),
 		);
 	}
 
@@ -367,7 +398,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			$actual['editor'],
 			$actual['author'],
 			$actual['subscriber'],
-			$actual['contributor']
+			$actual['contributor'],
+			// The following are granted via `user_has_cap`:
+			$actual['resume_plugins'],
+			$actual['resume_themes'],
+			$actual['view_site_health_checks']
 		);
 
 		unset(
@@ -429,6 +464,8 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			// Singular object meta capabilities (where an object ID is passed) are not tested:
 			$expected['activate_plugin'],
 			$expected['deactivate_plugin'],
+			$expected['resume_plugin'],
+			$expected['resume_theme'],
 			$expected['remove_user'],
 			$expected['promote_user'],
 			$expected['edit_user'],
@@ -872,7 +909,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		global $wp_roles;
 		$role_name = 'janitor';
 		add_role(
-			$role_name, 'Janitor', array(
+			$role_name,
+			'Janitor',
+			array(
 				'level_1'          => true,
 				'sweep_floor'      => true,
 				'polish_doorknobs' => true,
@@ -1092,7 +1131,8 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->assertEquals( 'draw_somethings', $something->cap->create_posts );
 
 		register_post_type(
-			'something', array(
+			'something',
+			array(
 				'capabilities' =>
 				array(
 					'edit_posts'   => 'draw_somethings',
@@ -1163,7 +1203,7 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->assertFalse( $contributor->has_cap( 'publish_post', $post ) );
 		$this->assertFalse( $contributor->has_cap( 'edit_post', $post ) );
 		$this->assertFalse( $contributor->has_cap( 'delete_post', $post ) );
-		$this->assertEquals( $status === 'publish', $contributor->has_cap( 'read_post', $post ) );
+		$this->assertEquals( 'publish' === $status, $contributor->has_cap( 'read_post', $post ) );
 	}
 
 	/**
@@ -1298,7 +1338,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			$this->assertEquals(
 				array(
 					$primitive_cap,
-				), $caps, "Meta cap: {$meta_cap}"
+				),
+				$caps,
+				"Meta cap: {$meta_cap}"
 			);
 		}
 	}
@@ -1390,7 +1432,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		);
 		$taxonomy = 'custom_cap_taxo';
 		register_taxonomy(
-			$taxonomy, 'post', array(
+			$taxonomy,
+			'post',
+			array(
 				'capabilities' => $expected,
 			)
 		);
@@ -1403,7 +1447,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			$this->assertEquals(
 				array(
 					$primitive_cap,
-				), $caps, "Meta cap: {$meta_cap}"
+				),
+				$caps,
+				"Meta cap: {$meta_cap}"
 			);
 		}
 	}
@@ -1706,7 +1752,8 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 	function test_cpt_with_page_capability_type() {
 
 		register_post_type(
-			'page_capability', array(
+			'page_capability',
+			array(
 				'capability_type' => 'page',
 			)
 		);
@@ -1917,7 +1964,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 		$role_name = 'uploader';
 		add_role(
-			$role_name, 'Uploader', array(
+			$role_name,
+			'Uploader',
+			array(
 				'read'         => true,
 				'upload_files' => true,
 			)
@@ -1945,7 +1994,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 		$role_name = 'uploader';
 		add_role(
-			$role_name, 'Uploader', array(
+			$role_name,
+			'Uploader',
+			array(
 				'read'         => true,
 				'upload_files' => true,
 			)
@@ -2012,7 +2063,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 		$role_name = 'uploader';
 		add_role(
-			$role_name, 'Uploader', array(
+			$role_name,
+			'Uploader',
+			array(
 				'read'         => true,
 				'upload_files' => true,
 			)
@@ -2070,5 +2123,77 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$wpdb->suppress_errors( $suppress );
 
 		$this->assertSame( 333, $roles->get_site_id() );
+	}
+
+	/**
+	 * @dataProvider data_block_caps
+	 */
+	function test_block_caps( $role, $cap, $use_post, $expected ) {
+		if ( $use_post ) {
+			$this->assertEquals( $expected, self::$users[ $role ]->has_cap( $cap, self::$block_id ) );
+		} else {
+			$this->assertEquals( $expected, self::$users[ $role ]->has_cap( $cap ) );
+		}
+	}
+
+	function data_block_caps() {
+		$post_caps = array(
+			'edit_block',
+			'read_block',
+			'delete_block',
+		);
+
+		$all_caps = array(
+			'edit_block',
+			'read_block',
+			'delete_block',
+			'edit_blocks',
+			'edit_others_blocks',
+			'publish_blocks',
+			'read_private_blocks',
+			'delete_blocks',
+			'delete_private_blocks',
+			'delete_published_blocks',
+			'delete_others_blocks',
+			'edit_private_blocks',
+			'edit_published_blocks',
+		);
+
+		$roles = array(
+			'administrator' => $all_caps,
+			'editor'        => $all_caps,
+			'author'        => array(
+				'read_block',
+				'edit_blocks',
+				'publish_blocks',
+				'delete_blocks',
+				'delete_published_blocks',
+				'edit_published_blocks',
+			),
+			'contributor'   => array(
+				'read_block',
+				'edit_blocks',
+				'delete_blocks',
+			),
+			'subscriber'    => array(),
+		);
+
+		$data = array();
+
+		foreach ( $roles as $role => $caps ) {
+			foreach ( $caps as $cap ) {
+				$use_post = in_array( $cap, $post_caps, true );
+				$data[]   = array( $role, $cap, $use_post, true );
+			}
+
+			foreach ( $all_caps as $cap ) {
+				if ( ! in_array( $cap, $caps, true ) ) {
+					$use_post = in_array( $cap, $post_caps, true );
+					$data[]   = array( $role, $cap, $use_post, false );
+				}
+			}
+		}
+
+		return $data;
 	}
 }

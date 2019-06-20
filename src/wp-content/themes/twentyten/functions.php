@@ -9,11 +9,13 @@
  * The first function, twentyten_setup(), sets up the theme by registering support
  * for various features in WordPress, such as post thumbnails, navigation menus, and the like.
  *
- * When using a child theme (see https://codex.wordpress.org/Theme_Development and
- * https://codex.wordpress.org/Child_Themes), you can override certain functions
- * (those wrapped in a function_exists() call) by defining them first in your child theme's
- * functions.php file. The child theme's functions.php file is included before the parent
- * theme's file, so the child theme functions would be used.
+ * When using a child theme you can override certain functions (those wrapped
+ * in a function_exists() call) by defining them first in your child theme's
+ * functions.php file. The child theme's functions.php file is included before
+ * the parent theme's file, so the child theme functions would be used.
+ *
+ * @link https://codex.wordpress.org/Theme_Development
+ * @link https://developer.wordpress.org/themes/advanced-topics/child-themes/
  *
  * Functions that are not pluggable (not wrapped in function_exists()) are instead attached
  * to a filter or action hook. The hook can be removed by using remove_action() or
@@ -76,6 +78,44 @@ if ( ! function_exists( 'twentyten_setup' ) ) :
 		// This theme styles the visual editor with editor-style.css to match the theme style.
 		add_editor_style();
 
+		// Load regular editor styles into the new block-based editor.
+		add_theme_support( 'editor-styles' );
+
+		// Load default block styles.
+		add_theme_support( 'wp-block-styles' );
+
+		// Add support for custom color scheme.
+		add_theme_support(
+			'editor-color-palette',
+			array(
+				array(
+					'name'  => __( 'Blue', 'twentyten' ),
+					'slug'  => 'blue',
+					'color' => '#0066cc',
+				),
+				array(
+					'name'  => __( 'Black', 'twentyten' ),
+					'slug'  => 'black',
+					'color' => '#000',
+				),
+				array(
+					'name'  => __( 'Medium Gray', 'twentyten' ),
+					'slug'  => 'medium-gray',
+					'color' => '#666',
+				),
+				array(
+					'name'  => __( 'Light Gray', 'twentyten' ),
+					'slug'  => 'light-gray',
+					'color' => '#f1f1f1',
+				),
+				array(
+					'name'  => __( 'White', 'twentyten' ),
+					'slug'  => 'white',
+					'color' => '#fff',
+				),
+			)
+		);
+
 		// Post Format support. You can also use the legacy "gallery" or "asides" (note the plural) categories.
 		add_theme_support( 'post-formats', array( 'aside', 'gallery' ) );
 
@@ -100,7 +140,8 @@ if ( ! function_exists( 'twentyten_setup' ) ) :
 
 		// This theme allows users to set a custom background.
 		add_theme_support(
-			'custom-background', array(
+			'custom-background',
+			array(
 				// Let WordPress know what our default background color is.
 				'default-color' => 'f1f1f1',
 			)
@@ -226,7 +267,7 @@ if ( ! function_exists( 'twentyten_admin_header_style' ) ) :
 	 * @since Twenty Ten 1.0
 	 */
 	function twentyten_admin_header_style() {
-	?>
+		?>
 	<style type="text/css" id="twentyten-admin-header-css">
 	/* Shows the same border as on front end */
 	#headimg {
@@ -238,7 +279,7 @@ if ( ! function_exists( 'twentyten_admin_header_style' ) ) :
 	#headimg #desc { }
 	*/
 	</style>
-	<?php
+		<?php
 	}
 endif;
 
@@ -377,14 +418,14 @@ if ( ! function_exists( 'twentyten_comment' ) ) :
 		$GLOBALS['comment'] = $comment;
 		switch ( $comment->comment_type ) :
 			case '':
-		?>
+				?>
 		<li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
 		<div id="comment-<?php comment_ID(); ?>">
 			<div class="comment-author vcard">
 				<?php echo get_avatar( $comment, 40 ); ?>
 				<?php printf( __( '%s <span class="says">says:</span>', 'twentyten' ), sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
 			</div><!-- .comment-author .vcard -->
-			<?php if ( $comment->comment_approved == '0' ) : ?>
+				<?php if ( $comment->comment_approved == '0' ) : ?>
 				<em class="comment-awaiting-moderation"><?php _e( 'Your comment is awaiting moderation.', 'twentyten' ); ?></em>
 				<br />
 			<?php endif; ?>
@@ -393,11 +434,11 @@ if ( ! function_exists( 'twentyten_comment' ) ) :
 				<?php
 					/* translators: 1: date, 2: time */
 					printf( __( '%1$s at %2$s', 'twentyten' ), get_comment_date(), get_comment_time() );
-					?>
+				?>
 					</a>
 					<?php
 					edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' );
-				?>
+					?>
 				</div><!-- .comment-meta .commentmetadata -->
 
 				<div class="comment-body"><?php comment_text(); ?></div>
@@ -406,24 +447,25 @@ if ( ! function_exists( 'twentyten_comment' ) ) :
 				<?php
 				comment_reply_link(
 					array_merge(
-						$args, array(
+						$args,
+						array(
 							'depth'     => $depth,
 							'max_depth' => $args['max_depth'],
 						)
 					)
 				);
-?>
+				?>
 				</div><!-- .reply -->
 			</div><!-- #comment-##  -->
 
-		<?php
+				<?php
 				break;
 			case 'pingback':
 			case 'trackback':
-		?>
+				?>
 		<li class="post pingback">
 		<p><?php _e( 'Pingback:', 'twentyten' ); ?> <?php comment_author_link(); ?><?php edit_comment_link( __( '(Edit)', 'twentyten' ), ' ' ); ?></p>
-	<?php
+				<?php
 				break;
 		endswitch;
 	}
@@ -653,3 +695,43 @@ function twentyten_widget_tag_cloud_args( $args ) {
 	return $args;
 }
 add_filter( 'widget_tag_cloud_args', 'twentyten_widget_tag_cloud_args' );
+
+/**
+ * Enqueue scripts and styles for front end.
+ *
+ * @since Twenty Ten 2.6
+ */
+function twentyten_scripts_styles() {
+	// Theme block stylesheet.
+	wp_enqueue_style( 'twentyten-block-style', get_template_directory_uri() . '/blocks.css', array(), '20181018' );
+}
+add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
+
+/**
+ * Enqueue styles for the block-based editor.
+ *
+ * @since Twenty Ten 2.6
+ */
+function twentyten_block_editor_styles() {
+	// Block styles.
+	wp_enqueue_style( 'twentyten-block-editor-style', get_template_directory_uri() . '/editor-blocks.css' );
+}
+add_action( 'enqueue_block_editor_assets', 'twentyten_block_editor_styles' );
+
+if ( ! function_exists( 'wp_body_open' ) ) :
+	/**
+	 * Fire the wp_body_open action.
+	 *
+	 * Added for backwards compatibility to support pre 5.2.0 WordPress versions.
+	 *
+	 * @since Twenty Ten 2.9
+	 */
+	function wp_body_open() {
+		/**
+		 * Triggered after the opening <body> tag.
+		 *
+		 * @since Twenty Ten 2.9
+		 */
+		do_action( 'wp_body_open' );
+	}
+endif;

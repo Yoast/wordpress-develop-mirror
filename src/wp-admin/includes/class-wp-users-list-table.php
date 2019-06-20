@@ -264,7 +264,7 @@ class WP_Users_List_Table extends WP_List_Table {
 	protected function extra_tablenav( $which ) {
 		$id        = 'bottom' === $which ? 'new_role2' : 'new_role';
 		$button_id = 'bottom' === $which ? 'changeit2' : 'changeit';
-	?>
+		?>
 	<div class="alignleft actions">
 		<?php if ( current_user_can( 'promote_users' ) && $this->has_items() ) : ?>
 		<label class="screen-reader-text" for="<?php echo $id; ?>"><?php _e( 'Change role to&hellip;' ); ?></label>
@@ -272,7 +272,7 @@ class WP_Users_List_Table extends WP_List_Table {
 			<option value=""><?php _e( 'Change role to&hellip;' ); ?></option>
 			<?php wp_dropdown_roles(); ?>
 		</select>
-	<?php
+			<?php
 			submit_button( __( 'Change' ), '', $button_id, false );
 		endif;
 
@@ -286,9 +286,9 @@ class WP_Users_List_Table extends WP_List_Table {
 		 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
 		 */
 		do_action( 'restrict_manage_users', $which );
-	?>
+		?>
 		</div>
-	<?php
+		<?php
 		/**
 		 * Fires immediately following the closing "actions" div in the tablenav for the users
 		 * list table.
@@ -431,7 +431,7 @@ class WP_Users_List_Table extends WP_List_Table {
 			if ( ! is_multisite() && get_current_user_id() != $user_object->ID && current_user_can( 'delete_user', $user_object->ID ) ) {
 				$actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url( "users.php?action=delete&amp;user=$user_object->ID", 'bulk-users' ) . "'>" . __( 'Delete' ) . '</a>';
 			}
-			if ( is_multisite() && get_current_user_id() != $user_object->ID && current_user_can( 'remove_user', $user_object->ID ) ) {
+			if ( is_multisite() && current_user_can( 'remove_user', $user_object->ID ) ) {
 				$actions['remove'] = "<a class='submitdelete' href='" . wp_nonce_url( $url . "action=remove&amp;user=$user_object->ID", 'bulk-users' ) . "'>" . __( 'Remove' ) . '</a>';
 			}
 
@@ -452,10 +452,10 @@ class WP_Users_List_Table extends WP_List_Table {
 			 *
 			 * @since 2.8.0
 			 *
-			 * @param array   $actions     An array of action links to be displayed.
-			 *                             Default 'Edit', 'Delete' for single site, and
-			 *                             'Edit', 'Remove' for Multisite.
-			 * @param WP_User $user_object WP_User object for the currently-listed user.
+			 * @param string[] $actions     An array of action links to be displayed.
+			 *                              Default 'Edit', 'Delete' for single site, and
+			 *                              'Edit', 'Remove' for Multisite.
+			 * @param WP_User  $user_object WP_User object for the currently listed user.
 			 */
 			$actions = apply_filters( 'user_row_actions', $actions, $user_object );
 
@@ -571,7 +571,7 @@ class WP_Users_List_Table extends WP_List_Table {
 	 * @since 4.4.0
 	 *
 	 * @param WP_User $user_object The WP_User object.
-	 * @return array An array of user roles.
+	 * @return string[] An array of user roles.
 	 */
 	protected function get_role_list( $user_object ) {
 		$wp_roles = wp_roles();
@@ -593,8 +593,8 @@ class WP_Users_List_Table extends WP_List_Table {
 		 *
 		 * @since 4.4.0
 		 *
-		 * @param array   $role_list   An array of user roles.
-		 * @param WP_User $user_object A WP_User object.
+		 * @param string[] $role_list   An array of user roles.
+		 * @param WP_User  $user_object A WP_User object.
 		 */
 		return apply_filters( 'get_role_list', $role_list, $user_object );
 	}

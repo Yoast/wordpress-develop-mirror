@@ -401,7 +401,8 @@ function get_oembed_endpoint_url( $permalink = '', $format = 'json' ) {
 			array(
 				'url'    => urlencode( $permalink ),
 				'format' => ( 'json' !== $format ) ? $format : false,
-			), $url
+			),
+			$url
 		);
 	}
 
@@ -445,7 +446,7 @@ function get_post_embed_html( $width, $height, $post = null ) {
 	} else {
 		/*
 		 * If you're looking at a src version of this file, you'll see an "include"
-		 * statement below. This is used by the `grunt build` process to directly
+		 * statement below. This is used by the `npm run build` process to directly
 		 * include a minified version of wp-embed.js, instead of using the
 		 * file_get_contents() method from above.
 		 *
@@ -522,7 +523,8 @@ function get_oembed_response_data( $post, $width ) {
 	 * }
 	 */
 	$min_max_width = apply_filters(
-		'oembed_min_max_width', array(
+		'oembed_min_max_width',
+		array(
 			'min' => 200,
 			'max' => 600,
 		)
@@ -537,7 +539,7 @@ function get_oembed_response_data( $post, $width ) {
 		'provider_url'  => get_home_url(),
 		'author_name'   => get_bloginfo( 'name' ),
 		'author_url'    => get_home_url(),
-		'title'         => $post->post_title,
+		'title'         => get_the_title( $post ),
 		'type'          => 'link',
 	);
 
@@ -560,6 +562,78 @@ function get_oembed_response_data( $post, $width ) {
 	 */
 	return apply_filters( 'oembed_response_data', $data, $post, $width, $height );
 }
+
+
+/**
+ * Retrieves the oEmbed response data for a given URL.
+ *
+ * @since 5.0.0
+ *
+ * @param string $url  The URL that should be inspected for discovery `<link>` tags.
+ * @param array  $args oEmbed remote get arguments.
+ * @return object|false oEmbed response data if the URL does belong to the current site. False otherwise.
+ */
+function get_oembed_response_data_for_url( $url, $args ) {
+	$switched_blog = false;
+
+	if ( is_multisite() ) {
+		$url_parts = wp_parse_args(
+			wp_parse_url( $url ),
+			array(
+				'host' => '',
+				'path' => '/',
+			)
+		);
+
+		$qv = array(
+			'domain'                 => $url_parts['host'],
+			'path'                   => '/',
+			'update_site_meta_cache' => false,
+		);
+
+		// In case of subdirectory configs, set the path.
+		if ( ! is_subdomain_install() ) {
+			$path = explode( '/', ltrim( $url_parts['path'], '/' ) );
+			$path = reset( $path );
+
+			if ( $path ) {
+				$qv['path'] = get_network()->path . $path . '/';
+			}
+		}
+
+		$sites = get_sites( $qv );
+		$site  = reset( $sites );
+
+		if ( $site && (int) $site->blog_id !== get_current_blog_id() ) {
+			switch_to_blog( $site->blog_id );
+			$switched_blog = true;
+		}
+	}
+
+	$post_id = url_to_postid( $url );
+
+	/** This filter is documented in wp-includes/class-wp-oembed-controller.php */
+	$post_id = apply_filters( 'oembed_request_post_id', $post_id, $url );
+
+	if ( ! $post_id ) {
+		if ( $switched_blog ) {
+			restore_current_blog();
+		}
+
+		return false;
+	}
+
+	$width = isset( $args['width'] ) ? $args['width'] : 0;
+
+	$data = get_oembed_response_data( $post_id, $width );
+
+	if ( $switched_blog ) {
+		restore_current_blog();
+	}
+
+	return $data ? (object) $data : false;
+}
+
 
 /**
  * Filters the oEmbed response data to return an iframe embed code.
@@ -707,12 +781,61 @@ function _oembed_create_xml( $data, $node = null ) {
 }
 
 /**
+ * Filters the given oEmbed HTML to make sure iframes have a title attribute.
+ *
+ * @since 5.2.0
+ *
+ * @param string $result The oEmbed HTML result.
+ * @param object $data   A data object result from an oEmbed provider.
+ * @param string $url    The URL of the content to be embedded.
+ * @return string The filtered oEmbed result.
+ */
+function wp_filter_oembed_iframe_title_attribute( $result, $data, $url ) {
+	if ( false === $result || ! in_array( $data->type, array( 'rich', 'video' ) ) ) {
+		return $result;
+	}
+
+	$title = ! empty( $data->title ) ? $data->title : '';
+
+	$pattern        = '`<iframe[^>]*?title=(\\\\\'|\\\\"|[\'"])([^>]*?)\1`i';
+	$has_title_attr = preg_match( $pattern, $result, $matches );
+
+	if ( $has_title_attr && ! empty( $matches[2] ) ) {
+		$title = $matches[2];
+	}
+
+	/**
+	 * Filters the title attribute of the given oEmbed HTML iframe.
+	 *
+	 * @since 5.2.0
+	 *
+	 * @param string $title  The title attribute.
+	 * @param string $result The oEmbed HTML result.
+	 * @param object $data   A data object result from an oEmbed provider.
+	 * @param string $url    The URL of the content to be embedded.
+	 */
+	$title = apply_filters( 'oembed_iframe_title_attribute', $title, $result, $data, $url );
+
+	if ( '' === $title ) {
+		return $result;
+	}
+
+	if ( $has_title_attr ) {
+		// Remove the old title, $matches[1]: quote, $matches[2]: title attribute value.
+		$result = str_replace( ' title=' . $matches[1] . $matches[2] . $matches[1], '', $result );
+	}
+
+	return str_ireplace( '<iframe ', sprintf( '<iframe title="%s" ', esc_attr( $title ) ), $result );
+}
+
+
+/**
  * Filters the given oEmbed HTML.
  *
  * If the `$url` isn't on the trusted providers list,
  * we need to filter the HTML heavily for security.
  *
- * Only filters 'rich' and 'html' response types.
+ * Only filters 'rich' and 'video' response types.
  *
  * @since 4.4.0
  *
@@ -885,7 +1008,7 @@ function print_embed_styles() {
 	} else {
 		/*
 		 * If you're looking at a src version of this file, you'll see an "include"
-		 * statement below. This is used by the `grunt build` process to directly
+		 * statement below. This is used by the `npm run build` process to directly
 		 * include a minified version of wp-oembed-embed.css, instead of using the
 		 * readfile() method from above.
 		 *
@@ -894,7 +1017,7 @@ function print_embed_styles() {
 		 * and edit wp-embed-template.css directly.
 		 */
 		?>
-		include "css/wp-embed-template.min.css"
+			include "css/wp-embed-template.min.css"
 		<?php
 	}
 	?>
@@ -916,7 +1039,7 @@ function print_embed_scripts() {
 	} else {
 		/*
 		 * If you're looking at a src version of this file, you'll see an "include"
-		 * statement below. This is used by the `grunt build` process to directly
+		 * statement below. This is used by the `npm run build` process to directly
 		 * include a minified version of wp-embed-template.js, instead of using the
 		 * readfile() method from above.
 		 *
@@ -925,7 +1048,7 @@ function print_embed_scripts() {
 		 * and edit wp-embed-template.js directly.
 		 */
 		?>
-		include "js/wp-embed-template.min.js"
+			include "js/wp-embed-template.min.js"
 		<?php
 	}
 	?>
@@ -1078,65 +1201,11 @@ function the_embed_site_title() {
  *                     Null if the URL does not belong to the current site.
  */
 function wp_filter_pre_oembed_result( $result, $url, $args ) {
-	$switched_blog = false;
+	$data = get_oembed_response_data_for_url( $url, $args );
 
-	if ( is_multisite() ) {
-		$url_parts = wp_parse_args(
-			wp_parse_url( $url ), array(
-				'host' => '',
-				'path' => '/',
-			)
-		);
-
-		$qv = array(
-			'domain' => $url_parts['host'],
-			'path'   => '/',
-		);
-
-		// In case of subdirectory configs, set the path.
-		if ( ! is_subdomain_install() ) {
-			$path = explode( '/', ltrim( $url_parts['path'], '/' ) );
-			$path = reset( $path );
-
-			if ( $path ) {
-				$qv['path'] = get_network()->path . $path . '/';
-			}
-		}
-
-		$sites = get_sites( $qv );
-		$site  = reset( $sites );
-
-		if ( $site && (int) $site->blog_id !== get_current_blog_id() ) {
-			switch_to_blog( $site->blog_id );
-			$switched_blog = true;
-		}
+	if ( $data ) {
+		return _wp_oembed_get_object()->data2html( $data, $url );
 	}
 
-	$post_id = url_to_postid( $url );
-
-	/** This filter is documented in wp-includes/class-wp-oembed-controller.php */
-	$post_id = apply_filters( 'oembed_request_post_id', $post_id, $url );
-
-	if ( ! $post_id ) {
-		if ( $switched_blog ) {
-			restore_current_blog();
-		}
-
-		return $result;
-	}
-
-	$width = isset( $args['width'] ) ? $args['width'] : 0;
-
-	$data = get_oembed_response_data( $post_id, $width );
-	$data = _wp_oembed_get_object()->data2html( (object) $data, $url );
-
-	if ( $switched_blog ) {
-		restore_current_blog();
-	}
-
-	if ( ! $data ) {
-		return $result;
-	}
-
-	return $data;
+	return $result;
 }

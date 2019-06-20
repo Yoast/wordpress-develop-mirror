@@ -20,7 +20,7 @@ get_header();
 		// Start the Loop.
 	while ( have_posts() ) :
 		the_post();
-	?>
+		?>
 		<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<header class="entry-header">
 				<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
@@ -61,7 +61,7 @@ get_header();
 					);
 				?>
 				</div><!-- .entry-content -->
-			</article><!-- #post-## -->
+			</article><!-- #post-<?php the_ID(); ?> -->
 
 			<nav id="image-navigation" class="navigation image-navigation">
 				<div class="nav-links">

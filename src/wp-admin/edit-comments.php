@@ -10,7 +10,7 @@
 require_once( dirname( __FILE__ ) . '/admin.php' );
 if ( ! current_user_can( 'edit_posts' ) ) {
 	wp_die(
-		'<h1>' . __( 'You don&#8217;t have permission to do this.' ) . '</h1>' .
+		'<h1>' . __( 'You need a higher level of permission.' ) . '</h1>' .
 		'<p>' . __( 'Sorry, you are not allowed to edit comments.' ) . '</p>',
 		403
 	);
@@ -146,7 +146,7 @@ if ( $post_id ) {
 	$comments_count      = wp_count_comments( $post_id );
 	$draft_or_post_title = wp_html_excerpt( _draft_or_post_title( $post_id ), 50, '&hellip;' );
 	if ( $comments_count->moderated > 0 ) {
-		/* translators: 1: comments count 2: post title */
+		/* translators: 1: comments count, 2: post title */
 		$title = sprintf(
 			__( 'Comments (%1$s) on &#8220;%2$s&#8221;' ),
 			number_format_i18n( $comments_count->moderated ),
@@ -201,7 +201,7 @@ get_current_screen()->set_help_sidebar(
 	'<p>' . __( '<a href="https://codex.wordpress.org/Administration_Screens#Comments">Documentation on Comments</a>' ) . '</p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Comment_Spam">Documentation on Comment Spam</a>' ) . '</p>' .
 	'<p>' . __( '<a href="https://codex.wordpress.org/Keyboard_Shortcuts">Documentation on Keyboard Shortcuts</a>' ) . '</p>' .
-	'<p>' . __( '<a href="https://wordpress.org/support/">Support Forums</a>' ) . '</p>'
+	'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 );
 
 get_current_screen()->set_screen_reader_content(

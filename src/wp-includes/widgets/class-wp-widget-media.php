@@ -55,7 +55,8 @@ abstract class WP_Widget_Media extends WP_Widget {
 	 */
 	public function __construct( $id_base, $name, $widget_options = array(), $control_options = array() ) {
 		$widget_opts = wp_parse_args(
-			$widget_options, array(
+			$widget_options,
+			array(
 				'description'                 => __( 'A media item.' ),
 				'customize_selective_refresh' => true,
 				'mime_type'                   => '',
@@ -80,7 +81,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 			'media_library_state_single' => __( 'Media Widget' ),
 			'unsupported_file_type'      => __( 'Looks like this isn&#8217;t the correct kind of file. Please link to an appropriate file instead.' ),
 		);
-		$this->l10n = array_merge( $l10n_defaults, array_filter( $this->l10n ) );
+		$this->l10n    = array_merge( $l10n_defaults, array_filter( $this->l10n ) );
 
 		parent::__construct(
 			$id_base,
@@ -121,7 +122,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 	/**
 	 * Get schema for properties of a widget instance (item).
 	 *
-	 * @since  4.8.0
+	 * @since 4.8.0
 	 *
 	 * @see WP_REST_Controller::get_item_schema()
 	 * @see WP_REST_Controller::get_additional_fields()
@@ -338,7 +339,7 @@ abstract class WP_Widget_Media extends WP_Widget {
 				id="<?php echo esc_attr( $this->get_field_id( $name ) ); // Needed specifically by wpWidgets.appendTitle(). ?>"
 				value="<?php echo esc_attr( is_array( $value ) ? join( ',', $value ) : strval( $value ) ); ?>"
 			/>
-		<?php
+			<?php
 		endforeach;
 	}
 
@@ -410,7 +411,9 @@ abstract class WP_Widget_Media extends WP_Widget {
 			</p>
 			<div class="media-widget-preview <?php echo esc_attr( $this->id_base ); ?>">
 				<div class="attachment-media-view">
-					<div class="placeholder"><?php echo esc_html( $this->l10n['no_media_selected'] ); ?></div>
+					<button type="button" class="select-media button-add-media not-selected">
+						<?php echo esc_html( $this->l10n['add_media'] ); ?>
+					</button>
 				</div>
 			</div>
 			<p class="media-widget-buttons">
@@ -422,9 +425,6 @@ abstract class WP_Widget_Media extends WP_Widget {
 					<?php echo esc_html( $this->l10n['replace_media'] ); ?>
 				</button>
 			<?php endif; ?>
-				<button type="button" class="button select-media not-selected">
-					<?php echo esc_html( $this->l10n['add_media'] ); ?>
-				</button>
 			</p>
 			<div class="media-widget-fields">
 			</div>
