@@ -5,8 +5,7 @@ use WP\Legacy\Action\ActionInterface;
 
 class About implements ActionInterface {
 
-	public function perform()
-	{
+	public function perform() {
 		/* translators: Page title of the About WordPress page in the admin. */
 		$title = _x( 'About', 'page title' );
 

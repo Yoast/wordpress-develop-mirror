@@ -5,7 +5,7 @@
  * @package WP\Helper
  */
 class HookHelper {
-	public static function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+	public static function addFilter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
 		global $wp_filter;
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
 			$wp_filter[ $tag ] = new \WP_Hook();
@@ -14,7 +14,7 @@ class HookHelper {
 		return true;
 	}
 
-	public static function has_filter( $tag, $function_to_check ) {
+	public static function hasFilter( $tag, $function_to_check ) {
 		global $wp_filter;
 
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
@@ -24,7 +24,7 @@ class HookHelper {
 		return $wp_filter[ $tag ]->has_filter( $tag, $function_to_check );
 	}
 
-	public static function apply_filters( $tag, $value ) {
+	public static function applyFilters( $tag, $value ) {
 		global $wp_filter, $wp_current_filter;
 
 		$args = array();
@@ -33,7 +33,7 @@ class HookHelper {
 		if ( isset( $wp_filter['all'] ) ) {
 			$wp_current_filter[] = $tag;
 			$args                = func_get_args();
-			self::_wp_call_all_hook( $args );
+			self::callAllHook( $args );
 		}
 
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
@@ -61,14 +61,14 @@ class HookHelper {
 		return $filtered;
 	}
 
-	public static function apply_filters_ref_array( $tag, $args ) {
+	public static function applyFiltersRefArray( $tag, $args ) {
 		global $wp_filter, $wp_current_filter;
 
 		// Do 'all' actions first
 		if ( isset( $wp_filter['all'] ) ) {
 			$wp_current_filter[] = $tag;
 			$all_args            = func_get_args();
-			self::_wp_call_all_hook( $all_args );
+			self::callAllHook( $all_args );
 		}
 
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
@@ -89,7 +89,7 @@ class HookHelper {
 		return $filtered;
 	}
 
-	public static function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
+	public static function removeFilter( $tag, $function_to_remove, $priority = 10 ) {
 		global $wp_filter;
 
 		$r = false;
@@ -103,7 +103,7 @@ class HookHelper {
 		return $r;
 	}
 
-	public static function remove_all_filters( $tag, $priority = false ) {
+	public static function removeAllFilters( $tag, $priority = false ) {
 		global $wp_filter;
 
 		if ( isset( $wp_filter[ $tag ] ) ) {
@@ -116,17 +116,17 @@ class HookHelper {
 		return true;
 	}
 
-	public static function current_filter() {
+	public static function currentFilter() {
 		global $wp_current_filter;
 		return end( $wp_current_filter );
 	}
 
-	public static function current_action() {
+	public static function currentAction() {
 		global $wp_current_filter;
 		return end( $wp_current_filter );
 	}
 
-	public static function doing_filter( $filter = null ) {
+	public static function doingFilter( $filter = null ) {
 		global $wp_current_filter;
 
 		if ( null === $filter ) {
@@ -136,15 +136,15 @@ class HookHelper {
 		return in_array( $filter, $wp_current_filter );
 	}
 
-	public static function doing_action( $action = null ) {
-		return self::doing_filter( $action );
+	public static function doingAction( $action = null ) {
+		return self::doingFilter( $action );
 	}
 
-	public static function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-		return self::add_filter( $tag, $function_to_add, $priority, $accepted_args );
+	public static function addAction( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+		return self::addFilter( $tag, $function_to_add, $priority, $accepted_args );
 	}
 
-	public static function do_action( $tag, $arg = '' ) {
+	public static function doAction( $tag, $arg = '' ) {
 		global $wp_filter, $wp_actions, $wp_current_filter;
 
 		if ( ! isset( $wp_actions[ $tag ] ) ) {
@@ -157,7 +157,7 @@ class HookHelper {
 		if ( isset( $wp_filter['all'] ) ) {
 			$wp_current_filter[] = $tag;
 			$all_args            = func_get_args();
-			self::_wp_call_all_hook( $all_args );
+			self::callAllHook( $all_args );
 		}
 
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
@@ -172,7 +172,7 @@ class HookHelper {
 		}
 
 		$args = array();
-		if ( is_array( $arg ) && 1 == count( $arg ) && isset( $arg[0] ) && is_object( $arg[0] ) ) { // array(&$this)
+		if ( is_array( $arg ) && 1 == count( $arg ) && isset( $arg[0] ) && is_object( $arg[0] ) ) {
 			$args[] =& $arg[0];
 		} else {
 			$args[] = $arg;
@@ -186,7 +186,7 @@ class HookHelper {
 		array_pop( $wp_current_filter );
 	}
 
-	public static function did_action( $tag ) {
+	public static function didAction( $tag ) {
 		global $wp_actions;
 
 		if ( ! isset( $wp_actions[ $tag ] ) ) {
@@ -196,7 +196,7 @@ class HookHelper {
 		return $wp_actions[ $tag ];
 	}
 
-	public static function do_action_ref_array( $tag, $args ) {
+	public static function doActionRefArray( $tag, $args ) {
 		global $wp_filter, $wp_actions, $wp_current_filter;
 
 		if ( ! isset( $wp_actions[ $tag ] ) ) {
@@ -209,7 +209,7 @@ class HookHelper {
 		if ( isset( $wp_filter['all'] ) ) {
 			$wp_current_filter[] = $tag;
 			$all_args            = func_get_args();
-			self::_wp_call_all_hook( $all_args );
+			self::callAllHook( $all_args );
 		}
 
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
@@ -228,19 +228,19 @@ class HookHelper {
 		array_pop( $wp_current_filter );
 	}
 
-	public static function has_action( $tag, $function_to_check = false ) {
-		return self::has_filter( $tag, $function_to_check );
+	public static function hasAction( $tag, $function_to_check = false ) {
+		return self::hasFilter( $tag, $function_to_check );
 	}
 
-	public static function remove_action( $tag, $function_to_remove, $priority = 10 ) {
-		return self::remove_filter( $tag, $function_to_remove, $priority );
+	public static function removeAction( $tag, $function_to_remove, $priority = 10 ) {
+		return self::removeFilter( $tag, $function_to_remove, $priority );
 	}
 
-	public static function remove_all_actions( $tag, $priority = false ) {
-		return self::remove_all_filters( $tag, $priority );
+	public static function removeAllActions( $tag, $priority = false ) {
+		return self::removeAllFilters( $tag, $priority );
 	}
 
-	public static function apply_filters_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
+	public static function applyFiltersDeprecated( $tag, $args, $version, $replacement = false, $message = null ) {
 		if ( ! has_filter( $tag ) ) {
 			return $args[0];
 		}
@@ -250,7 +250,7 @@ class HookHelper {
 		return apply_filters_ref_array( $tag, $args );
 	}
 
-	public static function do_action_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
+	public static function doActionDeprecated( $tag, $args, $version, $replacement = false, $message = null ) {
 		if ( ! has_action( $tag ) ) {
 			return;
 		}
@@ -260,17 +260,17 @@ class HookHelper {
 		do_action_ref_array( $tag, $args );
 	}
 
-	public static function register_activation_hook( $file, $function ) {
+	public static function registerActivationHook( $file, $function ) {
 		$file = PluginHelper::plugin_basename( $file );
 		add_action( 'activate_' . $file, $function );
 	}
 
-	public static function register_deactivation_hook( $file, $function ) {
+	public static function registerDeactivationHook( $file, $function ) {
 		$file = PluginHelper::plugin_basename( $file );
 		add_action( 'deactivate_' . $file, $function );
 	}
 
-	public static function register_uninstall_hook( $file, $callback ) {
+	public static function registerUninstallHook( $file, $callback ) {
 		if ( is_array( $callback ) && is_object( $callback[0] ) ) {
 			_doing_it_wrong( __FUNCTION__, __( 'Only a static class method or function can be used in an uninstall hook.' ), '3.1.0' );
 			return;
@@ -287,13 +287,13 @@ class HookHelper {
 		update_option( 'uninstall_plugins', $uninstallable_plugins );
 	}
 
-	public static function _wp_call_all_hook( $args ) {
+	public static function callAllHook( $args ) {
 		global $wp_filter;
 
 		$wp_filter['all']->do_all_hook( $args );
 	}
 
-	public static function _wp_filter_build_unique_id( $tag, $function, $priority ) {
+	public static function buildUniqueId( $tag, $function, $priority ) {
 		global $wp_filter;
 		static $filter_id_count = 0;
 
