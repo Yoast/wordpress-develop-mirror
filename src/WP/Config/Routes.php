@@ -10,6 +10,6 @@ use WP\Legacy\Action\Admin\About;
  */
 class Routes {
 	const ROUTES = [
-		'/wp-admin/about' => About::class,
+		'wp-admin/about' => About::class,
 	];
 }

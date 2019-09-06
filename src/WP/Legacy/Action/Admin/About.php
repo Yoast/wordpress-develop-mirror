@@ -1,6 +1,8 @@
 <?php
 namespace WP\Legacy\Action\Admin;
 
+use WP\Legacy\Action\ActionInterface;
+
 class About implements ActionInterface {
 
 	public function perform()

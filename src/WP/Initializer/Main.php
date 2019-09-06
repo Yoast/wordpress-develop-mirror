@@ -61,15 +61,10 @@ class Main implements InitializerInterface {
 		if ( strpos( $request, '/wp-admin/' ) === 0 ) {
 			$this->is_admin = true;
 
-			if ( $request === '/wp-admin/' ) {
-				$this->admin_route = 'index';
-
-				return;
-			}
-
-			preg_match( '|/wp-admin/(.*)\.php|U', $request, $matches );
+			preg_match( '|/(.*)\.php|U', $request, $matches );
 			$this->admin_route = $matches[1];
-			if ( ! in_array( $this->admin_route, Routes::ROUTES ) ) {
+			echo $this->admin_route;
+			if ( ! array_key_exists( $this->admin_route, Routes::ROUTES ) ) {
 				$this->is_admin    = false;
 				$this->admin_route = '';
 			}
