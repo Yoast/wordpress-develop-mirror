@@ -62,7 +62,7 @@ class PostStatusHelper{
     /**
      * Return post statuses:
      */
-    public static function getPostStatuses() {
+    public static function getPostStatuses( $args = array(), $output = 'names', $operator = 'and' ) {
         global $wp_post_statuses;
 
         $field = ( 'names' == $output ) ? 'name' : false;
