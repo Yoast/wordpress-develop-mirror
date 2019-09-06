@@ -1256,7 +1256,7 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  *                        WP_Error object if 'post_tag' taxonomy doesn't exist.
  */
 function wp_get_post_tags( $post_id = 0, $args = array() ) {
-    PostTermHelper::getTags( $post_id, $args );
+    return PostTermHelper::getTags( $post_id, $args );
 }
 
 /**
@@ -1277,9 +1277,86 @@ function wp_get_post_tags( $post_id = 0, $args = array() ) {
  *                        WP_Error object if `$taxonomy` doesn't exist.
  */
 function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
-    PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
+    return PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
 }
 
+/**
+ * Add tags to a post.
+ *
+ * @see wp_set_post_tags()
+ *
+ * @since 2.3.0
+ *
+ * @param int          $post_id Optional. The Post ID. Does not default to the ID of the global $post.
+ * @param string|array $tags    Optional. An array of tags to set for the post, or a string of tags
+ *                              separated by commas. Default empty.
+ * @return array|false|WP_Error Array of affected term IDs. WP_Error or false on failure.
+ */
+function wp_add_post_tags( $post_id = 0, $tags = '' ) {
+    return PostTermHelper::addTags( $post_id, $tags );
+}
+
+
+/**
+ * Set the tags for a post.
+ *
+ * @since 2.3.0
+ *
+ * @see wp_set_object_terms()
+ *
+ * @param int          $post_id Optional. The Post ID. Does not default to the ID of the global $post.
+ * @param string|array $tags    Optional. An array of tags to set for the post, or a string of tags
+ *                              separated by commas. Default empty.
+ * @param bool         $append  Optional. If true, don't delete existing tags, just add on. If false,
+ *                              replace the tags with the new tags. Default false.
+ * @return array|false|WP_Error Array of term taxonomy IDs of affected terms. WP_Error or false on failure.
+ */
+function wp_set_post_tags( $post_id = 0, $tags = '', $append = false ) {
+    return PostTermHelper::setTerms( $post_id, $tags, 'post_tag', $append );
+}
+
+
+/**
+ * Set the terms for a post.
+ *
+ * @since 2.8.0
+ *
+ * @see wp_set_object_terms()
+ *
+ * @param int          $post_id  Optional. The Post ID. Does not default to the ID of the global $post.
+ * @param string|array $tags     Optional. An array of terms to set for the post, or a string of terms
+ *                               separated by commas. Hierarchical taxonomies must always pass IDs rather
+ *                               than names so that children with the same names but different parents
+ *                               aren't confused. Default empty.
+ * @param string       $taxonomy Optional. Taxonomy name. Default 'post_tag'.
+ * @param bool         $append   Optional. If true, don't delete existing terms, just add on. If false,
+ *                               replace the terms with the new terms. Default false.
+ * @return array|false|WP_Error Array of term taxonomy IDs of affected terms. WP_Error or false on failure.
+ */
+function wp_set_post_terms( $post_id = 0, $tags = '', $taxonomy = 'post_tag', $append = false ) {
+    return PostTermHelper::setTerms( $post_id, $tags, $taxonomy, $append );
+}
+
+
+/**
+ * Set categories for a post.
+ *
+ * If the post categories parameter is not set, then the default category is
+ * going used.
+ *
+ * @since 2.1.0
+ *
+ * @param int       $post_ID         Optional. The Post ID. Does not default to the ID
+ *                                   of the global $post. Default 0.
+ * @param array|int $post_categories Optional. List of category IDs, or the ID of a single category.
+ *                                   Default empty array.
+ * @param bool      $append          If true, don't delete existing categories, just add on.
+ *                                   If false, replace the categories with the new categories.
+ * @return array|false|WP_Error Array of term taxonomy IDs of affected categories. WP_Error or false on failure.
+ */
+function wp_set_post_categories( $post_ID = 0, $post_categories = array(), $append = false ) {
+    return PostTermHelper::setCategories( $post_ID, $post_categories, $append );
+}
 
 
 /**
@@ -1864,6 +1941,33 @@ function get_post_status( $post = null ) {
  */
 function get_post_status_object( $post_status ) {
     return PostStatusHelper::getObject( $post_status );
+}
+
+
+
+/**
+ * Fires actions related to the transitioning of a post's status.
+ *
+ * When a post is saved, the post status is "transitioned" from one status to another,
+ * though this does not always mean the status has actually changed before and after
+ * the save. This function fires a number of action hooks related to that transition:
+ * the generic {@see 'transition_post_status'} action, as well as the dynamic hooks
+ * {@see '$old_status_to_$new_status'} and {@see '$new_status_$post->post_type'}. Note
+ * that the function does not transition the post object in the database.
+ *
+ * For instance: When publishing a post for the first time, the post status may transition
+ * from 'draft' – or some other status – to 'publish'. However, if a post is already
+ * published and is simply being updated, the "old" and "new" statuses may both be 'publish'
+ * before and after the transition.
+ *
+ * @since 2.3.0
+ *
+ * @param string  $new_status Transition to this post status.
+ * @param string  $old_status Previous post status.
+ * @param WP_Post $post Post data.
+ */
+function wp_transition_post_status( $new_status, $old_status, $post ) {
+    return PostStatusHelper::transition( $new_status, $old_status, $post );    
 }
 
 

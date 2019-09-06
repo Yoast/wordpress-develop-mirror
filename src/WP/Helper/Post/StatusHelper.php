@@ -189,4 +189,53 @@ class StatusHelper{
 
         return $args;
     }
+
+    /**
+     * Transition post statusses
+     */
+    public static function transition( $new_status, $old_status, $post ) {
+        /**
+         * Fires when a post is transitioned from one status to another.
+         *
+         * @since 2.3.0
+         *
+         * @param string  $new_status New post status.
+         * @param string  $old_status Old post status.
+         * @param WP_Post $post       Post object.
+         */
+        do_action( 'transition_post_status', $new_status, $old_status, $post );
+
+        /**
+         * Fires when a post is transitioned from one status to another.
+         *
+         * The dynamic portions of the hook name, `$new_status` and `$old status`,
+         * refer to the old and new post statuses, respectively.
+         *
+         * @since 2.3.0
+         *
+         * @param WP_Post $post Post object.
+         */
+        do_action( "{$old_status}_to_{$new_status}", $post );
+
+        /**
+         * Fires when a post is transitioned from one status to another.
+         *
+         * The dynamic portions of the hook name, `$new_status` and `$post->post_type`,
+         * refer to the new post status and post type, respectively.
+         *
+         * Please note: When this action is hooked using a particular post status (like
+         * 'publish', as `publish_{$post->post_type}`), it will fire both when a post is
+         * first transitioned to that status from something else, as well as upon
+         * subsequent post updates (old and new status are both the same).
+         *
+         * Therefore, if you are looking to only fire a callback when a post is first
+         * transitioned to a status, use the {@see 'transition_post_status'} hook instead.
+         *
+         * @since 2.3.0
+         *
+         * @param int     $post_id Post ID.
+         * @param WP_Post $post    Post object.
+         */
+        do_action( "{$new_status}_{$post->post_type}", $post->ID, $post );
+    }
 }
