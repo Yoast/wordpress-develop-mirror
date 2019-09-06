@@ -5,11 +5,17 @@ use WP\Helper\Frontend\LoginHelper;
 use \WP\Helper\Post\PostHelper;
 use \WP\Helper\Post\MetaHelper as PostMetaHelper;
 use \WP\Helper\Post\StatusHelper as PostStatusHelper;
+use \WP\Helper\Post\CommentHelper as PostCommentHelper;
+use \WP\Helper\Post\TermHelper as PostTermHelper;
+use \WP\Helper\Post\SlugHelper as PostSlugHelper;
 use \WP\Helper\Post\AttachmentHelper;
 use \WP\Helper\PostType\PostTypeHelper;
 use \WP\Helper\PostType\SupportsHelper as PostTypeSupportsHelper;
 
+use \WP\Helper\Taxonomy\TermHelper;
+
 use \WP\Helper\Meta\Metadata;
+use \WP\Helper\CacheHelper;
 
 use WP\Helper\HookHelper;
 use WP\Helper\PluginHelper;
@@ -597,6 +603,43 @@ function update_attached_file( $attachment_id, $file ) {
 }
 
 
+
+
+/**
+ * Count number of attachments for the mime type(s).
+ *
+ * If you set the optional mime_type parameter, then an array will still be
+ * returned, but will only have the item you are looking for. It does not give
+ * you the number of attachments that are children of a post. You can get that
+ * by counting the number of children that post has.
+ *
+ * @since 2.5.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string|array $mime_type Optional. Array or comma-separated list of
+ *                                MIME patterns. Default empty.
+ * @return object An object containing the attachment counts by mime type.
+ */
+function wp_count_attachments( $mime_type = '' ) {
+    return AttachmentHelper::count( $mime_type );
+}
+
+
+
+/**
+ * Get default post mime types.
+ *
+ * @since 2.9.0
+ * @since 5.3.0 Added the 'Documents', 'Spreadsheets', and 'Archives' mime type groups.
+ *
+ * @return array List of post mime types.
+ */
+function get_post_mime_types() {
+    return AttachmentHelper::getMimeTypes();
+}
+
+
 /**
  * Retrieve the mime type of an attachment based on the ID.
  *
@@ -610,6 +653,40 @@ function update_attached_file( $attachment_id, $file ) {
  */
 function get_post_mime_type( $post = null ) {
     return AttachmentHelper::getMimeType( $post );
+}
+
+
+/**
+ * Check a MIME-Type against a list.
+ *
+ * If the wildcard_mime_types parameter is a string, it must be comma separated
+ * list. If the real_mime_types is a string, it is also comma separated to
+ * create the list.
+ *
+ * @since 2.5.0
+ *
+ * @param string|array $wildcard_mime_types Mime types, e.g. audio/mpeg or image (same as image/*)
+ *                                          or flash (same as *flash*).
+ * @param string|array $real_mime_types     Real post mime type values.
+ * @return array array(wildcard=>array(real types)).
+ */
+function wp_match_mime_types( $wildcard_mime_types, $real_mime_types ) {
+    return AttachmentHelper::matchMimeTypes( $wildcard_mime_types, $real_mime_types );
+}
+
+/**
+ * Convert MIME types into SQL.
+ *
+ * @since 2.5.0
+ *
+ * @param string|array $post_mime_types List of mime types or comma separated string
+ *                                      of mime types.
+ * @param string       $table_alias     Optional. Specify a table alias, if needed.
+ *                                      Default empty.
+ * @return string The SQL AND clause for mime searching.
+ */
+function wp_post_mime_type_where( $post_mime_types, $table_alias = '' ) {
+    return AttachmentHelper::findByMimeType( $post_mime_types, $table_alias );
 }
 
 /**
@@ -653,6 +730,145 @@ function get_post( $post = null, $output = OBJECT, $filter = 'raw' ) {
     return PostHelper::get( $post, $output, $filter );
 }
 
+/**
+ * Insert or update a post.
+ *
+ * If the $postarr parameter has 'ID' set to a value, then post will be updated.
+ *
+ * You can set the post date manually, by setting the values for 'post_date'
+ * and 'post_date_gmt' keys. You can close the comments or open the comments by
+ * setting the value for 'comment_status' key.
+ *
+ * @since 1.0.0
+ * @since 4.2.0 Support was added for encoding emoji in the post title, content, and excerpt.
+ * @since 4.4.0 A 'meta_input' array can now be passed to `$postarr` to add post meta data.
+ *
+ * @see sanitize_post()
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param array $postarr {
+ *     An array of elements that make up a post to update or insert.
+ *
+ *     @type int    $ID                    The post ID. If equal to something other than 0,
+ *                                         the post with that ID will be updated. Default 0.
+ *     @type int    $post_author           The ID of the user who added the post. Default is
+ *                                         the current user ID.
+ *     @type string $post_date             The date of the post. Default is the current time.
+ *     @type string $post_date_gmt         The date of the post in the GMT timezone. Default is
+ *                                         the value of `$post_date`.
+ *     @type mixed  $post_content          The post content. Default empty.
+ *     @type string $post_content_filtered The filtered post content. Default empty.
+ *     @type string $post_title            The post title. Default empty.
+ *     @type string $post_excerpt          The post excerpt. Default empty.
+ *     @type string $post_status           The post status. Default 'draft'.
+ *     @type string $post_type             The post type. Default 'post'.
+ *     @type string $comment_status        Whether the post can accept comments. Accepts 'open' or 'closed'.
+ *                                         Default is the value of 'default_comment_status' option.
+ *     @type string $ping_status           Whether the post can accept pings. Accepts 'open' or 'closed'.
+ *                                         Default is the value of 'default_ping_status' option.
+ *     @type string $post_password         The password to access the post. Default empty.
+ *     @type string $post_name             The post name. Default is the sanitized post title
+ *                                         when creating a new post.
+ *     @type string $to_ping               Space or carriage return-separated list of URLs to ping.
+ *                                         Default empty.
+ *     @type string $pinged                Space or carriage return-separated list of URLs that have
+ *                                         been pinged. Default empty.
+ *     @type string $post_modified         The date when the post was last modified. Default is
+ *                                         the current time.
+ *     @type string $post_modified_gmt     The date when the post was last modified in the GMT
+ *                                         timezone. Default is the current time.
+ *     @type int    $post_parent           Set this for the post it belongs to, if any. Default 0.
+ *     @type int    $menu_order            The order the post should be displayed in. Default 0.
+ *     @type string $post_mime_type        The mime type of the post. Default empty.
+ *     @type string $guid                  Global Unique ID for referencing the post. Default empty.
+ *     @type array  $post_category         Array of category IDs.
+ *                                         Defaults to value of the 'default_category' option.
+ *     @type array  $tags_input            Array of tag names, slugs, or IDs. Default empty.
+ *     @type array  $tax_input             Array of taxonomy terms keyed by their taxonomy name. Default empty.
+ *     @type array  $meta_input            Array of post meta values keyed by their post meta key. Default empty.
+ * }
+ * @param bool  $wp_error Optional. Whether to return a WP_Error on failure. Default false.
+ * @return int|WP_Error The post ID on success. The value 0 or WP_Error on failure.
+ */
+function wp_insert_post( $postarr, $wp_error = false ) {
+    return PostHelper::add( $postarr, $wp_error = false );
+}
+
+
+
+/**
+ * Update a post with new post data.
+ *
+ * The date does not have to be set for drafts. You can set the date and it will
+ * not be overridden.
+ *
+ * @since 1.0.0
+ *
+ * @param array|object $postarr  Optional. Post data. Arrays are expected to be escaped,
+ *                               objects are not. Default array.
+ * @param bool         $wp_error Optional. Allow return of WP_Error on failure. Default false.
+ * @return int|WP_Error The value 0 or WP_Error on failure. The post ID on success.
+ */
+function wp_update_post( $postarr = array(), $wp_error = false ) {
+    return PostHelper::update( $postarr, $wp_error );
+}
+
+
+
+/**
+ * Publish a post by transitioning the post status.
+ *
+ * @since 2.1.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|WP_Post $post Post ID or post object.
+ */
+function wp_publish_post( $post ) {
+    return PostHelper::publish( $post );
+}
+
+/**
+ * Publish future post and make sure post ID has future post status.
+ *
+ * Invoked by cron 'publish_future_post' event. This safeguard prevents cron
+ * from publishing drafts, etc.
+ *
+ * @since 2.5.0
+ *
+ * @param int|WP_Post $post_id Post ID or post object.
+ */
+function check_and_publish_future_post( $post_id ) {
+    return PostHelper::publishFuturePost( $post_id );
+}
+
+
+/**
+ * Trash or delete a post or page.
+ *
+ * When the post and page is permanently deleted, everything that is tied to
+ * it is deleted also. This includes comments, post meta fields, and terms
+ * associated with the post.
+ *
+ * The post or page is moved to trash instead of permanently deleted unless
+ * trash is disabled, item is already in the trash, or $force_delete is true.
+ *
+ * @since 1.0.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ * @see wp_delete_attachment()
+ * @see wp_trash_post()
+ *
+ * @param int  $postid       Optional. Post ID. Default 0.
+ * @param bool $force_delete Optional. Whether to bypass trash and force deletion.
+ *                           Default false.
+ * @return WP_Post|false|null Post data on success, false or null on failure.
+ */
+function wp_delete_post( $postid = 0, $force_delete = false ) {
+    return PostHelper::delete( $postid, $force_delete );
+}
+
+
 
 /**
  * Retrieves an array of the latest posts, or posts matching the given criteria.
@@ -680,6 +896,24 @@ function get_post( $post = null, $output = OBJECT, $filter = 'raw' ) {
  */
 function get_posts( $args = null ) {
     return PostHelper::getPosts( $args );
+}
+
+
+/**
+ * Retrieve a number of recent posts.
+ *
+ * @since 1.0.0
+ *
+ * @see get_posts()
+ *
+ * @param array  $args   Optional. Arguments to retrieve posts. Default empty array.
+ * @param string $output Optional. The required return type. One of OBJECT or ARRAY_A, which correspond to
+ *                       a WP_Post object or an associative array, respectively. Default ARRAY_A.
+ * @return array|false Array of recent posts, where the type of each element is determined by $output parameter.
+ *                     Empty array on failure.
+ */
+function wp_get_recent_posts( $args = array(), $output = ARRAY_A ) {
+    return PostHelper::getRecentPosts( $args, $output );
 }
 
 
@@ -806,6 +1040,68 @@ function get_post_field( $field, $post = null, $context = 'display' ) {
 }
 
 
+
+
+/**
+ * Count number of posts of a post type and if user has permissions to view.
+ *
+ * This function provides an efficient method of finding the amount of post's
+ * type a blog has. Another method is to count the amount of items in
+ * get_posts(), but that method has a lot of overhead with doing so. Therefore,
+ * when developing for 2.5+, use this function instead.
+ *
+ * The $perm parameter checks for 'readable' value and if the user can read
+ * private posts, it will display that for the user that is signed in.
+ *
+ * @since 2.5.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $type Optional. Post type to retrieve count. Default 'post'.
+ * @param string $perm Optional. 'readable' or empty. Default empty.
+ * @return object Number of posts for each status.
+ */
+function wp_count_posts( $type = 'post', $perm = '' ) {
+    return PostHelper::count( $type, $perm );
+}
+
+
+/**
+ * Computes a unique slug for the post, when given the desired slug and some post details.
+ *
+ * @since 2.8.0
+ *
+ * @global wpdb       $wpdb       WordPress database abstraction object.
+ * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+ *
+ * @param string $slug        The desired slug (post_name).
+ * @param int    $post_ID     Post ID.
+ * @param string $post_status No uniqueness checks are made if the post is still draft or pending.
+ * @param string $post_type   Post type.
+ * @param int    $post_parent Post parent ID.
+ * @return string Unique slug for the post, based on $post_name (with a -1, -2, etc. suffix)
+ */
+function wp_unique_post_slug( $slug, $post_ID, $post_status, $post_type, $post_parent ) {
+    return PostSlugHelper::isUnique( $slug, $post_ID, $post_status, $post_type, $post_parent );
+}
+
+/**
+ * Truncate a post slug.
+ *
+ * @since 3.6.0
+ * @access private
+ *
+ * @see utf8_uri_encode()
+ *
+ * @param string $slug   The slug to truncate.
+ * @param int    $length Optional. Max length of the slug. Default 200 (characters).
+ * @return string The truncated slug.
+ */
+function _truncate_post_slug( $slug, $length = 200 ) {
+    return PostSlugHelper::truncate( $slug, $length );
+}
+
+
 /**
  * Get extended entry info (<!--more-->).
  *
@@ -825,6 +1121,247 @@ function get_post_field( $field, $post = null, $context = 'display' ) {
 function get_extended( $post ) {
     return PostHelper::getExtended( $post );
 }
+
+/**
+ * Determines whether a post is sticky.
+ *
+ * Sticky posts should remain at the top of The Loop. If the post ID is not
+ * given, then The Loop ID for the current post will be used.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
+ *
+ * @since 2.7.0
+ *
+ * @param int $post_id Optional. Post ID. Default is ID of the global $post.
+ * @return bool Whether post is sticky.
+ */
+function is_sticky( $post_id = 0 ) {
+    return PostHelper::isSticky( $post_id );
+}
+
+
+
+/**
+ * Make a post sticky.
+ *
+ * Sticky posts should be displayed at the top of the front page.
+ *
+ * @since 2.7.0
+ *
+ * @param int $post_id Post ID.
+ */
+function stick_post( $post_id ) {
+    return PostHelper::makeSticky( $post_id );
+}
+
+
+
+/**
+ * Un-stick a post.
+ *
+ * Sticky posts should be displayed at the top of the front page.
+ *
+ * @since 2.7.0
+ *
+ * @param int $post_id Post ID.
+ */
+function unstick_post( $post_id ) {
+    return PostHelper::makeUnsticky( $post_id );
+}
+
+/**
+ * Sanitize every post field.
+ *
+ * If the context is 'raw', then the post object or array will get minimal
+ * sanitization of the integer fields.
+ *
+ * @since 2.3.0
+ *
+ * @see sanitize_post_field()
+ *
+ * @param object|WP_Post|array $post    The Post Object or Array
+ * @param string               $context Optional. How to sanitize post fields.
+ *                                      Accepts 'raw', 'edit', 'db', or 'display'.
+ *                                      Default 'display'.
+ * @return object|WP_Post|array The now sanitized Post Object or Array (will be the
+ *                              same type as $post).
+ */
+function sanitize_post( $post, $context = 'display' ) {
+    return PostHelper::sanitize( $post, $context );
+}
+
+/**
+ * Sanitize post field based on context.
+ *
+ * Possible context values are:  'raw', 'edit', 'db', 'display', 'attribute' and
+ * 'js'. The 'display' context is used by default. 'attribute' and 'js' contexts
+ * are treated like 'display' when calling filters.
+ *
+ * @since 2.3.0
+ * @since 4.4.0 Like `sanitize_post()`, `$context` defaults to 'display'.
+ *
+ * @param string $field   The Post Object field name.
+ * @param mixed  $value   The Post Object value.
+ * @param int    $post_id Post ID.
+ * @param string $context Optional. How to sanitize post fields. Looks for 'raw', 'edit',
+ *                        'db', 'display', 'attribute' and 'js'. Default 'display'.
+ * @return mixed Sanitized value.
+ */
+function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
+    return PostHelper::sanitizeField( $field, $value, $post_id, $context );
+}
+
+
+
+
+/**
+ * Retrieve the list of categories for a post.
+ *
+ * Compatibility layer for themes and plugins. Also an easy layer of abstraction
+ * away from the complexity of the taxonomy layer.
+ *
+ * @since 2.1.0
+ *
+ * @see wp_get_object_terms()
+ *
+ * @param int   $post_id Optional. The Post ID. Does not default to the ID of the
+ *                       global $post. Default 0.
+ * @param array $args    Optional. Category query parameters. Default empty array.
+ *                       See WP_Term_Query::__construct() for supported arguments.
+ * @return array|WP_Error List of categories. If the `$fields` argument passed via `$args` is 'all' or
+ *                        'all_with_object_id', an array of WP_Term objects will be returned. If `$fields`
+ *                        is 'ids', an array of category ids. If `$fields` is 'names', an array of category names.
+ *                        WP_Error object if 'category' taxonomy doesn't exist.
+ */
+function wp_get_post_categories( $post_id = 0, $args = array() ) {
+    return PostTermHelper::getCategories( $post_id, $args );
+}
+
+/**
+ * Retrieve the tags for a post.
+ *
+ * There is only one default for this function, called 'fields' and by default
+ * is set to 'all'. There are other defaults that can be overridden in
+ * wp_get_object_terms().
+ *
+ * @since 2.3.0
+ *
+ * @param int   $post_id Optional. The Post ID. Does not default to the ID of the
+ *                       global $post. Default 0.
+ * @param array $args    Optional. Tag query parameters. Default empty array.
+ *                       See WP_Term_Query::__construct() for supported arguments.
+ * @return array|WP_Error Array of WP_Term objects on success or empty array if no tags were found.
+ *                        WP_Error object if 'post_tag' taxonomy doesn't exist.
+ */
+function wp_get_post_tags( $post_id = 0, $args = array() ) {
+    PostTermHelper::getTags( $post_id, $args );
+}
+
+/**
+ * Retrieves the terms for a post.
+ *
+ * @since 2.8.0
+ *
+ * @param int          $post_id  Optional. The Post ID. Does not default to the ID of the
+ *                               global $post. Default 0.
+ * @param string|array $taxonomy Optional. The taxonomy slug or array of slugs for which
+ *                               to retrieve terms. Default 'post_tag'.
+ * @param array        $args     {
+ *     Optional. Term query parameters. See WP_Term_Query::__construct() for supported arguments.
+ *
+ *     @type string $fields Term fields to retrieve. Default 'all'.
+ * }
+ * @return array|WP_Error Array of WP_Term objects on success or empty array if no terms were found.
+ *                        WP_Error object if `$taxonomy` doesn't exist.
+ */
+function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
+    PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
+}
+
+
+
+/**
+ * Move a post or page to the Trash
+ *
+ * If trash is disabled, the post or page is permanently deleted.
+ *
+ * @since 2.9.0
+ *
+ * @see wp_delete_post()
+ *
+ * @param int $post_id Optional. Post ID. Default is ID of the global $post
+ *                     if EMPTY_TRASH_DAYS equals true.
+ * @return WP_Post|false|null Post data on success, false or null on failure.
+ */
+function wp_trash_post( $post_id = 0 ) {
+    return PostHelper::trash( $post_id );
+}
+
+
+
+/**
+ * Restore a post or page from the Trash.
+ *
+ * @since 2.9.0
+ *
+ * @param int $post_id Optional. Post ID. Default is ID of the global $post.
+ * @return WP_Post|false|null Post data on success, false or null on failure.
+ */
+function wp_untrash_post( $post_id = 0 ) {
+    return PostHelper::untrash( $post_id );
+}
+
+
+/**
+ * Moves comments for a post to the trash.
+ *
+ * @since 2.9.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+ * @return mixed|void False on failure.
+ */
+function wp_trash_post_comments( $post = null ) {
+    return PostCommentHelper::trash( $post );
+}
+
+
+
+/**
+ * Restore comments for a post from the trash.
+ *
+ * @since 2.9.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+ * @return true|void
+ */
+function wp_untrash_post_comments( $post = null ) {
+    return PostCommentHelper::untrash( $post );
+}
+
+
+
+
+/**
+ * Reset the page_on_front, show_on_front, and page_for_post settings when
+ * a linked page is deleted or trashed.
+ *
+ * Also ensures the post is no longer sticky.
+ *
+ * @since 3.7.0
+ * @access private
+ *
+ * @param int $post_id Post ID.
+ */
+function _reset_front_page_settings_for_post( $post_id ) {
+    return PostHelper::resetFrontPageSettings( $post_id );
+}
+
 
 
 /* ------------------- Post Meta: --------------------------*/
@@ -1002,6 +1539,104 @@ function get_post_custom_values( $key = '', $post_id = 0 ) {
     return PostMetaHelper::getCustomValues( $key, $post_id );
 }
 
+/* ------------------- Taxonomies: -----------------------------*/
+
+/**
+ * Retrieves the terms associated with the given object(s), in the supplied taxonomies.
+ *
+ * @since 2.3.0
+ * @since 4.2.0 Added support for 'taxonomy', 'parent', and 'term_taxonomy_id' values of `$orderby`.
+ *              Introduced `$parent` argument.
+ * @since 4.4.0 Introduced `$meta_query` and `$update_term_meta_cache` arguments. When `$fields` is 'all' or
+ *              'all_with_object_id', an array of `WP_Term` objects will be returned.
+ * @since 4.7.0 Refactored to use WP_Term_Query, and to support any WP_Term_Query arguments.
+ *
+ * @param int|int[]       $object_ids The ID(s) of the object(s) to retrieve.
+ * @param string|string[] $taxonomies The taxonomy names to retrieve terms from.
+ * @param array|string    $args       See WP_Term_Query::__construct() for supported arguments.
+ * @return array|WP_Error The requested term data or empty array if no terms found.
+ *                        WP_Error if any of the taxonomies don't exist.
+ */
+function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
+    return TermHelper::getForObject( $object_ids, $taxonomies, $args );
+}
+
+
+
+/**
+ * Create Term and Taxonomy Relationships.
+ *
+ * Relates an object (post, link etc) to a term and taxonomy type. Creates the
+ * term and taxonomy relationship if it doesn't already exist. Creates a term if
+ * it doesn't exist (using the slug).
+ *
+ * A relationship means that the term is grouped in or belongs to the taxonomy.
+ * A term has no meaning until it is given context by defining which taxonomy it
+ * exists under.
+ *
+ * @since 2.3.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int              $object_id The object to relate to.
+ * @param string|int|array $terms     A single term slug, single term id, or array of either term slugs or ids.
+ *                                    Will replace all existing related terms in this taxonomy. Passing an
+ *                                    empty value will remove all related terms.
+ * @param string           $taxonomy  The context in which to relate the term to the object.
+ * @param bool             $append    Optional. If false will delete difference of terms. Default false.
+ * @return array|WP_Error Term taxonomy IDs of the affected terms or WP_Error on failure.
+ */
+function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
+    return TermHelper::setForObject( $object_id, $terms, $taxonomy, $append );
+}
+
+
+/**
+ * Add a new term to the database.
+ *
+ * A non-existent term is inserted in the following sequence:
+ * 1. The term is added to the term table, then related to the taxonomy.
+ * 2. If everything is correct, several actions are fired.
+ * 3. The 'term_id_filter' is evaluated.
+ * 4. The term cache is cleaned.
+ * 5. Several more actions are fired.
+ * 6. An array is returned containing the term_id and term_taxonomy_id.
+ *
+ * If the 'slug' argument is not empty, then it is checked to see if the term
+ * is invalid. If it is not a valid, existing term, it is added and the term_id
+ * is given.
+ *
+ * If the taxonomy is hierarchical, and the 'parent' argument is not empty,
+ * the term is inserted and the term_id will be given.
+ *
+ * Error handling:
+ * If $taxonomy does not exist or $term is empty,
+ * a WP_Error object will be returned.
+ *
+ * If the term already exists on the same hierarchical level,
+ * or the term slug and name are not unique, a WP_Error object will be returned.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @since 2.3.0
+ *
+ * @param string       $term     The term to add or update.
+ * @param string       $taxonomy The taxonomy to which to add the term.
+ * @param array|string $args {
+ *     Optional. Array or string of arguments for inserting a term.
+ *
+ *     @type string $alias_of    Slug of the term to make this term an alias of.
+ *                               Default empty string. Accepts a term slug.
+ *     @type string $description The term description. Default empty string.
+ *     @type int    $parent      The id of the parent term. Default 0.
+ *     @type string $slug        The term slug to use. Default empty string.
+ * }
+ * @return array|WP_Error An array containing the `term_id` and `term_taxonomy_id`,
+ *                        WP_Error otherwise.
+ */
+function wp_insert_term( $term, $taxonomy, $args = array() ) {
+    return TermHelper::add( $term, $taxonomy, $args );
+}
 
 /* ------------------- Metadata: -----------------------------*/
 
@@ -1364,7 +1999,7 @@ function _wp_privacy_statuses() {
  * @return true
  */
 function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-	return HookHelper::add_filter( $tag, $function_to_add, $priority, $accepted_args );
+	return HookHelper::addFilter( $tag, $function_to_add, $priority, $accepted_args );
 }
 
 /**
@@ -1384,7 +2019,7 @@ function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  *                   return value.
  */
 function has_filter( $tag, $function_to_check = false ) {
-	return HookHelper::has_filter( $tag, $function_to_check );
+	return HookHelper::hasFilter( $tag, $function_to_check );
 }
 
 /**
@@ -1426,7 +2061,7 @@ function has_filter( $tag, $function_to_check = false ) {
  * @return mixed The filtered value after all hooked functions are applied to it.
  */
 function apply_filters( $tag, $value, ...$args ) {
-	return HookHelper::apply_filters( $tag, $value, ...$args );
+	return HookHelper::applyFilters( $tag, $value, ...$args );
 }
 
 /**
@@ -1445,7 +2080,7 @@ function apply_filters( $tag, $value, ...$args ) {
  * @return mixed The filtered value after all hooked functions are applied to it.
  */
 function apply_filters_ref_array( $tag, $args ) {
-	return HookHelper::apply_filters_ref_array( $tag, $args );
+	return HookHelper::applyFiltersRefArray( $tag, $args );
 }
 
 /**
@@ -1469,7 +2104,7 @@ function apply_filters_ref_array( $tag, $args ) {
  * @return bool    Whether the function existed before it was removed.
  */
 function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
-	return HookHelper::remove_filter( $tag, $function_to_remove, $priority );
+	return HookHelper::removeFilter( $tag, $function_to_remove, $priority );
 }
 
 /**
@@ -1484,7 +2119,7 @@ function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
  * @return true True when finished.
  */
 function remove_all_filters( $tag, $priority = false ) {
-	return HookHelper::remove_all_filters( $tag, $priority );
+	return HookHelper::removeAllFilters( $tag, $priority );
 }
 
 /**
@@ -1497,7 +2132,7 @@ function remove_all_filters( $tag, $priority = false ) {
  * @return string Hook name of the current filter or action.
  */
 function current_filter() {
-	return HookHelper::current_filter();
+	return HookHelper::currentFilter();
 }
 
 /**
@@ -1508,7 +2143,7 @@ function current_filter() {
  * @return string Hook name of the current action.
  */
 function current_action() {
-	return HookHelper::current_action();
+	return HookHelper::currentAction();
 }
 
 /**
@@ -1533,7 +2168,7 @@ function current_action() {
  * @return bool Whether the filter is currently in the stack.
  */
 function doing_filter( $filter = null ) {
-	return HookHelper::doing_filter( $filter );
+	return HookHelper::doingFilter( $filter );
 }
 
 /**
@@ -1546,7 +2181,7 @@ function doing_filter( $filter = null ) {
  * @return bool Whether the action is currently in the stack.
  */
 function doing_action( $action = null ) {
-	return HookHelper::doing_action( $action );
+	return HookHelper::doingAction( $action );
 }
 
 /**
@@ -1570,7 +2205,7 @@ function doing_action( $action = null ) {
  * @return true Will always return true.
  */
 function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-	return HookHelper::add_action( $tag, $function_to_add, $priority, $accepted_args );
+	return HookHelper::addAction( $tag, $function_to_add, $priority, $accepted_args );
 }
 
 /**
@@ -1609,7 +2244,7 @@ function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  *                       functions hooked to the action. Default empty.
  */
 function do_action( $tag, $arg = '' ) {
-	HookHelper::do_action( $tag, $arg );
+	HookHelper::doAction( $tag, $arg );
 }
 
 /**
@@ -1623,7 +2258,7 @@ function do_action( $tag, $arg = '' ) {
  * @return int The number of times action hook $tag is fired.
  */
 function did_action( $tag ) {
-	return HookHelper::did_action( $tag );
+	return HookHelper::didAction( $tag );
 }
 
 /**
@@ -1641,7 +2276,7 @@ function did_action( $tag ) {
  * @param array  $args The arguments supplied to the functions hooked to `$tag`.
  */
 function do_action_ref_array( $tag, $args ) {
-	HookHelper::do_action_ref_array( $tag, $args );
+	HookHelper::doActionRefArray( $tag, $args );
 }
 
 /**
@@ -1661,7 +2296,7 @@ function do_action_ref_array( $tag, $args ) {
  *                  return value.
  */
 function has_action( $tag, $function_to_check = false ) {
-	return HookHelper::has_action( $tag, $function_to_check );
+	return HookHelper::hasAction( $tag, $function_to_check );
 }
 
 /**
@@ -1679,7 +2314,7 @@ function has_action( $tag, $function_to_check = false ) {
  * @return bool Whether the function is removed.
  */
 function remove_action( $tag, $function_to_remove, $priority = 10 ) {
-	return HookHelper::remove_action( $tag, $function_to_remove, $priority = 10 );
+	return HookHelper::removeAction( $tag, $function_to_remove, $priority = 10 );
 }
 
 /**
@@ -1692,7 +2327,7 @@ function remove_action( $tag, $function_to_remove, $priority = 10 ) {
  * @return true True when finished.
  */
 function remove_all_actions( $tag, $priority = false ) {
-	return HookHelper::remove_all_actions( $tag, $priority );
+	return HookHelper::removeAllActions( $tag, $priority );
 }
 
 /**
@@ -1724,7 +2359,7 @@ function remove_all_actions( $tag, $priority = false ) {
  *
  */
 function apply_filters_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
-	return HookHelper::apply_filters_deprecated( $tag, $args, $version, $replacement, $message );
+	return HookHelper::applyFiltersDeprecated( $tag, $args, $version, $replacement, $message );
 }
 
 /**
@@ -1745,7 +2380,7 @@ function apply_filters_deprecated( $tag, $args, $version, $replacement = false, 
  * @param string $message     Optional. A message regarding the change.
  */
 function do_action_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
-	HookHelper::do_action_deprecated( $tag, $args, $version, $replacement, $message );
+	HookHelper::doActionDeprecated( $tag, $args, $version, $replacement, $message );
 }
 
 /**
@@ -1767,7 +2402,7 @@ function do_action_deprecated( $tag, $args, $version, $replacement = false, $mes
  * @param callable $function The function hooked to the 'activate_PLUGIN' action.
  */
 function register_activation_hook( $file, $function ) {
-	HookHelper::register_activation_hook( $file, $function );
+	HookHelper::registerActivationHook( $file, $function );
 }
 
 /**
@@ -1789,7 +2424,7 @@ function register_activation_hook( $file, $function ) {
  * @param callable $function The function hooked to the 'deactivate_PLUGIN' action.
  */
 function register_deactivation_hook( $file, $function ) {
-	HookHelper::register_deactivation_hook( $file, $function );
+	HookHelper::registerDeactivationHook( $file, $function );
 }
 
 /**
@@ -1819,7 +2454,7 @@ function register_deactivation_hook( $file, $function ) {
  *                           a static method or function.
  */
 function register_uninstall_hook( $file, $callback ) {
-	HookHelper::register_uninstall_hook( $file, $callback );
+	HookHelper::registerUninstallHook( $file, $callback );
 }
 
 /**
@@ -1841,7 +2476,7 @@ function register_uninstall_hook( $file, $callback ) {
  * @param array $args The collected parameters from the hook that was called.
  */
 function _wp_call_all_hook( $args ) {
-	HookHelper::_wp_call_all_hook( $args );
+	HookHelper::callAllHook( $args );
 }
 
 /**
@@ -1879,7 +2514,7 @@ function _wp_call_all_hook( $args ) {
  *                      a unique id.
  */
 function _wp_filter_build_unique_id( $tag, $function, $priority ) {
-	return HookHelper::_wp_filter_build_unique_id( $tag, $function, $priority );
+	return HookHelper::buildUniqueId( $tag, $function, $priority );
 }
 
 /* ------------------- Plugins: --------------------------*/
@@ -1897,7 +2532,7 @@ function _wp_filter_build_unique_id( $tag, $function, $priority ) {
  * @return string The name of a plugin.
  */
 function plugin_basename( $file ) {
-	return PluginHelper::plugin_basename( $file );
+	return PluginHelper::basename( $file );
 }
 
 /**
@@ -1918,7 +2553,7 @@ function plugin_basename( $file ) {
  * @return bool Whether the path was able to be registered.
  */
 function wp_register_plugin_realpath( $file ) {
-	return PluginHelper::wp_register_plugin_realpath( $file );
+	return PluginHelper::registerRealpath( $file );
 }
 
 /**
@@ -1930,7 +2565,7 @@ function wp_register_plugin_realpath( $file ) {
  * @return string the filesystem path of the directory that contains the plugin.
  */
 function plugin_dir_path( $file ) {
-	return PluginHelper::plugin_dir_path( $file );
+	return PluginHelper::dirPath( $file );
 }
 
 /**
@@ -1942,7 +2577,7 @@ function plugin_dir_path( $file ) {
  * @return string the URL path of the directory that contains the plugin.
  */
 function plugin_dir_url( $file ) {
-	return PluginHelper::plugin_dir_url( $file );
+	return PluginHelper::dirUrl( $file );
 }
 
 /* ------------------- Login: --------------------------*/
@@ -1958,7 +2593,7 @@ function plugin_dir_url( $file ) {
  * @param WP_Error $wp_error Optional. The error to pass. Default is a WP_Error instance.
  */
 function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
-	LoginHelper::login_header( $title, $message, $wp_error );
+	LoginHelper::loginHeader( $title, $message, $wp_error );
 }
 
 /**
@@ -1969,7 +2604,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
  * @param string $input_id Which input to auto-focus.
  */
 function login_footer( $input_id = '' ) {
-	LoginHelper::login_footer( $input_id );
+	LoginHelper::loginFooter( $input_id );
 }
 
 /**
@@ -1978,7 +2613,7 @@ function login_footer( $input_id = '' ) {
  * @since 3.0.0
  */
 function wp_shake_js() {
-	LoginHelper::wp_shake_js();
+	LoginHelper::shakeJs();
 }
 
 /**
@@ -1987,7 +2622,7 @@ function wp_shake_js() {
  * @since 3.7.0
  */
 function wp_login_viewport_meta() {
-	LoginHelper::wp_login_viewport_meta();
+	LoginHelper::loginViewportMeta();
 }
 
 /**
@@ -1998,7 +2633,24 @@ function wp_login_viewport_meta() {
  * @return bool|WP_Error True: when finish. WP_Error on error
  */
 function retrieve_password() {
-	return LoginHelper::retrieve_password();
+	return LoginHelper::retrievePassword();
+}
+
+
+/* ------------------- Caching: --------------------------*/
+
+/**
+ * Return the cache key for wp_count_posts() based on the passed arguments.
+ *
+ * @since 3.9.0
+ * @access private
+ *
+ * @param string $type Optional. Post type to retrieve count Default 'post'.
+ * @param string $perm Optional. 'readable' or empty. Default empty.
+ * @return string The cache key.
+ */
+function _count_posts_cache_key( $type = 'post', $perm = '' ) {
+    return CacheHelper::countPostCacheKey( $type, $perm );
 }
 
 /* ------------------- Capabilities: --------------------------*/
@@ -2185,6 +2837,8 @@ function wp_maybe_grant_resume_extensions_caps( $allcaps ) {
 function wp_maybe_grant_site_health_caps( $allcaps, $caps, $args, $user ) {
 	return CapabilitiesHelper::maybeGrantSiteHealth( $allcaps, $caps, $args, $user );
 }
+
+/* ------------------- Roles: --------------------------*/
 
 /**
  * Retrieves the global WP_Roles instance and instantiates it if necessary.

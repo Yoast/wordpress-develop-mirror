@@ -5,7 +5,7 @@
  * @package WP\Helper
  */
 class PluginHelper {
-	public static function plugin_basename( $file ) {
+	public static function basename( $file ) {
 		global $wp_plugin_paths;
 
 		// $wp_plugin_paths contains normalized paths.
@@ -26,7 +26,7 @@ class PluginHelper {
 		return $file;
 	}
 
-	public static function wp_register_plugin_realpath( $file ) {
+	public static function registerRealpath( $file ) {
 		global $wp_plugin_paths;
 
 		// Normalize, but store as static to avoid recalculation of a constant value
@@ -50,11 +50,11 @@ class PluginHelper {
 		return true;
 	}
 
-	public static function plugin_dir_path( $file ) {
+	public static function dirPath( $file ) {
 		return trailingslashit( dirname( $file ) );
 	}
 
-	public static function plugin_dir_url( $file ) {
+	public static function dirUrl( $file ) {
 		return trailingslashit( plugins_url( '', $file ) );
 	}
 }

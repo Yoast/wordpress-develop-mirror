@@ -8,7 +8,7 @@ use WP_User;
  * @package WP\Helper
  */
 class LoginHelper {
-	public static function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
+	public static function loginHeader( $title = 'Log In', $message = '', $wp_error = null ) {
 		global $error, $interim_login, $action;
 
 		// Don't index any of these forms
@@ -246,7 +246,7 @@ class LoginHelper {
 		}
 	}
 
-	public static function login_footer( $input_id = '' ) {
+	public static function loginFooter( $input_id = '' ) {
 		global $interim_login;
 
 		// Don't allow interim logins to navigate away from the page.
@@ -293,7 +293,7 @@ class LoginHelper {
 		<?php
 	}
 
-    public static function wp_shake_js() {
+    public static function shakeJs() {
         ?>
         <script type="text/javascript">
             addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
@@ -305,13 +305,13 @@ class LoginHelper {
         <?php
 	}
 
-    public static function wp_login_viewport_meta() {
+    public static function loginViewportMeta() {
         ?>
         <meta name="viewport" content="width=device-width" />
         <?php
 	}
 
-    public static function retrieve_password() {
+    public static function retrievePassword() {
 		$errors = new WP_Error();
 
 		if ( empty( $_POST['user_login'] ) || ! is_string( $_POST['user_login'] ) ) {
