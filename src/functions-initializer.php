@@ -1,6 +1,7 @@
 <?php
 
 use \WP\Helper\LabelHelper;
+use WP\Helper\Frontend\LoginHelper;
 use \WP\Helper\Post\PostHelper;
 use \WP\Helper\Post\MetaHelper as PostMetaHelper;
 use \WP\Helper\Post\StatusHelper as PostStatusHelper;
@@ -1879,9 +1880,7 @@ function _wp_filter_build_unique_id( $tag, $function, $priority ) {
 	return HookHelper::_wp_filter_build_unique_id( $tag, $function, $priority );
 }
 
-/**
- * PLUGINS
- */
+/* ------------------- Plugins: --------------------------*/
 
 /**
  * Gets the basename of a plugin.
@@ -1942,4 +1941,60 @@ function plugin_dir_path( $file ) {
  */
 function plugin_dir_url( $file ) {
 	return PluginHelper::plugin_dir_url( $file );
+}
+
+/* ------------------- Login: --------------------------*/
+
+/**
+ * Output the login page header.
+ *
+ * @since 2.1.0
+ *
+ * @param string   $title    Optional. WordPress login Page title to display in the `<title>` element.
+ *                           Default 'Log In'.
+ * @param string   $message  Optional. Message to display in header. Default empty.
+ * @param WP_Error $wp_error Optional. The error to pass. Default is a WP_Error instance.
+ */
+function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
+	LoginHelper::login_header( $title, $message, $wp_error );
+}
+
+/**
+ * Outputs the footer for the login page.
+ *
+ * @since 3.1.0
+ *
+ * @param string $input_id Which input to auto-focus.
+ */
+function login_footer( $input_id = '' ) {
+	LoginHelper::login_footer( $input_id );
+}
+
+/**
+ * Outputs the Javascript to handle the form shaking.
+ *
+ * @since 3.0.0
+ */
+function wp_shake_js() {
+	LoginHelper::wp_shake_js();
+}
+
+/**
+ * Outputs the viewport meta tag.
+ *
+ * @since 3.7.0
+ */
+function wp_login_viewport_meta() {
+	LoginHelper::wp_login_viewport_meta();
+}
+
+/**
+ * Handles sending password retrieval email to user.
+ *
+ * @since 2.5.0
+ *
+ * @return bool|WP_Error True: when finish. WP_Error on error
+ */
+function retrieve_password() {
+	return LoginHelper::retrieve_password();
 }

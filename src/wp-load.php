@@ -28,3 +28,5 @@ if ( is_readable( __DIR__ . '/../vendor/autoload.php' ) ) {
 
 $initializer = new WP\Initializer\Main();
 $initializer->initialize();
+$router = new WP\Router( WP\Config\Routes::ROUTES );
+$router->route();
