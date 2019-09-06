@@ -22,6 +22,25 @@ use WP\Helper\PluginHelper;
 use WP\Helper\CapabilitiesHelper;
 use WP\Helper\RoleHelper;
 
+use WP\Helper\Ajax\CommentHelper as AjaxCommentHelper;
+use WP\Helper\Ajax\PostHelper as AjaxPostHelper;
+use WP\Helper\Ajax\TermHelper as AjaxTermHelper;
+use WP\Helper\Ajax\DashboardHelper as AjaxDashboardHelper;
+use WP\Helper\Ajax\UserHelper as AjaxUserHelper;
+use WP\Helper\Ajax\MetaHelper as AjaxMetaHelper;
+use WP\Helper\Ajax\HeartbeatHelper as AjaxHeartbeatHelper;
+use WP\Helper\Ajax\LinkHelper as AjaxLinkHelper;
+use WP\Helper\Ajax\MenuHelper as AjaxMenuHelper;
+use WP\Helper\Ajax\WidgetHelper as AjaxWidgetHelper;
+use WP\Helper\Ajax\MediaHelper as AjaxMediaHelper;
+use WP\Helper\Ajax\AttachmentHelper as AjaxAttachmentHelper;
+use WP\Helper\Ajax\ThemeHelper as AjaxThemeHelper;
+use WP\Helper\Ajax\PluginHelper as AjaxPluginHelper;
+use WP\Helper\Ajax\EmbedHelper as AjaxEmbedHelper;
+use WP\Helper\Ajax\PrivacyHelper as AjaxPrivacyHelper;
+use WP\Helper\Ajax\HealthCheckHelper as AjaxHealthCheckHelper;
+use WP\Helper\AjaxHelper;
+
 /* ------------------- Post Types: --------------------------*/
 
 
@@ -2942,4 +2961,828 @@ function grant_super_admin( $user_id ) {
  */
 function revoke_super_admin( $user_id ) {
 	return RoleHelper::revokeSuperAdmin( $user_id );
+}
+
+/**
+ * Ajax handler for the Heartbeat API in
+ * the no-privilege context.
+ *
+ * Runs when the user is not logged in.
+ *
+ * @since 3.6.0
+ */
+function wp_ajax_nopriv_heartbeat() {
+	AjaxHeartbeatHelper::sendNoPriv();
+}
+
+/**
+ * Ajax handler for fetching a list table.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_fetch_list() {
+	AjaxHelper::fetchList();
+}
+
+/**
+ * Ajax handler for tag search.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_ajax_tag_search() {
+	AjaxTermHelper::tagSearch();
+}
+
+/**
+ * Ajax handler for compression testing.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_wp_compression_test() {
+	AjaxHelper::compressionTest();
+}
+
+/**
+ * Ajax handler for image editor previews.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_imgedit_preview() {
+	AjaxMediaHelper::imageEditPreview();
+}
+
+/**
+ * Ajax handler for oEmbed caching.
+ *
+ * @since 3.1.0
+ *
+ * @global WP_Embed $wp_embed
+ */
+function wp_ajax_oembed_cache() {
+	AjaxEmbedHelper::oEmbedCache();
+}
+
+/**
+ * Ajax handler for user autocomplete.
+ *
+ * @since 3.4.0
+ */
+function wp_ajax_autocomplete_user() {
+	AjaxUserHelper::autocompleteUser();
+}
+
+/**
+ * Handles AJAX requests for community events
+ *
+ * @since 4.8.0
+ */
+function wp_ajax_get_community_events() {
+	AjaxDashboardHelper::getCommunityEvents();
+}
+
+/**
+ * Ajax handler for dashboard widgets.
+ *
+ * @since 3.4.0
+ */
+function wp_ajax_dashboard_widgets() {
+	AjaxDashboardHelper::dashboardWidgets();
+}
+
+/**
+ * Ajax handler for Customizer preview logged-in status.
+ *
+ * @since 3.4.0
+ */
+function wp_ajax_logged_in() {
+	AjaxUserHelper::loggedIn();
+}
+
+/**
+ * Sends back current comment total and new page links if they need to be updated.
+ *
+ * Contrary to normal success Ajax response ("1"), die with time() on success.
+ *
+ * @access private
+ * @since 2.7.0
+ *
+ * @param int $comment_id
+ * @param int $delta
+ */
+function _wp_ajax_delete_comment_response( $comment_id, $delta = -1 ) {
+	AjaxCommentHelper::deleteCommentResponse( $comment_id, $delta );
+}
+
+/**
+ * Ajax handler for adding a hierarchical term.
+ *
+ * @access private
+ * @since 3.1.0
+ */
+function _wp_ajax_add_hierarchical_term() {
+	AjaxTermHelper::addHierarchicalTerm();
+}
+
+/**
+ * Ajax handler for deleting a comment.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_comment() {
+	AjaxCommentHelper::deleteComment();
+}
+
+/**
+ * Ajax handler for deleting a tag.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_tag() {
+	AjaxTermHelper::deleteTag();
+}
+
+/**
+ * Ajax handler for deleting a link.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_link() {
+	AjaxLinkHelper::deleteLink();
+}
+
+/**
+ * Ajax handler for deleting meta.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_meta() {
+	AjaxMetaHelper::deleteMeta();
+}
+
+/**
+ * Ajax handler for deleting a post.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_delete_post( $action ) {
+	AjaxPostHelper::deletePost( $action );
+}
+
+/**
+ * Ajax handler for sending a post to the trash.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_trash_post( $action ) {
+	AjaxPostHelper::trashPost( $action );
+}
+
+/**
+ * Ajax handler to restore a post from the trash.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_untrash_post( $action ) {
+	AjaxPostHelper::untrashPost( $action );
+}
+
+/**
+ * Ajax handler to delete a page.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_delete_page( $action ) {
+	AjaxPostHelper::deletePage( $action );
+}
+
+/**
+ * Ajax handler to dim a comment.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_dim_comment() {
+	AjaxCommentHelper::dimComment();
+}
+
+/**
+ * Ajax handler for adding a link category.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_add_link_category( $action ) {
+	AjaxLinkHelper::addLinkCategory( $action );
+}
+
+/**
+ * Ajax handler to add a tag.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_add_tag() {
+	AjaxTermHelper::addTag();
+}
+
+/**
+ * Ajax handler for getting a tagcloud.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_get_tagcloud() {
+	AjaxTermHelper::getTagcloud();
+}
+
+/**
+ * Ajax handler for getting comments.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_get_comments( $action ) {
+	AjaxCommentHelper::getComments( $action );
+}
+
+/**
+ * Ajax handler for replying to a comment.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_replyto_comment( $action ) {
+	AjaxCommentHelper::replyToComment( $action );
+}
+
+/**
+ * Ajax handler for editing a comment.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_edit_comment() {
+	AjaxCommentHelper::editComment();
+}
+
+/**
+ * Ajax handler for adding meta.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_add_meta() {
+	AjaxMetaHelper::addMeta();
+}
+
+/**
+ * Ajax handler for adding a user.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_add_user( $action ) {
+	AjaxUserHelper::addUser( $action );
+}
+
+/**
+ * Ajax handler for adding a menu item.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_add_menu_item() {
+	AjaxMenuHelper::addMenuItem();
+}
+
+/**
+ * Ajax handler for menu locations save.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_menu_locations_save() {
+	AjaxMenuHelper::locationsSave();
+}
+
+/**
+ * Ajax handler for quick edit saving for a term.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_inline_save_tax() {
+	AjaxTermHelper::inlineSaveTax();
+}
+
+/**
+ * Ajax handler for querying posts for the Find Posts modal.
+ *
+ * @see window.findPosts
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_find_posts() {
+	AjaxPostHelper::findPosts();
+}
+
+/**
+ * Ajax handler for saving the widgets order.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_widgets_order() {
+	AjaxWidgetHelper::widgetsOrder();
+}
+
+/**
+ * Ajax handler for saving a widget.
+ *
+ * @since 3.1.0
+ *
+ * @global array $wp_registered_widgets
+ * @global array $wp_registered_widget_controls
+ * @global array $wp_registered_widget_updates
+ */
+function wp_ajax_save_widget() {
+	AjaxWidgetHelper::saveWidget();
+}
+
+/**
+ * Ajax handler for saving a widget.
+ *
+ * @since 3.9.0
+ *
+ * @global WP_Customize_Manager $wp_customize
+ */
+function wp_ajax_update_widget() {
+	AjaxWidgetHelper::updateWidget();
+}
+
+/**
+ * Ajax handler for removing inactive widgets.
+ *
+ * @since 4.4.0
+ */
+function wp_ajax_delete_inactive_widgets() {
+	AjaxWidgetHelper::deleteInactiveWidgets();
+}
+
+/**
+ * Ajax handler for creating missing image sub-sizes for just uploaded images.
+ *
+ * @since 5.3.0
+ */
+function wp_ajax_media_create_image_subsizes() {
+	AjaxMediaHelper::createImageSubsizes();
+}
+
+/**
+ * Ajax handler for uploading attachments
+ *
+ * @since 3.3.0
+ */
+function wp_ajax_upload_attachment() {
+	AjaxAttachmentHelper::upload();
+}
+
+/**
+ * Ajax handler for menu quick searching.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_menu_quick_search() {
+	AjaxMenuHelper::quickSearch();
+}
+
+/**
+ * Ajax handler to retrieve a permalink.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_get_permalink() {
+	AjaxPostHelper::getPermalink();
+}
+
+/**
+ * Ajax handler to retrieve a sample permalink.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_sample_permalink() {
+	AjaxPostHelper::samplePermalink();
+}
+
+/**
+ * Ajax handler for Quick Edit saving a post from a list table.
+ *
+ * @since 3.1.0
+ *
+ * @global string $mode List table view mode.
+ */
+function wp_ajax_inline_save() {
+	AjaxPostHelper::inlineSave();
+}
+
+/**
+ * Ajax handler for image editing.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_image_editor() {
+	AjaxMediaHelper::imageEditor();
+}
+
+/**
+ * Ajax handler for setting the featured image.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_set_post_thumbnail() {
+	AjaxPostHelper::setThumbnail();
+}
+
+/**
+ * Ajax handler for retrieving HTML for the featured image.
+ *
+ * @since 4.6.0
+ */
+function wp_ajax_get_post_thumbnail_html() {
+	AjaxPostHelper::getThumbnailHtml();
+}
+
+/**
+ * Ajax handler for setting the featured image for an attachment.
+ *
+ * @since 4.0.0
+ *
+ * @see set_post_thumbnail()
+ */
+function wp_ajax_set_attachment_thumbnail() {
+	AjaxAttachmentHelper::setThumbnail();
+}
+
+/**
+ * Ajax handler for saving posts from the fullscreen editor.
+ *
+ * @since 3.1.0
+ * @deprecated 4.3.0
+ */
+function wp_ajax_wp_fullscreen_save_post() {
+	AjaxPostHelper::fullscreenSave();
+}
+
+/**
+ * Ajax handler for removing a post lock.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_wp_remove_post_lock() {
+	AjaxPostHelper::removeLock();
+}
+
+/**
+ * Ajax handler for getting an attachment.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_get_attachment() {
+	AjaxAttachmentHelper::getOne();
+}
+
+/**
+ * Ajax handler for querying attachments.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_query_attachments() {
+	AjaxAttachmentHelper::queryAll();
+}
+
+/**
+ * Ajax handler for updating attachment attributes.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_save_attachment() {
+	AjaxAttachmentHelper::save();
+}
+
+/**
+ * Ajax handler for saving backward compatible attachment attributes.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_save_attachment_compat() {
+	AjaxAttachmentHelper::saveCompat();
+}
+
+/**
+ * Ajax handler for saving the attachment order.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_save_attachment_order() {
+	AjaxAttachmentHelper::saveOrder();
+}
+
+/**
+ * Ajax handler for sending an attachment to the editor.
+ *
+ * Generates the HTML to send an attachment to the editor.
+ * Backward compatible with the {@see 'media_send_to_editor'} filter
+ * and the chain of filters that follow.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_send_attachment_to_editor() {
+	AjaxAttachmentHelper::sendToEditor();
+}
+
+/**
+ * Ajax handler for sending a link to the editor.
+ *
+ * Generates the HTML to send a non-image embed link to the editor.
+ *
+ * Backward compatible with the following filters:
+ * - file_send_to_editor_url
+ * - audio_send_to_editor_url
+ * - video_send_to_editor_url
+ *
+ * @since 3.5.0
+ *
+ * @global WP_Post  $post     Global post object.
+ * @global WP_Embed $wp_embed
+ */
+function wp_ajax_send_link_to_editor() {
+	AjaxLinkHelper::sendToEditor();
+}
+
+/**
+ * Ajax handler for the Heartbeat API.
+ *
+ * Runs when the user is logged in.
+ *
+ * @since 3.6.0
+ */
+function wp_ajax_heartbeat() {
+	AjaxHeartbeatHelper::send();
+}
+
+/**
+ * Ajax handler for internal linking.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_wp_link_ajax() {
+	AjaxLinkHelper::query();
+}
+
+/**
+ * Ajax handler for auto-saving the selected color scheme for
+ * a user's own profile.
+ *
+ * @since 3.8.0
+ *
+ * @global array $_wp_admin_css_colors
+ */
+function wp_ajax_save_user_color_scheme() {
+	AjaxUserHelper::saveColorScheme();
+}
+
+/**
+ * Ajax handler for getting themes from themes_api().
+ *
+ * @since 3.9.0
+ *
+ * @global array $themes_allowedtags
+ * @global array $theme_field_defaults
+ */
+function wp_ajax_query_themes() {
+	AjaxThemeHelper::query();
+}
+
+/**
+ * Apply [embed] Ajax handlers to a string.
+ *
+ * @since 4.0.0
+ *
+ * @global WP_Post    $post       Global post object.
+ * @global WP_Embed   $wp_embed   Embed API instance.
+ * @global WP_Scripts $wp_scripts
+ * @global int        $content_width
+ */
+function wp_ajax_parse_embed() {
+	AjaxEmbedHelper::parse();
+}
+
+/**
+ * @since 4.0.0
+ *
+ * @global WP_Post    $post       Global post object.
+ * @global WP_Scripts $wp_scripts
+ */
+function wp_ajax_parse_media_shortcode() {
+	AjaxMediaHelper::parseShortcode();
+}
+
+/**
+ * Ajax handler for cropping an image.
+ *
+ * @since 4.3.0
+ */
+function wp_ajax_crop_image() {
+	AjaxMediaHelper::cropImage();
+}
+
+/**
+ * Ajax handler for generating a password.
+ *
+ * @since 4.4.0
+ */
+function wp_ajax_generate_password() {
+	AjaxUserHelper::generatePassword();
+}
+
+/**
+ * Ajax handler for saving the user's WordPress.org username.
+ *
+ * @since 4.4.0
+ */
+function wp_ajax_save_wporg_username() {
+	AjaxUserHelper::saveWPOrgUsername();
+}
+
+/**
+ * Ajax handler for installing a theme.
+ *
+ * @since 4.6.0
+ *
+ * @see Theme_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_install_theme() {
+	AjaxThemeHelper::install();
+}
+
+/**
+ * Ajax handler for updating a theme.
+ *
+ * @since 4.6.0
+ *
+ * @see Theme_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_update_theme() {
+	AjaxThemeHelper::update();
+}
+
+/**
+ * Ajax handler for deleting a theme.
+ *
+ * @since 4.6.0
+ *
+ * @see delete_theme()
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_delete_theme() {
+	AjaxThemeHelper::delete();
+}
+
+/**
+ * Ajax handler for installing a plugin.
+ *
+ * @since 4.6.0
+ *
+ * @see Plugin_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_install_plugin() {
+	AjaxPluginHelper::install();
+}
+
+/**
+ * Ajax handler for updating a plugin.
+ *
+ * @since 4.2.0
+ *
+ * @see Plugin_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_update_plugin() {
+	AjaxPluginHelper::update();
+}
+
+/**
+ * Ajax handler for deleting a plugin.
+ *
+ * @since 4.6.0
+ *
+ * @see delete_plugins()
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_delete_plugin() {
+	AjaxPluginHelper::delete();
+}
+
+/**
+ * Ajax handler for searching plugins.
+ *
+ * @since 4.6.0
+ *
+ * @global string $s Search term.
+ */
+function wp_ajax_search_plugins() {
+	AjaxPluginHelper::search();
+}
+
+/**
+ * Ajax handler for searching plugins to install.
+ *
+ * @since 4.6.0
+ */
+function wp_ajax_search_install_plugins() {
+	AjaxPluginHelper::install_search();
+}
+
+/**
+ * Ajax handler for exporting a user's personal data.
+ *
+ * @since 4.9.6
+ */
+function wp_ajax_wp_privacy_export_personal_data() {
+	AjaxPrivacyHelper::exportPersonalData();
+}
+
+/**
+ * Ajax handler for erasing personal data.
+ *
+ * @since 4.9.6
+ */
+function wp_ajax_wp_privacy_erase_personal_data() {
+	AjaxPrivacyHelper::erasePersonalData();
+}
+
+/**
+ * Ajax handler for site health checks on server communication.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_dotorg_communication() {
+	AjaxHealthCheckHelper::dotOrgCommunication();
+}
+
+/**
+ * Ajax handler for site health checks on debug mode.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_is_in_debug_mode() {
+	AjaxHealthCheckHelper::isInDebugMode();
+}
+
+/**
+ * Ajax handler for site health checks on background updates.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_background_updates() {
+	AjaxHealthCheckHelper::backgroundUpdates();
+}
+
+/**
+ * Ajax handler for site health checks on loopback requests.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_loopback_requests() {
+	AjaxHealthCheckHelper::loopbackRequests();
+}
+
+/**
+ * Ajax handler for site health check to update the result status.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_site_status_result() {
+	AjaxHealthCheckHelper::statusResult();
+}
+
+/**
+ * Ajax handler for site health check to get directories and database sizes.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_get_sizes() {
+	AjaxHealthCheckHelper::checkGetSizes();
 }
