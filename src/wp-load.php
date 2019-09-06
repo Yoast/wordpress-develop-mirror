@@ -26,7 +26,12 @@ if ( is_readable( __DIR__ . '/../vendor/autoload.php' ) ) {
 	require __DIR__ . '/vendor/autoload.php';
 }
 
-$initializer = new WP\Initializer\Main();
-$initializer->initialize();
-$router = new WP\Router( WP\Config\Routes::ROUTES );
-$router->route();
+static $wp_initialized;
+
+if ( $wp_initialized !== true ) {
+	$initializer = new WP\Initializer\Main();
+	$initializer->initialize();
+	$wp_initialized = true;
+	$router = new WP\Router( WP\Config\Routes::ROUTES );
+	$router->route();
+}
