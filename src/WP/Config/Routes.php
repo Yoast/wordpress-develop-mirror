@@ -17,6 +17,7 @@ use WP\Legacy\Action\Admin\Widgets;
 class Routes {
 	const ROUTES = [
 		'wp-admin/' => Dashboard::class,
+		'wp-admin/index' => Dashboard::class,
 		'wp-admin/about' => About::class,
 		'wp-admin/admin-ajax' => AdminAjax::class,
 		'wp-admin/admin-header' => AdminHeader::class,
