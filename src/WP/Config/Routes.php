@@ -11,5 +11,6 @@ use WP\Legacy\Action\Admin\About;
 class Routes {
 	const ROUTES = [
 		'wp-admin/about' => About::class,
+		'wp-admin/admin-ajax' => About::class,
 	];
 }
