@@ -15,6 +15,7 @@ class Routes {
 	const ROUTES = [
 		'wp-admin' => Dashboard::class,
 		'wp-admin/about' => About::class,
+		'wp-admin/admin-ajax' => AdminAjax::class,
 		'wp-admin/widgets' => Widgets::class,
 		'wp-admin/plugin-install' => PluginInstall::class,
 	];
