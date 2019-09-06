@@ -8,7 +8,7 @@ class HookHelper {
 	public static function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
 		global $wp_filter;
 		if ( ! isset( $wp_filter[ $tag ] ) ) {
-			$wp_filter[ $tag ] = new WP_Hook();
+			$wp_filter[ $tag ] = new \WP_Hook();
 		}
 		$wp_filter[ $tag ]->add_filter( $tag, $function_to_add, $priority, $accepted_args );
 		return true;
