@@ -13,6 +13,7 @@
  *
  * @global string $wp_version
  */
+global $wp_version;
 $wp_version = '5.3-alpha-45282-src';
 
 /**
@@ -20,6 +21,7 @@ $wp_version = '5.3-alpha-45282-src';
  *
  * @global int $wp_db_version
  */
+global $wp_db_version;
 $wp_db_version = 45805;
 
 /**
@@ -27,6 +29,7 @@ $wp_db_version = 45805;
  *
  * @global string $tinymce_version
  */
+global $tinymce_version;
 $tinymce_version = '4940-20190515';
 
 /**
@@ -34,6 +37,7 @@ $tinymce_version = '4940-20190515';
  *
  * @global string $required_php_version
  */
+global $required_php_version;
 $required_php_version = '5.6.20';
 
 /**
@@ -41,4 +45,5 @@ $required_php_version = '5.6.20';
  *
  * @global string $required_mysql_version
  */
+global $required_mysql_version;
 $required_mysql_version = '5.0';
