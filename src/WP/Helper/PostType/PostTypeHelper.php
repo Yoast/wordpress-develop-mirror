@@ -576,8 +576,8 @@ class PostTypeHelper{
         );
 
         //add support:
-        static::addSupport( 'attachment:audio', 'thumbnail' );
-        static::addSupport( 'attachment:video', 'thumbnail' );
+        SupportsHelper::add( 'attachment:audio', 'thumbnail' );
+        SupportsHelper::add( 'attachment:video', 'thumbnail' );
 
 
         PostStatusHelper::register(
