@@ -29,5 +29,11 @@ class AdminConstants implements InitializerInterface {
 		if ( isset( $_GET['import'] ) && ! defined( 'WP_LOAD_IMPORTERS' ) ) {
 			define( 'WP_LOAD_IMPORTERS', true );
 		}
+
+		// Taken from plugin-install.php and moved here.
+		if ( ! defined( 'IFRAME_REQUEST' ) && isset( $_GET['tab'] ) && ( 'plugin-information' == $_GET['tab'] ) ) {
+			define( 'IFRAME_REQUEST', true );
+		}
+
 	}
 }
