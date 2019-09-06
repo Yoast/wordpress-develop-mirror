@@ -63,7 +63,6 @@ class Main implements InitializerInterface {
 
 			preg_match( '|/(.*)\.php|U', $request, $matches );
 			$this->admin_route = $matches[1];
-			echo $this->admin_route;
 			if ( ! array_key_exists( $this->admin_route, Routes::ROUTES ) ) {
 				$this->is_admin    = false;
 				$this->admin_route = '';

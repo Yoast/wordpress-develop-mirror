@@ -4,7 +4,7 @@ namespace WP\Helper\PostType;
 
 use \WP_Error;
 use WP_Post_Type;
-use WP\Helper\Post\PostStatusHelper;
+use WP\Helper\Post\StatusHelper as PostStatusHelper;
 
 class PostTypeHelper{
 
