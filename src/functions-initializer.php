@@ -1297,7 +1297,7 @@ function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array(
  */
 function wp_trash_post( $post_id = 0 ) {
     return PostHelper::trash( $post_id );
-}   
+}
 
 
 
@@ -1559,7 +1559,7 @@ function get_post_custom_values( $key = '', $post_id = 0 ) {
  */
 function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
     return TermHelper::getForObject( $object_ids, $taxonomies, $args );
-}   
+}
 
 
 
@@ -2652,6 +2652,7 @@ function retrieve_password() {
 function _count_posts_cache_key( $type = 'post', $perm = '' ) {
     return CacheHelper::countPostCacheKey( $type, $perm );
 }
+
 /* ------------------- Capabilities: --------------------------*/
 
 /**
@@ -2836,6 +2837,8 @@ function wp_maybe_grant_resume_extensions_caps( $allcaps ) {
 function wp_maybe_grant_site_health_caps( $allcaps, $caps, $args, $user ) {
 	return CapabilitiesHelper::maybeGrantSiteHealth( $allcaps, $caps, $args, $user );
 }
+
+/* ------------------- Roles: --------------------------*/
 
 /**
  * Retrieves the global WP_Roles instance and instantiates it if necessary.

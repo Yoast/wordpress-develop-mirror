@@ -4,7 +4,6 @@ namespace WP\Config;
 
 use WP\Legacy\Action\Admin\About;
 use WP\Legacy\Action\Admin\AdminAjax;
-use WP\Legacy\Action\Admin\AdminHeader;
 use WP\Legacy\Action\Admin\AdminPost;
 use WP\Legacy\Action\Admin\AsyncUpload;
 use WP\Legacy\Action\Admin\Dashboard;
@@ -22,7 +21,6 @@ class Routes {
 		'wp-admin/index' => Dashboard::class,
 		'wp-admin/about' => About::class,
 		'wp-admin/admin-ajax' => AdminAjax::class,
-		'wp-admin/admin-header' => AdminHeader::class,
 		'wp-admin/admin-post' => AdminPost::class,
 		'wp-admin/async-upload' => AsyncUpload::class,
 		'wp-admin/plugin-install' => PluginInstall::class,
