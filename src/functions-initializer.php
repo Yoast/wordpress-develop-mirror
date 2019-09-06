@@ -2,10 +2,14 @@
 
 use \WP\Helper\LabelHelper;
 use \WP\Helper\Post\PostHelper;
-use \WP\Helper\Post\PostStatusHelper;
+use \WP\Helper\Post\MetaHelper as PostMetaHelper;
+use \WP\Helper\Post\StatusHelper as PostStatusHelper;
 use \WP\Helper\Post\AttachmentHelper;
 use \WP\Helper\PostType\PostTypeHelper;
 use \WP\Helper\PostType\SupportsHelper as PostTypeSupportsHelper;
+
+use \WP\Helper\Meta\Metadata;
+
 use WP\Helper\HookHelper;
 use WP\Helper\PluginHelper;
 
@@ -822,6 +826,7 @@ function get_extended( $post ) {
 
 /* ------------------- Post Meta: --------------------------*/
 
+
 /**
  * Adds a meta field to the given post.
  *
@@ -836,8 +841,311 @@ function get_extended( $post ) {
  *                           Default false.
  * @return int|false Meta ID on success, false on failure.
  */
-//function add_post_meta( $post_id, $meta_key, $meta_value, $unique = false ) {
+function add_post_meta( $post_id, $meta_key, $meta_value, $unique = false ) {
+    return PostMetaHelper::add( $post_id, $meta_key, $meta_value, $unique );
+}
 
+/**
+ * Deletes a post meta field for the given post ID.
+ *
+ * You can match based on the key, or key and value. Removing based on key and
+ * value, will keep from removing duplicate metadata with the same key. It also
+ * allows removing all metadata matching the key, if needed.
+ *
+ * @since 1.5.0
+ *
+ * @param int    $post_id    Post ID.
+ * @param string $meta_key   Metadata name.
+ * @param mixed  $meta_value Optional. Metadata value. Must be serializable if
+ *                           non-scalar. Default empty.
+ * @return bool True on success, false on failure.
+ */
+function delete_post_meta( $post_id, $meta_key, $meta_value = '' ) {
+    return PostMetaHelper::delete( $post_id, $meta_key, $meta_value );
+}
+
+/**
+ * Retrieves a post meta field for the given post ID.
+ *
+ * @since 1.5.0
+ *
+ * @param int    $post_id Post ID.
+ * @param string $key     Optional. The meta key to retrieve. By default, returns
+ *                        data for all keys. Default empty.
+ * @param bool   $single  Optional. If true, returns only the first value for the specified meta key.
+ *                        This parameter has no effect if $key is not specified. Default false.
+ * @return mixed Will be an array if $single is false. Will be value of the meta
+ *               field if $single is true.
+ */
+function get_post_meta( $post_id, $key = '', $single = false ) {
+    return PostMetaHelper::get( $post_id, $key, $single );
+}
+
+/**
+ * Updates a post meta field based on the given post ID.
+ *
+ * Use the `$prev_value` parameter to differentiate between meta fields with the
+ * same key and post ID.
+ *
+ * If the meta field for the post does not exist, it will be added and its ID returned.
+ *
+ * Can be used in place of add_post_meta().
+ *
+ * @since 1.5.0
+ *
+ * @param int    $post_id    Post ID.
+ * @param string $meta_key   Metadata key.
+ * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
+ * @param mixed  $prev_value Optional. Previous value to check before updating.
+ * @return int|bool The new meta field ID if a field with the given key didn't exist and was
+ *                  therefore added, true on successful update, false on failure.
+ */
+function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) {
+    return PostMetaHelper::update( $post_id, $meta_key, $meta_value, $prev_value );
+}
+
+
+
+/**
+ * Deletes everything from post meta matching the given meta key.
+ *
+ * @since 2.3.0
+ *
+ * @param string $post_meta_key Key to search for when deleting.
+ * @return bool Whether the post meta key was deleted from the database.
+ */
+function delete_post_meta_by_key( $post_meta_key ) {
+    return PostMetaHelper::deleteByKey( $post_meta_key );
+}
+
+
+
+/**
+ * Registers a meta key for posts.
+ *
+ * @since 4.9.8
+ *
+ * @param string $post_type Post type to register a meta key for. Pass an empty string
+ *                          to register the meta key across all existing post types.
+ * @param string $meta_key  The meta key to register.
+ * @param array  $args      Data used to describe the meta key when registered. See
+ *                          {@see register_meta()} for a list of supported arguments.
+ * @return bool True if the meta key was successfully registered, false if not.
+ */
+function register_post_meta( $post_type, $meta_key, array $args ) {
+    return PostMetaHelper::register( $post_type, $meta_key, $args );
+}
+
+
+/**
+ * Unregisters a meta key for posts.
+ *
+ * @since 4.9.8
+ *
+ * @param string $post_type Post type the meta key is currently registered for. Pass
+ *                          an empty string if the meta key is registered across all
+ *                          existing post types.
+ * @param string $meta_key  The meta key to unregister.
+ * @return bool True on success, false if the meta key was not previously registered.
+ */
+function unregister_post_meta( $post_type, $meta_key ) {
+    return PostMetaHelper::unregister( $post_type, $meta_key );
+}
+
+
+/**
+ * Retrieve post meta fields, based on post ID.
+ *
+ * The post meta fields are retrieved from the cache where possible,
+ * so the function is optimized to be called more than once.
+ *
+ * @since 1.2.0
+ *
+ * @param int $post_id Optional. Post ID. Default is ID of the global $post.
+ * @return array Post meta for the given post.
+ */
+function get_post_custom( $post_id = 0 ) {
+    return PostMetaHelper::getCustom( $post_id );
+}
+
+
+/**
+ * Retrieve meta field names for a post.
+ *
+ * If there are no meta fields, then nothing (null) will be returned.
+ *
+ * @since 1.2.0
+ *
+ * @param int $post_id Optional. Post ID. Default is ID of the global $post.
+ * @return array|void Array of the keys, if retrieved.
+ */
+function get_post_custom_keys( $post_id = 0 ) {
+    return PostMetaHelper::getCustomKeys( $post_id );
+}
+
+/**
+ * Retrieve values for a custom post field.
+ *
+ * The parameters must not be considered optional. All of the post meta fields
+ * will be retrieved and only the meta field key values returned.
+ *
+ * @since 1.2.0
+ *
+ * @param string $key     Optional. Meta field key. Default empty.
+ * @param int    $post_id Optional. Post ID. Default is ID of the global $post.
+ * @return array|null Meta field values.
+ */
+function get_post_custom_values( $key = '', $post_id = 0 ) {
+    return PostMetaHelper::getCustomValues( $key, $post_id );
+}   
+
+
+/* ------------------- Metadata: -----------------------------*/
+
+/**
+ * Add metadata for the specified object.
+ *
+ * @since 2.9.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $meta_type  Type of object metadata is for (e.g., comment, post, term, or user).
+ * @param int    $object_id  ID of the object metadata is for
+ * @param string $meta_key   Metadata key
+ * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
+ * @param bool   $unique     Optional, default is false.
+ *                           Whether the specified metadata key should be unique for the object.
+ *                           If true, and the object already has a value for the specified metadata key,
+ *                           no change will be made.
+ * @return int|false The meta ID on success, false on failure.
+ */
+function add_metadata( $meta_type, $object_id, $meta_key, $meta_value, $unique = false ) {
+    return Metadata::add( $meta_type, $object_id, $meta_key, $meta_value, $unique );
+}
+
+/**
+ * Update metadata for the specified object. If no value already exists for the specified object
+ * ID and metadata key, the metadata will be added.
+ *
+ * @since 2.9.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $meta_type  Type of object metadata is for (e.g., comment, post, term, or user).
+ * @param int    $object_id  ID of the object metadata is for
+ * @param string $meta_key   Metadata key
+ * @param mixed  $meta_value Metadata value. Must be serializable if non-scalar.
+ * @param mixed  $prev_value Optional. If specified, only update existing metadata entries with
+ *                           the specified value. Otherwise, update all entries.
+ * @return int|bool The new meta field ID if a field with the given key didn't exist and was
+ *                  therefore added, true on successful update, false on failure.
+ */
+function update_metadata( $meta_type, $object_id, $meta_key, $meta_value, $prev_value = '' ) {
+    return Metadata::update( $meta_type, $object_id, $meta_key, $meta_value, $prev_value );
+}
+
+
+
+/**
+ * Delete metadata for the specified object.
+ *
+ * @since 2.9.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $meta_type  Type of object metadata is for (e.g., comment, post, term, or user).
+ * @param int    $object_id  ID of the object metadata is for
+ * @param string $meta_key   Metadata key
+ * @param mixed  $meta_value Optional. Metadata value. Must be serializable if non-scalar. If specified, only delete
+ *                           metadata entries with this value. Otherwise, delete all entries with the specified meta_key.
+ *                           Pass `null`, `false`, or an empty string to skip this check. (For backward compatibility,
+ *                           it is not possible to pass an empty string to delete those entries with an empty string
+ *                           for a value.)
+ * @param bool   $delete_all Optional, default is false. If true, delete matching metadata entries for all objects,
+ *                           ignoring the specified object_id. Otherwise, only delete matching metadata entries for
+ *                           the specified object_id.
+ * @return bool True on successful delete, false on failure.
+ */
+function delete_metadata( $meta_type, $object_id, $meta_key, $meta_value = '', $delete_all = false ) {
+    return Metadata::delete( $meta_type, $object_id, $meta_key, $meta_value, $delete_all );
+}
+
+/**
+ * Retrieve metadata for the specified object.
+ *
+ * @since 2.9.0
+ *
+ * @param string $meta_type Type of object metadata is for (e.g., comment, post, term, or user).
+ * @param int    $object_id ID of the object metadata is for
+ * @param string $meta_key  Optional. Metadata key. If not specified, retrieve all metadata for
+ *                          the specified object.
+ * @param bool   $single    Optional, default is false.
+ *                          If true, return only the first value of the specified meta_key.
+ *                          This parameter has no effect if meta_key is not specified.
+ * @return mixed Single metadata value, or array of values
+ */
+function get_metadata( $meta_type, $object_id, $meta_key = '', $single = false ) {
+    return Metadata::get( $meta_type, $object_id, $meta_key, $single );
+}
+
+
+/**
+ * Registers a meta key.
+ *
+ * It is recommended to register meta keys for a specific combination of object type and object subtype. If passing
+ * an object subtype is omitted, the meta key will be registered for the entire object type, however it can be partly
+ * overridden in case a more specific meta key of the same name exists for the same object type and a subtype.
+ *
+ * If an object type does not support any subtypes, such as users or comments, you should commonly call this function
+ * without passing a subtype.
+ *
+ * @since 3.3.0
+ * @since 4.6.0 {@link https://core.trac.wordpress.org/ticket/35658 Modified
+ *              to support an array of data to attach to registered meta keys}. Previous arguments for
+ *              `$sanitize_callback` and `$auth_callback` have been folded into this array.
+ * @since 4.9.8 The `$object_subtype` argument was added to the arguments array.
+ *
+ * @param string $object_type    Type of object this meta is registered to.
+ * @param string $meta_key       Meta key to register.
+ * @param array  $args {
+ *     Data used to describe the meta key when registered.
+ *
+ *     @type string $object_subtype    A subtype; e.g. if the object type is "post", the post type. If left empty,
+ *                                     the meta key will be registered on the entire object type. Default empty.
+ *     @type string $type              The type of data associated with this meta key.
+ *                                     Valid values are 'string', 'boolean', 'integer', and 'number'.
+ *     @type string $description       A description of the data attached to this meta key.
+ *     @type bool   $single            Whether the meta key has one value per object, or an array of values per object.
+ *     @type string $sanitize_callback A function or method to call when sanitizing `$meta_key` data.
+ *     @type string $auth_callback     Optional. A function or method to call when performing edit_post_meta, add_post_meta, and delete_post_meta capability checks.
+ *     @type bool   $show_in_rest      Whether data associated with this meta key can be considered public and
+ *                                     should be accessible via the REST API. A custom post type must also declare
+ *                                     support for custom fields for registered meta to be accessible via REST.
+ * }
+ * @param string|array $deprecated Deprecated. Use `$args` instead.
+ *
+ * @return bool True if the meta key was successfully registered in the global array, false if not.
+ *                       Registering a meta key with distinct sanitize and auth callbacks will fire those
+ *                       callbacks, but will not add to the global registry.
+ */
+function register_meta( $object_type, $meta_key, $args, $deprecated = null ) {
+    return Metadata::register( $object_type, $meta_key, $args, $deprecated );
+}
+
+/**
+ * Unregisters a meta key from the list of registered keys.
+ *
+ * @since 4.6.0
+ * @since 4.9.8 The `$object_subtype` parameter was added.
+ *
+ * @param string $object_type    The type of object.
+ * @param string $meta_key       The meta key.
+ * @param string $object_subtype Optional. The subtype of the object type.
+ * @return bool True if successful. False if the meta key was not registered.
+ */
+function unregister_meta_key( $object_type, $meta_key, $object_subtype = '' ) {
+    return Metadata::unregisterKey( $object_type, $meta_key, $object_subtype = '' );
+}
 
 /* ------------------- Post Status: --------------------------*/
 
