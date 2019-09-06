@@ -1,6 +1,6 @@
 <?php
 
-namespace WP\Helper;
+namespace WP\Helper\PostType;
 
 use WP_Error;
 use WP_Post_Type;
@@ -20,6 +20,17 @@ class PostTypeHelper{
         }
 
         return $wp_post_types[ $post_type ];
+    }
+
+    /**
+     * Get a list of all registered post type objects.
+     */
+    public static function list( $args = array(), $output = 'names', $operator = 'and') {
+        global $wp_post_types;
+
+        $field = ( 'names' == $output ) ? 'name' : false;
+
+        return wp_filter_object_list( $wp_post_types, $args, $operator, $field );
     }
 
     /**
@@ -67,6 +78,45 @@ class PostTypeHelper{
         return $post_type_object;
     }
 
+
+    /**
+     * Unregister a post type
+     */
+    public static function unregister( $post_type ) {
+
+        global $wp_post_types;
+
+        if ( ! post_type_exists( $post_type ) ) {
+            return new WP_Error( 'invalid_post_type', __( 'Invalid post type.' ) );
+        }
+
+        $post_type_object = get_post_type_object( $post_type );
+
+        // Do not allow unregistering internal post types.
+        if ( $post_type_object->_builtin ) {
+            return new WP_Error( 'invalid_post_type', __( 'Unregistering a built-in post type is not allowed' ) );
+        }
+
+        $post_type_object->remove_supports();
+        $post_type_object->remove_rewrite_rules();
+        $post_type_object->unregister_meta_boxes();
+        $post_type_object->remove_hooks();
+        $post_type_object->unregister_taxonomies();
+
+        unset( $wp_post_types[ $post_type ] );
+
+        /**
+         * Fires after a post type was unregistered.
+         *
+         * @since 4.5.0
+         *
+         * @param string $post_type Post type key.
+         */
+        do_action( 'unregistered_post_type', $post_type );
+
+        return true;    
+    }
+
     /**
      * Determines whether a post type is registered.
      */
@@ -74,8 +124,134 @@ class PostTypeHelper{
         return (bool) static::get( $post_type );
     }
 
+    /**
+     * Return an object with all post-types and their capabilities
+     */
+    public static function getCapabilities( $args ) {
+        if ( ! is_array( $args->capability_type ) ) {
+            $args->capability_type = array( $args->capability_type, $args->capability_type . 's' );
+        }
 
-    
+        // Singular base for meta capabilities, plural base for primitive capabilities.
+        list( $singular_base, $plural_base ) = $args->capability_type;
+
+        $default_capabilities = array(
+            // Meta capabilities
+            'edit_post'          => 'edit_' . $singular_base,
+            'read_post'          => 'read_' . $singular_base,
+            'delete_post'        => 'delete_' . $singular_base,
+            // Primitive capabilities used outside of map_meta_cap():
+            'edit_posts'         => 'edit_' . $plural_base,
+            'edit_others_posts'  => 'edit_others_' . $plural_base,
+            'publish_posts'      => 'publish_' . $plural_base,
+            'read_private_posts' => 'read_private_' . $plural_base,
+        );
+
+        // Primitive capabilities used within map_meta_cap():
+        if ( $args->map_meta_cap ) {
+            $default_capabilities_for_mapping = array(
+                'read'                   => 'read',
+                'delete_posts'           => 'delete_' . $plural_base,
+                'delete_private_posts'   => 'delete_private_' . $plural_base,
+                'delete_published_posts' => 'delete_published_' . $plural_base,
+                'delete_others_posts'    => 'delete_others_' . $plural_base,
+                'edit_private_posts'     => 'edit_private_' . $plural_base,
+                'edit_published_posts'   => 'edit_published_' . $plural_base,
+            );
+            $default_capabilities             = array_merge( $default_capabilities, $default_capabilities_for_mapping );
+        }
+
+        $capabilities = array_merge( $default_capabilities, $args->capabilities );
+
+        // Post creation capability simply maps to edit_posts by default:
+        if ( ! isset( $capabilities['create_posts'] ) ) {
+            $capabilities['create_posts'] = $capabilities['edit_posts'];
+        }
+
+        // Remember meta capabilities for future reference.
+        if ( $args->map_meta_cap ) {
+            _post_type_meta_capabilities( $capabilities );
+        }
+
+        return (object) $capabilities;
+    }
+
+    /**
+     * Store or return a list of post type meta caps for map_meta_cap().
+     */ 
+    public static function getMetaCapabilities( $capabilities ) {
+        global $post_type_meta_caps;
+
+        foreach ( $capabilities as $core => $custom ) {
+            if ( in_array( $core, array( 'read_post', 'delete_post', 'edit_post' ) ) ) {
+                $post_type_meta_caps[ $custom ] = $core;
+            }
+        }
+    }
+
+    /**
+     * Get all labels from a single post-type object
+     */
+    public static function getLabels( $post_type_object ) {
+        $nohier_vs_hier_defaults              = array(
+            'name'                     => array( _x( 'Posts', 'post type general name' ), _x( 'Pages', 'post type general name' ) ),
+            'singular_name'            => array( _x( 'Post', 'post type singular name' ), _x( 'Page', 'post type singular name' ) ),
+            'add_new'                  => array( _x( 'Add New', 'post' ), _x( 'Add New', 'page' ) ),
+            'add_new_item'             => array( __( 'Add New Post' ), __( 'Add New Page' ) ),
+            'edit_item'                => array( __( 'Edit Post' ), __( 'Edit Page' ) ),
+            'new_item'                 => array( __( 'New Post' ), __( 'New Page' ) ),
+            'view_item'                => array( __( 'View Post' ), __( 'View Page' ) ),
+            'view_items'               => array( __( 'View Posts' ), __( 'View Pages' ) ),
+            'search_items'             => array( __( 'Search Posts' ), __( 'Search Pages' ) ),
+            'not_found'                => array( __( 'No posts found.' ), __( 'No pages found.' ) ),
+            'not_found_in_trash'       => array( __( 'No posts found in Trash.' ), __( 'No pages found in Trash.' ) ),
+            'parent_item_colon'        => array( null, __( 'Parent Page:' ) ),
+            'all_items'                => array( __( 'All Posts' ), __( 'All Pages' ) ),
+            'archives'                 => array( __( 'Post Archives' ), __( 'Page Archives' ) ),
+            'attributes'               => array( __( 'Post Attributes' ), __( 'Page Attributes' ) ),
+            'insert_into_item'         => array( __( 'Insert into post' ), __( 'Insert into page' ) ),
+            'uploaded_to_this_item'    => array( __( 'Uploaded to this post' ), __( 'Uploaded to this page' ) ),
+            'featured_image'           => array( _x( 'Featured Image', 'post' ), _x( 'Featured Image', 'page' ) ),
+            'set_featured_image'       => array( _x( 'Set featured image', 'post' ), _x( 'Set featured image', 'page' ) ),
+            'remove_featured_image'    => array( _x( 'Remove featured image', 'post' ), _x( 'Remove featured image', 'page' ) ),
+            'use_featured_image'       => array( _x( 'Use as featured image', 'post' ), _x( 'Use as featured image', 'page' ) ),
+            'filter_items_list'        => array( __( 'Filter posts list' ), __( 'Filter pages list' ) ),
+            'items_list_navigation'    => array( __( 'Posts list navigation' ), __( 'Pages list navigation' ) ),
+            'items_list'               => array( __( 'Posts list' ), __( 'Pages list' ) ),
+            'item_published'           => array( __( 'Post published.' ), __( 'Page published.' ) ),
+            'item_published_privately' => array( __( 'Post published privately.' ), __( 'Page published privately.' ) ),
+            'item_reverted_to_draft'   => array( __( 'Post reverted to draft.' ), __( 'Page reverted to draft.' ) ),
+            'item_scheduled'           => array( __( 'Post scheduled.' ), __( 'Page scheduled.' ) ),
+            'item_updated'             => array( __( 'Post updated.' ), __( 'Page updated.' ) ),
+        );
+        $nohier_vs_hier_defaults['menu_name'] = $nohier_vs_hier_defaults['name'];
+
+        $labels = _get_custom_object_labels( $post_type_object, $nohier_vs_hier_defaults );
+
+        $post_type = $post_type_object->name;
+
+        $default_labels = clone $labels;
+
+        /**
+         * Filters the labels of a specific post type.
+         *
+         * The dynamic portion of the hook name, `$post_type`, refers to
+         * the post type slug.
+         *
+         * @since 3.5.0
+         *
+         * @see get_post_type_labels() for the full list of labels.
+         *
+         * @param object $labels Object with labels for the post type as member variables.
+         */
+        $labels = apply_filters( "post_type_labels_{$post_type}", $labels );
+
+        // Ensure that the filtered labels contain all required default values.
+        $labels = (object) array_merge( (array) $default_labels, (array) $labels );
+
+        return $labels;
+    }
+
 
     /**
      * Whether the post type is hierarchical.
@@ -89,19 +265,19 @@ class PostTypeHelper{
         return $post_type->hierarchical;
     }
 
+    
+
     /**
-     * Registers support of certain features for a post type.
+     * Add the submenus for each post-type
      */
-    public static function addSupport( $post_type, $feature, ...$args  )
-    {
-        global $_wp_post_type_features;
-        $features = (array) $feature;
-        foreach ( $features as $feature ) {
-            if ( $args ) {
-                $_wp_post_type_features[ $post_type ][ $feature ] = $args;
-            } else {
-                $_wp_post_type_features[ $post_type ][ $feature ] = true;
+    public static function addSubmenus() {
+        foreach ( static::list( array( 'show_ui' => true ) ) as $ptype ) {
+            $ptype_obj = static::get( $ptype );
+            // Sub-menus only.
+            if ( ! $ptype_obj->show_in_menu || $ptype_obj->show_in_menu === true ) {
+                continue;
             }
+            add_submenu_page( $ptype_obj->show_in_menu, $ptype_obj->labels->name, $ptype_obj->labels->all_items, $ptype_obj->cap->edit_posts, "edit.php?post_type=$ptype" );
         }
     }
 
@@ -400,8 +576,8 @@ class PostTypeHelper{
         );
 
         //add support:
-        static::addSupport( 'attachment:audio', 'thumbnail' );
-        static::addSupport( 'attachment:video', 'thumbnail' );
+        SupportsHelper::add( 'attachment:audio', 'thumbnail' );
+        SupportsHelper::add( 'attachment:video', 'thumbnail' );
 
 
         PostStatusHelper::register(
