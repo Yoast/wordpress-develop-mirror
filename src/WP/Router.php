@@ -26,8 +26,7 @@ class Router {
 	 */
 	public function route() {
 		$request = filter_input( INPUT_SERVER, 'REQUEST_URI' );
-		preg_match( '|/(.*)(\.php)?|', $request, $matches );
-		$route = $matches[1];
+		$route = ltrim( str_replace( '.php', '', parse_url( $request, PHP_URL_PATH ) ), '/' );
 		if ( ! array_key_exists( $route, Routes::ROUTES ) ) {
 			return;
 		}
