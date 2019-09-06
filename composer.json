@@ -17,5 +17,12 @@
 		"format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source --cache -d memory_limit=256M",
 		"lint": "phpcs --standard=phpcs.xml.dist --report-summary --report-source --cache -d memory_limit=256M",
 		"lint:errors": "phpcs --standard=phpcs.xml.dist --report-summary --report-source --cache -d memory_limit=256M -n"
+	},
+	"autoload": {
+		"psr-4": {
+			"WP\\": "src/WP/"
+		},
+		"classmap": [ "src/" ],
+		"exclude-from-classmap": [ "src/WP/" ]
 	}
 }
