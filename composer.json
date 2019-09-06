@@ -23,6 +23,7 @@
 			"WP\\": "src/WP/"
 		},
 		"classmap": [ "src/" ],
-		"exclude-from-classmap": [ "src/WP/" ]
+		"exclude-from-classmap": [ "src/WP/" ],
+		"files": [ "src/functions-initializer.php"]
 	}
 }
