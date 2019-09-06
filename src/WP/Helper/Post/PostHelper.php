@@ -8,7 +8,7 @@ class PostHelper{
     /**
      * Retrieves post data given a post ID or post object.
      */
-    public static function getPost( $post = null, $output = OBJECT, $filter = 'raw' ) {
+    public static function get( $post = null, $output = OBJECT, $filter = 'raw' ) {
         if ( empty( $post ) && isset( $GLOBALS['post'] ) ) {
             $post = $GLOBALS['post'];
         }
@@ -41,6 +41,48 @@ class PostHelper{
         }
 
         return $_post;
+    }
+
+    /**
+     * Get multiple posts
+     */
+    public static function getPosts( $args ) {
+        $defaults = array(
+            'numberposts'      => 5,
+            'category'         => 0,
+            'orderby'          => 'date',
+            'order'            => 'DESC',
+            'include'          => array(),
+            'exclude'          => array(),
+            'meta_key'         => '',
+            'meta_value'       => '',
+            'post_type'        => 'post',
+            'suppress_filters' => true,
+        );
+
+        $parsed_args = wp_parse_args( $args, $defaults );
+        if ( empty( $parsed_args['post_status'] ) ) {
+            $parsed_args['post_status'] = ( 'attachment' == $parsed_args['post_type'] ) ? 'inherit' : 'publish';
+        }
+        if ( ! empty( $parsed_args['numberposts'] ) && empty( $parsed_args['posts_per_page'] ) ) {
+            $parsed_args['posts_per_page'] = $parsed_args['numberposts'];
+        }
+        if ( ! empty( $parsed_args['category'] ) ) {
+            $parsed_args['cat'] = $parsed_args['category'];
+        }
+        if ( ! empty( $parsed_args['include'] ) ) {
+            $incposts                      = wp_parse_id_list( $parsed_args['include'] );
+            $parsed_args['posts_per_page'] = count( $incposts );  // only the number of posts included
+            $parsed_args['post__in']       = $incposts;
+        } elseif ( ! empty( $parsed_args['exclude'] ) ) {
+            $parsed_args['post__not_in'] = wp_parse_id_list( $parsed_args['exclude'] );
+        }
+
+        $parsed_args['ignore_sticky_posts'] = true;
+        $parsed_args['no_found_rows']       = true;
+
+        $get_posts = new \WP_Query;
+        return $get_posts->query( $parsed_args );
     }
 
 
