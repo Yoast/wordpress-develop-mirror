@@ -2,7 +2,7 @@
 
 namespace WP\Helper\Post;
 
-class PostStatusHelper{
+class StatusHelper{
 
     /**
      * Retrieve the post status based on the post ID.
