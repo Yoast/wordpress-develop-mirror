@@ -1,5 +1,5 @@
 <?php
-namespace WP\Legacy\Action;
+namespace WP\Legacy\Action\Admin;
 
 class About implements ActionInterface {
 

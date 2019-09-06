@@ -2,83 +2,10 @@
 
 namespace WP\Initializer;
 
+use WP\Router;
+use WP\Config\Routes;
 
 class Main implements InitializerInterface {
-
-	const ADMIN_ROUTES = [
-		'about',
-		'admin-ajax',
-		'admin-functions',
-		'admin-header',
-		'admin-post',
-		'admin',
-		'async-upload',
-		'comment',
-		'credits',
-		'customize',
-		'edit-comments',
-		'edit-tags',
-		'edit',
-		'export',
-		'freedoms',
-		'import',
-		'index',
-		'install-helper',
-		'install',
-		'link-add',
-		'link-manager',
-		'link',
-		'load-scripts',
-		'load-styles',
-		'media-new',
-		'media-upload',
-		'media',
-		'moderation',
-		'ms-admin',
-		'ms-delete-site',
-		'ms-edit',
-		'ms-options',
-		'ms-sites',
-		'ms-themes',
-		'ms-upgrade-network',
-		'ms-users',
-		'my-sites',
-		'nav-menus',
-		'network',
-		'options-discussion',
-		'options-general',
-		'options-media',
-		'options-permalink',
-		'options-reading',
-		'options-writing',
-		'options',
-		'plugin-editor',
-		'plugin-install',
-		'plugins',
-		'post-new',
-		'post',
-		'press-this',
-		'privacy',
-		'profile',
-		'revision',
-		'setup-config',
-		'site-health-info',
-		'site-health',
-		'term',
-		'theme-editor',
-		'theme-install',
-		'themes',
-		'tools',
-		'update-core',
-		'update',
-		'upgrade-functions',
-		'upgrade',
-		'upload',
-		'user-edit',
-		'user-new',
-		'users',
-		'widgets'
-	];
 
 	private $admin_constants_initializer;
 
@@ -101,8 +28,8 @@ class Main implements InitializerInterface {
 	 */
 	public function __construct() {
 		$this->admin_constants_initializer = new AdminConstants();
-		$this->general_initializer = new General();
-		$this->admin_initializer = new Admin();
+		$this->general_initializer         = new General();
+		$this->admin_initializer           = new Admin();
 	}
 
 	/**
@@ -129,20 +56,21 @@ class Main implements InitializerInterface {
 	 * @return void
 	 */
 	protected function check_admin() {
-		$request = filter_input( INPUT_SERVER,  'REQUEST_URI' );
+		$request        = filter_input( INPUT_SERVER, 'REQUEST_URI' );
 		$this->is_admin = false;
 		if ( strpos( $request, '/wp-admin/' ) === 0 ) {
 			$this->is_admin = true;
 
 			if ( $request === '/wp-admin/' ) {
 				$this->admin_route = 'index';
+
 				return;
 			}
 
 			preg_match( '|/wp-admin/(.*)\.php|U', $request, $matches );
 			$this->admin_route = $matches[1];
-			if ( ! in_array( $this->admin_route, $this::ADMIN_ROUTES ) ) {
-				$this->is_admin = false;
+			if ( ! in_array( $this->admin_route, Routes::ROUTES ) ) {
+				$this->is_admin    = false;
 				$this->admin_route = '';
 			}
 		}
