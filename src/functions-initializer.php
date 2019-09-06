@@ -1114,8 +1114,8 @@ function has_filter( $tag, $function_to_check = false ) {
  * @param mixed  ...$args Additional parameters to pass to the callback functions.
  * @return mixed The filtered value after all hooked functions are applied to it.
  */
-function apply_filters( $tag, $value ) {
-	return HookHelper::apply_filters( $tag, $value );
+function apply_filters( $tag, $value, ...$args ) {
+	return HookHelper::apply_filters( $tag, $value, ...$args );
 }
 
 /**
