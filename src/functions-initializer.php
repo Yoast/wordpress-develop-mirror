@@ -1364,7 +1364,7 @@ function _wp_privacy_statuses() {
  * @return true
  */
 function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-	return HookHelper::add_filter( $tag, $function_to_add, $priority, $accepted_args );
+	return HookHelper::addFilter( $tag, $function_to_add, $priority, $accepted_args );
 }
 
 /**
@@ -1384,7 +1384,7 @@ function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  *                   return value.
  */
 function has_filter( $tag, $function_to_check = false ) {
-	return HookHelper::has_filter( $tag, $function_to_check );
+	return HookHelper::hasFilter( $tag, $function_to_check );
 }
 
 /**
@@ -1426,7 +1426,7 @@ function has_filter( $tag, $function_to_check = false ) {
  * @return mixed The filtered value after all hooked functions are applied to it.
  */
 function apply_filters( $tag, $value, ...$args ) {
-	return HookHelper::apply_filters( $tag, $value, ...$args );
+	return HookHelper::applyFilters( $tag, $value, ...$args );
 }
 
 /**
@@ -1445,7 +1445,7 @@ function apply_filters( $tag, $value, ...$args ) {
  * @return mixed The filtered value after all hooked functions are applied to it.
  */
 function apply_filters_ref_array( $tag, $args ) {
-	return HookHelper::apply_filters_ref_array( $tag, $args );
+	return HookHelper::applyFiltersRefArray( $tag, $args );
 }
 
 /**
@@ -1469,7 +1469,7 @@ function apply_filters_ref_array( $tag, $args ) {
  * @return bool    Whether the function existed before it was removed.
  */
 function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
-	return HookHelper::remove_filter( $tag, $function_to_remove, $priority );
+	return HookHelper::removeFilter( $tag, $function_to_remove, $priority );
 }
 
 /**
@@ -1484,7 +1484,7 @@ function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
  * @return true True when finished.
  */
 function remove_all_filters( $tag, $priority = false ) {
-	return HookHelper::remove_all_filters( $tag, $priority );
+	return HookHelper::removeAllFilters( $tag, $priority );
 }
 
 /**
@@ -1497,7 +1497,7 @@ function remove_all_filters( $tag, $priority = false ) {
  * @return string Hook name of the current filter or action.
  */
 function current_filter() {
-	return HookHelper::current_filter();
+	return HookHelper::currentFilter();
 }
 
 /**
@@ -1508,7 +1508,7 @@ function current_filter() {
  * @return string Hook name of the current action.
  */
 function current_action() {
-	return HookHelper::current_action();
+	return HookHelper::currentAction();
 }
 
 /**
@@ -1533,7 +1533,7 @@ function current_action() {
  * @return bool Whether the filter is currently in the stack.
  */
 function doing_filter( $filter = null ) {
-	return HookHelper::doing_filter( $filter );
+	return HookHelper::doingFilter( $filter );
 }
 
 /**
@@ -1546,7 +1546,7 @@ function doing_filter( $filter = null ) {
  * @return bool Whether the action is currently in the stack.
  */
 function doing_action( $action = null ) {
-	return HookHelper::doing_action( $action );
+	return HookHelper::doingAction( $action );
 }
 
 /**
@@ -1570,7 +1570,7 @@ function doing_action( $action = null ) {
  * @return true Will always return true.
  */
 function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-	return HookHelper::add_action( $tag, $function_to_add, $priority, $accepted_args );
+	return HookHelper::addAction( $tag, $function_to_add, $priority, $accepted_args );
 }
 
 /**
@@ -1609,7 +1609,7 @@ function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 
  *                       functions hooked to the action. Default empty.
  */
 function do_action( $tag, $arg = '' ) {
-	HookHelper::do_action( $tag, $arg );
+	HookHelper::doAction( $tag, $arg );
 }
 
 /**
@@ -1623,7 +1623,7 @@ function do_action( $tag, $arg = '' ) {
  * @return int The number of times action hook $tag is fired.
  */
 function did_action( $tag ) {
-	return HookHelper::did_action( $tag );
+	return HookHelper::didAction( $tag );
 }
 
 /**
@@ -1641,7 +1641,7 @@ function did_action( $tag ) {
  * @param array  $args The arguments supplied to the functions hooked to `$tag`.
  */
 function do_action_ref_array( $tag, $args ) {
-	HookHelper::do_action_ref_array( $tag, $args );
+	HookHelper::doActionRefArray( $tag, $args );
 }
 
 /**
@@ -1661,7 +1661,7 @@ function do_action_ref_array( $tag, $args ) {
  *                  return value.
  */
 function has_action( $tag, $function_to_check = false ) {
-	return HookHelper::has_action( $tag, $function_to_check );
+	return HookHelper::hasAction( $tag, $function_to_check );
 }
 
 /**
@@ -1679,7 +1679,7 @@ function has_action( $tag, $function_to_check = false ) {
  * @return bool Whether the function is removed.
  */
 function remove_action( $tag, $function_to_remove, $priority = 10 ) {
-	return HookHelper::remove_action( $tag, $function_to_remove, $priority = 10 );
+	return HookHelper::removeAction( $tag, $function_to_remove, $priority = 10 );
 }
 
 /**
@@ -1692,7 +1692,7 @@ function remove_action( $tag, $function_to_remove, $priority = 10 ) {
  * @return true True when finished.
  */
 function remove_all_actions( $tag, $priority = false ) {
-	return HookHelper::remove_all_actions( $tag, $priority );
+	return HookHelper::removeAllActions( $tag, $priority );
 }
 
 /**
@@ -1724,7 +1724,7 @@ function remove_all_actions( $tag, $priority = false ) {
  *
  */
 function apply_filters_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
-	return HookHelper::apply_filters_deprecated( $tag, $args, $version, $replacement, $message );
+	return HookHelper::applyFiltersDeprecated( $tag, $args, $version, $replacement, $message );
 }
 
 /**
@@ -1745,7 +1745,7 @@ function apply_filters_deprecated( $tag, $args, $version, $replacement = false, 
  * @param string $message     Optional. A message regarding the change.
  */
 function do_action_deprecated( $tag, $args, $version, $replacement = false, $message = null ) {
-	HookHelper::do_action_deprecated( $tag, $args, $version, $replacement, $message );
+	HookHelper::doActionDeprecated( $tag, $args, $version, $replacement, $message );
 }
 
 /**
@@ -1767,7 +1767,7 @@ function do_action_deprecated( $tag, $args, $version, $replacement = false, $mes
  * @param callable $function The function hooked to the 'activate_PLUGIN' action.
  */
 function register_activation_hook( $file, $function ) {
-	HookHelper::register_activation_hook( $file, $function );
+	HookHelper::registerActivationHook( $file, $function );
 }
 
 /**
@@ -1789,7 +1789,7 @@ function register_activation_hook( $file, $function ) {
  * @param callable $function The function hooked to the 'deactivate_PLUGIN' action.
  */
 function register_deactivation_hook( $file, $function ) {
-	HookHelper::register_deactivation_hook( $file, $function );
+	HookHelper::registerDeactivationHook( $file, $function );
 }
 
 /**
@@ -1819,7 +1819,7 @@ function register_deactivation_hook( $file, $function ) {
  *                           a static method or function.
  */
 function register_uninstall_hook( $file, $callback ) {
-	HookHelper::register_uninstall_hook( $file, $callback );
+	HookHelper::registerUninstallHook( $file, $callback );
 }
 
 /**
@@ -1841,7 +1841,7 @@ function register_uninstall_hook( $file, $callback ) {
  * @param array $args The collected parameters from the hook that was called.
  */
 function _wp_call_all_hook( $args ) {
-	HookHelper::_wp_call_all_hook( $args );
+	HookHelper::callAllHook( $args );
 }
 
 /**
@@ -1879,7 +1879,7 @@ function _wp_call_all_hook( $args ) {
  *                      a unique id.
  */
 function _wp_filter_build_unique_id( $tag, $function, $priority ) {
-	return HookHelper::_wp_filter_build_unique_id( $tag, $function, $priority );
+	return HookHelper::buildUniqueId( $tag, $function, $priority );
 }
 
 /* ------------------- Plugins: --------------------------*/
@@ -1897,7 +1897,7 @@ function _wp_filter_build_unique_id( $tag, $function, $priority ) {
  * @return string The name of a plugin.
  */
 function plugin_basename( $file ) {
-	return PluginHelper::plugin_basename( $file );
+	return PluginHelper::basename( $file );
 }
 
 /**
@@ -1918,7 +1918,7 @@ function plugin_basename( $file ) {
  * @return bool Whether the path was able to be registered.
  */
 function wp_register_plugin_realpath( $file ) {
-	return PluginHelper::wp_register_plugin_realpath( $file );
+	return PluginHelper::registerRealpath( $file );
 }
 
 /**
@@ -1930,7 +1930,7 @@ function wp_register_plugin_realpath( $file ) {
  * @return string the filesystem path of the directory that contains the plugin.
  */
 function plugin_dir_path( $file ) {
-	return PluginHelper::plugin_dir_path( $file );
+	return PluginHelper::dirPath( $file );
 }
 
 /**
@@ -1942,7 +1942,7 @@ function plugin_dir_path( $file ) {
  * @return string the URL path of the directory that contains the plugin.
  */
 function plugin_dir_url( $file ) {
-	return PluginHelper::plugin_dir_url( $file );
+	return PluginHelper::dirUrl( $file );
 }
 
 /* ------------------- Login: --------------------------*/
@@ -1958,7 +1958,7 @@ function plugin_dir_url( $file ) {
  * @param WP_Error $wp_error Optional. The error to pass. Default is a WP_Error instance.
  */
 function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
-	LoginHelper::login_header( $title, $message, $wp_error );
+	LoginHelper::loginHeader( $title, $message, $wp_error );
 }
 
 /**
@@ -1969,7 +1969,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = null ) {
  * @param string $input_id Which input to auto-focus.
  */
 function login_footer( $input_id = '' ) {
-	LoginHelper::login_footer( $input_id );
+	LoginHelper::loginFooter( $input_id );
 }
 
 /**
@@ -1978,7 +1978,7 @@ function login_footer( $input_id = '' ) {
  * @since 3.0.0
  */
 function wp_shake_js() {
-	LoginHelper::wp_shake_js();
+	LoginHelper::shakeJs();
 }
 
 /**
@@ -1987,7 +1987,7 @@ function wp_shake_js() {
  * @since 3.7.0
  */
 function wp_login_viewport_meta() {
-	LoginHelper::wp_login_viewport_meta();
+	LoginHelper::loginViewportMeta();
 }
 
 /**
@@ -1998,7 +1998,7 @@ function wp_login_viewport_meta() {
  * @return bool|WP_Error True: when finish. WP_Error on error
  */
 function retrieve_password() {
-	return LoginHelper::retrieve_password();
+	return LoginHelper::retrievePassword();
 }
 
 /* ------------------- Capabilities: --------------------------*/
