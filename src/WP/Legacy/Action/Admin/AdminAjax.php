@@ -4,7 +4,7 @@ namespace WP\Legacy\Action\Admin;
 
 use WP\Legacy\Action\ActionInterface;
 
-class About implements ActionInterface {
+class AdminAjax implements ActionInterface {
 
 	public function perform() {
 
