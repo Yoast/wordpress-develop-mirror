@@ -20,7 +20,7 @@
  * @global array $menu
  */
 
-global $menu;
+global $menu, $submenu;
 $menu[2] = array( __( 'Dashboard' ), 'read', 'index.php', '', 'menu-top menu-top-first menu-icon-dashboard', 'menu-dashboard', 'dashicons-dashboard' );
 
 $submenu['index.php'][0] = array( __( 'Home' ), 'read', 'index.php' );
