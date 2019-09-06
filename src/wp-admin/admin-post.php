@@ -13,9 +13,6 @@ if ( ! defined( 'WP_ADMIN' ) ) {
 	define( 'WP_ADMIN', true );
 }
 
-if ( defined( 'ABSPATH' ) ) {
-	require_once( ABSPATH . 'wp-load.php' );
-} else {
-	require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
-}
+require_once( dirname( dirname( __FILE__ ) ) . '/wp-load.php' );
+
 
