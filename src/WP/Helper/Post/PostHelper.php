@@ -81,7 +81,7 @@ class PostHelper{
         $parsed_args['ignore_sticky_posts'] = true;
         $parsed_args['no_found_rows']       = true;
 
-        $get_posts = new WP_Query;
+        $get_posts = new \WP_Query;
         return $get_posts->query( $parsed_args );
     }
 
