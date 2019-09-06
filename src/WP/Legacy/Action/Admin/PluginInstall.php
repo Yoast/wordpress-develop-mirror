@@ -7,7 +7,7 @@ use WP\Legacy\Action\ActionInterface;
 class PluginInstall implements ActionInterface {
 
 	public function perform() {
-		global $tab, $paged;
+		global $tab, $paged, $wp_list_table;
 
 		if (!current_user_can('install_plugins')) {
 			wp_die(__('Sorry, you are not allowed to install plugins on this site.'));

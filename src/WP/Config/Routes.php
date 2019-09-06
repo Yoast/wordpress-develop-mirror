@@ -4,6 +4,7 @@ namespace WP\Config;
 
 use WP\Legacy\Action\Admin\About;
 use WP\Legacy\Action\Admin\PluginInstall;
+use WP\Legacy\Action\Admin\Plugins;
 use WP\Legacy\Action\Admin\Widgets;
 
 /**
@@ -15,5 +16,6 @@ class Routes {
 		'wp-admin/about' => About::class,
 		'wp-admin/widgets' => Widgets::class,
 		'wp-admin/plugin-install' => PluginInstall::class,
+		'wp-admin/plugins' => Plugins::class,
 	];
 }
