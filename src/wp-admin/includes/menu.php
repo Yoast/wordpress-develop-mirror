@@ -71,7 +71,10 @@ foreach ( $menu as $menu_page ) {
 }
 unset( $menu_page, $compat );
 
+global $_wp_submenu_nopriv;
 $_wp_submenu_nopriv = array();
+
+global $_wp_menu_nopriv;
 $_wp_menu_nopriv    = array();
 // Loop over submenus and remove pages for which the user does not have privs.
 foreach ( $submenu as $parent => $sub ) {
@@ -350,4 +353,5 @@ if ( ! user_can_access_admin_page() ) {
 	wp_die( __( 'Sorry, you are not allowed to access this page.' ), 403 );
 }
 
+global $menu;
 $menu = add_menu_classes( $menu );

@@ -1,8 +1,8 @@
 <?php
 
-namespace WP\Initializers;
+namespace WP\Initializer;
 
 interface InitializerInterface {
 
-	public function initialize;
+	public function initialize();
 }
