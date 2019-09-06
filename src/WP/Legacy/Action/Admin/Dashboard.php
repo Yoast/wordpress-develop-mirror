@@ -6,6 +6,9 @@ use WP\Legacy\Action\ActionInterface;
 class Dashboard implements ActionInterface {
 
 	public function perform() {
+		global $title;
+
+		require_once( ABSPATH . 'wp-admin/admin-header.php' );
 		require_once( ABSPATH . 'wp-admin/includes/dashboard.php' );
 
 		wp_dashboard_setup();
@@ -104,7 +107,6 @@ class Dashboard implements ActionInterface {
 			'<p>' . __( '<a href="https://wordpress.org/support/">Support</a>' ) . '</p>'
 		);
 
-		include( ABSPATH . 'wp-admin/admin-header.php' );
 		?>
 
 		<div class="wrap">
