@@ -332,6 +332,7 @@ function get_post_type_object( $post_type ) {
 }
 
 
+
 /**
  * Whether the post type is hierarchical.
  *
@@ -388,6 +389,23 @@ function post_type_exists( $post_type ) {
  */
 function get_post_types( $args = array(), $output = 'names', $operator = 'and' ) {
     return PostTypeHelper::list( $args, $output, $operator );
+}
+
+/**
+ * Determines whether a post type is considered "viewable".
+ *
+ * For built-in post types such as posts and pages, the 'public' value will be evaluated.
+ * For all others, the 'publicly_queryable' value will be used.
+ *
+ * @since 4.4.0
+ * @since 4.5.0 Added the ability to pass a post type name in addition to object.
+ * @since 4.6.0 Converted the `$post_type` parameter to accept a `WP_Post_Type` object.
+ *
+ * @param string|WP_Post_Type $post_type Post type name or object.
+ * @return bool Whether the post type should be considered viewable.
+ */
+function is_post_type_viewable( $post_type ) {
+    return PostTypeHelper::isViewable( $post_type );
 }
 
 
@@ -491,6 +509,24 @@ function get_all_post_type_supports( $post_type ) {
  */
 function post_type_supports( $post_type, $feature ) {
     return PostTypeSupportsHelper::hasSupport( $post_type, $feature );
+}
+
+/**
+ * Retrieves a list of post type names that support a specific feature.
+ *
+ * @since 4.5.0
+ *
+ * @global array $_wp_post_type_features Post type features
+ *
+ * @param array|string $feature  Single feature or an array of features the post types should support.
+ * @param string       $operator Optional. The logical operation to perform. 'or' means
+ *                               only one element from the array needs to match; 'and'
+ *                               means all elements must match; 'not' means no elements may
+ *                               match. Default 'and'.
+ * @return array A list of post type names.
+ */
+function get_post_types_by_support( $feature, $operator = 'and' ) {
+    return PostTypeSupportsHelper::getPostTypesBySupport( $feature, $operator );
 }
 
 /* ------------------- Labels: --------------------------*/
@@ -692,6 +728,24 @@ function get_post_type( $post = null ) {
 }
 
 /**
+ * Update the post type for the post ID.
+ *
+ * The page or post cache will be cleaned for the post ID.
+ *
+ * @since 2.5.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int    $post_id   Optional. Post ID to change post type. Default 0.
+ * @param string $post_type Optional. Post type. Accepts 'post' or 'page' to
+ *                          name a few. Default 'post'.
+ * @return int|false Amount of rows changed. Should be 1 for success and 0 for failure.
+ */
+function set_post_type( $post_id = 0, $post_type = 'post' ) {
+    return PostHelper::setPostType( $post_id, $post_type );
+}
+
+/**
  * Retrieve data from a post field based on Post ID.
  *
  * Examples of the post field will be, 'post_type', 'post_status', 'post_content',
@@ -882,6 +936,9 @@ function get_page_statuses() {
 function _wp_privacy_statuses() {
     return PostStatusHelper::getPrivacyStatuses();
 }
+
+/* ------------------- Hooks: --------------------------*/
+
 
 /**
  * Hook a function or method to a specific filter action.

@@ -2,7 +2,7 @@
 
 namespace WP\Helper\PostType;
 
-use WP_Error;
+use \WP_Error;
 use WP_Post_Type;
 use WP\Helper\Post\PostStatusHelper;
 
@@ -51,10 +51,10 @@ class PostTypeHelper{
 
         if ( empty( $post_type ) || strlen( $post_type ) > 20 ) {
             _doing_it_wrong( __FUNCTION__, __( 'Post type names must be between 1 and 20 characters in length.' ), '4.2.0' );
-            return new WP_Error( 'post_type_length_invalid', __( 'Post type names must be between 1 and 20 characters in length.' ) );
+            return new \WP_Error( 'post_type_length_invalid', __( 'Post type names must be between 1 and 20 characters in length.' ) );
         }
 
-        $post_type_object = new WP_Post_Type( $post_type, $args );
+        $post_type_object = new \WP_Post_Type( $post_type, $args );
         $post_type_object->add_supports();
         $post_type_object->add_rewrite_rules();
         $post_type_object->register_meta_boxes();
@@ -87,14 +87,14 @@ class PostTypeHelper{
         global $wp_post_types;
 
         if ( ! post_type_exists( $post_type ) ) {
-            return new WP_Error( 'invalid_post_type', __( 'Invalid post type.' ) );
+            return new \WP_Error( 'invalid_post_type', __( 'Invalid post type.' ) );
         }
 
         $post_type_object = get_post_type_object( $post_type );
 
         // Do not allow unregistering internal post types.
         if ( $post_type_object->_builtin ) {
-            return new WP_Error( 'invalid_post_type', __( 'Unregistering a built-in post type is not allowed' ) );
+            return new \WP_Error( 'invalid_post_type', __( 'Unregistering a built-in post type is not allowed' ) );
         }
 
         $post_type_object->remove_supports();
@@ -122,6 +122,20 @@ class PostTypeHelper{
      */
     public static function exists( $post_type ) {
         return (bool) static::get( $post_type );
+    }
+
+    /**
+     * Check if a post-type is viewable:
+     */
+    public static function isViewable( $post_type ) {
+        if ( is_scalar( $post_type ) ) {
+            $post_type = get_post_type_object( $post_type );
+            if ( ! $post_type ) {
+                return false;
+            }
+        }
+
+        return $post_type->publicly_queryable || ( $post_type->_builtin && $post_type->public );
     }
 
     /**

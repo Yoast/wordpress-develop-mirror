@@ -18,14 +18,14 @@ class PostHelper{
         } elseif ( is_object( $post ) ) {
             if ( empty( $post->filter ) ) {
                 $_post = sanitize_post( $post, 'raw' );
-                $_post = new WP_Post( $_post );
+                $_post = new \WP_Post( $_post );
             } elseif ( 'raw' == $post->filter ) {
-                $_post = new WP_Post( $post );
+                $_post = new \WP_Post( $post );
             } else {
-                $_post = WP_Post::get_instance( $post->ID );
+                $_post = \WP_Post::get_instance( $post->ID );
             }
         } else {
-            $_post = WP_Post::get_instance( $post );
+            $_post = \WP_Post::get_instance( $post );
         }
 
         if ( ! $_post ) {
@@ -146,6 +146,19 @@ class PostHelper{
         return false;
     }
 
+     /**
+     * Retrieves the post type of the current post or of a given post.
+     */
+    public static function setPostType( $post_id = 0, $post_type = 'post' ) {
+        global $wpdb;
+
+        $post_type = sanitize_post_field( 'post_type', $post_type, $post_id, 'db' );
+        $return    = $wpdb->update( $wpdb->posts, array( 'post_type' => $post_type ), array( 'ID' => $post_id ) );
+
+        clean_post_cache( $post_id );
+
+        return $return;
+    }
 
     /**
      * Retrieve data from a post field based on Post ID.
