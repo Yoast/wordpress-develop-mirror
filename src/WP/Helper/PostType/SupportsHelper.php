@@ -51,4 +51,14 @@ class SupportsHelper{
 
 	    return ( isset( $_wp_post_type_features[ $post_type ][ $feature ] ) );
     }
+
+    /**
+     * Return post types in a list, filtered by support
+     */
+    public static function getPostTypesBySupport( $feature, $operator = 'and' ) {
+        global $_wp_post_type_features;
+
+        $features = array_fill_keys( (array) $feature, true );
+        return array_keys( wp_filter_object_list( $_wp_post_type_features, $features, $operator ) );
+    }
 }

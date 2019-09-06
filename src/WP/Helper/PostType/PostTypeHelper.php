@@ -125,6 +125,20 @@ class PostTypeHelper{
     }
 
     /**
+     * Check if a post-type is viewable:
+     */
+    public static function isViewable( $post_type ) {
+        if ( is_scalar( $post_type ) ) {
+            $post_type = get_post_type_object( $post_type );
+            if ( ! $post_type ) {
+                return false;
+            }
+        }
+
+        return $post_type->publicly_queryable || ( $post_type->_builtin && $post_type->public );
+    }
+
+    /**
      * Return an object with all post-types and their capabilities
      */
     public static function getCapabilities( $args ) {
