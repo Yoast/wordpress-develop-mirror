@@ -3,7 +3,12 @@
 namespace WP\Config;
 
 use WP\Legacy\Action\Admin\About;
+use WP\Legacy\Action\Admin\AdminAjax;
+use WP\Legacy\Action\Admin\AdminHeader;
+use WP\Legacy\Action\Admin\AdminPost;
+use WP\Legacy\Action\Admin\Dashboard;
 use WP\Legacy\Action\Admin\PluginInstall;
+use WP\Legacy\Action\Admin\Plugins;
 use WP\Legacy\Action\Admin\Widgets;
 
 /**
@@ -12,8 +17,14 @@ use WP\Legacy\Action\Admin\Widgets;
  */
 class Routes {
 	const ROUTES = [
+		'wp-admin/' => Dashboard::class,
+		'wp-admin/index' => Dashboard::class,
 		'wp-admin/about' => About::class,
-		'wp-admin/widgets' => Widgets::class,
+		'wp-admin/admin-ajax' => AdminAjax::class,
+		'wp-admin/admin-header' => AdminHeader::class,
+		'wp-admin/admin-post' => AdminPost::class,
 		'wp-admin/plugin-install' => PluginInstall::class,
+		'wp-admin/plugins' => Plugins::class,
+		'wp-admin/widgets' => Widgets::class,
 	];
 }

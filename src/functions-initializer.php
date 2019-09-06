@@ -19,6 +19,8 @@ use \WP\Helper\CacheHelper;
 
 use WP\Helper\HookHelper;
 use WP\Helper\PluginHelper;
+use WP\Helper\CapabilitiesHelper;
+use WP\Helper\RoleHelper;
 
 /* ------------------- Post Types: --------------------------*/
 
@@ -1535,7 +1537,7 @@ function get_post_custom_keys( $post_id = 0 ) {
  */
 function get_post_custom_values( $key = '', $post_id = 0 ) {
     return PostMetaHelper::getCustomValues( $key, $post_id );
-}   
+}
 
 /* ------------------- Taxonomies: -----------------------------*/
 
@@ -2649,4 +2651,292 @@ function retrieve_password() {
  */
 function _count_posts_cache_key( $type = 'post', $perm = '' ) {
     return CacheHelper::countPostCacheKey( $type, $perm );
+}
+/* ------------------- Capabilities: --------------------------*/
+
+/**
+ * Maps meta capabilities to primitive capabilities.
+ *
+ * This function also accepts an ID of an object to map against if the capability is a meta capability. Meta
+ * capabilities such as `edit_post` and `edit_user` are capabilities used by this function to map to primitive
+ * capabilities that a user or role has, such as `edit_posts` and `edit_others_posts`.
+ *
+ * Example usage:
+ *
+ *     map_meta_cap( 'edit_posts', $user->ID );
+ *     map_meta_cap( 'edit_post', $user->ID, $post->ID );
+ *     map_meta_cap( 'edit_post_meta', $user->ID, $post->ID, $meta_key );
+ *
+ * This does not actually compare whether the user ID has the actual capability,
+ * just what the capability or capabilities are. Meta capability list value can
+ * be 'delete_user', 'edit_user', 'remove_user', 'promote_user', 'delete_post',
+ * 'delete_page', 'edit_post', 'edit_page', 'read_post', or 'read_page'.
+ *
+ * @since 2.0.0
+ *
+ * @global array $post_type_meta_caps Used to get post type meta capabilities.
+ *
+ * @param string $cap     Capability name.
+ * @param int    $user_id User ID.
+ * @param mixed  ...$args Optional further parameters, typically starting with an object ID.
+ * @return array Actual capabilities for meta capability.
+ */
+function map_meta_cap( $cap, $user_id, ...$args ) {
+	return CapabilitiesHelper::mapMetaCap( $cap, $user_id, ...$args );
+}
+
+/**
+ * Returns whether the current user has the specified capability.
+ *
+ * This function also accepts an ID of an object to check against if the capability is a meta capability. Meta
+ * capabilities such as `edit_post` and `edit_user` are capabilities used by the `map_meta_cap()` function to
+ * map to primitive capabilities that a user or role has, such as `edit_posts` and `edit_others_posts`.
+ *
+ * Example usage:
+ *
+ *     current_user_can( 'edit_posts' );
+ *     current_user_can( 'edit_post', $post->ID );
+ *     current_user_can( 'edit_post_meta', $post->ID, $meta_key );
+ *
+ * While checking against particular roles in place of a capability is supported
+ * in part, this practice is discouraged as it may produce unreliable results.
+ *
+ * Note: Will always return true if the current user is a super admin, unless specifically denied.
+ *
+ * @since 2.0.0
+ *
+ * @see WP_User::has_cap()
+ * @see map_meta_cap()
+ *
+ * @param string $capability Capability name.
+ * @param mixed  ...$args    Optional further parameters, typically starting with an object ID.
+ * @return bool Whether the current user has the given capability. If `$capability` is a meta cap and `$object_id` is
+ *              passed, whether the current user has the given meta capability for the given object.
+ */
+function current_user_can( $capability, ...$args ) {
+	return CapabilitiesHelper::currentUserCan( $capability, ...$args );
+}
+
+/**
+ * Returns whether the current user has the specified capability for a given site.
+ *
+ * This function also accepts an ID of an object to check against if the capability is a meta capability. Meta
+ * capabilities such as `edit_post` and `edit_user` are capabilities used by the `map_meta_cap()` function to
+ * map to primitive capabilities that a user or role has, such as `edit_posts` and `edit_others_posts`.
+ *
+ * Example usage:
+ *
+ *     current_user_can_for_blog( $blog_id, 'edit_posts' );
+ *     current_user_can_for_blog( $blog_id, 'edit_post', $post->ID );
+ *     current_user_can_for_blog( $blog_id, 'edit_post_meta', $post->ID, $meta_key );
+ *
+ * @since 3.0.0
+ *
+ * @param int    $blog_id    Site ID.
+ * @param string $capability Capability name.
+ * @param mixed  ...$args    Optional further parameters, typically starting with an object ID.
+ * @return bool Whether the user has the given capability.
+ */
+function current_user_can_for_blog( $blog_id, $capability, ...$args ) {
+	return CapabilitiesHelper::currentUserCanForBlog( $blog_id, $capability, ...$args );
+}
+
+/**
+ * Returns whether the author of the supplied post has the specified capability.
+ *
+ * This function also accepts an ID of an object to check against if the capability is a meta capability. Meta
+ * capabilities such as `edit_post` and `edit_user` are capabilities used by the `map_meta_cap()` function to
+ * map to primitive capabilities that a user or role has, such as `edit_posts` and `edit_others_posts`.
+ *
+ * Example usage:
+ *
+ *     author_can( $post, 'edit_posts' );
+ *     author_can( $post, 'edit_post', $post->ID );
+ *     author_can( $post, 'edit_post_meta', $post->ID, $meta_key );
+ *
+ * @since 2.9.0
+ *
+ * @param int|WP_Post $post       Post ID or post object.
+ * @param string      $capability Capability name.
+ * @param mixed       ...$args    Optional further parameters, typically starting with an object ID.
+ * @return bool Whether the post author has the given capability.
+ */
+function author_can( $post, $capability, ...$args ) {
+	return CapabilitiesHelper::authorCan( $post, $capability, ...$args );
+}
+
+/**
+ * Returns whether a particular user has the specified capability.
+ *
+ * This function also accepts an ID of an object to check against if the capability is a meta capability. Meta
+ * capabilities such as `edit_post` and `edit_user` are capabilities used by the `map_meta_cap()` function to
+ * map to primitive capabilities that a user or role has, such as `edit_posts` and `edit_others_posts`.
+ *
+ * Example usage:
+ *
+ *     user_can( $user->ID, 'edit_posts' );
+ *     user_can( $user->ID, 'edit_post', $post->ID );
+ *     user_can( $user->ID, 'edit_post_meta', $post->ID, $meta_key );
+ *
+ * @since 3.1.0
+ *
+ * @param int|WP_User $user       User ID or object.
+ * @param string      $capability Capability name.
+ * @param mixed       ...$args    Optional further parameters, typically starting with an object ID.
+ * @return bool Whether the user has the given capability.
+ */
+function user_can( $user, $capability, ...$args ) {
+	return CapabilitiesHelper::userCan( $user, $capability, ...$args );
+}
+
+/**
+ * Filters the user capabilities to grant the 'install_languages' capability as necessary.
+ *
+ * A user must have at least one out of the 'update_core', 'install_plugins', and
+ * 'install_themes' capabilities to qualify for 'install_languages'.
+ *
+ * @since 4.9.0
+ *
+ * @param bool[] $allcaps An array of all the user's capabilities.
+ * @return bool[] Filtered array of the user's capabilities.
+ */
+function wp_maybe_grant_install_languages_cap( $allcaps ) {
+	return CapabilitiesHelper::maybeGrantInstallLanguages( $allcaps );
+}
+
+/**
+ * Filters the user capabilities to grant the 'resume_plugins' and 'resume_themes' capabilities as necessary.
+ *
+ * @since 5.2.0
+ *
+ * @param bool[] $allcaps An array of all the user's capabilities.
+ * @return bool[] Filtered array of the user's capabilities.
+ */
+function wp_maybe_grant_resume_extensions_caps( $allcaps ) {
+	return CapabilitiesHelper::maybeGrantResumeExtensions( $allcaps );
+}
+
+/**
+ * Filters the user capabilities to grant the 'view_site_health_checks' capabilities as necessary.
+ *
+ * @since 5.2.2
+ *
+ * @param bool[]   $allcaps An array of all the user's capabilities.
+ * @param string[] $caps    Required primitive capabilities for the requested capability.
+ * @param array    $args {
+ *     Arguments that accompany the requested capability check.
+ *
+ *     @type string    $0 Requested capability.
+ *     @type int       $1 Concerned user ID.
+ *     @type mixed  ...$2 Optional second and further parameters, typically object ID.
+ * }
+ * @param \WP_User  $user    The user object.
+ * @return bool[] Filtered array of the user's capabilities.
+ */
+function wp_maybe_grant_site_health_caps( $allcaps, $caps, $args, $user ) {
+	return CapabilitiesHelper::maybeGrantSiteHealth( $allcaps, $caps, $args, $user );
+}
+
+/**
+ * Retrieves the global WP_Roles instance and instantiates it if necessary.
+ *
+ * @since 4.3.0
+ *
+ * @global WP_Roles $wp_roles WordPress role management object.
+ *
+ * @return WP_Roles WP_Roles global instance if not already instantiated.
+ */
+function wp_roles() {
+	return RoleHelper::roles();
+}
+
+/**
+ * Retrieve role object.
+ *
+ * @since 2.0.0
+ *
+ * @param string $role Role name.
+ * @return WP_Role|null WP_Role object if found, null if the role does not exist.
+ */
+function get_role( $role ) {
+	return RoleHelper::getRole( $role );
+}
+
+/**
+ * Add role, if it does not exist.
+ *
+ * @since 2.0.0
+ *
+ * @param string $role Role name.
+ * @param string $display_name Display name for role.
+ * @param array $capabilities List of capabilities, e.g. array( 'edit_posts' => true, 'delete_posts' => false );
+ * @return WP_Role|null WP_Role object if role is added, null if already exists.
+ */
+function add_role( $role, $display_name, $capabilities = array() ) {
+	return RoleHelper::addRole( $role, $display_name, $capabilities );
+}
+
+/**
+ * Remove role, if it exists.
+ *
+ * @since 2.0.0
+ *
+ * @param string $role Role name.
+ */
+function remove_role( $role ) {
+	RoleHelper::removeRole( $role );
+}
+
+/**
+ * Retrieve a list of super admins.
+ *
+ * @since 3.0.0
+ *
+ * @global array $super_admins
+ * @return array List of super admin logins
+ */
+function get_super_admins() {
+	return RoleHelper::getSuperAdmins();
+}
+
+/**
+ * Determine if user is a site admin.
+ *
+ * @since 3.0.0
+ *
+ * @param bool|int $user_id (Optional) The ID of a user. Defaults to the current user.
+ * @return bool True if the user is a site admin.
+ */
+function is_super_admin( $user_id = false ) {
+	return RoleHelper::isSuperAdmin( $user_id );
+}
+
+/**
+ * Grants Super Admin privileges.
+ *
+ * @since 3.0.0
+ *
+ * @global array $super_admins
+ *
+ * @param int $user_id ID of the user to be granted Super Admin privileges.
+ * @return bool True on success, false on failure. This can fail when the user is
+ *              already a super admin or when the `$super_admins` global is defined.
+ */
+function grant_super_admin( $user_id ) {
+	return RoleHelper::grantSuperAdmin( $user_id );
+}
+
+/**
+ * Revokes Super Admin privileges.
+ *
+ * @since 3.0.0
+ *
+ * @global array $super_admins
+ *
+ * @param int $user_id ID of the user Super Admin privileges to be revoked from.
+ * @return bool True on success, false on failure. This can fail when the user's email
+ *              is the network admin email or when the `$super_admins` global is defined.
+ */
+function revoke_super_admin( $user_id ) {
+	return RoleHelper::revokeSuperAdmin( $user_id );
 }
