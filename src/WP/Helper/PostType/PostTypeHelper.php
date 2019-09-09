@@ -25,7 +25,7 @@ class PostTypeHelper{
     /**
      * Get a list of all registered post type objects.
      */
-    public static function list( $args = array(), $output = 'names', $operator = 'and') {
+    public static function get_list( $args = array(), $output = 'names', $operator = 'and') {
         global $wp_post_types;
 
         $field = ( 'names' == $output ) ? 'name' : false;
@@ -285,7 +285,7 @@ class PostTypeHelper{
      * Add the submenus for each post-type
      */
     public static function addSubmenus() {
-        foreach ( static::list( array( 'show_ui' => true ) ) as $ptype ) {
+        foreach ( static::get_list( array( 'show_ui' => true ) ) as $ptype ) {
             $ptype_obj = static::get( $ptype );
             // Sub-menus only.
             if ( ! $ptype_obj->show_in_menu || $ptype_obj->show_in_menu === true ) {

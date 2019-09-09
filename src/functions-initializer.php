@@ -401,7 +401,7 @@ function post_type_exists( $post_type ) {
  * @return string[]|WP_Post_Type[] An array of post type names or objects.
  */
 function get_post_types( $args = array(), $output = 'names', $operator = 'and' ) {
-    return PostTypeHelper::list( $args, $output, $operator );
+    return PostTypeHelper::get_list( $args, $output, $operator );
 }
 
 /**
