@@ -18,15 +18,17 @@ use WP\Legacy\Action\Admin\Widgets;
  */
 class Routes {
 	const ROUTES = [
-		'wp-admin/' => Dashboard::class,
-		'wp-admin/index' => Dashboard::class,
-		'wp-admin/about' => About::class,
-		'wp-admin/admin-ajax' => AdminAjax::class,
-		'wp-admin/admin-post' => AdminPost::class,
-		'wp-admin/async-upload' => AsyncUpload::class,
-		'wp-admin/comments' => Comment::class,
-		'wp-admin/plugin-install' => PluginInstall::class,
-		'wp-admin/plugins' => Plugins::class,
-		'wp-admin/widgets' => Widgets::class,
+		'GET' => [
+			'wp-admin/'               => Dashboard::class,
+			'wp-admin/index'          => Dashboard::class,
+			'wp-admin/about'          => About::class,
+			'wp-admin/admin-ajax'     => AdminAjax::class,
+			'wp-admin/admin-post'     => AdminPost::class,
+			'wp-admin/async-upload'   => AsyncUpload::class,
+			'wp-admin/comments'       => Comment::class,
+			'wp-admin/plugin-install' => PluginInstall::class,
+			'wp-admin/plugins'        => Plugins::class,
+			'wp-admin/widgets'        => Widgets::class,
+		],
 	];
 }

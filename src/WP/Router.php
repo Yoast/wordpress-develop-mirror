@@ -10,6 +10,9 @@ use WP\Config\Routes;
  * @package WP
  */
 class Router {
+	/**
+	 * @var array 
+	 */
 	private $routes;
 
 	/**
@@ -26,11 +29,14 @@ class Router {
 	 */
 	public function route() {
 		$request = filter_input( INPUT_SERVER, 'REQUEST_URI' );
-		$route = ltrim( str_replace( '.php', '', parse_url( $request, PHP_URL_PATH ) ), '/' );
-		if ( ! array_key_exists( $route, Routes::ROUTES ) ) {
+		$method  = filter_input( INPUT_SERVER, 'REQUEST_METHOD' );
+		$route   = ltrim( str_replace( '.php', '', parse_url( $request, PHP_URL_PATH ) ), '/' );
+		if ( ! array_key_exists( $route, Routes::ROUTES[ $method ] ) ) {
 			return;
 		}
-		$action = new $this->routes[$route];
+
+		$action_class = $this->routes[ $method ][ $route ];
+		$action       = new $action_class;
 		$action->perform();
 	}
 
