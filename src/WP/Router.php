@@ -11,7 +11,7 @@ use WP\Config\Routes;
  */
 class Router {
 	/**
-	 * @var array 
+	 * @var array
 	 */
 	private $routes;
 
