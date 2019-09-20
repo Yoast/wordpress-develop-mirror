@@ -21,7 +21,16 @@ class Main implements InitializerInterface {
 	/**
 	 * @var string
 	 */
-	private $admin_route;
+	private $route;
+
+	/**
+	 * @var string[]
+	 */
+	private $exceptions = [
+		'wp-admin/admin-post',
+		'wp-admin/async-upload',
+		'wp-admin/upgrade'
+	];
 
 	/**
 	 * Main constructor.
@@ -40,6 +49,8 @@ class Main implements InitializerInterface {
 	public function initialize() {
 		$this->check_admin();
 
+		$this->set_constants();
+
 		if ( $this->is_admin === true ) {
 			$this->admin_constants_initializer->initialize();
 			$this->general_initializer->initialize();
@@ -57,9 +68,41 @@ class Main implements InitializerInterface {
 	 */
 	protected function check_admin() {
 		$request        = filter_input( INPUT_SERVER, 'REQUEST_URI' );
+		$this->route    = ltrim( str_replace( '.php', '', parse_url( $request, PHP_URL_PATH ) ), '/' );
 		$this->is_admin = false;
-		if ( strpos( $request, '/wp-admin/' ) === 0 ) {
+		if ( strpos( $request, '/wp-admin/' ) === 0 && ! in_array( $this->route, $this->exceptions ) ) {
 			$this->is_admin = true;
+		}
+	}
+
+	/**
+	 * Set the required constants for these requests.
+	 */
+	private function set_constants() {
+		switch( $this->route ) {
+			case 'wp-admin/install':
+			case 'wp-admin/setup-config.php':
+			case 'wp-admin/upgrade.php':
+				define( 'WP_INSTALLING', true );
+				break;
+			case 'wp-admin/network':
+				break;
+			case 'wp-admin/customize':
+			case 'wp-admin/press-this':
+			case 'wp-admin/update':
+				define( 'IFRAME_REQUEST', true );
+				break;
+			case 'wp-admin/plugin-install.php':
+				// Taken from plugin-install.php and moved here.
+				if ( ! defined( 'IFRAME_REQUEST' ) && isset( $_GET['tab'] ) && ( 'plugin-information' == $_GET['tab'] ) ) {
+					define( 'IFRAME_REQUEST', true );
+				}
+				break;
+			case 'wp-admin/media-upload':
+				if ( isset( $_GET['inline'] ) ) {
+					define( 'IFRAME_REQUEST', true );
+				}
+				break;
 		}
 	}
 }

@@ -11,6 +11,7 @@ use WP\Legacy\Action\Admin\Dashboard;
 use WP\Legacy\Action\Admin\MediaLibrary;
 use WP\Legacy\Action\Admin\PluginInstall;
 use WP\Legacy\Action\Admin\Plugins;
+use WP\Legacy\Action\Admin\Upgrade;
 use WP\Legacy\Action\Admin\UserEdit;
 use WP\Legacy\Action\Admin\UserNew;
 use WP\Legacy\Action\Admin\Users;
@@ -32,6 +33,7 @@ class Routes {
 		'wp-admin/plugin-install' => PluginInstall::class,
 		'wp-admin/plugins'        => Plugins::class,
 		'wp-admin/upload'         => MediaLibrary::class,
+		'wp-admin/upgrade'        => Upgrade::class,
 		'wp-admin/user-edit'      => UserEdit::class,
 		'wp-admin/user-new'       => UserNew::class,
 		'wp-admin/users'          => Users::class,
