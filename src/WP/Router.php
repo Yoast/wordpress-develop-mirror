@@ -29,13 +29,12 @@ class Router {
 	 */
 	public function route() {
 		$request = filter_input( INPUT_SERVER, 'REQUEST_URI' );
-		$method  = filter_input( INPUT_SERVER, 'REQUEST_METHOD' );
 		$route   = ltrim( str_replace( '.php', '', parse_url( $request, PHP_URL_PATH ) ), '/' );
-		if ( ! array_key_exists( $route, Routes::ROUTES[ $method ] ) ) {
+		if ( ! array_key_exists( $route, Routes::ROUTES ) ) {
 			return;
 		}
 
-		$action_class = $this->routes[ $method ][ $route ];
+		$action_class = $this->routes[ $route ];
 		$action       = new $action_class;
 		$action->perform();
 	}
