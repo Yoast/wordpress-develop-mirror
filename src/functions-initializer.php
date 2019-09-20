@@ -1,27 +1,23 @@
 <?php
 
-use \WP\Helper\LabelHelper;
+use WP\Helper\LabelHelper;
 use WP\Helper\Frontend\LoginHelper;
-use \WP\Helper\Post\PostHelper;
-use \WP\Helper\Post\MetaHelper as PostMetaHelper;
-use \WP\Helper\Post\StatusHelper as PostStatusHelper;
-use \WP\Helper\Post\CommentHelper as PostCommentHelper;
-use \WP\Helper\Post\TermHelper as PostTermHelper;
-use \WP\Helper\Post\SlugHelper as PostSlugHelper;
-use \WP\Helper\Post\AttachmentHelper;
-use \WP\Helper\PostType\PostTypeHelper;
-use \WP\Helper\PostType\SupportsHelper as PostTypeSupportsHelper;
-
-use \WP\Helper\Taxonomy\TermHelper;
-
-use \WP\Helper\Meta\Metadata;
-use \WP\Helper\CacheHelper;
-
+use WP\Helper\Post\PostHelper;
+use WP\Helper\Post\MetaHelper as PostMetaHelper;
+use WP\Helper\Post\StatusHelper as PostStatusHelper;
+use WP\Helper\Post\CommentHelper as PostCommentHelper;
+use WP\Helper\Post\TermHelper as PostTermHelper;
+use WP\Helper\Post\SlugHelper as PostSlugHelper;
+use WP\Helper\Post\AttachmentHelper;
+use WP\Helper\PostType\PostTypeHelper;
+use WP\Helper\PostType\SupportsHelper as PostTypeSupportsHelper;
+use WP\Helper\Taxonomy\TermHelper;
+use WP\Helper\Meta\Metadata;
+use WP\Helper\CacheHelper;
 use WP\Helper\HookHelper;
 use WP\Helper\PluginHelper;
 use WP\Helper\CapabilitiesHelper;
 use WP\Helper\RoleHelper;
-
 use WP\Helper\Ajax\CommentHelper as AjaxCommentHelper;
 use WP\Helper\Ajax\PostHelper as AjaxPostHelper;
 use WP\Helper\Ajax\TermHelper as AjaxTermHelper;
@@ -38,11 +34,12 @@ use WP\Helper\Ajax\ThemeHelper as AjaxThemeHelper;
 use WP\Helper\Ajax\PluginHelper as AjaxPluginHelper;
 use WP\Helper\Ajax\EmbedHelper as AjaxEmbedHelper;
 use WP\Helper\Ajax\PrivacyHelper as AjaxPrivacyHelper;
-use WP\Helper\Ajax\HealthCheckHelper as AjaxHealthCheckHelper;
-use WP\Helper\AjaxHelper;
+use WP\Helper\Ajax\SiteHealthHelper as AjaxSiteHealthHelper;
+use WP\Helper\Ajax\ScreenHelper as AjaxScreenHelper;
+use WP\Helper\Ajax\EditHelper as AjaxEditHelper;
+use WP\Helper\Ajax\DateTimeHelper as AjaxDateTimeHelper;
 
 /* ------------------- Post Types: --------------------------*/
-
 
 /**
  * Registers a post type.
@@ -2963,6 +2960,8 @@ function revoke_super_admin( $user_id ) {
 	return RoleHelper::revokeSuperAdmin( $user_id );
 }
 
+/* ------------------- Ajax actions: --------------------------*/
+
 /**
  * Ajax handler for the Heartbeat API in
  * the no-privilege context.
@@ -2981,7 +2980,7 @@ function wp_ajax_nopriv_heartbeat() {
  * @since 3.1.0
  */
 function wp_ajax_fetch_list() {
-	AjaxHelper::fetchList();
+	AjaxScreenHelper::fetchList();
 }
 
 /**
@@ -2999,7 +2998,7 @@ function wp_ajax_ajax_tag_search() {
  * @since 3.1.0
  */
 function wp_ajax_wp_compression_test() {
-	AjaxHelper::compressionTest();
+	AjaxSiteHealthHelper::compressionTest();
 }
 
 /**
@@ -3739,7 +3738,7 @@ function wp_ajax_wp_privacy_erase_personal_data() {
  * @since 5.2.0
  */
 function wp_ajax_health_check_dotorg_communication() {
-	AjaxHealthCheckHelper::dotOrgCommunication();
+	AjaxSiteHealthHelper::dotOrgCommunication();
 }
 
 /**
@@ -3748,7 +3747,7 @@ function wp_ajax_health_check_dotorg_communication() {
  * @since 5.2.0
  */
 function wp_ajax_health_check_is_in_debug_mode() {
-	AjaxHealthCheckHelper::isInDebugMode();
+	AjaxSiteHealthHelper::isInDebugMode();
 }
 
 /**
@@ -3757,7 +3756,7 @@ function wp_ajax_health_check_is_in_debug_mode() {
  * @since 5.2.0
  */
 function wp_ajax_health_check_background_updates() {
-	AjaxHealthCheckHelper::backgroundUpdates();
+	AjaxSiteHealthHelper::backgroundUpdates();
 }
 
 /**
@@ -3766,7 +3765,7 @@ function wp_ajax_health_check_background_updates() {
  * @since 5.2.0
  */
 function wp_ajax_health_check_loopback_requests() {
-	AjaxHealthCheckHelper::loopbackRequests();
+	AjaxSiteHealthHelper::loopbackRequests();
 }
 
 /**
@@ -3775,7 +3774,7 @@ function wp_ajax_health_check_loopback_requests() {
  * @since 5.2.0
  */
 function wp_ajax_health_check_site_status_result() {
-	AjaxHealthCheckHelper::statusResult();
+	AjaxSiteHealthHelper::statusResult();
 }
 
 /**
@@ -3784,5 +3783,105 @@ function wp_ajax_health_check_site_status_result() {
  * @since 5.2.0
  */
 function wp_ajax_health_check_get_sizes() {
-	AjaxHealthCheckHelper::checkGetSizes();
+	AjaxSiteHealthHelper::checkGetSizes();
+}
+
+/**
+ * Ajax handler for closed post boxes.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_closed_postboxes() {
+	AjaxScreenHelper::closedPostboxes();
+}
+
+/**
+ * Ajax handler for hidden columns.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_hidden_columns() {
+	AjaxScreenHelper::hiddenColumns();
+}
+
+/**
+ * Ajax handler for updating whether to display the welcome panel.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_update_welcome_panel() {
+	AjaxScreenHelper::updateWelcomePanel();
+}
+
+/**
+ * Ajax handler for retrieving menu meta boxes.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_menu_get_metabox() {
+	AjaxMenuHelper::getMetabox();
+}
+
+/**
+ * Ajax handler for saving the meta box order.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_meta_box_order() {
+	AjaxScreenHelper::metaBoxOrder();
+}
+
+/**
+ * Ajax handler for dismissing a WordPress pointer.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_dismiss_wp_pointer() {
+	AjaxScreenHelper::dismissWPPointer();
+}
+
+/**
+ * Ajax handler for getting revision diffs.
+ *
+ * @since 3.6.0
+ */
+function wp_ajax_get_revision_diffs() {
+	AjaxPostHelper::getRevisionDiffs();
+}
+
+/**
+ * Ajax handler for destroying multiple open sessions for a user.
+ *
+ * @since 4.1.0
+ */
+function wp_ajax_destroy_sessions() {
+	AjaxUserHelper::destroySessions();
+}
+
+/**
+ * Ajax handler for editing a theme or plugin file.
+ *
+ * @since 4.9.0
+ * @see wp_edit_theme_plugin_file()
+ */
+function wp_ajax_edit_theme_plugin_file() {
+	AjaxEditHelper::editThemePluginFile();
+}
+
+/**
+ * Ajax handler for date formatting.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_date_format() {
+	AjaxDateTimeHelper::formatDate();
+}
+
+/**
+ * Ajax handler for time formatting.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_time_format() {
+	AjaxDateTimeHelper::formatTime();
 }

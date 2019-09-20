@@ -445,4 +445,39 @@ class PostHelper {
 		update_post_meta( $post_id, '_edit_lock', $new_lock, implode( ':', $active_lock ) );
 		wp_die( 1 );
 	}
+
+	/**
+	 * Ajax handler for getting revision diffs.
+	 *
+	 * @since 3.6.0
+	 */
+	public static function getRevisionDiffs() {
+		$post = get_post( (int) $_REQUEST['post_id'] );
+		if ( ! $post ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			wp_send_json_error();
+		}
+
+		// Really just pre-loading the cache here.
+		$revisions = wp_get_post_revisions( $post->ID, array( 'check_enabled' => false ) );
+		if ( ! $revisions ) {
+			wp_send_json_error();
+		}
+
+		$return = array();
+		set_time_limit( 0 );
+
+		foreach ( $_REQUEST['compare'] as $compare_key ) {
+			list( $compare_from, $compare_to ) = explode( ':', $compare_key ); // from:to
+
+			$return[] = array(
+				'id'     => $compare_key,
+				'fields' => wp_get_revision_ui_diff( $post, $compare_from, $compare_to ),
+			);
+		}
+		wp_send_json_success( $return );
+	}
 }

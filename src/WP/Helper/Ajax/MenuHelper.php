@@ -121,4 +121,54 @@ class MenuHelper {
 
 		wp_die();
 	}
+
+	/**
+	 * Ajax handler for retrieving menu meta boxes.
+	 */
+	public static function getMetabox() {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
+			wp_die( -1 );
+		}
+
+		if ( isset( $_POST['item-type'] ) && 'post_type' == $_POST['item-type'] ) {
+			$type     = 'posttype';
+			$callback = 'wp_nav_menu_item_post_type_meta_box';
+			$items    = (array) get_post_types( array( 'show_in_nav_menus' => true ), 'object' );
+		} elseif ( isset( $_POST['item-type'] ) && 'taxonomy' == $_POST['item-type'] ) {
+			$type     = 'taxonomy';
+			$callback = 'wp_nav_menu_item_taxonomy_meta_box';
+			$items    = (array) get_taxonomies( array( 'show_ui' => true ), 'object' );
+		}
+
+		if ( ! empty( $_POST['item-object'] ) && isset( $items[ $_POST['item-object'] ] ) ) {
+			$menus_meta_box_object = $items[ $_POST['item-object'] ];
+
+			/** This filter is documented in wp-admin/includes/nav-menu.php */
+			$item = apply_filters( 'nav_menu_meta_box_object', $menus_meta_box_object );
+			ob_start();
+			call_user_func_array(
+				$callback,
+				array(
+					null,
+					array(
+						'id'       => 'add-' . $item->name,
+						'title'    => $item->labels->name,
+						'callback' => $callback,
+						'args'     => $item,
+					),
+				)
+			);
+
+			$markup = ob_get_clean();
+
+			echo wp_json_encode(
+				array(
+					'replace-id' => $type . '-' . $item->name,
+					'markup'     => $markup,
+				)
+			);
+		}
+
+		wp_die();
+	}
 }

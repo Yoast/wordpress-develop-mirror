@@ -189,4 +189,40 @@ class UserHelper {
 
 		wp_send_json_success( update_user_meta( get_current_user_id(), 'wporg_favorites', $username ) );
 	}
+
+	/**
+	 * Ajax handler for destroying multiple open sessions for a user.
+	 */
+	public static function destroySessions() {
+		$user = get_userdata( (int) $_POST['user_id'] );
+
+		if ( $user ) {
+			if ( ! current_user_can( 'edit_user', $user->ID ) ) {
+				$user = false;
+			} elseif ( ! wp_verify_nonce( $_POST['nonce'], 'update-user_' . $user->ID ) ) {
+				$user = false;
+			}
+		}
+
+		if ( ! $user ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Could not log out user sessions. Please try again.' ),
+				)
+			);
+		}
+
+		$sessions = \WP_Session_Tokens::get_instance( $user->ID );
+
+		if ( $user->ID === get_current_user_id() ) {
+			$sessions->destroy_others( wp_get_session_token() );
+			$message = __( 'You are now logged out everywhere else.' );
+		} else {
+			$sessions->destroy_all();
+			/* translators: %s: User's display name. */
+			$message = sprintf( __( '%s has been logged out.' ), $user->display_name );
+		}
+
+		wp_send_json_success( array( 'message' => $message ) );
+	}
 }
