@@ -4,7 +4,7 @@ namespace WP\Helper\Post;
 
 use WP\Helper\Taxonomy\TermHelper as Term;
 
-class TermHelper{
+class TermHelper {
 
     /**
      * Get all categories, tied to a post
@@ -23,7 +23,7 @@ class TermHelper{
      * Get all tags tied to a post
      */
     public static function getTags( $post_id = 0, $args = array() ) {
-        return static::getTerms( $post_id, 'post_tag', $args );        
+        return static::getTerms( $post_id, 'post_tag', $args );
     }
 
     /**
@@ -37,6 +37,6 @@ class TermHelper{
 
         $tags = Term::getForObject( $post_id, $taxonomy, $args );
 
-        return $tags;    
+        return $tags;
     }
 }
