@@ -2,7 +2,7 @@
 
 namespace WP\Helper\Post;
 
-class StatusHelper{
+class StatusHelper {
 
     /**
      * Retrieve the post status based on the post ID.
@@ -58,7 +58,7 @@ class StatusHelper{
 
         return $wp_post_statuses[ $post_status ];
     }
-    
+
     /**
      * Return post statuses:
      */

@@ -11,7 +11,8 @@
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "~0.5.0",
-		"wp-coding-standards/wpcs": "~2.1.0"
+		"wp-coding-standards/wpcs": "~2.1.0",
+		"atanamo/php-codeshift": "^1.0"
 	},
 	"scripts": {
 		"format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source --cache -d memory_limit=256M",
