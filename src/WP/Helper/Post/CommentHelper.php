@@ -1,8 +1,8 @@
 <?php
 
-namespace WP\Helpers\Post;
+namespace WP\Helper\Post;
 
-class CommentHelper{
+class CommentHelper {
 
     /**
      * Trash post comments

@@ -1,29 +1,48 @@
 <?php
 
-use \WP\Helper\LabelHelper;
+use WP\Helper\AuthorHelper;
+use WP\Helper\CommentHelper;
+use WP\Helper\CreditsHelper;
+use WP\Helper\LabelHelper;
 use WP\Helper\Frontend\LoginHelper;
-use \WP\Helper\Post\PostHelper;
-use \WP\Helper\Post\MetaHelper as PostMetaHelper;
-use \WP\Helper\Post\StatusHelper as PostStatusHelper;
-use \WP\Helper\Post\CommentHelper as PostCommentHelper;
-use \WP\Helper\Post\TermHelper as PostTermHelper;
-use \WP\Helper\Post\SlugHelper as PostSlugHelper;
-use \WP\Helper\Post\AttachmentHelper;
-use \WP\Helper\PostType\PostTypeHelper;
-use \WP\Helper\PostType\SupportsHelper as PostTypeSupportsHelper;
-
-use \WP\Helper\Taxonomy\TermHelper;
-
-use \WP\Helper\Meta\Metadata;
-use \WP\Helper\CacheHelper;
-
+use WP\Helper\Post\PostHelper;
+use WP\Helper\Post\MetaHelper as PostMetaHelper;
+use WP\Helper\Post\StatusHelper as PostStatusHelper;
+use WP\Helper\Post\CommentHelper as PostCommentHelper;
+use WP\Helper\Post\TermHelper as PostTermHelper;
+use WP\Helper\Post\SlugHelper as PostSlugHelper;
+use WP\Helper\Post\AttachmentHelper;
+use WP\Helper\PostType\PostTypeHelper;
+use WP\Helper\PostType\SupportsHelper as PostTypeSupportsHelper;
+use WP\Helper\Taxonomy\TermHelper;
+use WP\Helper\Meta\Metadata;
+use WP\Helper\CacheHelper;
 use WP\Helper\HookHelper;
 use WP\Helper\PluginHelper;
 use WP\Helper\CapabilitiesHelper;
 use WP\Helper\RoleHelper;
+use WP\Helper\Ajax\CommentHelper as AjaxCommentHelper;
+use WP\Helper\Ajax\PostHelper as AjaxPostHelper;
+use WP\Helper\Ajax\TermHelper as AjaxTermHelper;
+use WP\Helper\Ajax\DashboardHelper as AjaxDashboardHelper;
+use WP\Helper\Ajax\UserHelper as AjaxUserHelper;
+use WP\Helper\Ajax\MetaHelper as AjaxMetaHelper;
+use WP\Helper\Ajax\HeartbeatHelper as AjaxHeartbeatHelper;
+use WP\Helper\Ajax\LinkHelper as AjaxLinkHelper;
+use WP\Helper\Ajax\MenuHelper as AjaxMenuHelper;
+use WP\Helper\Ajax\WidgetHelper as AjaxWidgetHelper;
+use WP\Helper\Ajax\MediaHelper as AjaxMediaHelper;
+use WP\Helper\Ajax\AttachmentHelper as AjaxAttachmentHelper;
+use WP\Helper\Ajax\ThemeHelper as AjaxThemeHelper;
+use WP\Helper\Ajax\PluginHelper as AjaxPluginHelper;
+use WP\Helper\Ajax\EmbedHelper as AjaxEmbedHelper;
+use WP\Helper\Ajax\PrivacyHelper as AjaxPrivacyHelper;
+use WP\Helper\Ajax\SiteHealthHelper as AjaxSiteHealthHelper;
+use WP\Helper\Ajax\ScreenHelper as AjaxScreenHelper;
+use WP\Helper\Ajax\EditHelper as AjaxEditHelper;
+use WP\Helper\Ajax\DateTimeHelper as AjaxDateTimeHelper;
 
 /* ------------------- Post Types: --------------------------*/
-
 
 /**
  * Registers a post type.
@@ -251,9 +270,8 @@ function get_post_type_capabilities( $args ) {
  * @param array $capabilities Post type meta capabilities.
  */
 function _post_type_meta_capabilities( $capabilities = null ) {
-    return PostTypeHelper::getMetaCapabilities( $capabilities );
+    PostTypeHelper::getMetaCapabilities( $capabilities );
 }
-
 
 /**
  * Builds an object with all post type labels out of a post type object.
@@ -326,7 +344,6 @@ function get_post_type_labels( $post_type_object ) {
     return PostTypeHelper::getLabels( $post_type_object );
 }
 
-
 /**
  * Retrieves a post type object by name.
  *
@@ -343,8 +360,6 @@ function get_post_type_labels( $post_type_object ) {
 function get_post_type_object( $post_type ) {
     return PostTypeHelper::get( $post_type );
 }
-
-
 
 /**
  * Whether the post type is hierarchical.
@@ -379,8 +394,6 @@ function is_post_type_hierarchical( $post_type ) {
 function post_type_exists( $post_type ) {
     return PostTypeHelper::exists( $post_type );
 }
-
-
 
 /**
  * Get a list of all registered post type objects.
@@ -441,7 +454,7 @@ function create_initial_post_types(){
  * @since 3.1.0
  */
 function _add_post_type_submenus() {
-    return PostTypeHelper::addSubmenus();
+    PostTypeHelper::addSubmenus();
 }
 
 
@@ -477,7 +490,7 @@ function _add_post_type_submenus() {
  * @param mixed        ...$args   Optional extra arguments to pass along with certain features.
  */
 function add_post_type_support( $post_type, $feature, ...$args ){
-    return PostTypeSupportsHelper::add( $post_type, $feature, ...$args );
+    PostTypeSupportsHelper::add( $post_type, $feature, ...$args );
 }
 
 /**
@@ -491,7 +504,7 @@ function add_post_type_support( $post_type, $feature, ...$args ){
  * @param string $feature   The feature being removed.
  */
 function remove_post_type_support( $post_type, $feature ) {
-    return PostTypeSupportsHelper::remove( $post_type, $feature );
+    PostTypeSupportsHelper::remove( $post_type, $feature );
 }
 
 
@@ -825,7 +838,7 @@ function wp_update_post( $postarr = array(), $wp_error = false ) {
  * @param int|WP_Post $post Post ID or post object.
  */
 function wp_publish_post( $post ) {
-    return PostHelper::publish( $post );
+    PostHelper::publish( $post );
 }
 
 /**
@@ -839,9 +852,8 @@ function wp_publish_post( $post ) {
  * @param int|WP_Post $post_id Post ID or post object.
  */
 function check_and_publish_future_post( $post_id ) {
-    return PostHelper::publishFuturePost( $post_id );
+    PostHelper::publishFuturePost( $post_id );
 }
-
 
 /**
  * Trash or delete a post or page.
@@ -867,8 +879,6 @@ function check_and_publish_future_post( $post_id ) {
 function wp_delete_post( $postid = 0, $force_delete = false ) {
     return PostHelper::delete( $postid, $force_delete );
 }
-
-
 
 /**
  * Retrieves an array of the latest posts, or posts matching the given criteria.
@@ -898,7 +908,6 @@ function get_posts( $args = null ) {
     return PostHelper::getPosts( $args );
 }
 
-
 /**
  * Retrieve a number of recent posts.
  *
@@ -915,7 +924,6 @@ function get_posts( $args = null ) {
 function wp_get_recent_posts( $args = array(), $output = ARRAY_A ) {
     return PostHelper::getRecentPosts( $args, $output );
 }
-
 
 /**
  * Retrieve ancestors of a post.
@@ -983,7 +991,6 @@ function get_post_ancestors( $post ) {
 function get_children( $args = '', $output = OBJECT ) {
     return PostHelper::getChildren( $args, $output );
 }
-
 
 /**
  * Retrieves the post type of the current post or of a given post.
@@ -1141,8 +1148,6 @@ function is_sticky( $post_id = 0 ) {
     return PostHelper::isSticky( $post_id );
 }
 
-
-
 /**
  * Make a post sticky.
  *
@@ -1153,10 +1158,8 @@ function is_sticky( $post_id = 0 ) {
  * @param int $post_id Post ID.
  */
 function stick_post( $post_id ) {
-    return PostHelper::makeSticky( $post_id );
+    PostHelper::makeSticky( $post_id );
 }
-
-
 
 /**
  * Un-stick a post.
@@ -1168,7 +1171,7 @@ function stick_post( $post_id ) {
  * @param int $post_id Post ID.
  */
 function unstick_post( $post_id ) {
-    return PostHelper::makeUnsticky( $post_id );
+    PostHelper::makeUnsticky( $post_id );
 }
 
 /**
@@ -1213,9 +1216,6 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
     return PostHelper::sanitizeField( $field, $value, $post_id, $context );
 }
 
-
-
-
 /**
  * Retrieve the list of categories for a post.
  *
@@ -1256,7 +1256,7 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  *                        WP_Error object if 'post_tag' taxonomy doesn't exist.
  */
 function wp_get_post_tags( $post_id = 0, $args = array() ) {
-    PostTermHelper::getTags( $post_id, $args );
+    return PostTermHelper::getTags( $post_id, $args );
 }
 
 /**
@@ -1277,10 +1277,8 @@ function wp_get_post_tags( $post_id = 0, $args = array() ) {
  *                        WP_Error object if `$taxonomy` doesn't exist.
  */
 function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
-    PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
+    return PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
 }
-
-
 
 /**
  * Move a post or page to the Trash
@@ -1299,8 +1297,6 @@ function wp_trash_post( $post_id = 0 ) {
     return PostHelper::trash( $post_id );
 }
 
-
-
 /**
  * Restore a post or page from the Trash.
  *
@@ -1312,7 +1308,6 @@ function wp_trash_post( $post_id = 0 ) {
 function wp_untrash_post( $post_id = 0 ) {
     return PostHelper::untrash( $post_id );
 }
-
 
 /**
  * Moves comments for a post to the trash.
@@ -1328,8 +1323,6 @@ function wp_trash_post_comments( $post = null ) {
     return PostCommentHelper::trash( $post );
 }
 
-
-
 /**
  * Restore comments for a post from the trash.
  *
@@ -1344,9 +1337,6 @@ function wp_untrash_post_comments( $post = null ) {
     return PostCommentHelper::untrash( $post );
 }
 
-
-
-
 /**
  * Reset the page_on_front, show_on_front, and page_for_post settings when
  * a linked page is deleted or trashed.
@@ -1359,13 +1349,10 @@ function wp_untrash_post_comments( $post = null ) {
  * @param int $post_id Post ID.
  */
 function _reset_front_page_settings_for_post( $post_id ) {
-    return PostHelper::resetFrontPageSettings( $post_id );
+    PostHelper::resetFrontPageSettings( $post_id );
 }
 
-
-
 /* ------------------- Post Meta: --------------------------*/
-
 
 /**
  * Adds a meta field to the given post.
@@ -1444,8 +1431,6 @@ function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) 
     return PostMetaHelper::update( $post_id, $meta_key, $meta_value, $prev_value );
 }
 
-
-
 /**
  * Deletes everything from post meta matching the given meta key.
  *
@@ -1457,8 +1442,6 @@ function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) 
 function delete_post_meta_by_key( $post_meta_key ) {
     return PostMetaHelper::deleteByKey( $post_meta_key );
 }
-
-
 
 /**
  * Registers a meta key for posts.
@@ -1476,7 +1459,6 @@ function register_post_meta( $post_type, $meta_key, array $args ) {
     return PostMetaHelper::register( $post_type, $meta_key, $args );
 }
 
-
 /**
  * Unregisters a meta key for posts.
  *
@@ -1492,7 +1474,6 @@ function unregister_post_meta( $post_type, $meta_key ) {
     return PostMetaHelper::unregister( $post_type, $meta_key );
 }
 
-
 /**
  * Retrieve post meta fields, based on post ID.
  *
@@ -1507,7 +1488,6 @@ function unregister_post_meta( $post_type, $meta_key ) {
 function get_post_custom( $post_id = 0 ) {
     return PostMetaHelper::getCustom( $post_id );
 }
-
 
 /**
  * Retrieve meta field names for a post.
@@ -1561,8 +1541,6 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
     return TermHelper::getForObject( $object_ids, $taxonomies, $args );
 }
 
-
-
 /**
  * Create Term and Taxonomy Relationships.
  *
@@ -1589,7 +1567,6 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
 function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
     return TermHelper::setForObject( $object_id, $terms, $taxonomy, $append );
 }
-
 
 /**
  * Add a new term to the database.
@@ -1682,8 +1659,6 @@ function update_metadata( $meta_type, $object_id, $meta_key, $meta_value, $prev_
     return Metadata::update( $meta_type, $object_id, $meta_key, $meta_value, $prev_value );
 }
 
-
-
 /**
  * Delete metadata for the specified object.
  *
@@ -1725,7 +1700,6 @@ function delete_metadata( $meta_type, $object_id, $meta_key, $meta_value = '', $
 function get_metadata( $meta_type, $object_id, $meta_key = '', $single = false ) {
     return Metadata::get( $meta_type, $object_id, $meta_key, $single );
 }
-
 
 /**
  * Registers a meta key.
@@ -1786,7 +1760,6 @@ function unregister_meta_key( $object_type, $meta_key, $object_subtype = '' ) {
 }
 
 /* ------------------- Post Status: --------------------------*/
-
 
 /**
  * Register a post status. Do not use before init.
@@ -1888,8 +1861,6 @@ function get_post_stati( $args = array(), $output = 'names', $operator = 'and' )
     return PostStatusHelper::getPostStatuses( $args, $output, $operator );
 }
 
-
-
 /**
  * Retrieve all of the WordPress supported post statuses.
  *
@@ -1917,7 +1888,6 @@ function get_post_statuses() {
 function get_page_statuses() {
     return PostStatusHelper::getPossiblePageStatuses();
 }
-
 
 /**
  * Return statuses for privacy requests.
@@ -2636,7 +2606,6 @@ function retrieve_password() {
 	return LoginHelper::retrievePassword();
 }
 
-
 /* ------------------- Caching: --------------------------*/
 
 /**
@@ -2942,4 +2911,1354 @@ function grant_super_admin( $user_id ) {
  */
 function revoke_super_admin( $user_id ) {
 	return RoleHelper::revokeSuperAdmin( $user_id );
+}
+
+/* ------------------- Ajax actions: --------------------------*/
+
+/**
+ * Ajax handler for the Heartbeat API in
+ * the no-privilege context.
+ *
+ * Runs when the user is not logged in.
+ *
+ * @since 3.6.0
+ */
+function wp_ajax_nopriv_heartbeat() {
+	AjaxHeartbeatHelper::sendNoPriv();
+}
+
+/**
+ * Ajax handler for fetching a list table.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_fetch_list() {
+	AjaxScreenHelper::fetchList();
+}
+
+/**
+ * Ajax handler for tag search.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_ajax_tag_search() {
+	AjaxTermHelper::tagSearch();
+}
+
+/**
+ * Ajax handler for compression testing.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_wp_compression_test() {
+	AjaxSiteHealthHelper::compressionTest();
+}
+
+/**
+ * Ajax handler for image editor previews.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_imgedit_preview() {
+	AjaxMediaHelper::imageEditPreview();
+}
+
+/**
+ * Ajax handler for oEmbed caching.
+ *
+ * @since 3.1.0
+ *
+ * @global WP_Embed $wp_embed
+ */
+function wp_ajax_oembed_cache() {
+	AjaxEmbedHelper::oEmbedCache();
+}
+
+/**
+ * Ajax handler for user autocomplete.
+ *
+ * @since 3.4.0
+ */
+function wp_ajax_autocomplete_user() {
+	AjaxUserHelper::autocompleteUser();
+}
+
+/**
+ * Handles AJAX requests for community events
+ *
+ * @since 4.8.0
+ */
+function wp_ajax_get_community_events() {
+	AjaxDashboardHelper::getCommunityEvents();
+}
+
+/**
+ * Ajax handler for dashboard widgets.
+ *
+ * @since 3.4.0
+ */
+function wp_ajax_dashboard_widgets() {
+	AjaxDashboardHelper::dashboardWidgets();
+}
+
+/**
+ * Ajax handler for Customizer preview logged-in status.
+ *
+ * @since 3.4.0
+ */
+function wp_ajax_logged_in() {
+	AjaxUserHelper::loggedIn();
+}
+
+/**
+ * Sends back current comment total and new page links if they need to be updated.
+ *
+ * Contrary to normal success Ajax response ("1"), die with time() on success.
+ *
+ * @access private
+ * @since 2.7.0
+ *
+ * @param int $comment_id
+ * @param int $delta
+ */
+function _wp_ajax_delete_comment_response( $comment_id, $delta = -1 ) {
+	AjaxCommentHelper::deleteCommentResponse( $comment_id, $delta );
+}
+
+/**
+ * Ajax handler for adding a hierarchical term.
+ *
+ * @access private
+ * @since 3.1.0
+ */
+function _wp_ajax_add_hierarchical_term() {
+	AjaxTermHelper::addHierarchicalTerm();
+}
+
+/**
+ * Ajax handler for deleting a comment.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_comment() {
+	AjaxCommentHelper::deleteComment();
+}
+
+/**
+ * Ajax handler for deleting a tag.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_tag() {
+	AjaxTermHelper::deleteTag();
+}
+
+/**
+ * Ajax handler for deleting a link.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_link() {
+	AjaxLinkHelper::deleteLink();
+}
+
+/**
+ * Ajax handler for deleting meta.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_delete_meta() {
+	AjaxMetaHelper::deleteMeta();
+}
+
+/**
+ * Ajax handler for deleting a post.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_delete_post( $action ) {
+	AjaxPostHelper::deletePost( $action );
+}
+
+/**
+ * Ajax handler for sending a post to the trash.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_trash_post( $action ) {
+	AjaxPostHelper::trashPost( $action );
+}
+
+/**
+ * Ajax handler to restore a post from the trash.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_untrash_post( $action ) {
+	AjaxPostHelper::untrashPost( $action );
+}
+
+/**
+ * Ajax handler to delete a page.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_delete_page( $action ) {
+	AjaxPostHelper::deletePage( $action );
+}
+
+/**
+ * Ajax handler to dim a comment.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_dim_comment() {
+	AjaxCommentHelper::dimComment();
+}
+
+/**
+ * Ajax handler for adding a link category.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_add_link_category( $action ) {
+	AjaxLinkHelper::addLinkCategory( $action );
+}
+
+/**
+ * Ajax handler to add a tag.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_add_tag() {
+	AjaxTermHelper::addTag();
+}
+
+/**
+ * Ajax handler for getting a tagcloud.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_get_tagcloud() {
+	AjaxTermHelper::getTagcloud();
+}
+
+/**
+ * Ajax handler for getting comments.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_get_comments( $action ) {
+	AjaxCommentHelper::getComments( $action );
+}
+
+/**
+ * Ajax handler for replying to a comment.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_replyto_comment( $action ) {
+	AjaxCommentHelper::replyToComment( $action );
+}
+
+/**
+ * Ajax handler for editing a comment.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_edit_comment() {
+	AjaxCommentHelper::editComment();
+}
+
+/**
+ * Ajax handler for adding meta.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_add_meta() {
+	AjaxMetaHelper::addMeta();
+}
+
+/**
+ * Ajax handler for adding a user.
+ *
+ * @since 3.1.0
+ *
+ * @param string $action Action to perform.
+ */
+function wp_ajax_add_user( $action ) {
+	AjaxUserHelper::addUser( $action );
+}
+
+/**
+ * Ajax handler for adding a menu item.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_add_menu_item() {
+	AjaxMenuHelper::addMenuItem();
+}
+
+/**
+ * Ajax handler for menu locations save.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_menu_locations_save() {
+	AjaxMenuHelper::locationsSave();
+}
+
+/**
+ * Ajax handler for quick edit saving for a term.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_inline_save_tax() {
+	AjaxTermHelper::inlineSaveTax();
+}
+
+/**
+ * Ajax handler for querying posts for the Find Posts modal.
+ *
+ * @see window.findPosts
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_find_posts() {
+	AjaxPostHelper::findPosts();
+}
+
+/**
+ * Ajax handler for saving the widgets order.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_widgets_order() {
+	AjaxWidgetHelper::widgetsOrder();
+}
+
+/**
+ * Ajax handler for saving a widget.
+ *
+ * @since 3.1.0
+ *
+ * @global array $wp_registered_widgets
+ * @global array $wp_registered_widget_controls
+ * @global array $wp_registered_widget_updates
+ */
+function wp_ajax_save_widget() {
+	AjaxWidgetHelper::saveWidget();
+}
+
+/**
+ * Ajax handler for saving a widget.
+ *
+ * @since 3.9.0
+ *
+ * @global WP_Customize_Manager $wp_customize
+ */
+function wp_ajax_update_widget() {
+	AjaxWidgetHelper::updateWidget();
+}
+
+/**
+ * Ajax handler for removing inactive widgets.
+ *
+ * @since 4.4.0
+ */
+function wp_ajax_delete_inactive_widgets() {
+	AjaxWidgetHelper::deleteInactiveWidgets();
+}
+
+/**
+ * Ajax handler for creating missing image sub-sizes for just uploaded images.
+ *
+ * @since 5.3.0
+ */
+function wp_ajax_media_create_image_subsizes() {
+	AjaxMediaHelper::createImageSubsizes();
+}
+
+/**
+ * Ajax handler for uploading attachments
+ *
+ * @since 3.3.0
+ */
+function wp_ajax_upload_attachment() {
+	AjaxAttachmentHelper::upload();
+}
+
+/**
+ * Ajax handler for menu quick searching.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_menu_quick_search() {
+	AjaxMenuHelper::quickSearch();
+}
+
+/**
+ * Ajax handler to retrieve a permalink.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_get_permalink() {
+	AjaxPostHelper::getPermalink();
+}
+
+/**
+ * Ajax handler to retrieve a sample permalink.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_sample_permalink() {
+	AjaxPostHelper::samplePermalink();
+}
+
+/**
+ * Ajax handler for Quick Edit saving a post from a list table.
+ *
+ * @since 3.1.0
+ *
+ * @global string $mode List table view mode.
+ */
+function wp_ajax_inline_save() {
+	AjaxPostHelper::inlineSave();
+}
+
+/**
+ * Ajax handler for image editing.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_image_editor() {
+	AjaxMediaHelper::imageEditor();
+}
+
+/**
+ * Ajax handler for setting the featured image.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_set_post_thumbnail() {
+	AjaxPostHelper::setThumbnail();
+}
+
+/**
+ * Ajax handler for retrieving HTML for the featured image.
+ *
+ * @since 4.6.0
+ */
+function wp_ajax_get_post_thumbnail_html() {
+	AjaxPostHelper::getThumbnailHtml();
+}
+
+/**
+ * Ajax handler for setting the featured image for an attachment.
+ *
+ * @since 4.0.0
+ *
+ * @see set_post_thumbnail()
+ */
+function wp_ajax_set_attachment_thumbnail() {
+	AjaxAttachmentHelper::setThumbnail();
+}
+
+/**
+ * Ajax handler for saving posts from the fullscreen editor.
+ *
+ * @since 3.1.0
+ * @deprecated 4.3.0
+ */
+function wp_ajax_wp_fullscreen_save_post() {
+	AjaxPostHelper::fullscreenSave();
+}
+
+/**
+ * Ajax handler for removing a post lock.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_wp_remove_post_lock() {
+	AjaxPostHelper::removeLock();
+}
+
+/**
+ * Ajax handler for getting an attachment.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_get_attachment() {
+	AjaxAttachmentHelper::getOne();
+}
+
+/**
+ * Ajax handler for querying attachments.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_query_attachments() {
+	AjaxAttachmentHelper::queryAll();
+}
+
+/**
+ * Ajax handler for updating attachment attributes.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_save_attachment() {
+	AjaxAttachmentHelper::save();
+}
+
+/**
+ * Ajax handler for saving backward compatible attachment attributes.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_save_attachment_compat() {
+	AjaxAttachmentHelper::saveCompat();
+}
+
+/**
+ * Ajax handler for saving the attachment order.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_save_attachment_order() {
+	AjaxAttachmentHelper::saveOrder();
+}
+
+/**
+ * Ajax handler for sending an attachment to the editor.
+ *
+ * Generates the HTML to send an attachment to the editor.
+ * Backward compatible with the {@see 'media_send_to_editor'} filter
+ * and the chain of filters that follow.
+ *
+ * @since 3.5.0
+ */
+function wp_ajax_send_attachment_to_editor() {
+	AjaxAttachmentHelper::sendToEditor();
+}
+
+/**
+ * Ajax handler for sending a link to the editor.
+ *
+ * Generates the HTML to send a non-image embed link to the editor.
+ *
+ * Backward compatible with the following filters:
+ * - file_send_to_editor_url
+ * - audio_send_to_editor_url
+ * - video_send_to_editor_url
+ *
+ * @since 3.5.0
+ *
+ * @global WP_Post  $post     Global post object.
+ * @global WP_Embed $wp_embed
+ */
+function wp_ajax_send_link_to_editor() {
+	AjaxLinkHelper::sendToEditor();
+}
+
+/**
+ * Ajax handler for the Heartbeat API.
+ *
+ * Runs when the user is logged in.
+ *
+ * @since 3.6.0
+ */
+function wp_ajax_heartbeat() {
+	AjaxHeartbeatHelper::send();
+}
+
+/**
+ * Ajax handler for internal linking.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_wp_link_ajax() {
+	AjaxLinkHelper::query();
+}
+
+/**
+ * Ajax handler for auto-saving the selected color scheme for
+ * a user's own profile.
+ *
+ * @since 3.8.0
+ *
+ * @global array $_wp_admin_css_colors
+ */
+function wp_ajax_save_user_color_scheme() {
+	AjaxUserHelper::saveColorScheme();
+}
+
+/**
+ * Ajax handler for getting themes from themes_api().
+ *
+ * @since 3.9.0
+ *
+ * @global array $themes_allowedtags
+ * @global array $theme_field_defaults
+ */
+function wp_ajax_query_themes() {
+	AjaxThemeHelper::query();
+}
+
+/**
+ * Apply [embed] Ajax handlers to a string.
+ *
+ * @since 4.0.0
+ *
+ * @global WP_Post    $post       Global post object.
+ * @global WP_Embed   $wp_embed   Embed API instance.
+ * @global WP_Scripts $wp_scripts
+ * @global int        $content_width
+ */
+function wp_ajax_parse_embed() {
+	AjaxEmbedHelper::parse();
+}
+
+/**
+ * @since 4.0.0
+ *
+ * @global WP_Post    $post       Global post object.
+ * @global WP_Scripts $wp_scripts
+ */
+function wp_ajax_parse_media_shortcode() {
+	AjaxMediaHelper::parseShortcode();
+}
+
+/**
+ * Ajax handler for cropping an image.
+ *
+ * @since 4.3.0
+ */
+function wp_ajax_crop_image() {
+	AjaxMediaHelper::cropImage();
+}
+
+/**
+ * Ajax handler for generating a password.
+ *
+ * @since 4.4.0
+ */
+function wp_ajax_generate_password() {
+	AjaxUserHelper::generatePassword();
+}
+
+/**
+ * Ajax handler for saving the user's WordPress.org username.
+ *
+ * @since 4.4.0
+ */
+function wp_ajax_save_wporg_username() {
+	AjaxUserHelper::saveWPOrgUsername();
+}
+
+/**
+ * Ajax handler for installing a theme.
+ *
+ * @since 4.6.0
+ *
+ * @see Theme_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_install_theme() {
+	AjaxThemeHelper::install();
+}
+
+/**
+ * Ajax handler for updating a theme.
+ *
+ * @since 4.6.0
+ *
+ * @see Theme_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_update_theme() {
+	AjaxThemeHelper::update();
+}
+
+/**
+ * Ajax handler for deleting a theme.
+ *
+ * @since 4.6.0
+ *
+ * @see delete_theme()
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_delete_theme() {
+	AjaxThemeHelper::delete();
+}
+
+/**
+ * Ajax handler for installing a plugin.
+ *
+ * @since 4.6.0
+ *
+ * @see Plugin_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_install_plugin() {
+	AjaxPluginHelper::install();
+}
+
+/**
+ * Ajax handler for updating a plugin.
+ *
+ * @since 4.2.0
+ *
+ * @see Plugin_Upgrader
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_update_plugin() {
+	AjaxPluginHelper::update();
+}
+
+/**
+ * Ajax handler for deleting a plugin.
+ *
+ * @since 4.6.0
+ *
+ * @see delete_plugins()
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function wp_ajax_delete_plugin() {
+	AjaxPluginHelper::delete();
+}
+
+/**
+ * Ajax handler for searching plugins.
+ *
+ * @since 4.6.0
+ *
+ * @global string $s Search term.
+ */
+function wp_ajax_search_plugins() {
+	AjaxPluginHelper::search();
+}
+
+/**
+ * Ajax handler for searching plugins to install.
+ *
+ * @since 4.6.0
+ */
+function wp_ajax_search_install_plugins() {
+	AjaxPluginHelper::install_search();
+}
+
+/**
+ * Ajax handler for exporting a user's personal data.
+ *
+ * @since 4.9.6
+ */
+function wp_ajax_wp_privacy_export_personal_data() {
+	AjaxPrivacyHelper::exportPersonalData();
+}
+
+/**
+ * Ajax handler for erasing personal data.
+ *
+ * @since 4.9.6
+ */
+function wp_ajax_wp_privacy_erase_personal_data() {
+	AjaxPrivacyHelper::erasePersonalData();
+}
+
+/**
+ * Ajax handler for site health checks on server communication.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_dotorg_communication() {
+	AjaxSiteHealthHelper::dotOrgCommunication();
+}
+
+/**
+ * Ajax handler for site health checks on debug mode.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_is_in_debug_mode() {
+	AjaxSiteHealthHelper::isInDebugMode();
+}
+
+/**
+ * Ajax handler for site health checks on background updates.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_background_updates() {
+	AjaxSiteHealthHelper::backgroundUpdates();
+}
+
+/**
+ * Ajax handler for site health checks on loopback requests.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_loopback_requests() {
+	AjaxSiteHealthHelper::loopbackRequests();
+}
+
+/**
+ * Ajax handler for site health check to update the result status.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_site_status_result() {
+	AjaxSiteHealthHelper::statusResult();
+}
+
+/**
+ * Ajax handler for site health check to get directories and database sizes.
+ *
+ * @since 5.2.0
+ */
+function wp_ajax_health_check_get_sizes() {
+	AjaxSiteHealthHelper::checkGetSizes();
+}
+
+/**
+ * Ajax handler for closed post boxes.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_closed_postboxes() {
+	AjaxScreenHelper::closedPostboxes();
+}
+
+/**
+ * Ajax handler for hidden columns.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_hidden_columns() {
+	AjaxScreenHelper::hiddenColumns();
+}
+
+/**
+ * Ajax handler for updating whether to display the welcome panel.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_update_welcome_panel() {
+	AjaxScreenHelper::updateWelcomePanel();
+}
+
+/**
+ * Ajax handler for retrieving menu meta boxes.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_menu_get_metabox() {
+	AjaxMenuHelper::getMetabox();
+}
+
+/**
+ * Ajax handler for saving the meta box order.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_meta_box_order() {
+	AjaxScreenHelper::metaBoxOrder();
+}
+
+/**
+ * Ajax handler for dismissing a WordPress pointer.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_dismiss_wp_pointer() {
+	AjaxScreenHelper::dismissWPPointer();
+}
+
+/**
+ * Ajax handler for getting revision diffs.
+ *
+ * @since 3.6.0
+ */
+function wp_ajax_get_revision_diffs() {
+	AjaxPostHelper::getRevisionDiffs();
+}
+
+/**
+ * Ajax handler for destroying multiple open sessions for a user.
+ *
+ * @since 4.1.0
+ */
+function wp_ajax_destroy_sessions() {
+	AjaxUserHelper::destroySessions();
+}
+
+/**
+ * Ajax handler for editing a theme or plugin file.
+ *
+ * @since 4.9.0
+ * @see wp_edit_theme_plugin_file()
+ */
+function wp_ajax_edit_theme_plugin_file() {
+	AjaxEditHelper::editThemePluginFile();
+}
+
+/**
+ * Ajax handler for date formatting.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_date_format() {
+	AjaxDateTimeHelper::formatDate();
+}
+
+/**
+ * Ajax handler for time formatting.
+ *
+ * @since 3.1.0
+ */
+function wp_ajax_time_format() {
+	AjaxDateTimeHelper::formatTime();
+}
+
+/* ------------------- Comments: --------------------------*/
+
+/**
+ * Determine if a comment exists based on author and date.
+ *
+ * For best performance, use `$timezone = 'gmt'`, which queries a field that is properly indexed. The default value
+ * for `$timezone` is 'blog' for legacy reasons.
+ *
+ * @since 2.0.0
+ * @since 4.4.0 Added the `$timezone` parameter.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $comment_author Author of the comment.
+ * @param string $comment_date   Date of the comment.
+ * @param string $timezone       Timezone. Accepts 'blog' or 'gmt'. Default 'blog'.
+ *
+ * @return mixed Comment post ID on success.
+ */
+function comment_exists( $comment_author, $comment_date, $timezone = 'blog' ) {
+	return CommentHelper::commentExists( $comment_author, $comment_date, $timezone );
+}
+
+/**
+ * Update a comment with values provided in $_POST.
+ *
+ * @since 2.0.0
+ */
+function edit_comment() {
+	CommentHelper::editComment();
+}
+
+/**
+ * Returns a WP_Comment object based on comment ID.
+ *
+ * @since 2.0.0
+ *
+ * @param int $id ID of comment to retrieve.
+ * @return WP_Comment|false Comment if found. False on failure.
+ */
+function get_comment_to_edit( $id ) {
+	return CommentHelper::getCommentToEdit( $id );
+}
+
+/**
+ * Get the number of pending comments on a post or posts
+ *
+ * @since 2.3.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|array $post_id Either a single Post ID or an array of Post IDs
+ * @return int|array Either a single Posts pending comments as an int or an array of ints keyed on the Post IDs
+ */
+function get_pending_comments_num( $post_id ) {
+	return CommentHelper::getPendingCommentsNum( $post_id );
+}
+
+/**
+ * Add avatars to relevant places in admin, or try to.
+ *
+ * @since 2.5.0
+ *
+ * @param string $name User name.
+ * @return string Avatar with Admin name.
+ */
+function floated_admin_avatar( $name ) {;
+	return CommentHelper::floatedAdminAvatar( $name );
+}
+
+/**
+ * @since 2.7.0
+ */
+function enqueue_comment_hotkeys_js() {
+	CommentHelper::enqueueCommentHotkeysJS();
+}
+
+/**
+ * Display error message at bottom of comments.
+ *
+ * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
+ */
+function comment_footer_die( $msg ) {
+	CommentHelper::commentFooterDie( $msg );
+}
+
+/* ------------------- Credits: --------------------------*/
+
+/**
+ * Retrieve the contributor credits.
+ *
+ * @since 3.2.0
+ *
+ * @return array|false A list of all of the contributors, or false on error.
+ */
+function wp_credits() {
+	return CreditsHelper::getCredits();
+}
+
+/**
+ * Retrieve the link to a contributor's WordPress.org profile page.
+ *
+ * @access private
+ * @since 3.2.0
+ *
+ * @param string $display_name  The contributor's display name (passed by reference).
+ * @param string $username      The contributor's username.
+ * @param string $profiles      URL to the contributor's WordPress.org profile page.
+ */
+function _wp_credits_add_profile_link( &$display_name, $username, $profiles ) {
+	CreditsHelper::addProfileLink( $display_name, $username, $profiles );
+}
+
+/**
+ * Retrieve the link to an external library used in WordPress.
+ *
+ * @access private
+ * @since 3.2.0
+ *
+ * @param string $data External library data (passed by reference).
+ */
+function _wp_credits_build_object_link( &$data ) {
+	CreditsHelper::buildObjectLink( $data );
+}
+
+/* ------------------- Authors: --------------------------*/
+
+/**
+ * Author Template functions for use in themes.
+ *
+ * These functions must be used within the WordPress Loop.
+ *
+ * @link https://codex.wordpress.org/Author_Templates
+ *
+ * @package WordPress
+ * @subpackage Template
+ */
+
+/**
+ * Retrieve the author of the current post.
+ *
+ * @param string $deprecated Deprecated.
+ *
+ * @return string|null The author's display name.
+ * @since 1.5.0
+ *
+ * @global object $authordata The current author's DB object.
+ *
+ */
+function get_the_author( $deprecated = '' ) {
+	return AuthorHelper::getTheAuthor( $deprecated );
+}
+
+/**
+ * Display the name of the author of the current post.
+ *
+ * The behavior of this function is based off of old functionality predating
+ * get_the_author(). This function is not deprecated, but is designed to echo
+ * the value from get_the_author() and as an result of any old theme that might
+ * still use the old behavior will also pass the value from get_the_author().
+ *
+ * The normal, expected behavior of this function is to echo the author and not
+ * return it. However, backward compatibility has to be maintained.
+ *
+ * @param string $deprecated Deprecated.
+ * @param bool $deprecated_echo Deprecated. Use get_the_author(). Echo the string or return it.
+ *
+ * @return string|null The author's display name, from get_the_author().
+ * @since 0.71
+ * @see get_the_author()
+ * @link https://developer.wordpress.org/reference/functions/the_author/
+ *
+ */
+function the_author( $deprecated = '', $deprecated_echo = true ) {
+	return AuthorHelper::theAuthor( $deprecated, $deprecated_echo );
+}
+
+/**
+ * Retrieve the author who last edited the current post.
+ *
+ * @return string|void The author's display name.
+ * @since 2.8.0
+ *
+ */
+function get_the_modified_author() {
+	return AuthorHelper::getTheModifiedAuthor();
+}
+
+/**
+ * Display the name of the author who last edited the current post,
+ * if the author's ID is available.
+ *
+ * @since 2.8.0
+ *
+ * @see get_the_author()
+ */
+function the_modified_author() {
+	AuthorHelper::theModifiedAuthor();
+}
+
+/**
+ * Retrieves the requested data of the author of the current post.
+ *
+ * Valid values for the `$field` parameter include:
+ *
+ * - admin_color
+ * - aim
+ * - comment_shortcuts
+ * - description
+ * - display_name
+ * - first_name
+ * - ID
+ * - jabber
+ * - last_name
+ * - nickname
+ * - plugins_last_view
+ * - plugins_per_page
+ * - rich_editing
+ * - syntax_highlighting
+ * - user_activation_key
+ * - user_description
+ * - user_email
+ * - user_firstname
+ * - user_lastname
+ * - user_level
+ * - user_login
+ * - user_nicename
+ * - user_pass
+ * - user_registered
+ * - user_status
+ * - user_url
+ * - yim
+ *
+ * @param string $field Optional. The user field to retrieve. Default empty.
+ * @param int|false $user_id Optional. User ID.
+ *
+ * @return string The author's field from the current author's DB object, otherwise an empty string.
+ * @global object $authordata The current author's DB object.
+ *
+ * @since 2.8.0
+ *
+ */
+function get_the_author_meta( $field = '', $user_id = false ) {
+	return AuthorHelper::getTheAuthorMeta( $field, $user_id );
+}
+
+/**
+ * Outputs the field from the user's DB object. Defaults to current post's author.
+ *
+ * @param string $field Selects the field of the users record. See get_the_author_meta()
+ *                           for the list of possible fields.
+ * @param int|false $user_id Optional. User ID.
+ *
+ * @since 2.8.0
+ *
+ * @see get_the_author_meta()
+ */
+function the_author_meta( $field = '', $user_id = false ) {
+	AuthorHelper::theAuthorMeta( $field, $user_id );
+}
+
+/**
+ * Retrieve either author's link or author's name.
+ *
+ * If the author has a home page set, return an HTML link, otherwise just return the
+ * author's name.
+ *
+ * @return string|null An HTML link if the author's url exist in user meta,
+ *                     else the result of get_the_author().
+ * @since 3.0.0
+ *
+ */
+function get_the_author_link() {
+	return AuthorHelper::getTheAuthorLink();
+}
+
+/**
+ * Display either author's link or author's name.
+ *
+ * If the author has a home page set, echo an HTML link, otherwise just echo the
+ * author's name.
+ *
+ * @link https://developer.wordpress.org/reference/functions/the_author_link/
+ *
+ * @since 2.1.0
+ */
+function the_author_link() {
+	AuthorHelper::theAuthorLink();
+}
+
+/**
+ * Retrieve the number of posts by the author of the current post.
+ *
+ * @return int The number of posts by the author.
+ * @since 1.5.0
+ *
+ */
+function get_the_author_posts() {
+	return AuthorHelper::getTheAuthorPosts();
+}
+
+/**
+ * Display the number of posts by the author of the current post.
+ *
+ * @link https://developer.wordpress.org/reference/functions/the_author_posts/
+ * @since 0.71
+ */
+function the_author_posts() {
+	AuthorHelper::theAuthorPosts();
+}
+
+/**
+ * Retrieves an HTML link to the author page of the current post's author.
+ *
+ * Returns an HTML-formatted link using get_author_posts_url().
+ *
+ * @return string An HTML link to the author page, or an empty string if $authordata isn't defined.
+ * @global object $authordata The current author's DB object.
+ *
+ * @since 4.4.0
+ *
+ */
+function get_the_author_posts_link() {
+	return AuthorHelper::getTheAuthorPostsLink();
+}
+
+/**
+ * Displays an HTML link to the author page of the current post's author.
+ *
+ * @param string $deprecated Unused.
+ *
+ * @since 4.4.0 Converted into a wrapper for get_the_author_posts_link()
+ *
+ * @since 1.2.0
+ */
+function the_author_posts_link( $deprecated = '' ) {
+	AuthorHelper::theAuthorPostsLink( $deprecated );
+}
+
+/**
+ * Retrieve the URL to the author page for the user with the ID provided.
+ *
+ * @param int $author_id Author ID.
+ * @param string $author_nicename Optional. The author's nicename (slug). Default empty.
+ *
+ * @return string The URL to the author's page.
+ * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+ *
+ * @since 2.1.0
+ *
+ */
+function get_author_posts_url( $author_id, $author_nicename = '' ) {
+	return AuthorHelper::getAuthorPostsUrl( $author_id, $author_nicename );
+}
+
+/**
+ * List all the authors of the site, with several options available.
+ *
+ * @link https://developer.wordpress.org/reference/functions/wp_list_authors/
+ *
+ * @since 1.2.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string|array $args {
+ *     Optional. Array or string of default arguments.
+ *
+ * @type string $orderby How to sort the authors. Accepts 'nicename', 'email', 'url', 'registered',
+ *                                       'user_nicename', 'user_email', 'user_url', 'user_registered', 'name',
+ *                                       'display_name', 'post_count', 'ID', 'meta_value', 'user_login'. Default 'name'.
+ * @type string $order Sorting direction for $orderby. Accepts 'ASC', 'DESC'. Default 'ASC'.
+ * @type int $number Maximum authors to return or display. Default empty (all authors).
+ * @type bool $optioncount Show the count in parenthesis next to the author's name. Default false.
+ * @type bool $exclude_admin Whether to exclude the 'admin' account, if it exists. Default true.
+ * @type bool $show_fullname Whether to show the author's full name. Default false.
+ * @type bool $hide_empty Whether to hide any authors with no posts. Default true.
+ * @type string $feed If not empty, show a link to the author's feed and use this text as the alt
+ *                                       parameter of the link. Default empty.
+ * @type string $feed_image If not empty, show a link to the author's feed and use this image URL as
+ *                                       clickable anchor. Default empty.
+ * @type string $feed_type The feed type to link to. Possible values include 'rss2', 'atom'.
+ *                                       Default is the value of get_default_feed().
+ * @type bool $echo Whether to output the result or instead return it. Default true.
+ * @type string $style If 'list', each author is wrapped in an `<li>` element, otherwise the authors
+ *                                       will be separated by commas.
+ * @type bool $html Whether to list the items in HTML form or plaintext. Default true.
+ * @type array|string $exclude Array or comma/space-separated list of author IDs to exclude. Default empty.
+ * @type array|string $include Array or comma/space-separated list of author IDs to include. Default empty.
+ * }
+ * @return string|void The output, if echo is set to false.
+ */
+function wp_list_authors( $args = '' ) {
+	return AuthorHelper::listAuthors( $args );
+}
+
+/**
+ * Determines whether this site has more than one author.
+ *
+ * Checks to see if more than one author has published posts.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
+ *
+ * @return bool Whether or not we have more than one author
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @since 3.2.0
+ *
+ */
+function is_multi_author() {
+	return AuthorHelper::isMultiAuthor();
+}
+
+/**
+ * Helper function to clear the cache for number of authors.
+ *
+ * @since 3.2.0
+ * @access private
+ */
+function __clear_multi_author_cache() { //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionDoubleUnderscore
+	AuthorHelper::clearMultiAuthorCache();
 }
