@@ -35,6 +35,7 @@ class Routes {
 		'wp-admin/upload'         => MediaLibrary::class,
 		'wp-admin/upgrade'        => Upgrade::class,
 		'wp-admin/user-edit'      => UserEdit::class,
+		'wp-admin/profile'        => UserEdit::class,
 		'wp-admin/user-new'       => UserNew::class,
 		'wp-admin/users'          => Users::class,
 		'wp-admin/widgets'        => Widgets::class,

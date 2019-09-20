@@ -103,6 +103,15 @@ class Main implements InitializerInterface {
 					define( 'IFRAME_REQUEST', true );
 				}
 				break;
+			case 'wp-admin/profile':
+				/**
+				 * This is a profile page.
+				 *
+				 * @since 2.5.0
+				 * @var bool
+				 */
+				define( 'IS_PROFILE_PAGE', true );
+				break;
 		}
 	}
 }
