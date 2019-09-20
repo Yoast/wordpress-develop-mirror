@@ -1,5 +1,8 @@
 <?php
 
+use WP\Helper\AuthorHelper;
+use WP\Helper\CommentHelper;
+use WP\Helper\CreditsHelper;
 use WP\Helper\LabelHelper;
 use WP\Helper\Frontend\LoginHelper;
 use WP\Helper\Post\PostHelper;
@@ -267,9 +270,8 @@ function get_post_type_capabilities( $args ) {
  * @param array $capabilities Post type meta capabilities.
  */
 function _post_type_meta_capabilities( $capabilities = null ) {
-    return PostTypeHelper::getMetaCapabilities( $capabilities );
+    PostTypeHelper::getMetaCapabilities( $capabilities );
 }
-
 
 /**
  * Builds an object with all post type labels out of a post type object.
@@ -342,7 +344,6 @@ function get_post_type_labels( $post_type_object ) {
     return PostTypeHelper::getLabels( $post_type_object );
 }
 
-
 /**
  * Retrieves a post type object by name.
  *
@@ -359,8 +360,6 @@ function get_post_type_labels( $post_type_object ) {
 function get_post_type_object( $post_type ) {
     return PostTypeHelper::get( $post_type );
 }
-
-
 
 /**
  * Whether the post type is hierarchical.
@@ -395,8 +394,6 @@ function is_post_type_hierarchical( $post_type ) {
 function post_type_exists( $post_type ) {
     return PostTypeHelper::exists( $post_type );
 }
-
-
 
 /**
  * Get a list of all registered post type objects.
@@ -457,7 +454,7 @@ function create_initial_post_types(){
  * @since 3.1.0
  */
 function _add_post_type_submenus() {
-    return PostTypeHelper::addSubmenus();
+    PostTypeHelper::addSubmenus();
 }
 
 
@@ -493,7 +490,7 @@ function _add_post_type_submenus() {
  * @param mixed        ...$args   Optional extra arguments to pass along with certain features.
  */
 function add_post_type_support( $post_type, $feature, ...$args ){
-    return PostTypeSupportsHelper::add( $post_type, $feature, ...$args );
+    PostTypeSupportsHelper::add( $post_type, $feature, ...$args );
 }
 
 /**
@@ -507,7 +504,7 @@ function add_post_type_support( $post_type, $feature, ...$args ){
  * @param string $feature   The feature being removed.
  */
 function remove_post_type_support( $post_type, $feature ) {
-    return PostTypeSupportsHelper::remove( $post_type, $feature );
+    PostTypeSupportsHelper::remove( $post_type, $feature );
 }
 
 
@@ -841,7 +838,7 @@ function wp_update_post( $postarr = array(), $wp_error = false ) {
  * @param int|WP_Post $post Post ID or post object.
  */
 function wp_publish_post( $post ) {
-    return PostHelper::publish( $post );
+    PostHelper::publish( $post );
 }
 
 /**
@@ -855,9 +852,8 @@ function wp_publish_post( $post ) {
  * @param int|WP_Post $post_id Post ID or post object.
  */
 function check_and_publish_future_post( $post_id ) {
-    return PostHelper::publishFuturePost( $post_id );
+    PostHelper::publishFuturePost( $post_id );
 }
-
 
 /**
  * Trash or delete a post or page.
@@ -883,8 +879,6 @@ function check_and_publish_future_post( $post_id ) {
 function wp_delete_post( $postid = 0, $force_delete = false ) {
     return PostHelper::delete( $postid, $force_delete );
 }
-
-
 
 /**
  * Retrieves an array of the latest posts, or posts matching the given criteria.
@@ -914,7 +908,6 @@ function get_posts( $args = null ) {
     return PostHelper::getPosts( $args );
 }
 
-
 /**
  * Retrieve a number of recent posts.
  *
@@ -931,7 +924,6 @@ function get_posts( $args = null ) {
 function wp_get_recent_posts( $args = array(), $output = ARRAY_A ) {
     return PostHelper::getRecentPosts( $args, $output );
 }
-
 
 /**
  * Retrieve ancestors of a post.
@@ -999,7 +991,6 @@ function get_post_ancestors( $post ) {
 function get_children( $args = '', $output = OBJECT ) {
     return PostHelper::getChildren( $args, $output );
 }
-
 
 /**
  * Retrieves the post type of the current post or of a given post.
@@ -1157,8 +1148,6 @@ function is_sticky( $post_id = 0 ) {
     return PostHelper::isSticky( $post_id );
 }
 
-
-
 /**
  * Make a post sticky.
  *
@@ -1169,10 +1158,8 @@ function is_sticky( $post_id = 0 ) {
  * @param int $post_id Post ID.
  */
 function stick_post( $post_id ) {
-    return PostHelper::makeSticky( $post_id );
+    PostHelper::makeSticky( $post_id );
 }
-
-
 
 /**
  * Un-stick a post.
@@ -1184,7 +1171,7 @@ function stick_post( $post_id ) {
  * @param int $post_id Post ID.
  */
 function unstick_post( $post_id ) {
-    return PostHelper::makeUnsticky( $post_id );
+    PostHelper::makeUnsticky( $post_id );
 }
 
 /**
@@ -1229,9 +1216,6 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
     return PostHelper::sanitizeField( $field, $value, $post_id, $context );
 }
 
-
-
-
 /**
  * Retrieve the list of categories for a post.
  *
@@ -1272,7 +1256,7 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  *                        WP_Error object if 'post_tag' taxonomy doesn't exist.
  */
 function wp_get_post_tags( $post_id = 0, $args = array() ) {
-    PostTermHelper::getTags( $post_id, $args );
+    return PostTermHelper::getTags( $post_id, $args );
 }
 
 /**
@@ -1293,10 +1277,8 @@ function wp_get_post_tags( $post_id = 0, $args = array() ) {
  *                        WP_Error object if `$taxonomy` doesn't exist.
  */
 function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
-    PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
+    return PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
 }
-
-
 
 /**
  * Move a post or page to the Trash
@@ -1315,8 +1297,6 @@ function wp_trash_post( $post_id = 0 ) {
     return PostHelper::trash( $post_id );
 }
 
-
-
 /**
  * Restore a post or page from the Trash.
  *
@@ -1328,7 +1308,6 @@ function wp_trash_post( $post_id = 0 ) {
 function wp_untrash_post( $post_id = 0 ) {
     return PostHelper::untrash( $post_id );
 }
-
 
 /**
  * Moves comments for a post to the trash.
@@ -1344,8 +1323,6 @@ function wp_trash_post_comments( $post = null ) {
     return PostCommentHelper::trash( $post );
 }
 
-
-
 /**
  * Restore comments for a post from the trash.
  *
@@ -1360,9 +1337,6 @@ function wp_untrash_post_comments( $post = null ) {
     return PostCommentHelper::untrash( $post );
 }
 
-
-
-
 /**
  * Reset the page_on_front, show_on_front, and page_for_post settings when
  * a linked page is deleted or trashed.
@@ -1375,13 +1349,10 @@ function wp_untrash_post_comments( $post = null ) {
  * @param int $post_id Post ID.
  */
 function _reset_front_page_settings_for_post( $post_id ) {
-    return PostHelper::resetFrontPageSettings( $post_id );
+    PostHelper::resetFrontPageSettings( $post_id );
 }
 
-
-
 /* ------------------- Post Meta: --------------------------*/
-
 
 /**
  * Adds a meta field to the given post.
@@ -1460,8 +1431,6 @@ function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) 
     return PostMetaHelper::update( $post_id, $meta_key, $meta_value, $prev_value );
 }
 
-
-
 /**
  * Deletes everything from post meta matching the given meta key.
  *
@@ -1473,8 +1442,6 @@ function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) 
 function delete_post_meta_by_key( $post_meta_key ) {
     return PostMetaHelper::deleteByKey( $post_meta_key );
 }
-
-
 
 /**
  * Registers a meta key for posts.
@@ -1492,7 +1459,6 @@ function register_post_meta( $post_type, $meta_key, array $args ) {
     return PostMetaHelper::register( $post_type, $meta_key, $args );
 }
 
-
 /**
  * Unregisters a meta key for posts.
  *
@@ -1508,7 +1474,6 @@ function unregister_post_meta( $post_type, $meta_key ) {
     return PostMetaHelper::unregister( $post_type, $meta_key );
 }
 
-
 /**
  * Retrieve post meta fields, based on post ID.
  *
@@ -1523,7 +1488,6 @@ function unregister_post_meta( $post_type, $meta_key ) {
 function get_post_custom( $post_id = 0 ) {
     return PostMetaHelper::getCustom( $post_id );
 }
-
 
 /**
  * Retrieve meta field names for a post.
@@ -1577,8 +1541,6 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
     return TermHelper::getForObject( $object_ids, $taxonomies, $args );
 }
 
-
-
 /**
  * Create Term and Taxonomy Relationships.
  *
@@ -1605,7 +1567,6 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
 function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
     return TermHelper::setForObject( $object_id, $terms, $taxonomy, $append );
 }
-
 
 /**
  * Add a new term to the database.
@@ -1698,8 +1659,6 @@ function update_metadata( $meta_type, $object_id, $meta_key, $meta_value, $prev_
     return Metadata::update( $meta_type, $object_id, $meta_key, $meta_value, $prev_value );
 }
 
-
-
 /**
  * Delete metadata for the specified object.
  *
@@ -1741,7 +1700,6 @@ function delete_metadata( $meta_type, $object_id, $meta_key, $meta_value = '', $
 function get_metadata( $meta_type, $object_id, $meta_key = '', $single = false ) {
     return Metadata::get( $meta_type, $object_id, $meta_key, $single );
 }
-
 
 /**
  * Registers a meta key.
@@ -1802,7 +1760,6 @@ function unregister_meta_key( $object_type, $meta_key, $object_subtype = '' ) {
 }
 
 /* ------------------- Post Status: --------------------------*/
-
 
 /**
  * Register a post status. Do not use before init.
@@ -1904,8 +1861,6 @@ function get_post_stati( $args = array(), $output = 'names', $operator = 'and' )
     return PostStatusHelper::getPostStatuses( $args, $output, $operator );
 }
 
-
-
 /**
  * Retrieve all of the WordPress supported post statuses.
  *
@@ -1933,7 +1888,6 @@ function get_post_statuses() {
 function get_page_statuses() {
     return PostStatusHelper::getPossiblePageStatuses();
 }
-
 
 /**
  * Return statuses for privacy requests.
@@ -2651,7 +2605,6 @@ function wp_login_viewport_meta() {
 function retrieve_password() {
 	return LoginHelper::retrievePassword();
 }
-
 
 /* ------------------- Caching: --------------------------*/
 
@@ -3884,4 +3837,428 @@ function wp_ajax_date_format() {
  */
 function wp_ajax_time_format() {
 	AjaxDateTimeHelper::formatTime();
+}
+
+/* ------------------- Comments: --------------------------*/
+
+/**
+ * Determine if a comment exists based on author and date.
+ *
+ * For best performance, use `$timezone = 'gmt'`, which queries a field that is properly indexed. The default value
+ * for `$timezone` is 'blog' for legacy reasons.
+ *
+ * @since 2.0.0
+ * @since 4.4.0 Added the `$timezone` parameter.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $comment_author Author of the comment.
+ * @param string $comment_date   Date of the comment.
+ * @param string $timezone       Timezone. Accepts 'blog' or 'gmt'. Default 'blog'.
+ *
+ * @return mixed Comment post ID on success.
+ */
+function comment_exists( $comment_author, $comment_date, $timezone = 'blog' ) {
+	return CommentHelper::commentExists( $comment_author, $comment_date, $timezone );
+}
+
+/**
+ * Update a comment with values provided in $_POST.
+ *
+ * @since 2.0.0
+ */
+function edit_comment() {
+	CommentHelper::editComment();
+}
+
+/**
+ * Returns a WP_Comment object based on comment ID.
+ *
+ * @since 2.0.0
+ *
+ * @param int $id ID of comment to retrieve.
+ * @return WP_Comment|false Comment if found. False on failure.
+ */
+function get_comment_to_edit( $id ) {
+	return CommentHelper::getCommentToEdit( $id );
+}
+
+/**
+ * Get the number of pending comments on a post or posts
+ *
+ * @since 2.3.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|array $post_id Either a single Post ID or an array of Post IDs
+ * @return int|array Either a single Posts pending comments as an int or an array of ints keyed on the Post IDs
+ */
+function get_pending_comments_num( $post_id ) {
+	return CommentHelper::getPendingCommentsNum( $post_id );
+}
+
+/**
+ * Add avatars to relevant places in admin, or try to.
+ *
+ * @since 2.5.0
+ *
+ * @param string $name User name.
+ * @return string Avatar with Admin name.
+ */
+function floated_admin_avatar( $name ) {;
+	return CommentHelper::floatedAdminAvatar( $name );
+}
+
+/**
+ * @since 2.7.0
+ */
+function enqueue_comment_hotkeys_js() {
+	CommentHelper::enqueueCommentHotkeysJS();
+}
+
+/**
+ * Display error message at bottom of comments.
+ *
+ * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
+ */
+function comment_footer_die( $msg ) {
+	CommentHelper::commentFooterDie( $msg );
+}
+
+/* ------------------- Credits: --------------------------*/
+
+/**
+ * Retrieve the contributor credits.
+ *
+ * @since 3.2.0
+ *
+ * @return array|false A list of all of the contributors, or false on error.
+ */
+function wp_credits() {
+	return CreditsHelper::getCredits();
+}
+
+/**
+ * Retrieve the link to a contributor's WordPress.org profile page.
+ *
+ * @access private
+ * @since 3.2.0
+ *
+ * @param string $display_name  The contributor's display name (passed by reference).
+ * @param string $username      The contributor's username.
+ * @param string $profiles      URL to the contributor's WordPress.org profile page.
+ */
+function _wp_credits_add_profile_link( &$display_name, $username, $profiles ) {
+	CreditsHelper::addProfileLink( $display_name, $username, $profiles );
+}
+
+/**
+ * Retrieve the link to an external library used in WordPress.
+ *
+ * @access private
+ * @since 3.2.0
+ *
+ * @param string $data External library data (passed by reference).
+ */
+function _wp_credits_build_object_link( &$data ) {
+	CreditsHelper::buildObjectLink( $data );
+}
+
+/* ------------------- Authors: --------------------------*/
+
+/**
+ * Author Template functions for use in themes.
+ *
+ * These functions must be used within the WordPress Loop.
+ *
+ * @link https://codex.wordpress.org/Author_Templates
+ *
+ * @package WordPress
+ * @subpackage Template
+ */
+
+/**
+ * Retrieve the author of the current post.
+ *
+ * @param string $deprecated Deprecated.
+ *
+ * @return string|null The author's display name.
+ * @since 1.5.0
+ *
+ * @global object $authordata The current author's DB object.
+ *
+ */
+function get_the_author( $deprecated = '' ) {
+	return AuthorHelper::getTheAuthor( $deprecated );
+}
+
+/**
+ * Display the name of the author of the current post.
+ *
+ * The behavior of this function is based off of old functionality predating
+ * get_the_author(). This function is not deprecated, but is designed to echo
+ * the value from get_the_author() and as an result of any old theme that might
+ * still use the old behavior will also pass the value from get_the_author().
+ *
+ * The normal, expected behavior of this function is to echo the author and not
+ * return it. However, backward compatibility has to be maintained.
+ *
+ * @param string $deprecated Deprecated.
+ * @param bool $deprecated_echo Deprecated. Use get_the_author(). Echo the string or return it.
+ *
+ * @return string|null The author's display name, from get_the_author().
+ * @since 0.71
+ * @see get_the_author()
+ * @link https://developer.wordpress.org/reference/functions/the_author/
+ *
+ */
+function the_author( $deprecated = '', $deprecated_echo = true ) {
+	return AuthorHelper::theAuthor( $deprecated, $deprecated_echo );
+}
+
+/**
+ * Retrieve the author who last edited the current post.
+ *
+ * @return string|void The author's display name.
+ * @since 2.8.0
+ *
+ */
+function get_the_modified_author() {
+	return AuthorHelper::getTheModifiedAuthor();
+}
+
+/**
+ * Display the name of the author who last edited the current post,
+ * if the author's ID is available.
+ *
+ * @since 2.8.0
+ *
+ * @see get_the_author()
+ */
+function the_modified_author() {
+	AuthorHelper::theModifiedAuthor();
+}
+
+/**
+ * Retrieves the requested data of the author of the current post.
+ *
+ * Valid values for the `$field` parameter include:
+ *
+ * - admin_color
+ * - aim
+ * - comment_shortcuts
+ * - description
+ * - display_name
+ * - first_name
+ * - ID
+ * - jabber
+ * - last_name
+ * - nickname
+ * - plugins_last_view
+ * - plugins_per_page
+ * - rich_editing
+ * - syntax_highlighting
+ * - user_activation_key
+ * - user_description
+ * - user_email
+ * - user_firstname
+ * - user_lastname
+ * - user_level
+ * - user_login
+ * - user_nicename
+ * - user_pass
+ * - user_registered
+ * - user_status
+ * - user_url
+ * - yim
+ *
+ * @param string $field Optional. The user field to retrieve. Default empty.
+ * @param int|false $user_id Optional. User ID.
+ *
+ * @return string The author's field from the current author's DB object, otherwise an empty string.
+ * @global object $authordata The current author's DB object.
+ *
+ * @since 2.8.0
+ *
+ */
+function get_the_author_meta( $field = '', $user_id = false ) {
+	return AuthorHelper::getTheAuthorMeta( $field, $user_id );
+}
+
+/**
+ * Outputs the field from the user's DB object. Defaults to current post's author.
+ *
+ * @param string $field Selects the field of the users record. See get_the_author_meta()
+ *                           for the list of possible fields.
+ * @param int|false $user_id Optional. User ID.
+ *
+ * @since 2.8.0
+ *
+ * @see get_the_author_meta()
+ */
+function the_author_meta( $field = '', $user_id = false ) {
+	AuthorHelper::theAuthorMeta( $field, $user_id );
+}
+
+/**
+ * Retrieve either author's link or author's name.
+ *
+ * If the author has a home page set, return an HTML link, otherwise just return the
+ * author's name.
+ *
+ * @return string|null An HTML link if the author's url exist in user meta,
+ *                     else the result of get_the_author().
+ * @since 3.0.0
+ *
+ */
+function get_the_author_link() {
+	return AuthorHelper::getTheAuthorLink();
+}
+
+/**
+ * Display either author's link or author's name.
+ *
+ * If the author has a home page set, echo an HTML link, otherwise just echo the
+ * author's name.
+ *
+ * @link https://developer.wordpress.org/reference/functions/the_author_link/
+ *
+ * @since 2.1.0
+ */
+function the_author_link() {
+	AuthorHelper::theAuthorLink();
+}
+
+/**
+ * Retrieve the number of posts by the author of the current post.
+ *
+ * @return int The number of posts by the author.
+ * @since 1.5.0
+ *
+ */
+function get_the_author_posts() {
+	return AuthorHelper::getTheAuthorPosts();
+}
+
+/**
+ * Display the number of posts by the author of the current post.
+ *
+ * @link https://developer.wordpress.org/reference/functions/the_author_posts/
+ * @since 0.71
+ */
+function the_author_posts() {
+	AuthorHelper::theAuthorPosts();
+}
+
+/**
+ * Retrieves an HTML link to the author page of the current post's author.
+ *
+ * Returns an HTML-formatted link using get_author_posts_url().
+ *
+ * @return string An HTML link to the author page, or an empty string if $authordata isn't defined.
+ * @global object $authordata The current author's DB object.
+ *
+ * @since 4.4.0
+ *
+ */
+function get_the_author_posts_link() {
+	return AuthorHelper::getTheAuthorPostsLink();
+}
+
+/**
+ * Displays an HTML link to the author page of the current post's author.
+ *
+ * @param string $deprecated Unused.
+ *
+ * @since 4.4.0 Converted into a wrapper for get_the_author_posts_link()
+ *
+ * @since 1.2.0
+ */
+function the_author_posts_link( $deprecated = '' ) {
+	AuthorHelper::theAuthorPostsLink( $deprecated );
+}
+
+/**
+ * Retrieve the URL to the author page for the user with the ID provided.
+ *
+ * @param int $author_id Author ID.
+ * @param string $author_nicename Optional. The author's nicename (slug). Default empty.
+ *
+ * @return string The URL to the author's page.
+ * @global WP_Rewrite $wp_rewrite WordPress rewrite component.
+ *
+ * @since 2.1.0
+ *
+ */
+function get_author_posts_url( $author_id, $author_nicename = '' ) {
+	return AuthorHelper::getAuthorPostsUrl( $author_id, $author_nicename );
+}
+
+/**
+ * List all the authors of the site, with several options available.
+ *
+ * @link https://developer.wordpress.org/reference/functions/wp_list_authors/
+ *
+ * @since 1.2.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string|array $args {
+ *     Optional. Array or string of default arguments.
+ *
+ * @type string $orderby How to sort the authors. Accepts 'nicename', 'email', 'url', 'registered',
+ *                                       'user_nicename', 'user_email', 'user_url', 'user_registered', 'name',
+ *                                       'display_name', 'post_count', 'ID', 'meta_value', 'user_login'. Default 'name'.
+ * @type string $order Sorting direction for $orderby. Accepts 'ASC', 'DESC'. Default 'ASC'.
+ * @type int $number Maximum authors to return or display. Default empty (all authors).
+ * @type bool $optioncount Show the count in parenthesis next to the author's name. Default false.
+ * @type bool $exclude_admin Whether to exclude the 'admin' account, if it exists. Default true.
+ * @type bool $show_fullname Whether to show the author's full name. Default false.
+ * @type bool $hide_empty Whether to hide any authors with no posts. Default true.
+ * @type string $feed If not empty, show a link to the author's feed and use this text as the alt
+ *                                       parameter of the link. Default empty.
+ * @type string $feed_image If not empty, show a link to the author's feed and use this image URL as
+ *                                       clickable anchor. Default empty.
+ * @type string $feed_type The feed type to link to. Possible values include 'rss2', 'atom'.
+ *                                       Default is the value of get_default_feed().
+ * @type bool $echo Whether to output the result or instead return it. Default true.
+ * @type string $style If 'list', each author is wrapped in an `<li>` element, otherwise the authors
+ *                                       will be separated by commas.
+ * @type bool $html Whether to list the items in HTML form or plaintext. Default true.
+ * @type array|string $exclude Array or comma/space-separated list of author IDs to exclude. Default empty.
+ * @type array|string $include Array or comma/space-separated list of author IDs to include. Default empty.
+ * }
+ * @return string|void The output, if echo is set to false.
+ */
+function wp_list_authors( $args = '' ) {
+	return AuthorHelper::listAuthors( $args );
+}
+
+/**
+ * Determines whether this site has more than one author.
+ *
+ * Checks to see if more than one author has published posts.
+ *
+ * For more information on this and similar theme functions, check out
+ * the {@link https://developer.wordpress.org/themes/basics/conditional-tags/
+ * Conditional Tags} article in the Theme Developer Handbook.
+ *
+ * @return bool Whether or not we have more than one author
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @since 3.2.0
+ *
+ */
+function is_multi_author() {
+	return AuthorHelper::isMultiAuthor();
+}
+
+/**
+ * Helper function to clear the cache for number of authors.
+ *
+ * @since 3.2.0
+ * @access private
+ */
+function __clear_multi_author_cache() { //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionDoubleUnderscore
+	AuthorHelper::clearMultiAuthorCache();
 }

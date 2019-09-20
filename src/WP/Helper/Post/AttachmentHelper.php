@@ -64,7 +64,7 @@ class AttachmentHelper{
     /**
      * Return the mime-type
      */
-    public static function getMimeType() {
+    public static function getMimeType( $post = null ) {
         $post = get_post( $post );
 
         if ( is_object( $post ) ) {
@@ -289,7 +289,7 @@ class AttachmentHelper{
     /**
      * Count attachments
      */
-    public static function count() {
+    public static function count( $mime_type = '' ) {
         global $wpdb;
 
         $and   = wp_post_mime_type_where( $mime_type );

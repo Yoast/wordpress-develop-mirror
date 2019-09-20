@@ -4,7 +4,7 @@ namespace WP\Helper\Post;
 
 class PostHelper{
 
-    
+
 
     /**
      * Retrieves post data given a post ID or post object.
@@ -88,7 +88,7 @@ class PostHelper{
 
 
     public static function getRecentPosts( $args = array(), $output = ARRAY_A ) {
-            
+
         if ( is_numeric( $args ) ) {
             _deprecated_argument( __FUNCTION__, '3.1.0', __( 'Passing an integer number of posts is deprecated. Pass an array of arguments instead.' ) );
             $args = array( 'numberposts' => absint( $args ) );
@@ -890,7 +890,7 @@ class PostHelper{
         do_action( 'save_post', $post->ID, $post, true );
 
         /** This action is documented in wp-includes/post.php */
-        do_action( 'wp_insert_post', $post->ID, $post, true );        
+        do_action( 'wp_insert_post', $post->ID, $post, true );
     }
 
     /**
@@ -920,7 +920,7 @@ class PostHelper{
         static::publish( $post_id );
     }
 
-    
+
     /**
      * Retrieves the post type of the current post or of a given post.
      */
@@ -950,7 +950,7 @@ class PostHelper{
     /**
      * Retrieve data from a post field based on Post ID.
      */
-    public function getField( $field, $post = null, $context = 'display' )
+    public static function getField( $field, $post = null, $context = 'display' )
     {
         $post = get_post( $post );
 
@@ -1169,7 +1169,7 @@ class PostHelper{
     /**
      * Untrash a post
      */
-    public static function untrash() {
+    public static function untrash( $post_id = 0 ) {
         $post = static::get( $post_id );
 
         if ( ! $post ) {
@@ -1394,8 +1394,8 @@ class PostHelper{
                 update_option( 'page_for_posts', 0 );
             }
         }
-        
-        static::makeUnsticky( $post->ID );       
+
+        static::makeUnsticky( $post->ID );
     }
 
     /**
@@ -1575,7 +1575,7 @@ class PostHelper{
 
         return $value;
     }
-    
+
 
     /**
      * Get extended entry info (<!--more-->).
@@ -1602,6 +1602,6 @@ class PostHelper{
             'more_text' => $more_text,
         );
     }
-    
+
 
 }
