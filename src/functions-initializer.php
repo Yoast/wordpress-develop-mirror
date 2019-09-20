@@ -1,5 +1,6 @@
 <?php
 
+use WP\Helper\CommentHelper;
 use WP\Helper\LabelHelper;
 use WP\Helper\Frontend\LoginHelper;
 use WP\Helper\Post\PostHelper;
@@ -267,9 +268,8 @@ function get_post_type_capabilities( $args ) {
  * @param array $capabilities Post type meta capabilities.
  */
 function _post_type_meta_capabilities( $capabilities = null ) {
-    return PostTypeHelper::getMetaCapabilities( $capabilities );
+    PostTypeHelper::getMetaCapabilities( $capabilities );
 }
-
 
 /**
  * Builds an object with all post type labels out of a post type object.
@@ -342,7 +342,6 @@ function get_post_type_labels( $post_type_object ) {
     return PostTypeHelper::getLabels( $post_type_object );
 }
 
-
 /**
  * Retrieves a post type object by name.
  *
@@ -359,8 +358,6 @@ function get_post_type_labels( $post_type_object ) {
 function get_post_type_object( $post_type ) {
     return PostTypeHelper::get( $post_type );
 }
-
-
 
 /**
  * Whether the post type is hierarchical.
@@ -395,8 +392,6 @@ function is_post_type_hierarchical( $post_type ) {
 function post_type_exists( $post_type ) {
     return PostTypeHelper::exists( $post_type );
 }
-
-
 
 /**
  * Get a list of all registered post type objects.
@@ -457,7 +452,7 @@ function create_initial_post_types(){
  * @since 3.1.0
  */
 function _add_post_type_submenus() {
-    return PostTypeHelper::addSubmenus();
+    PostTypeHelper::addSubmenus();
 }
 
 
@@ -493,7 +488,7 @@ function _add_post_type_submenus() {
  * @param mixed        ...$args   Optional extra arguments to pass along with certain features.
  */
 function add_post_type_support( $post_type, $feature, ...$args ){
-    return PostTypeSupportsHelper::add( $post_type, $feature, ...$args );
+    PostTypeSupportsHelper::add( $post_type, $feature, ...$args );
 }
 
 /**
@@ -507,7 +502,7 @@ function add_post_type_support( $post_type, $feature, ...$args ){
  * @param string $feature   The feature being removed.
  */
 function remove_post_type_support( $post_type, $feature ) {
-    return PostTypeSupportsHelper::remove( $post_type, $feature );
+    PostTypeSupportsHelper::remove( $post_type, $feature );
 }
 
 
@@ -841,7 +836,7 @@ function wp_update_post( $postarr = array(), $wp_error = false ) {
  * @param int|WP_Post $post Post ID or post object.
  */
 function wp_publish_post( $post ) {
-    return PostHelper::publish( $post );
+    PostHelper::publish( $post );
 }
 
 /**
@@ -855,9 +850,8 @@ function wp_publish_post( $post ) {
  * @param int|WP_Post $post_id Post ID or post object.
  */
 function check_and_publish_future_post( $post_id ) {
-    return PostHelper::publishFuturePost( $post_id );
+    PostHelper::publishFuturePost( $post_id );
 }
-
 
 /**
  * Trash or delete a post or page.
@@ -883,8 +877,6 @@ function check_and_publish_future_post( $post_id ) {
 function wp_delete_post( $postid = 0, $force_delete = false ) {
     return PostHelper::delete( $postid, $force_delete );
 }
-
-
 
 /**
  * Retrieves an array of the latest posts, or posts matching the given criteria.
@@ -914,7 +906,6 @@ function get_posts( $args = null ) {
     return PostHelper::getPosts( $args );
 }
 
-
 /**
  * Retrieve a number of recent posts.
  *
@@ -931,7 +922,6 @@ function get_posts( $args = null ) {
 function wp_get_recent_posts( $args = array(), $output = ARRAY_A ) {
     return PostHelper::getRecentPosts( $args, $output );
 }
-
 
 /**
  * Retrieve ancestors of a post.
@@ -999,7 +989,6 @@ function get_post_ancestors( $post ) {
 function get_children( $args = '', $output = OBJECT ) {
     return PostHelper::getChildren( $args, $output );
 }
-
 
 /**
  * Retrieves the post type of the current post or of a given post.
@@ -1157,8 +1146,6 @@ function is_sticky( $post_id = 0 ) {
     return PostHelper::isSticky( $post_id );
 }
 
-
-
 /**
  * Make a post sticky.
  *
@@ -1169,10 +1156,8 @@ function is_sticky( $post_id = 0 ) {
  * @param int $post_id Post ID.
  */
 function stick_post( $post_id ) {
-    return PostHelper::makeSticky( $post_id );
+    PostHelper::makeSticky( $post_id );
 }
-
-
 
 /**
  * Un-stick a post.
@@ -1184,7 +1169,7 @@ function stick_post( $post_id ) {
  * @param int $post_id Post ID.
  */
 function unstick_post( $post_id ) {
-    return PostHelper::makeUnsticky( $post_id );
+    PostHelper::makeUnsticky( $post_id );
 }
 
 /**
@@ -1229,9 +1214,6 @@ function sanitize_post_field( $field, $value, $post_id, $context = 'display' ) {
     return PostHelper::sanitizeField( $field, $value, $post_id, $context );
 }
 
-
-
-
 /**
  * Retrieve the list of categories for a post.
  *
@@ -1272,7 +1254,7 @@ function wp_get_post_categories( $post_id = 0, $args = array() ) {
  *                        WP_Error object if 'post_tag' taxonomy doesn't exist.
  */
 function wp_get_post_tags( $post_id = 0, $args = array() ) {
-    PostTermHelper::getTags( $post_id, $args );
+    return PostTermHelper::getTags( $post_id, $args );
 }
 
 /**
@@ -1293,10 +1275,8 @@ function wp_get_post_tags( $post_id = 0, $args = array() ) {
  *                        WP_Error object if `$taxonomy` doesn't exist.
  */
 function wp_get_post_terms( $post_id = 0, $taxonomy = 'post_tag', $args = array() ) {
-    PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
+    return PostTermHelper::getTerms( $post_id = 0, $taxonomy = 'post_tag', $args = array() );
 }
-
-
 
 /**
  * Move a post or page to the Trash
@@ -1315,8 +1295,6 @@ function wp_trash_post( $post_id = 0 ) {
     return PostHelper::trash( $post_id );
 }
 
-
-
 /**
  * Restore a post or page from the Trash.
  *
@@ -1328,7 +1306,6 @@ function wp_trash_post( $post_id = 0 ) {
 function wp_untrash_post( $post_id = 0 ) {
     return PostHelper::untrash( $post_id );
 }
-
 
 /**
  * Moves comments for a post to the trash.
@@ -1344,8 +1321,6 @@ function wp_trash_post_comments( $post = null ) {
     return PostCommentHelper::trash( $post );
 }
 
-
-
 /**
  * Restore comments for a post from the trash.
  *
@@ -1360,9 +1335,6 @@ function wp_untrash_post_comments( $post = null ) {
     return PostCommentHelper::untrash( $post );
 }
 
-
-
-
 /**
  * Reset the page_on_front, show_on_front, and page_for_post settings when
  * a linked page is deleted or trashed.
@@ -1375,13 +1347,10 @@ function wp_untrash_post_comments( $post = null ) {
  * @param int $post_id Post ID.
  */
 function _reset_front_page_settings_for_post( $post_id ) {
-    return PostHelper::resetFrontPageSettings( $post_id );
+    PostHelper::resetFrontPageSettings( $post_id );
 }
 
-
-
 /* ------------------- Post Meta: --------------------------*/
-
 
 /**
  * Adds a meta field to the given post.
@@ -1460,8 +1429,6 @@ function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) 
     return PostMetaHelper::update( $post_id, $meta_key, $meta_value, $prev_value );
 }
 
-
-
 /**
  * Deletes everything from post meta matching the given meta key.
  *
@@ -1473,8 +1440,6 @@ function update_post_meta( $post_id, $meta_key, $meta_value, $prev_value = '' ) 
 function delete_post_meta_by_key( $post_meta_key ) {
     return PostMetaHelper::deleteByKey( $post_meta_key );
 }
-
-
 
 /**
  * Registers a meta key for posts.
@@ -1492,7 +1457,6 @@ function register_post_meta( $post_type, $meta_key, array $args ) {
     return PostMetaHelper::register( $post_type, $meta_key, $args );
 }
 
-
 /**
  * Unregisters a meta key for posts.
  *
@@ -1508,7 +1472,6 @@ function unregister_post_meta( $post_type, $meta_key ) {
     return PostMetaHelper::unregister( $post_type, $meta_key );
 }
 
-
 /**
  * Retrieve post meta fields, based on post ID.
  *
@@ -1523,7 +1486,6 @@ function unregister_post_meta( $post_type, $meta_key ) {
 function get_post_custom( $post_id = 0 ) {
     return PostMetaHelper::getCustom( $post_id );
 }
-
 
 /**
  * Retrieve meta field names for a post.
@@ -1577,8 +1539,6 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
     return TermHelper::getForObject( $object_ids, $taxonomies, $args );
 }
 
-
-
 /**
  * Create Term and Taxonomy Relationships.
  *
@@ -1605,7 +1565,6 @@ function wp_get_object_terms( $object_ids, $taxonomies, $args = array() ) {
 function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
     return TermHelper::setForObject( $object_id, $terms, $taxonomy, $append );
 }
-
 
 /**
  * Add a new term to the database.
@@ -1698,8 +1657,6 @@ function update_metadata( $meta_type, $object_id, $meta_key, $meta_value, $prev_
     return Metadata::update( $meta_type, $object_id, $meta_key, $meta_value, $prev_value );
 }
 
-
-
 /**
  * Delete metadata for the specified object.
  *
@@ -1741,7 +1698,6 @@ function delete_metadata( $meta_type, $object_id, $meta_key, $meta_value = '', $
 function get_metadata( $meta_type, $object_id, $meta_key = '', $single = false ) {
     return Metadata::get( $meta_type, $object_id, $meta_key, $single );
 }
-
 
 /**
  * Registers a meta key.
@@ -1802,7 +1758,6 @@ function unregister_meta_key( $object_type, $meta_key, $object_subtype = '' ) {
 }
 
 /* ------------------- Post Status: --------------------------*/
-
 
 /**
  * Register a post status. Do not use before init.
@@ -1904,8 +1859,6 @@ function get_post_stati( $args = array(), $output = 'names', $operator = 'and' )
     return PostStatusHelper::getPostStatuses( $args, $output, $operator );
 }
 
-
-
 /**
  * Retrieve all of the WordPress supported post statuses.
  *
@@ -1933,7 +1886,6 @@ function get_post_statuses() {
 function get_page_statuses() {
     return PostStatusHelper::getPossiblePageStatuses();
 }
-
 
 /**
  * Return statuses for privacy requests.
@@ -2651,7 +2603,6 @@ function wp_login_viewport_meta() {
 function retrieve_password() {
 	return LoginHelper::retrievePassword();
 }
-
 
 /* ------------------- Caching: --------------------------*/
 
@@ -3884,4 +3835,90 @@ function wp_ajax_date_format() {
  */
 function wp_ajax_time_format() {
 	AjaxDateTimeHelper::formatTime();
+}
+
+/* ------------------- Comments: --------------------------*/
+
+/**
+ * Determine if a comment exists based on author and date.
+ *
+ * For best performance, use `$timezone = 'gmt'`, which queries a field that is properly indexed. The default value
+ * for `$timezone` is 'blog' for legacy reasons.
+ *
+ * @since 2.0.0
+ * @since 4.4.0 Added the `$timezone` parameter.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param string $comment_author Author of the comment.
+ * @param string $comment_date   Date of the comment.
+ * @param string $timezone       Timezone. Accepts 'blog' or 'gmt'. Default 'blog'.
+ *
+ * @return mixed Comment post ID on success.
+ */
+function comment_exists( $comment_author, $comment_date, $timezone = 'blog' ) {
+	return CommentHelper::commentExists( $comment_author, $comment_date, $timezone );
+}
+
+/**
+ * Update a comment with values provided in $_POST.
+ *
+ * @since 2.0.0
+ */
+function edit_comment() {
+	CommentHelper::editComment();
+}
+
+/**
+ * Returns a WP_Comment object based on comment ID.
+ *
+ * @since 2.0.0
+ *
+ * @param int $id ID of comment to retrieve.
+ * @return WP_Comment|false Comment if found. False on failure.
+ */
+function get_comment_to_edit( $id ) {
+	return CommentHelper::getCommentToEdit( $id );
+}
+
+/**
+ * Get the number of pending comments on a post or posts
+ *
+ * @since 2.3.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param int|array $post_id Either a single Post ID or an array of Post IDs
+ * @return int|array Either a single Posts pending comments as an int or an array of ints keyed on the Post IDs
+ */
+function get_pending_comments_num( $post_id ) {
+	return CommentHelper::getPendingCommentsNum( $post_id );
+}
+
+/**
+ * Add avatars to relevant places in admin, or try to.
+ *
+ * @since 2.5.0
+ *
+ * @param string $name User name.
+ * @return string Avatar with Admin name.
+ */
+function floated_admin_avatar( $name ) {;
+	return CommentHelper::floatedAdminAvatar( $name );
+}
+
+/**
+ * @since 2.7.0
+ */
+function enqueue_comment_hotkeys_js() {
+	CommentHelper::enqueueCommentHotkeysJS();
+}
+
+/**
+ * Display error message at bottom of comments.
+ *
+ * @param string $msg Error Message. Assumed to contain HTML and be sanitized.
+ */
+function comment_footer_die( $msg ) {
+	CommentHelper::commentFooterDie( $msg );
 }
