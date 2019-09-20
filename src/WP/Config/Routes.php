@@ -7,6 +7,8 @@ use WP\Legacy\Action\Admin\AdminAjax;
 use WP\Legacy\Action\Admin\AdminPost;
 use WP\Legacy\Action\Admin\AsyncUpload;
 use WP\Legacy\Action\Admin\Comment;
+use WP\Legacy\Action\Admin\Credits;
+use WP\Legacy\Action\Admin\Customize;
 use WP\Legacy\Action\Admin\Dashboard;
 use WP\Legacy\Action\Admin\MediaLibrary;
 use WP\Legacy\Action\Admin\PluginInstall;
@@ -30,6 +32,8 @@ class Routes {
 		'wp-admin/admin-post'     => AdminPost::class,
 		'wp-admin/async-upload'   => AsyncUpload::class,
 		'wp-admin/comments'       => Comment::class,
+		'wp-admin/credits'		  => Credits::class,
+		'wp-admin/customize'	  => Customize::class,
 		'wp-admin/plugin-install' => PluginInstall::class,
 		'wp-admin/plugins'        => Plugins::class,
 		'wp-admin/upload'         => MediaLibrary::class,
