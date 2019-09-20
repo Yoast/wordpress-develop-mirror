@@ -261,12 +261,12 @@ class HookHelper {
 	}
 
 	public static function registerActivationHook( $file, $function ) {
-		$file = PluginHelper::plugin_basename( $file );
+		$file = plugin_basename( $file );
 		add_action( 'activate_' . $file, $function );
 	}
 
 	public static function registerDeactivationHook( $file, $function ) {
-		$file = PluginHelper::plugin_basename( $file );
+		$file = plugin_basename( $file );
 		add_action( 'deactivate_' . $file, $function );
 	}
 
