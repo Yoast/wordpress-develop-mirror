@@ -2,8 +2,8 @@
 
 namespace WP\Helper;
 
-class CacheHelper{
-    
+class CacheHelper {
+
     /**
      * get the count post cache key
      */

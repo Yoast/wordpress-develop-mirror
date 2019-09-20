@@ -1,4 +1,6 @@
-<?php namespace WP\Helper;
+<?php
+
+namespace WP\Helper;
 
 /**
  * Class CommentHelper
@@ -14,7 +16,7 @@ class CommentHelper {
 	 * @since 2.0.0
 	 * @since 4.4.0 Added the `$timezone` parameter.
 	 *
-	 * @global wpdb $wpdb WordPress database abstraction object.
+	 * @global \wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param string $comment_author Author of the comment.
 	 * @param string $comment_date   Date of the comment.
