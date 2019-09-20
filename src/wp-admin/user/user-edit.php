@@ -8,6 +8,4 @@
  */
 
 /** Load WordPress Administration Bootstrap */
-require_once( dirname( __FILE__ ) . '/admin.php' );
-
-require( ABSPATH . 'wp-admin/user-edit.php' );
+require_once( dirname( dirname( dirname( __FILE__ ) ) ) . '/wp-load.php' );

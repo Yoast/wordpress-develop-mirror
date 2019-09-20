@@ -104,6 +104,8 @@ class Main implements InitializerInterface {
 				}
 				break;
 			case 'wp-admin/profile':
+			case 'wp-admin/network/profile':
+			case 'wp-admin/user/profile':
 				/**
 				 * This is a profile page.
 				 *
