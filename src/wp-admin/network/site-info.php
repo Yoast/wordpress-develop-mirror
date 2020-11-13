@@ -17,7 +17,7 @@ if ( ! current_user_can( 'manage_sites' ) ) {
 get_current_screen()->add_help_tab( get_site_screen_help_tab_args() );
 get_current_screen()->set_help_sidebar( get_site_screen_help_sidebar_content() );
 
-$id = isset( $_REQUEST['id'] ) ? intval( $_REQUEST['id'] ) : 0;
+$id = isset( $_REQUEST['id'] ) ? (int) $_REQUEST['id'] : 0;
 
 if ( ! $id ) {
 	wp_die( __( 'Invalid site ID.' ) );
@@ -35,7 +35,7 @@ if ( ! can_edit_network( $details->site_id ) ) {
 $parsed_scheme = parse_url( $details->siteurl, PHP_URL_SCHEME );
 $is_main_site  = is_main_site( $id );
 
-if ( isset( $_REQUEST['action'] ) && 'update-site' == $_REQUEST['action'] ) {
+if ( isset( $_REQUEST['action'] ) && 'update-site' === $_REQUEST['action'] ) {
 	check_admin_referer( 'edit-site' );
 
 	switch_to_blog( $id );
@@ -117,7 +117,7 @@ if ( isset( $_REQUEST['action'] ) && 'update-site' == $_REQUEST['action'] ) {
 
 if ( isset( $_GET['update'] ) ) {
 	$messages = array();
-	if ( 'updated' == $_GET['update'] ) {
+	if ( 'updated' === $_GET['update'] ) {
 		$messages[] = __( 'Site info updated.' );
 	}
 }
@@ -202,7 +202,19 @@ if ( ! empty( $messages ) ) {
 			</td>
 		</tr>
 	</table>
-	<?php submit_button(); ?>
+
+	<?php
+	/**
+	 * Fires at the end of the site info form in network admin.
+	 *
+	 * @since 5.6.0
+	 *
+	 * @param int $id The site ID.
+	 */
+	do_action( 'network_site_info_form', $id );
+
+	submit_button();
+	?>
 </form>
 
 </div>

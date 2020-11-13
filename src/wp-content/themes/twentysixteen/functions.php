@@ -108,6 +108,7 @@ if ( ! function_exists( 'twentysixteen_setup' ) ) :
 				'caption',
 				'script',
 				'style',
+				'navigation-widgets',
 			)
 		);
 
@@ -215,6 +216,9 @@ if ( ! function_exists( 'twentysixteen_setup' ) ) :
 
 		// Indicate widget sidebars can use selective refresh in the Customizer.
 		add_theme_support( 'customize-selective-refresh-widgets' );
+
+		// Add support for custom line height controls.
+		add_theme_support( 'custom-line-height' );
 	}
 endif; // twentysixteen_setup()
 add_action( 'after_setup_theme', 'twentysixteen_setup' );
@@ -238,9 +242,9 @@ add_action( 'after_setup_theme', 'twentysixteen_content_width', 0 );
  *
  * @since Twenty Sixteen 1.6
  *
- * @param array  $urls           URLs to print for resource hints.
- * @param string $relation_type  The relation type the URLs are printed.
- * @return array $urls           URLs to print for resource hints.
+ * @param array  $urls          URLs to print for resource hints.
+ * @param string $relation_type The relation type the URLs are printed.
+ * @return array URLs to print for resource hints.
  */
 function twentysixteen_resource_hints( $urls, $relation_type ) {
 	if ( wp_style_is( 'twentysixteen-fonts', 'queue' ) && 'preconnect' === $relation_type ) {
@@ -504,6 +508,11 @@ function twentysixteen_hex2rgb( $color ) {
  * Custom template tags for this theme.
  */
 require get_template_directory() . '/inc/template-tags.php';
+
+/**
+ * Block Patterns.
+ */
+require get_template_directory() . '/inc/block-patterns.php';
 
 /**
  * Customizer additions.
